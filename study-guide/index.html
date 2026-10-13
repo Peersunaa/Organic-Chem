@@ -1,0 +1,1373 @@
+<title>Organic Chem Midterm Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lab-notebook study companion. Sticky chapter tabs, one readable column, molecule-model colors (CPK) as the semantic palette. */
+:root{
+  --bg:#eef2f6; --surface:#ffffff; --sunk:#e3e9f0; --ink:#15202c; --muted:#556476; --line:#cfd8e3;
+  --accent:#2343c4;      /* nitrogen blue: navigation, key ideas */
+  --oxy:#c4302b;         /* oxygen red: exam traps */
+  --hal:#1f7f45;         /* halogen green: correct / tips */
+  --carbon:#2b3440; --hyd:#ffffff;
+  --accent-soft:#dfe5fb; --oxy-soft:#f8e1df; --hal-soft:#dcf0e3;
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e131a; --surface:#161d27; --sunk:#1d2632; --ink:#e4eaf2; --muted:#98a6b7; --line:#2b3644;
+  --accent:#8ea4ff; --oxy:#ff7f76; --hal:#62cf8c; --carbon:#a7b2c0; --hyd:#e9eef5;
+  --accent-soft:#1f2747; --oxy-soft:#3a1f1f; --hal-soft:#17321f; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --surface:#161d27; --sunk:#1d2632; --ink:#e4eaf2; --muted:#98a6b7; --line:#2b3644;
+  --accent:#8ea4ff; --oxy:#ff7f76; --hal:#62cf8c; --carbon:#a7b2c0; --hyd:#e9eef5;
+  --accent-soft:#1f2747; --oxy-soft:#3a1f1f; --hal-soft:#17321f; color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.65 var(--f-body);margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.2;text-wrap:balance;margin:0}
+p{margin:0}
+a{color:var(--accent)}
+sub,sup{font-size:.72em;line-height:0}
+.mono,code{font-family:var(--f-mono);font-size:.92em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top-inner{max-width:860px;margin:0 auto;padding:12px 16px 0;display:flex;flex-direction:column;gap:10px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:1.25rem;font-weight:800;letter-spacing:-.01em}
+.brand .src{color:var(--muted);font-size:.82rem}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:-1px}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:1px solid transparent;border-bottom:none;background:none;color:var(--muted);font:600 .9rem var(--f-body);padding:8px 12px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.tab .n{font-family:var(--f-mono);font-size:.78rem;color:var(--accent);margin-right:4px}
+
+/* chapter header */
+.ch-head{display:grid;grid-template-columns:auto 1fr;gap:4px 20px;align-items:end;padding-block:32px 20px}
+.ch-num{font-family:var(--f-display);font-weight:800;font-size:5.5rem;line-height:.8;color:var(--accent);grid-row:span 2}
+.ch-head h2{font-size:clamp(1.5rem,4vw,2.1rem);font-weight:700}
+.ch-head .pages{color:var(--muted);font-size:.85rem}
+.why{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:28px}
+.why b{font-family:var(--f-display)}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:-12px 0 28px}
+.toc a{font-size:.8rem;text-decoration:none;color:var(--muted);background:var(--sunk);padding:3px 9px;border-radius:99px}
+.toc a:hover{color:var(--ink)}
+
+/* topics */
+.view,.topic{scroll-margin-top:120px}
+.topic{padding-block:22px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.topic h3{font-size:1.3rem;font-weight:700;display:flex;gap:10px;align-items:baseline}
+.topic h3 .sec{font-family:var(--f-mono);font-size:.8rem;font-weight:500;color:var(--muted);flex:0 0 auto}
+.topic p,.topic li{max-width:68ch}
+.topic ul,.topic ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
+.key{background:var(--accent-soft);border-radius:10px;padding:12px 16px}
+.key::before{content:"Key idea";display:block;font:600 .72rem var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.trap{background:var(--oxy-soft);border-radius:10px;padding:12px 16px}
+.trap::before{content:"Exam trap";display:block;font:600 .72rem var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--oxy);margin-bottom:2px}
+.tip{background:var(--hal-soft);border-radius:10px;padding:12px 16px}
+.tip::before{content:"Shortcut";display:block;font:600 .72rem var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--hal);margin-bottom:2px}
+details.check{border:1px dashed var(--line);border-radius:10px;padding:10px 14px;background:var(--surface)}
+details.check summary{cursor:pointer;font-weight:600}
+details.check summary::before{content:"Check yourself · ";color:var(--muted);font-weight:500}
+details.check[open] summary{margin-bottom:6px}
+.eq{font-family:var(--f-mono);background:var(--sunk);padding:10px 14px;border-radius:8px;overflow-x:auto;white-space:nowrap}
+
+/* tables */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;background:var(--sunk)}
+tr:last-child td{border-bottom:none}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);white-space:nowrap}
+
+/* figures */
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+figure .art{overflow-x:auto}
+figure svg{display:block;margin:0 auto;max-width:100%;height:auto}
+figcaption{font-size:.85rem;color:var(--muted)}
+svg text{font-family:var(--f-body);fill:var(--ink)}
+svg .ln{stroke:var(--ink);stroke-width:2;fill:none;stroke-linecap:round}
+svg .ln-m{stroke:var(--muted);stroke-width:1.5;fill:none}
+svg .dash{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 4;fill:none}
+svg .acc{stroke:var(--accent);stroke-width:2;fill:none}
+svg .arrow{stroke:var(--accent);stroke-width:2;fill:none;marker-end:url(#mk)}
+svg .arrow-o{stroke:var(--oxy);stroke-width:2;fill:none;marker-end:url(#mko)}
+svg .small{font-size:11px;fill:var(--muted)}
+svg .lbl{font-size:13px}
+svg .mono{font-family:var(--f-mono)}
+.mk{fill:var(--accent)} .mko{fill:var(--oxy)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.grid2>*{min-width:0}
+
+/* 3D viewer */
+.viewer{display:grid;grid-template-columns:1fr;gap:10px}
+.viewer canvas{width:100%;height:280px;background:var(--sunk);border-radius:10px;touch-action:none;cursor:grab}
+.viewer canvas:active{cursor:grabbing}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 .82rem var(--f-body);padding:5px 11px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1px solid var(--line)}
+
+/* stepper */
+.stepper .steps{display:flex;gap:6px;flex-wrap:wrap}
+.stepper .panel{min-height:150px}
+
+/* practice */
+.mode{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.card{perspective:1000px;cursor:pointer;min-height:220px}
+.card-in{position:relative;min-height:220px;transition:transform .45s;transform-style:preserve-3d}
+.card.flip .card-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:22px;display:flex;flex-direction:column;justify-content:center;gap:8px;overflow:auto}
+.face.back{transform:rotateY(180deg);background:var(--accent-soft)}
+.face .lab{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.face .q{font-family:var(--f-display);font-size:1.3rem;font-weight:700}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 .88rem var(--f-body);padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.muted{color:var(--muted);font-size:.88rem}
+.quiz-q{font-family:var(--f-display);font-size:1.2rem;font-weight:700}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 .95rem var(--f-body);padding:10px 14px;border-radius:10px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.right{background:var(--hal-soft);border-color:var(--hal)}
+.opt.wrong{background:var(--oxy-soft);border-color:var(--oxy)}
+.opt:disabled{cursor:default}
+.explain{border-left:3px solid var(--accent);padding:6px 12px;background:var(--surface);border-radius:0 8px 8px 0}
+.bar{height:6px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.score-grid div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:.82rem;color:var(--muted)}
+.score-grid b{display:block;font-family:var(--f-display);font-size:1.3rem;color:var(--ink);font-variant-numeric:tabular-nums}
+input[type="search"]{width:100%;font:500 .95rem var(--f-body);padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.section-title{font-size:1.5rem;font-weight:700;padding-block:28px 12px}
+footer{color:var(--muted);font-size:.8rem;padding-top:40px;border-top:1px solid var(--line);margin-top:40px}
+@media (prefers-reduced-motion: reduce){.card-in,.bar i{transition:none}}
+@media (max-width:520px){.ch-num{font-size:4rem}.ch-head{gap:4px 14px}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="mk" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0 0L10 5L0 10z"/></marker>
+    <marker id="mko" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mko" d="M0 0L10 5L0 10z"/></marker>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>Organic Chem Midterm Guide</h1>
+      <span class="src">McMurry, <i>Fundamentals of Organic Chemistry</i> · Chapters 1–6</span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Chapters">
+      <button class="tab" role="tab" data-go="c1"><span class="n">1</span>Bonding &amp; Acids</button>
+      <button class="tab" role="tab" data-go="c2"><span class="n">2</span>Alkanes</button>
+      <button class="tab" role="tab" data-go="c3"><span class="n">3</span>Alkenes &amp; Mechanisms</button>
+      <button class="tab" role="tab" data-go="c4"><span class="n">4</span>Alkene Reactions</button>
+      <button class="tab" role="tab" data-go="c5"><span class="n">5</span>Aromatics</button>
+      <button class="tab" role="tab" data-go="c6"><span class="n">6</span>Stereochemistry</button>
+      <button class="tab" role="tab" data-go="sheet">Cheat sheet</button>
+      <button class="tab" role="tab" data-go="practice">Practice</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ================= CHAPTER 1 ================= -->
+<section class="view" id="c1" hidden>
+  <div class="ch-head"><div class="ch-num">1</div><h2>Structure and Bonding; Acids and Bases</h2><div class="pages">Book pages 1–37 · §1.1–1.12</div></div>
+  <div class="why"><b>Why this matters:</b> every reaction later in the course is electrons moving between atoms. This chapter teaches where electrons sit (orbitals), how atoms share them (bonds), what shape that makes (hybridization), and who pulls them harder (electronegativity, acids and bases).</div>
+
+  <div class="topic">
+    <h3><span class="sec">§1.1–1.2</span>Atoms and electron configurations</h3>
+    <p>An atom is a tiny positive nucleus (protons + neutrons) surrounded by electrons. Electrons live in <b>orbitals</b>, regions where you are likely to find them. Orbitals are grouped into <b>shells</b>: shell 1 holds 2 electrons, shell 2 holds 8, shell 3 holds 18.</p>
+    <ul>
+      <li><b>s orbitals</b> are spheres. <b>p orbitals</b> are dumbbells, and there are three of them (p<sub>x</sub>, p<sub>y</sub>, p<sub>z</sub>) at right angles.</li>
+      <li>Fill electrons from lowest energy up (1s → 2s → 2p → 3s → 3p). Each orbital holds at most 2 electrons with opposite spins. In equal-energy orbitals, put one electron in each before pairing.</li>
+      <li>Carbon (6 electrons): <span class="mono">1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>2</sup></span>. It has 4 <b>valence</b> (outer-shell) electrons, which is why it makes 4 bonds.</li>
+    </ul>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§1.3–1.4</span>How atoms bond</h3>
+    <p>Atoms bond to reach a full outer shell (an <b>octet</b>, 8 electrons; hydrogen wants 2). <b>Ionic bonds</b> come from transferring electrons (Na<sup>+</sup>Cl<sup>−</sup>). <b>Covalent bonds</b> come from sharing a pair of electrons, and organic molecules are almost all covalent.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Atom</th><th>Bonds it usually makes</th><th>Lone pairs</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>H</td><td class="num">1</td><td class="num">0</td><td>H–H</td></tr>
+        <tr><td>C</td><td class="num">4</td><td class="num">0</td><td>CH<sub>4</sub></td></tr>
+        <tr><td>N</td><td class="num">3</td><td class="num">1</td><td>NH<sub>3</sub></td></tr>
+        <tr><td>O</td><td class="num">2</td><td class="num">2</td><td>H<sub>2</sub>O</td></tr>
+        <tr><td>F, Cl, Br, I</td><td class="num">1</td><td class="num">3</td><td>CH<sub>3</sub>Cl</td></tr>
+      </tbody></table></div>
+    <div class="tip">"HONC 1-2-3-4": hydrogen 1 bond, oxygen 2, nitrogen 3, carbon 4. If a neutral atom has a different count, re-check your structure.</div>
+    <p>Ways to draw molecules: <b>electron-dot</b> (Lewis) structures show every valence electron as a dot; <b>line-bond</b> (Kekulé) structures show each shared pair as a line. Electrons that are not in bonds are <b>lone pairs</b>.</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§1.5–1.8</span>Valence bond theory and hybrid orbitals</h3>
+    <p>A covalent bond forms when orbitals on two atoms <b>overlap</b> and share two electrons. There are two kinds of overlap:</p>
+    <ul>
+      <li><b>Sigma (σ) bond</b>: head-on overlap along the line between the nuclei. Every single bond is σ. You can rotate around it freely.</li>
+      <li><b>Pi (π) bond</b>: sideways overlap of two parallel p orbitals, above and below the bond axis. A double bond = 1 σ + 1 π. A triple bond = 1 σ + 2 π. You cannot rotate around a π bond without breaking it.</li>
+    </ul>
+    <p>Carbon mixes its 2s and 2p orbitals into <b>hybrid orbitals</b> so its bonds point as far apart as possible.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Hybrid</th><th>Groups around C</th><th>Shape · angle</th><th>Leftover p</th><th>Example · C–C length · strength</th></tr></thead>
+      <tbody>
+        <tr><td><b>sp<sup>3</sup></b></td><td>4 (all single bonds)</td><td>Tetrahedral · 109.5°</td><td class="num">0</td><td>Ethane C–C · 154 pm · 376 kJ/mol</td></tr>
+        <tr><td><b>sp<sup>2</sup></b></td><td>3 (one double bond)</td><td>Trigonal planar · 120°</td><td class="num">1</td><td>Ethylene C=C · 134 pm · 728 kJ/mol</td></tr>
+        <tr><td><b>sp</b></td><td>2 (triple bond, or two doubles)</td><td>Linear · 180°</td><td class="num">2</td><td>Acetylene C≡C · 120 pm · 965 kJ/mol</td></tr>
+      </tbody></table></div>
+    <div class="tip">Count the "electron groups" on the atom: each attached atom counts 1, and each lone pair counts 1. Double and triple bonds count as one group. 4 groups → sp<sup>3</sup>, 3 → sp<sup>2</sup>, 2 → sp. This also works for N and O: NH<sub>3</sub> (3 atoms + 1 lone pair) is sp<sup>3</sup> with angles of 107°; H<sub>2</sub>O (2 + 2) is sp<sup>3</sup> with 104.5°. Lone pairs squeeze the angles below 109.5°.</div>
+    <p>More bonds between two carbons means shorter and stronger: triple &gt; double &gt; single.</p>
+    <figure>
+      <div class="viewer" data-viewer="c1">
+        <div class="chips" role="group" aria-label="Molecule"></div>
+        <canvas width="800" height="560" aria-label="Rotatable 3D molecule model"></canvas>
+        <div class="legend"><span><i style="background:var(--carbon)"></i>Carbon</span><span><i style="background:var(--hyd)"></i>Hydrogen</span><span><i style="background:#3060e0"></i>Nitrogen</span><span><i style="background:#e0302a"></i>Oxygen</span></div>
+      </div>
+      <figcaption>Drag to rotate. Compare methane (tetrahedral), ethylene (flat) and acetylene (straight line). Ammonia and water show how lone pairs (not drawn) push the bonds closer together.</figcaption>
+    </figure>
+    <details class="check"><summary>What is the hybridization of each carbon in CH<sub>2</sub>=CH–C≡N?</summary><p>C1 (=CH<sub>2</sub>) is sp<sup>2</sup>, C2 (=CH–) is sp<sup>2</sup>, and C3 (–C≡N) is sp. The N has a triple bond and a lone pair, so it is sp too.</p></details>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§1.9</span>Polar covalent bonds: electronegativity</h3>
+    <p><b>Electronegativity (EN)</b> is how strongly an atom pulls on the electrons in a bond. When two atoms with different EN share electrons, the more electronegative one gets a partial negative charge (δ−) and the other a partial positive charge (δ+). This is a <b>polar covalent bond</b>.</p>
+    <figure>
+      <div class="art"><svg viewBox="0 0 520 96" width="520" role="img" aria-label="Electronegativity scale: metals about 1, H 2.1, C 2.5, N and Cl 3.0, O 3.5, F 4.0">
+        <line x1="20" y1="50" x2="500" y2="50" class="ln-m"/>
+        <g class="small"><text x="20" y="78">1.0</text><text x="180" y="78">2.0</text><text x="340" y="78">3.0</text><text x="484" y="78">4.0</text></g>
+        <g>
+          <circle cx="36" cy="50" r="6" fill="var(--muted)"/><text x="36" y="32" text-anchor="middle" class="lbl">Li, Mg</text>
+          <circle cx="196" cy="50" r="6" fill="var(--hyd)" stroke="var(--ink)"/><text x="196" y="32" text-anchor="middle" class="lbl">H 2.1</text>
+          <circle cx="260" cy="50" r="6" fill="var(--carbon)"/><text x="260" y="32" text-anchor="middle" class="lbl">C 2.5</text>
+          <circle cx="340" cy="50" r="6" fill="#3060e0"/><text x="340" y="32" text-anchor="middle" class="lbl">N, Cl 3.0</text>
+          <circle cx="420" cy="50" r="6" fill="#e0302a"/><text x="420" y="32" text-anchor="middle" class="lbl">O 3.5</text>
+          <circle cx="500" cy="50" r="6" fill="var(--hal)"/><text x="494" y="32" text-anchor="end" class="lbl">F 4.0</text>
+        </g>
+      </svg></div>
+      <figcaption>Pauling electronegativities. Fluorine pulls hardest; metals pull least.</figcaption>
+    </figure>
+    <ul>
+      <li>EN difference under about 0.5: essentially <b>nonpolar</b> (C–H, C–C).</li>
+      <li>Between about 0.5 and 2: <b>polar covalent</b> (C–O, C–Cl, O–H).</li>
+      <li>Over about 2: <b>ionic</b> (Na<sup>+</sup>Cl<sup>−</sup>).</li>
+    </ul>
+    <p>The <b>inductive effect</b> is an atom shifting electrons toward itself through σ bonds. Electronegative atoms (O, N, halogens) pull electrons away from carbon, making that carbon δ+. Metals do the opposite: in a C–Mg or C–Li bond, carbon is δ−.</p>
+    <div class="trap">Students often forget that carbon is δ− when bonded to a metal. In CH<sub>3</sub>–Li the carbon is electron-rich. In CH<sub>3</sub>–Cl it is electron-poor.</div>
+  </div>
+
+  <div class="topic" id="c1-acid">
+    <h3><span class="sec">§1.10</span>Brønsted–Lowry acids and bases</h3>
+    <p>A <b>Brønsted–Lowry acid</b> donates a proton (H<sup>+</sup>). A <b>base</b> accepts a proton. When an acid loses H<sup>+</sup>, what remains is its <b>conjugate base</b>; when a base gains H<sup>+</sup>, it becomes its <b>conjugate acid</b>.</p>
+    <div class="eq">HA + H<sub>2</sub>O ⇌ A<sup>−</sup> + H<sub>3</sub>O<sup>+</sup> &nbsp;&nbsp; K<sub>a</sub> = [A<sup>−</sup>][H<sub>3</sub>O<sup>+</sup>] / [HA] &nbsp;&nbsp; pK<sub>a</sub> = −log K<sub>a</sub></div>
+    <div class="key"><b>Smaller pK<sub>a</sub> = stronger acid.</b> The stronger the acid, the weaker (more stable) its conjugate base. An acid–base equilibrium always favors the side with the <b>weaker acid</b> (the one with the higher pK<sub>a</sub>).</div>
+    <figure>
+      <div class="art"><svg viewBox="0 0 560 120" width="560" role="img" aria-label="pKa ladder from HCl −7 to ammonia 36">
+        <defs></defs>
+        <line x1="20" y1="60" x2="540" y2="60" class="ln-m"/>
+        <text x="20" y="104" class="small">← stronger acid</text><text x="540" y="104" class="small" text-anchor="end">weaker acid →</text>
+        <g class="lbl">
+          <circle cx="20" cy="60" r="5" fill="var(--oxy)"/><text x="20" y="42" text-anchor="start">HCl</text><text x="20" y="82" class="small">−7</text>
+          <circle cx="83" cy="60" r="5" fill="var(--oxy)"/><text x="83" y="30" text-anchor="middle">H<tspan baseline-shift="sub" font-size="9">3</tspan>O<tspan baseline-shift="super" font-size="9">+</tspan></text><text x="83" y="82" class="small" text-anchor="middle">−1.7</text>
+          <circle cx="137" cy="60" r="5" fill="var(--accent)"/><text x="137" y="42" text-anchor="middle">HF</text><text x="137" y="82" class="small" text-anchor="middle">3.45</text>
+          <circle cx="160" cy="60" r="5" fill="var(--accent)"/><text x="172" y="30" text-anchor="middle">CH<tspan baseline-shift="sub" font-size="9">3</tspan>COOH</text><text x="170" y="82" class="small" text-anchor="middle">4.76</text>
+          <circle cx="214" cy="60" r="5" fill="var(--accent)"/><text x="214" y="42" text-anchor="middle">HCN</text><text x="214" y="82" class="small" text-anchor="middle">9.31</text>
+          <circle cx="310" cy="60" r="5" fill="var(--muted)"/><text x="300" y="30" text-anchor="middle">H<tspan baseline-shift="sub" font-size="9">2</tspan>O</text><text x="300" y="82" class="small" text-anchor="middle">15.74</text>
+          <circle cx="313" cy="60" r="5" fill="var(--muted)"/><text x="330" y="42" text-anchor="start">EtOH 16</text>
+          <circle cx="353" cy="60" r="5" fill="var(--muted)"/><text x="353" y="82" class="small" text-anchor="middle">19.3 acetone</text>
+          <circle cx="540" cy="60" r="5" fill="var(--muted)"/><text x="540" y="42" text-anchor="end">NH<tspan baseline-shift="sub" font-size="9">3</tspan></text><text x="540" y="82" class="small" text-anchor="end">36</text>
+        </g>
+      </svg></div>
+      <figcaption>pK<sub>a</sub> values to know (positions roughly to scale). Each step of 1 pK<sub>a</sub> unit is a 10× difference in acid strength.</figcaption>
+    </figure>
+    <details class="check"><summary>HCN + OH<sup>−</sup> ⇌ CN<sup>−</sup> + H<sub>2</sub>O. Which side is favored?</summary><p>The right. Compare the two acids: HCN (pK<sub>a</sub> 9.31) and H<sub>2</sub>O (pK<sub>a</sub> 15.74). Water is the weaker acid, so the equilibrium lies on the water side. Hydroxide is a strong enough base to deprotonate HCN.</p></details>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§1.11</span>Organic acids and organic bases</h3>
+    <ul>
+      <li><b>Organic acids</b> have a hydrogen on an electronegative atom (O–H in alcohols and carboxylic acids), or a C–H next to a C=O (acetone, pK<sub>a</sub> 19.3).</li>
+      <li>Carboxylic acids (pK<sub>a</sub> about 4–5) are much more acidic than alcohols (about 16). Their conjugate base, the carboxylate ion, spreads its negative charge over two oxygens, which makes it stable.</li>
+      <li><b>Organic bases</b> have a lone pair that can grab H<sup>+</sup>. Most are nitrogen compounds (amines like CH<sub>3</sub>NH<sub>2</sub>). Oxygen compounds (alcohols, ethers, ketones) can also act as weak bases toward strong acids.</li>
+    </ul>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§1.12</span>Lewis acids and bases</h3>
+    <p>The Lewis definition is broader and is the one that matters for mechanisms. A <b>Lewis acid accepts an electron pair</b>; a <b>Lewis base donates an electron pair</b>.</p>
+    <ul>
+      <li>Lewis acids have an empty orbital or a positive charge: H<sup>+</sup>, BF<sub>3</sub>, AlCl<sub>3</sub>, FeBr<sub>3</sub>, ZnCl<sub>2</sub>, metal cations (Mg<sup>2+</sup>).</li>
+      <li>Lewis bases have a lone pair: H<sub>2</sub>O, alcohols, ethers, amines, carbonyl oxygens.</li>
+      <li>A <b>curved arrow</b> always starts at the electrons (the base) and points to where they go (the acid).</li>
+    </ul>
+    <div class="trap">The curved arrow never starts at H<sup>+</sup> or at the Lewis acid. It starts at the lone pair or bond that moves.</div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 2 ================= -->
+<section class="view" id="c2" hidden>
+  <div class="ch-head"><div class="ch-num">2</div><h2>Alkanes: The Nature of Organic Compounds</h2><div class="pages">Book pages 38–77 · §2.1–2.11</div></div>
+  <div class="why"><b>Why this matters:</b> you'll name compounds and read structures in every chapter after this. The cyclohexane chair is one of the most tested drawings in the whole course.</div>
+
+  <div class="topic">
+    <h3><span class="sec">§2.1</span>Functional groups</h3>
+    <p>A <b>functional group</b> is a part of a molecule that reacts the same way no matter what molecule it's in. Learn to recognize these on sight:</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Family</th><th>Group</th><th>Example</th><th>Name ending</th></tr></thead>
+      <tbody>
+        <tr><td>Alkane</td><td>only C–C, C–H</td><td>CH<sub>3</sub>CH<sub>3</sub></td><td>-ane</td></tr>
+        <tr><td>Alkene</td><td>C=C</td><td>H<sub>2</sub>C=CH<sub>2</sub></td><td>-ene</td></tr>
+        <tr><td>Alkyne</td><td>C≡C</td><td>HC≡CH</td><td>-yne</td></tr>
+        <tr><td>Arene</td><td>benzene ring</td><td>C<sub>6</sub>H<sub>6</sub></td><td>—</td></tr>
+        <tr><td>Alkyl halide</td><td>C–X (X = F, Cl, Br, I)</td><td>CH<sub>3</sub>Cl</td><td>—</td></tr>
+        <tr><td>Alcohol</td><td>C–OH</td><td>CH<sub>3</sub>OH</td><td>-ol</td></tr>
+        <tr><td>Ether</td><td>C–O–C</td><td>CH<sub>3</sub>OCH<sub>3</sub></td><td>ether</td></tr>
+        <tr><td>Amine</td><td>C–N</td><td>CH<sub>3</sub>NH<sub>2</sub></td><td>-amine</td></tr>
+        <tr><td>Thiol</td><td>C–SH</td><td>CH<sub>3</sub>SH</td><td>-thiol</td></tr>
+        <tr><td>Aldehyde</td><td>C=O with an H on it (–CHO)</td><td>CH<sub>3</sub>CHO</td><td>-al</td></tr>
+        <tr><td>Ketone</td><td>C=O between two carbons</td><td>CH<sub>3</sub>COCH<sub>3</sub></td><td>-one</td></tr>
+        <tr><td>Carboxylic acid</td><td>–COOH</td><td>CH<sub>3</sub>COOH</td><td>-oic acid</td></tr>
+        <tr><td>Ester</td><td>–COO–C</td><td>CH<sub>3</sub>COOCH<sub>3</sub></td><td>-oate</td></tr>
+        <tr><td>Amide</td><td>–CONH<sub>2</sub></td><td>CH<sub>3</sub>CONH<sub>2</sub></td><td>-amide</td></tr>
+        <tr><td>Nitrile</td><td>C≡N</td><td>CH<sub>3</sub>CN</td><td>-nitrile</td></tr>
+      </tbody></table></div>
+    <div class="trap">Aldehyde vs ketone: an aldehyde's C=O is at the end of a chain (it carries an H). A ketone's C=O is in the middle. Ester vs ether: an ester has a C=O next to the O; an ether doesn't.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§2.2</span>Alkanes, alkyl groups and isomers</h3>
+    <p><b>Alkanes</b> contain only single bonds. They are <b>saturated</b> hydrocarbons with formula <span class="mono">C<sub>n</sub>H<sub>2n+2</sub></span>. <b>Isomers</b> have the same formula but different structures. <b>Constitutional isomers</b> differ in which atoms are connected to which (butane vs isobutane, both C<sub>4</sub>H<sub>10</sub>).</p>
+    <div class="tbl"><table>
+      <thead><tr><th>C</th><th>Name</th><th>C</th><th>Name</th><th>Isomers of the alkane</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>methane</td><td class="num">6</td><td>hexane</td><td class="num">C4: 2 · C5: 3 · C6: 5</td></tr>
+        <tr><td class="num">2</td><td>ethane</td><td class="num">7</td><td>heptane</td><td class="num">C7: 9 · C8: 18</td></tr>
+        <tr><td class="num">3</td><td>propane</td><td class="num">8</td><td>octane</td><td class="num">C10: 75</td></tr>
+        <tr><td class="num">4</td><td>butane</td><td class="num">9</td><td>nonane</td><td></td></tr>
+        <tr><td class="num">5</td><td>pentane</td><td class="num">10</td><td>decane</td><td></td></tr>
+      </tbody></table></div>
+    <p>An <b>alkyl group</b> is an alkane minus one H: methyl (–CH<sub>3</sub>), ethyl (–CH<sub>2</sub>CH<sub>3</sub>), propyl, isopropyl (–CH(CH<sub>3</sub>)<sub>2</sub>), butyl, sec-butyl, isobutyl, tert-butyl (–C(CH<sub>3</sub>)<sub>3</sub>).</p>
+    <p>Classify carbons by how many other carbons they're bonded to: <b>primary (1°)</b> = 1, <b>secondary (2°)</b> = 2, <b>tertiary (3°)</b> = 3, <b>quaternary (4°)</b> = 4. Hydrogens take the label of the carbon they're on.</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§2.3</span>Naming branched alkanes (IUPAC)</h3>
+    <ol>
+      <li><b>Find the longest chain.</b> That's the parent name. If two chains tie, choose the one with more branches.</li>
+      <li><b>Number the chain</b> from the end nearer the first branch. If it's a tie, go to the next branch.</li>
+      <li><b>Name and number each substituent.</b> Two identical groups on the same carbon each get the number (2,2-dimethyl).</li>
+      <li><b>Write it as one word</b>, substituents in <b>alphabetical order</b>. Ignore di-, tri-, sec-, tert- when alphabetizing. Do alphabetize "iso" (isopropyl goes under i).</li>
+      <li>Commas between numbers, hyphens between numbers and letters.</li>
+    </ol>
+    <div class="eq">CH<sub>3</sub>CH(CH<sub>3</sub>)CH<sub>2</sub>CH(CH<sub>2</sub>CH<sub>3</sub>)CH<sub>2</sub>CH<sub>3</sub> → 4-ethyl-2-methylhexane</div>
+    <div class="trap">The longest chain is often bent in the drawing. Trace every path. "2-ethylpentane" is never a correct name, because the ethyl group makes a longer chain (it's 3-methylhexane).</div>
+    <details class="check"><summary>Name (CH<sub>3</sub>)<sub>3</sub>CCH<sub>2</sub>CH(CH<sub>3</sub>)<sub>2</sub>.</summary><p>2,2,4-Trimethylpentane (isooctane). The main chain has 5 carbons. Numbering from the left gives 2,2,4; from the right gives 2,4,4. Choose the lower set: 2,2,4.</p></details>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§2.4</span>Properties of alkanes</h3>
+    <ul>
+      <li>Nonpolar and unreactive ("paraffins" means little affinity). They burn (combustion to CO<sub>2</sub> + H<sub>2</sub>O) and react with Cl<sub>2</sub> in light.</li>
+      <li>Boiling and melting points rise with chain length, because bigger molecules have stronger <b>dispersion forces</b>.</li>
+      <li><b>Branching lowers the boiling point</b>: a more compact, rounder molecule has less surface contact. Pentane boils at 36 °C; 2,2-dimethylpropane at 9.5 °C.</li>
+    </ul>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§2.5</span>Conformations of ethane</h3>
+    <p>Because a σ bond is symmetric, groups can rotate around it. Each different rotational arrangement is a <b>conformation</b> (conformer). A <b>Newman projection</b> looks straight down the C–C bond: the front carbon is the point where three bonds meet, and the back carbon is the circle.</p>
+    <div class="grid2">
+      <figure>
+        <svg viewBox="0 0 120 124" width="160" role="img" aria-label="Staggered Newman projection">
+          <circle cx="60" cy="60" r="40" class="ln"/>
+          <line x1="60" y1="60" x2="60" y2="5" class="ln"/><line x1="60" y1="60" x2="12.4" y2="87.5" class="ln"/><line x1="60" y1="60" x2="107.6" y2="87.5" class="ln"/>
+          <line x1="94.6" y1="40" x2="110.2" y2="31" class="ln"/><line x1="25.4" y1="40" x2="9.8" y2="31" class="ln"/><line x1="60" y1="100" x2="60" y2="118" class="ln"/>
+        </svg>
+        <figcaption><b>Staggered</b>: back bonds sit between front bonds (60° apart). Lowest energy. About 99% of ethane molecules are near this shape at any instant.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 120 124" width="160" role="img" aria-label="Eclipsed Newman projection">
+          <circle cx="60" cy="60" r="40" class="ln"/>
+          <line x1="60" y1="60" x2="60" y2="5" class="ln"/><line x1="60" y1="60" x2="12.4" y2="87.5" class="ln"/><line x1="60" y1="60" x2="107.6" y2="87.5" class="ln"/>
+          <line x1="67" y1="20.6" x2="70" y2="3" class="ln-m"/><line x1="29.4" y1="85.7" x2="14" y2="99" class="ln-m"/><line x1="94" y1="80" x2="113" y2="84" class="ln-m"/>
+        </svg>
+        <figcaption><b>Eclipsed</b>: back bonds line up behind front bonds (drawn slightly offset so you can see them). Highest energy, because the C–H bonds repel (<b>torsional strain</b>).</figcaption>
+      </figure>
+    </div>
+    <div class="key">The barrier to rotation in ethane is <b>12 kJ/mol</b>, which is 4.0 kJ/mol for each of the three eclipsed H–H pairs. That's small enough that rotation happens millions of times per second at room temperature.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§2.6</span>Drawing skeletal structures</h3>
+    <ul>
+      <li>Carbons aren't written. A carbon sits at every corner and at every line end.</li>
+      <li>Hydrogens on carbon aren't drawn. Fill them in so each carbon has 4 bonds.</li>
+      <li>All other atoms (O, N, Cl…) are written, along with any H on them (–OH, –NH<sub>2</sub>).</li>
+    </ul>
+    <div class="tip">To count hydrogens on a corner: 4 minus the number of lines going into it. A corner with two lines is CH<sub>2</sub>; a line end is CH<sub>3</sub>.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§2.7–2.8</span>Cycloalkanes and cis–trans isomers</h3>
+    <p><b>Cycloalkanes</b> are rings, formula <span class="mono">C<sub>n</sub>H<sub>2n</sub></span>. Name them with "cyclo-" (cyclohexane). With one substituent, no number is needed (methylcyclohexane). With more, number the ring to give the lowest numbers, starting with the group that comes first alphabetically. If the chain has more carbons than the ring, the ring becomes the substituent ("cyclopropyl").</p>
+    <p>Rings can't rotate freely, so two substituents can be on the <b>same side</b> of the ring (<b>cis</b>) or on <b>opposite sides</b> (<b>trans</b>). These are <b>stereoisomers</b>: the same connections but a different 3D arrangement. They can't interconvert without breaking bonds.</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§2.9–2.11</span>Cyclohexane: chair, axial and equatorial, ring-flip</h3>
+    <p>Small rings are strained. Cyclopropane has 60° angles (<b>angle strain</b>) and eclipsed hydrogens. Cyclohexane avoids both by puckering into a <b>chair conformation</b>: all angles are about 111° and every C–H bond is staggered. It is strain-free, which is why six-membered rings are everywhere in nature.</p>
+    <figure>
+      <div class="art"><svg id="chairSvg" viewBox="0 0 360 200" width="360" role="img" aria-label="Chair cyclohexane with axial bonds in blue and equatorial bonds in green"></svg></div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>Axial (straight up or down, parallel to the ring axis)</span><span><i style="background:var(--hal)"></i>Equatorial (around the ring's equator)</span></div>
+      <figcaption>Each carbon has one axial and one equatorial position. Axial bonds alternate up, down, up… around the ring.</figcaption>
+    </figure>
+    <ul>
+      <li><b>Ring-flip</b>: the chair flips into another chair. Every axial position becomes equatorial and vice versa, but "up" stays "up".</li>
+      <li>Substituents prefer <b>equatorial</b>. An axial group bumps into the two axial hydrogens three carbons away (<b>1,3-diaxial interactions</b>, a kind of <b>steric strain</b>).</li>
+      <li>Methylcyclohexane: equatorial is more stable by <b>7.6 kJ/mol</b>, so about 95% of molecules have the methyl equatorial. Bigger groups (tert-butyl) are almost 100% equatorial.</li>
+    </ul>
+    <div class="tbl"><table>
+      <thead><tr><th>Disubstituted cyclohexane</th><th>cis</th><th>trans</th></tr></thead>
+      <tbody>
+        <tr><td>1,2-</td><td>axial + equatorial</td><td><b>both equatorial</b> (or both axial)</td></tr>
+        <tr><td>1,3-</td><td><b>both equatorial</b> (or both axial)</td><td>axial + equatorial</td></tr>
+        <tr><td>1,4-</td><td>axial + equatorial</td><td><b>both equatorial</b> (or both axial)</td></tr>
+      </tbody></table></div>
+    <div class="tip">For two groups, the most stable isomer is the one that can put both groups equatorial: trans for 1,2 and 1,4, cis for 1,3. If you can't get both equatorial, put the bigger group equatorial.</div>
+    <figure>
+      <div class="viewer" data-viewer="c2">
+        <div class="chips" role="group" aria-label="Molecule"></div>
+        <canvas width="800" height="560" aria-label="Rotatable 3D model of cyclohexane"></canvas>
+      </div>
+      <figcaption>Rotate the chair and look at it edge-on: six hydrogens point straight up or down (axial), and six point outward around the ring (equatorial).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 3 ================= -->
+<section class="view" id="c3" hidden>
+  <div class="ch-head"><div class="ch-num">3</div><h2>Alkenes and Alkynes: The Nature of Organic Reactions</h2><div class="pages">Book pages 78–111 · §3.1–3.9</div></div>
+  <div class="why"><b>Why this matters:</b> this chapter gives you the language of reactions (nucleophile, electrophile, curved arrows, energy diagrams) that Chapters 4 and 5 use on every page. E/Z naming uses the same priority rules as R/S in Chapter 6.</div>
+
+  <div class="topic">
+    <h3><span class="sec">§3.1</span>Naming alkenes and alkynes</h3>
+    <ol>
+      <li>The parent chain must <b>contain the double (or triple) bond</b>. Ending: -ene or -yne.</li>
+      <li>Number from the end <b>nearer the multiple bond</b>, and give the bond the lower number of its two carbons.</li>
+      <li>Number substituents and write the full name. Your book uses the newer IUPAC style, with the number just before the ending: <b>but-2-ene</b>, <b>buta-1,3-diene</b>, <b>pent-1-yne</b>.</li>
+      <li>In cycloalkenes, the double bond is C1=C2. Number so the substituents get the lowest numbers.</li>
+    </ol>
+    <p>Common names to know: ethylene (ethene), propylene (propene), acetylene (ethyne), vinyl (H<sub>2</sub>C=CH–), allyl (H<sub>2</sub>C=CHCH<sub>2</sub>–).</p>
+    <p>Alkenes and alkynes have fewer hydrogens than the matching alkane, so they are called <b>unsaturated</b>.</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§3.2–3.3</span>Double-bond structure and cis–trans isomers</h3>
+    <p>A C=C is one σ bond (sp<sup>2</sup>–sp<sup>2</sup>) plus one π bond (p–p). To rotate, the π bond would have to break, which costs about 350 kJ/mol. So rotation doesn't happen at room temperature, and substituted alkenes can be <b>cis</b> (same side) or <b>trans</b> (opposite sides).</p>
+    <div class="trap">Cis–trans isomers only exist if <b>each</b> double-bond carbon has two <b>different</b> groups. CH<sub>2</sub>=CHCH<sub>3</sub> (propene) has none, because C1 carries two H's.</div>
+    <p>Trans alkenes are usually more stable than cis, because in cis the bulky groups bump into each other.</p>
+  </div>
+
+  <div class="topic" id="cip">
+    <h3><span class="sec">§3.4</span>Sequence rules: the E,Z system</h3>
+    <p>When there are three or four different groups, "cis/trans" is ambiguous. Instead, rank the two groups on <b>each</b> carbon using the <b>Cahn–Ingold–Prelog sequence rules</b>:</p>
+    <ol>
+      <li><b>Higher atomic number wins</b> for the atom directly attached: Br &gt; Cl &gt; O &gt; N &gt; C &gt; H.</li>
+      <li><b>Tie? Move outward.</b> List the three atoms attached to each tied atom, highest first, and compare at the first point of difference. –CH<sub>2</sub>OH (O,H,H) beats –CH(CH<sub>3</sub>)<sub>2</sub> (C,C,H), because O beats C.</li>
+      <li><b>Multiple bonds count as duplicates.</b> A C=O carbon counts as having (O,O,…); a –CH=CH<sub>2</sub> counts as (C,C,H).</li>
+    </ol>
+    <div class="key">Higher-priority groups on the <b>same side</b> → <b>Z</b> (<i>zusammen</i>, "together"). On <b>opposite sides</b> → <b>E</b> (<i>entgegen</i>, "opposite"). Memory hook: <b>Z</b> = "<b>z</b>ame zide".</div>
+    <div class="trap">Rule 2 compares the <b>set</b> of attached atoms at the first point of difference. It is not a sum. –C(CH<sub>3</sub>)<sub>3</sub> (C,C,C) loses to –CH<sub>2</sub>Br (Br,H,H), because Br beats C at the first comparison.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§3.5</span>Kinds of organic reactions</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Type</th><th>What happens</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><b>Addition</b></td><td>Two reactants combine into one product, nothing left over</td><td>alkene + HBr → alkyl bromide</td></tr>
+        <tr><td><b>Elimination</b></td><td>One reactant splits into two (the reverse of addition)</td><td>alkyl bromide → alkene + HBr</td></tr>
+        <tr><td><b>Substitution</b></td><td>Two reactants swap parts</td><td>CH<sub>4</sub> + Cl<sub>2</sub> → CH<sub>3</sub>Cl + HCl</td></tr>
+        <tr><td><b>Rearrangement</b></td><td>One molecule reorganizes into an isomer</td><td>but-1-ene → but-2-ene (acid catalyst)</td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§3.6</span>How reactions occur: mechanisms</h3>
+    <p>A <b>mechanism</b> describes step by step which bonds break and form. Bonds can break in two ways:</p>
+    <ul>
+      <li><b>Homolytic</b> (symmetric): each atom keeps one electron, making <b>radicals</b>. Shown with half-headed "fishhook" arrows. These are <b>radical reactions</b>, the less common kind.</li>
+      <li><b>Heterolytic</b> (unsymmetric): one atom keeps both electrons, making ions. These are <b>polar reactions</b>, the most common kind.</li>
+    </ul>
+    <div class="grid2">
+      <div class="key"><b>Nucleophile</b> ("nucleus-lover"): electron-<b>rich</b>, donates a pair. Has a lone pair, a π bond or a negative charge. Examples: OH<sup>−</sup>, Br<sup>−</sup>, H<sub>2</sub>O, NH<sub>3</sub>, C=C. It is a Lewis base.</div>
+      <div class="key"><b>Electrophile</b> ("electron-lover"): electron-<b>poor</b>, accepts a pair. Has a + or δ+ atom or an empty orbital. Examples: H<sup>+</sup>, HBr, carbocations, BF<sub>3</sub>. It is a Lewis acid.</div>
+    </div>
+    <div class="tip">Curved-arrow rules: (1) the arrow starts at electrons (a lone pair or a bond) and ends at an atom. (2) A nucleophile attacks an electrophile; the arrow goes <b>from</b> the nucleophile <b>to</b> the electrophile. (3) Total charge is the same on both sides. (4) Don't give any atom more than an octet (2 for H).</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§3.7</span>Worked mechanism: HBr adding to an alkene</h3>
+    <p>Your book uses HCl + ethylene. Below is the same two-step mechanism with propene, which also shows why the H goes where it does (Chapter 4).</p>
+    <figure class="stepper" data-stepper>
+      <div class="steps" role="group" aria-label="Mechanism step">
+        <button class="chip" aria-pressed="true" data-step="0">Step 1: π bond attacks H</button>
+        <button class="chip" aria-pressed="false" data-step="1">Step 2: Br<sup>−</sup> attacks C<sup>+</sup></button>
+      </div>
+      <div class="panel art" data-panel="0">
+        <svg viewBox="0 0 440 130" width="440" role="img" aria-label="Propene pi bond attacks the H of HBr; H–Br bond electrons go to bromine">
+          <text x="20" y="90" class="mono" font-size="20">CH₃–CH</text>
+          <text x="106" y="90" class="mono" font-size="20">=</text>
+          <text x="124" y="90" class="mono" font-size="20">CH₂</text>
+          <text x="188" y="90" class="mono" font-size="20">+</text>
+          <text x="222" y="90" class="mono" font-size="20">H</text>
+          <text x="236" y="90" class="mono" font-size="20">–</text>
+          <text x="252" y="90" class="mono" font-size="20">Br</text>
+          <path d="M112 72 C130 18 200 18 226 70" class="arrow"/>
+          <path d="M243 78 C246 50 270 46 266 70" class="arrow-o"/>
+          <text x="20" y="124" class="small">Blue arrow: the π electrons attack the H. Red arrow: the H–Br bonding pair moves onto Br.</text>
+        </svg>
+        <p class="muted">Result: a <b>carbocation</b> intermediate (CH<sub>3</sub>–CH<sup>+</sup>–CH<sub>3</sub>) and Br<sup>−</sup>. H went to the CH<sub>2</sub> end, so the positive charge sits on the middle carbon. That makes it a <b>secondary</b> carbocation, more stable than the primary one the other way round. This is the slow step.</p>
+      </div>
+      <div class="panel art" data-panel="1" hidden>
+        <svg viewBox="0 0 440 130" width="440" role="img" aria-label="Bromide lone pair attacks the carbocation">
+          <text x="20" y="90" class="mono" font-size="20">CH₃–</text>
+          <text x="74" y="90" class="mono" font-size="20">C</text><text x="88" y="78" class="mono" font-size="14">+</text>
+          <text x="98" y="90" class="mono" font-size="20">H–CH₃</text>
+          <text x="210" y="90" class="mono" font-size="20">:Br</text><text x="246" y="78" class="mono" font-size="14">−</text>
+          <path d="M214 72 C180 28 110 28 84 68" class="arrow"/>
+          <text x="290" y="90" class="mono" font-size="18">→ CH₃CHBrCH₃</text>
+          <text x="20" y="124" class="small">The bromide lone pair (nucleophile) attacks the empty p orbital of C⁺ (electrophile).</text>
+        </svg>
+        <p class="muted">Product: <b>2-bromopropane</b>. This step is fast. The overall reaction is an <b>electrophilic addition</b>.</p>
+      </div>
+    </figure>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§3.8</span>Energy diagrams: transition states and intermediates</h3>
+    <figure>
+      <div class="art"><svg viewBox="0 0 380 210" width="440" role="img" aria-label="Two-step reaction energy diagram">
+        <line x1="14" y1="12" x2="14" y2="182" class="ln-m" marker-end="url(#mk)" transform="rotate(180 14 97)"/>
+        <line x1="14" y1="182" x2="366" y2="182" class="ln-m"/>
+        <text x="10" y="200" class="small">Reaction progress →</text>
+        <text x="22" y="18" class="small">Energy ↑</text>
+        <line x1="50" y1="130" x2="118" y2="130" class="dash"/>
+        <line x1="300" y1="130" x2="340" y2="130" class="dash"/>
+        <path d="M24 130 L50 130 C80 130 92 42 112 42 C132 42 146 98 172 98 C196 98 204 62 224 62 C248 62 262 152 300 152 L350 152" class="acc" stroke-width="3"/>
+        <line x1="96" y1="128" x2="96" y2="48" class="arrow"/>
+        <text x="58" y="92" class="lbl" fill="var(--accent)">E<tspan baseline-shift="sub" font-size="9">act</tspan></text>
+        <line x1="330" y1="132" x2="330" y2="148" class="arrow-o"/>
+        <text x="336" y="144" class="lbl" fill="var(--oxy)">ΔH</text>
+        <text x="112" y="34" text-anchor="middle" class="lbl">Transition state 1</text>
+        <text x="172" y="116" text-anchor="middle" class="small">Intermediate (carbocation)</text>
+        <text x="236" y="54" text-anchor="middle" class="small">TS 2</text>
+        <text x="28" y="146" class="small">Reactants</text>
+        <text x="292" y="170" class="small">Products</text>
+      </svg></div>
+      <figcaption>A two-step reaction, like HBr adding to an alkene. Step 1 has the highest barrier, so it is the slow, rate-determining step. Products lie lower than reactants, so the reaction releases heat (ΔH &lt; 0).</figcaption>
+    </figure>
+    <div class="grid2">
+      <div class="key"><b>Transition state</b>: the energy <b>peak</b> of a step. Bonds are half-formed and half-broken. It can't be isolated, because it exists for about one bond vibration.</div>
+      <div class="key"><b>Intermediate</b>: an energy <b>valley</b> between two transition states. It is a real species (like a carbocation), but usually too reactive to bottle.</div>
+    </div>
+    <ul>
+      <li><b>Activation energy (E<sub>act</sub>)</b>: the climb from reactants to the transition state. Bigger E<sub>act</sub> means a slower reaction. Around 40–150 kJ/mol is typical.</li>
+      <li><b>ΔH</b> (heat of reaction): negative = <b>exothermic</b> (releases heat); positive = <b>endothermic</b>.</li>
+      <li>ΔH tells you <b>whether</b> a reaction is favorable. E<sub>act</sub> tells you <b>how fast</b> it is. These are independent.</li>
+    </ul>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§3.9</span>Catalysis</h3>
+    <p>A <b>catalyst</b> speeds up a reaction without being used up. It provides a different pathway with a <b>lower E<sub>act</sub></b>. It does <b>not</b> change ΔH or where the equilibrium lies; it only gets you there faster. Enzymes are biological catalysts.</p>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 4 ================= -->
+<section class="view" id="c4" hidden>
+  <div class="ch-head"><div class="ch-num">4</div><h2>Reactions of Alkenes and Alkynes</h2><div class="pages">Book pages 112–154 · §4.1–4.11</div></div>
+  <div class="why"><b>Why this matters:</b> this is the first big "reaction list" chapter, and it carries the most exam points. For each reaction, know three things: the <b>reagent</b>, <b>where things add</b> (regiochemistry), and <b>which side they add from</b> (stereochemistry). The cheat sheet tab collects all of them.</div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.1</span>Adding HX: Markovnikov's rule</h3>
+    <p>HCl, HBr and HI add across a C=C. When the alkene is unsymmetrical, one product dominates. The reaction is <b>regiospecific</b>.</p>
+    <div class="key"><b>Markovnikov's rule:</b> the H adds to the carbon that already has <b>more H's</b> (fewer alkyl groups), and the X goes to the carbon with <b>more alkyl groups</b>. The real reason is that this route goes through the <b>more stable carbocation</b>.</div>
+    <div class="eq">(CH<sub>3</sub>)<sub>2</sub>C=CH<sub>2</sub> + HBr → (CH<sub>3</sub>)<sub>3</sub>C–Br &nbsp;&nbsp;(2-bromo-2-methylpropane, via a 3° carbocation)</div>
+    <div class="trap">If both double-bond carbons have the same number of alkyl groups (like pent-2-ene), you get a mixture of both products. Markovnikov's rule doesn't pick one.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.2</span>Carbocation structure and stability</h3>
+    <p>A carbocation carbon is sp<sup>2</sup> and flat, with an <b>empty p orbital</b> sticking up and down. Alkyl groups push electron density toward it (inductive effect), which stabilizes the positive charge. More alkyl groups means a more stable cation.</p>
+    <div class="eq">3° (R<sub>3</sub>C<sup>+</sup>) &nbsp;&gt;&nbsp; 2° (R<sub>2</sub>CH<sup>+</sup>) &nbsp;&gt;&nbsp; 1° (RCH<sub>2</sub><sup>+</sup>) &nbsp;&gt;&nbsp; methyl (CH<sub>3</sub><sup>+</sup>)</div>
+    <p>Allylic (and benzylic) cations are extra stable because of resonance (§4.9).</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.3</span>Adding water: hydration</h3>
+    <p>Alkene + H<sub>2</sub>O with an acid catalyst (H<sub>2</sub>SO<sub>4</sub> or H<sub>3</sub>O<sup>+</sup>) → <b>alcohol</b>, Markovnikov orientation (OH on the more substituted carbon).</p>
+    <ol>
+      <li>The π bond takes H<sup>+</sup> from H<sub>3</sub>O<sup>+</sup>, making the more stable carbocation.</li>
+      <li>Water (nucleophile) attacks C<sup>+</sup>, giving a protonated alcohol (an oxonium ion).</li>
+      <li>Water removes H<sup>+</sup> from the oxygen, giving the alcohol. The acid catalyst is regenerated.</li>
+    </ol>
+    <div class="eq">(CH<sub>3</sub>)<sub>2</sub>C=CH<sub>2</sub> + H<sub>2</sub>O —H<sub>3</sub>O<sup>+</sup>→ (CH<sub>3</sub>)<sub>3</sub>C–OH &nbsp;(tert-butyl alcohol)</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.4</span>Adding halogens: anti addition</h3>
+    <p>Br<sub>2</sub> or Cl<sub>2</sub> in CH<sub>2</sub>Cl<sub>2</sub> adds across the C=C to give a <b>1,2-dihalide</b>. The bromine adds to opposite faces (<b>anti stereochemistry</b>).</p>
+    <ol>
+      <li>The π bond attacks Br<sub>2</sub>, forming a three-membered <b>bromonium ion</b> (Br<sup>+</sup> bridging both carbons) and Br<sup>−</sup>.</li>
+      <li>The bromonium ion blocks one face, so Br<sup>−</sup> attacks from the <b>opposite</b> side and opens the ring.</li>
+    </ol>
+    <div class="eq">cyclopentene + Br<sub>2</sub> → <b>trans</b>-1,2-dibromocyclopentane (not cis)</div>
+    <div class="tip">Br<sub>2</sub> is red-brown. The color disappearing is a quick test for a C=C.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.5</span>Reduction: hydrogenation</h3>
+    <p>H<sub>2</sub> with a metal catalyst (Pd on carbon, or PtO<sub>2</sub>) turns an alkene into an alkane. Both H's add from the <b>same face</b> (<b>syn stereochemistry</b>), because the alkene lies flat on the metal surface where the H atoms are bound.</p>
+    <p>In organic chemistry, <b>reduction</b> means gaining H or losing O (or N, X). <b>Oxidation</b> means gaining O (or N, X) or losing H.</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.6</span>Oxidation: epoxides, diols and cleavage</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Reagent</th><th>Product</th><th>Stereo / note</th></tr></thead>
+      <tbody>
+        <tr><td>Peroxyacid RCO<sub>3</sub>H (e.g. meta-chloroperoxybenzoic acid)</td><td><b>Epoxide</b> (3-membered C–O–C ring)</td><td>Oxygen adds to one face; the alkene's cis/trans geometry is kept</td></tr>
+        <tr><td>Epoxide, then H<sub>3</sub>O<sup>+</sup></td><td><b>trans-1,2-diol</b></td><td>Water opens the ring from the back side → <b>anti</b></td></tr>
+        <tr><td>KMnO<sub>4</sub>, OH<sup>−</sup>, H<sub>2</sub>O (basic)</td><td><b>cis-1,2-diol</b></td><td>Both OH's from one face → <b>syn</b></td></tr>
+        <tr><td>KMnO<sub>4</sub>, H<sub>3</sub>O<sup>+</sup> (neutral or acidic)</td><td><b>Cleaves</b> the C=C → ketones and/or carboxylic acids</td><td>=CR<sub>2</sub> → ketone; =CHR → carboxylic acid; =CH<sub>2</sub> → CO<sub>2</sub></td></tr>
+      </tbody></table></div>
+    <div class="trap">Same reagent, different conditions: <b>basic</b> KMnO<sub>4</sub> makes a diol; <b>acidic or neutral</b> KMnO<sub>4</sub> cuts the molecule in two. Read the conditions.</div>
+    <details class="check"><summary>What does acidic KMnO<sub>4</sub> do to (CH<sub>3</sub>)<sub>2</sub>C=CHCH<sub>3</sub>?</summary><p>It splits the double bond. The (CH<sub>3</sub>)<sub>2</sub>C= half becomes acetone, (CH<sub>3</sub>)<sub>2</sub>C=O. The =CHCH<sub>3</sub> half has an H, so it becomes acetic acid, CH<sub>3</sub>COOH.</p></details>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.7</span>Radical addition: polymers</h3>
+    <p>A <b>polymer</b> is a giant molecule made of repeating <b>monomer</b> units. Alkenes polymerize through a radical chain reaction started by a radical initiator such as benzoyl peroxide.</p>
+    <ol>
+      <li><b>Initiation</b>: heat splits the initiator into radicals (In•), and In• adds to a monomer's C=C.</li>
+      <li><b>Propagation</b>: the new carbon radical adds to another monomer, over and over, so the chain grows.</li>
+      <li><b>Termination</b>: two radicals combine, and the chain stops.</li>
+    </ol>
+    <p>Examples: ethylene → polyethylene; propylene → polypropylene; chloroethylene (vinyl chloride) → PVC; styrene → polystyrene; tetrafluoroethylene → Teflon.</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.8–4.9</span>Conjugated dienes and allylic carbocations</h3>
+    <p>A <b>conjugated diene</b> has alternating double and single bonds (buta-1,3-diene). Its four p orbitals line up and overlap across the whole system.</p>
+    <p>HBr adds to buta-1,3-diene to give two products. In <b>1,2-addition</b>, H and Br add to neighboring carbons. In <b>1,4-addition</b>, they add to the ends, and the remaining double bond moves to the middle (C2=C3).</p>
+    <div class="key">Why two products? Protonation at C1 gives an <b>allylic carbocation</b>, a cation next to a C=C. Its positive charge is shared between C2 and C4 by <b>resonance</b>. Br<sup>−</sup> can attack either carbon.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.10</span>Drawing and interpreting resonance forms</h3>
+    <ul>
+      <li>Resonance forms are <b>imaginary</b>. The real molecule is a <b>resonance hybrid</b>, a blend of all forms, and it is more stable than any single form.</li>
+      <li>Only <b>electrons</b> move (π bonds and lone pairs). <b>Atoms never move</b>, and σ bonds stay put.</li>
+      <li>Each form must be a valid Lewis structure: no carbon with 5 bonds. The overall charge stays the same.</li>
+      <li>Typical pattern: three atoms, where one has a p orbital (a C=C next to a C<sup>+</sup>, a lone pair, or a radical). Use a double-headed arrow ↔ between forms.</li>
+      <li>More resonance forms means a more stable species.</li>
+    </ul>
+    <div class="trap">If you moved a hydrogen or any atom, you drew a different molecule (an isomer), not a resonance form.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§4.11</span>Alkynes and their reactions</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Reaction</th><th>Reagent</th><th>Product</th></tr></thead>
+      <tbody>
+        <tr><td>Add HX</td><td>1 equiv HBr or HCl</td><td>Vinylic halide (X on a C=C carbon), Markovnikov. A 2nd equiv gives a dihalide (both X on the same carbon).</td></tr>
+        <tr><td>Add X<sub>2</sub></td><td>1 equiv Br<sub>2</sub> or Cl<sub>2</sub></td><td>1,2-dihaloalkene; 2 equiv → tetrahaloalkane</td></tr>
+        <tr><td>Hydration</td><td>H<sub>2</sub>O, H<sub>2</sub>SO<sub>4</sub>, <b>HgSO<sub>4</sub></b></td><td><b>Ketone</b> (Markovnikov). It goes through an <b>enol</b> (OH on a C=C) that quickly rearranges to the ketone. A terminal alkyne gives a methyl ketone.</td></tr>
+        <tr><td>Full reduction</td><td>2 H<sub>2</sub>, Pd/C</td><td>Alkane</td></tr>
+        <tr><td>Partial reduction</td><td>H<sub>2</sub>, <b>Lindlar catalyst</b></td><td><b>cis</b>-Alkene (syn addition, stops at the alkene)</td></tr>
+        <tr><td>Deprotonation</td><td>NaNH<sub>2</sub> (terminal alkyne only, pK<sub>a</sub> ≈ 25)</td><td>Acetylide anion R–C≡C:<sup>−</sup></td></tr>
+        <tr><td>Alkylation</td><td>Acetylide + <b>primary</b> alkyl halide (R'CH<sub>2</sub>Br)</td><td>Internal alkyne R–C≡C–CH<sub>2</sub>R'. This makes a new C–C bond.</td></tr>
+      </tbody></table></div>
+    <div class="tip">Terminal alkyne C–H (pK<sub>a</sub> 25) is far more acidic than alkene C–H (44) or alkane C–H (about 60). That is why NaNH<sub>2</sub> can remove it but hydroxide can't (water's pK<sub>a</sub> is 15.7).</div>
+    <details class="check"><summary>Make hex-2-yne from propyne.</summary><p>Propyne + NaNH<sub>2</sub> → CH<sub>3</sub>C≡C<sup>−</sup> Na<sup>+</sup>. Then add CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>Br (a primary halide) → CH<sub>3</sub>C≡CCH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub>, which is hex-2-yne (3 + 3 = 6 carbons).</p></details>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 5 ================= -->
+<section class="view" id="c5" hidden>
+  <div class="ch-head"><div class="ch-num">5</div><h2>Aromatic Compounds</h2><div class="pages">Book pages 155–188 · §5.1–5.10</div></div>
+  <div class="why"><b>Why this matters:</b> benzene looks like it has three double bonds, but it doesn't react like an alkene. It does <b>substitution</b> instead of addition. Exams love multistep synthesis questions where the <b>order</b> of steps decides the product.</div>
+
+  <div class="topic">
+    <h3><span class="sec">§5.1</span>Structure of benzene</h3>
+    <figure>
+      <div class="art"><svg viewBox="0 0 400 124" width="400" role="img" aria-label="Two Kekulé resonance forms of benzene and the hybrid drawn with a circle">
+        <g transform="translate(10,0)">
+          <polygon points="60,20 94.6,40 94.6,80 60,100 25.4,80 25.4,40" class="ln"/>
+          <line x1="60" y1="28" x2="87.7" y2="44" class="ln"/><line x1="87.7" y1="76" x2="60" y2="92" class="ln"/><line x1="32.3" y1="76" x2="32.3" y2="44" class="ln"/>
+        </g>
+        <text x="130" y="66" text-anchor="middle" font-size="20">↔</text>
+        <g transform="translate(140,0)">
+          <polygon points="60,20 94.6,40 94.6,80 60,100 25.4,80 25.4,40" class="ln"/>
+          <line x1="87.7" y1="44" x2="87.7" y2="76" class="ln"/><line x1="60" y1="92" x2="32.3" y2="76" class="ln"/><line x1="32.3" y1="44" x2="60" y2="28" class="ln"/>
+        </g>
+        <text x="262" y="66" text-anchor="middle" font-size="20">=</text>
+        <g transform="translate(270,0)">
+          <polygon points="60,20 94.6,40 94.6,80 60,100 25.4,80 25.4,40" class="ln"/>
+          <circle cx="60" cy="60" r="24" class="acc"/>
+        </g>
+        <text x="330" y="118" text-anchor="middle" class="small">hybrid</text>
+      </svg></div>
+      <figcaption>Benzene is not switching between the two forms. It is one structure, the hybrid, with 6 π electrons spread evenly around the ring.</figcaption>
+    </figure>
+    <ul>
+      <li>C<sub>6</sub>H<sub>6</sub>: flat, all angles 120°, every carbon sp<sup>2</sup>.</li>
+      <li>All six C–C bonds are the <b>same length (139 pm)</b>, between a single bond (154) and a double bond (134).</li>
+      <li>It is unusually stable, so it resists addition. With Br<sub>2</sub> it needs a catalyst, and then it <b>substitutes</b> an H instead of adding.</li>
+      <li>"Aromatic" today means having this special 6-π-electron ring stability, not having a smell.</li>
+    </ul>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§5.2</span>Naming aromatic compounds</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Common name</th><th>Group on ring</th><th>Common name</th><th>Group on ring</th></tr></thead>
+      <tbody>
+        <tr><td>Toluene</td><td>–CH<sub>3</sub></td><td>Benzoic acid</td><td>–COOH</td></tr>
+        <tr><td>Phenol</td><td>–OH</td><td>Benzaldehyde</td><td>–CHO</td></tr>
+        <tr><td>Aniline</td><td>–NH<sub>2</sub></td><td>Acetophenone</td><td>–COCH<sub>3</sub></td></tr>
+        <tr><td>Xylene</td><td>two –CH<sub>3</sub></td><td>Benzonitrile</td><td>–CN</td></tr>
+      </tbody></table></div>
+    <ul>
+      <li>Two substituents: <b>ortho (o-)</b> = 1,2; <b>meta (m-)</b> = 1,3; <b>para (p-)</b> = 1,4.</li>
+      <li>Three or more: use numbers, as low as possible, alphabetical order.</li>
+      <li>C<sub>6</sub>H<sub>5</sub>– as a substituent is <b>phenyl</b> (Ph); C<sub>6</sub>H<sub>5</sub>CH<sub>2</sub>– is <b>benzyl</b>. Any aromatic ring as a substituent is an <b>aryl</b> group (Ar).</li>
+    </ul>
+    <div class="trap">Phenyl (C<sub>6</sub>H<sub>5</sub>–) and benzyl (C<sub>6</sub>H<sub>5</sub>CH<sub>2</sub>–) differ by one CH<sub>2</sub>. Students swap them all the time.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§5.3–5.5</span>Electrophilic aromatic substitution (EAS)</h3>
+    <p>Every EAS reaction follows the same two steps. Only the electrophile changes.</p>
+    <ol>
+      <li>The ring's π electrons attack the electrophile E<sup>+</sup>, giving a resonance-stabilized carbocation (the positive charge is shared over three ring carbons). This step is slow because aromaticity is lost.</li>
+      <li>A base removes the H<sup>+</sup> from the carbon bearing E. The ring becomes aromatic again, so the product is substituted rather than added to.</li>
+    </ol>
+    <div class="tbl"><table>
+      <thead><tr><th>Reaction</th><th>Reagents</th><th>Real electrophile</th><th>Adds</th></tr></thead>
+      <tbody>
+        <tr><td>Bromination</td><td>Br<sub>2</sub>, FeBr<sub>3</sub></td><td>Br<sup>+</sup> (Br<sub>2</sub>–FeBr<sub>3</sub> complex)</td><td>–Br</td></tr>
+        <tr><td>Chlorination</td><td>Cl<sub>2</sub>, FeCl<sub>3</sub></td><td>Cl<sup>+</sup></td><td>–Cl</td></tr>
+        <tr><td>Iodination</td><td>I<sub>2</sub> + an oxidizing agent</td><td>I<sup>+</sup></td><td>–I</td></tr>
+        <tr><td>Nitration</td><td>HNO<sub>3</sub>, H<sub>2</sub>SO<sub>4</sub></td><td>NO<sub>2</sub><sup>+</sup> (nitronium ion)</td><td>–NO<sub>2</sub></td></tr>
+        <tr><td>Sulfonation</td><td>SO<sub>3</sub>, H<sub>2</sub>SO<sub>4</sub></td><td>HSO<sub>3</sub><sup>+</sup></td><td>–SO<sub>3</sub>H</td></tr>
+        <tr><td>Friedel–Crafts alkylation</td><td>R–Cl, AlCl<sub>3</sub></td><td>R<sup>+</sup> (carbocation)</td><td>–R</td></tr>
+        <tr><td>Friedel–Crafts acylation</td><td>RCOCl, AlCl<sub>3</sub></td><td>RC≡O<sup>+</sup> (acyl cation)</td><td>–COR (a ketone)</td></tr>
+      </tbody></table></div>
+    <p>A nitro group can be <b>reduced to –NH<sub>2</sub></b> with Fe, Sn or SnCl<sub>2</sub> in acid. This is how you put an amine on a ring.</p>
+    <div class="trap">Friedel–Crafts limitations: (1) only <b>alkyl</b> halides work; aryl and vinylic halides like chlorobenzene don't react. (2) It fails on rings that already carry –NO<sub>2</sub>, –CN, –SO<sub>3</sub>H or –COR (strongly deactivated).</div>
+  </div>
+
+  <div class="topic" id="directors">
+    <h3><span class="sec">§5.6–5.7</span>Substituent effects: activators and directors</h3>
+    <p>A group already on the ring controls two things: <b>how fast</b> the next substitution goes (activator or deactivator) and <b>where</b> it goes (ortho/para or meta).</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Category</th><th>Groups</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><b style="color:var(--hal)">Activating</b>, ortho/para</td><td>–NH<sub>2</sub>, –NHR, –OH, –OR, –NHCOR, –R (alkyl), –C<sub>6</sub>H<sub>5</sub></td><td>Donate electrons to the ring (lone pair by resonance, or alkyl by induction)</td></tr>
+        <tr><td><b style="color:var(--oxy)">Deactivating</b>, ortho/para</td><td>–F, –Cl, –Br, –I</td><td>Pull by induction (slower) but donate a lone pair by resonance (o/p)</td></tr>
+        <tr><td><b style="color:var(--oxy)">Deactivating</b>, meta</td><td>–NO<sub>2</sub>, –CN, –SO<sub>3</sub>H, –CHO, –COR, –COOH, –COOR, –NR<sub>3</sub><sup>+</sup></td><td>Pull electrons out of the ring (they have δ+ or + next to the ring)</td></tr>
+      </tbody></table></div>
+    <div class="key">There are <b>no meta-directing activators</b>. Every activator directs ortho/para. Halogens are the odd case: deactivating but ortho/para.</div>
+    <div class="tip">Quick test: if the atom attached to the ring has a <b>lone pair</b> (N, O, halogen) or is a plain alkyl, it's ortho/para. If the attached atom is <b>double- or triple-bonded to something electronegative</b> or carries a + charge, it's meta.</div>
+    <p><b>Why it works (§5.7):</b> in ortho or para attack, one resonance form of the carbocation puts the + charge right on the carbon holding the substituent. A donor group (lone pair or alkyl) stabilizes that, so o/p wins. An electron-withdrawing group destabilizes it, so meta (which avoids that form) wins.</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§5.8</span>Oxidation and reduction of aromatic compounds</h3>
+    <ul>
+      <li><b>Side-chain oxidation</b>: KMnO<sub>4</sub>, H<sub>2</sub>O turns <b>any</b> alkyl group with a benzylic H into –COOH. Toluene → benzoic acid; a propyl side chain → benzoic acid too (the extra carbons are lost). A tert-butyl group has no benzylic H, so it doesn't react.</li>
+      <li><b>Ring hydrogenation</b>: H<sub>2</sub> with a Pt or Rh catalyst at high pressure → cyclohexane. It is much harder than reducing an alkene, so a C=C outside the ring can be reduced while the ring stays.</li>
+    </ul>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§5.9</span>Other aromatic compounds</h3>
+    <p><b>Polycyclic</b> aromatics are fused benzene rings: naphthalene (2 rings), anthracene and phenanthrene (3). <b>Heterocycles</b> have a non-carbon atom in the ring and can still be aromatic with 6 π electrons: <b>pyridine</b> and <b>pyrimidine</b> (6-membered, N in ring), <b>pyrrole</b> and <b>imidazole</b> (5-membered). These rings are in DNA bases and many drugs.</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§5.10</span>Organic synthesis: planning the order</h3>
+    <p>Work <b>backward</b> from the target. Ask "what was the last step?" and use the directing rules to choose the order.</p>
+    <div class="grid2">
+      <div class="key"><b>m-Bromonitrobenzene:</b> nitrate first (–NO<sub>2</sub> is a meta director), then brominate.</div>
+      <div class="key"><b>p-Bromonitrobenzene:</b> brominate first (–Br is an o/p director), then nitrate and separate para from ortho.</div>
+    </div>
+    <details class="check"><summary>Make m-chlorobenzoic acid from toluene.</summary><p>Oxidize first: toluene + KMnO<sub>4</sub> → benzoic acid (–COOH is a meta director). Then Cl<sub>2</sub>, FeCl<sub>3</sub> → m-chlorobenzoic acid. If you chlorinated first, –CH<sub>3</sub> would send the Cl ortho/para, which is wrong.</p></details>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 6 ================= -->
+<section class="view" id="c6" hidden>
+  <div class="ch-head"><div class="ch-num">6</div><h2>Stereochemistry at Tetrahedral Centers</h2><div class="pages">Book pages 189–221 · §6.1–6.10</div></div>
+  <div class="why"><b>Why this matters:</b> R/S assignment, counting stereoisomers and spotting meso compounds are guaranteed exam questions. Use the 3D models below until "mirror image" becomes something you can see.</div>
+
+  <div class="topic">
+    <h3><span class="sec">§6.1–6.2</span>Enantiomers and chirality</h3>
+    <p>A molecule is <b>chiral</b> ("handed") if it <b>cannot be superimposed on its mirror image</b>, like your left and right hands. The two mirror-image forms are <b>enantiomers</b>.</p>
+    <div class="key">The usual cause is a <b>chirality center</b> (a stereocenter): an sp<sup>3</sup> carbon bonded to <b>four different groups</b>. If the molecule has a <b>plane of symmetry</b>, it is <b>achiral</b>.</div>
+    <figure>
+      <div class="viewer" data-viewer="c6">
+        <div class="chips" role="group" aria-label="Molecule"></div>
+        <canvas width="800" height="560" aria-label="Rotatable 3D models of enantiomers"></canvas>
+        <div class="legend"><span><i style="background:var(--carbon)"></i>C</span><span><i style="background:var(--hyd)"></i>H</span><span><i style="background:#40c060"></i>F</span><span><i style="background:#1f9e3a"></i>Cl</span><span><i style="background:#9a2a1e"></i>Br</span></div>
+      </div>
+      <figcaption>Bromochlorofluoromethane and its mirror image. Try to rotate one until it matches the other. You can't, so they are enantiomers.</figcaption>
+    </figure>
+    <div class="trap">Never a chirality center: any CH<sub>2</sub> or CH<sub>3</sub> carbon (two identical H's), and any sp<sup>2</sup> or sp carbon. Butan-2-ol is chiral (C2 has H, OH, CH<sub>3</sub>, CH<sub>2</sub>CH<sub>3</sub>). Propan-2-ol is not, because C2 has two CH<sub>3</sub> groups.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§6.3–6.4</span>Optical activity</h3>
+    <p>Enantiomers have identical melting points, boiling points, solubility and density. They differ in how they rotate <b>plane-polarized light</b> (measured with a polarimeter). One rotates it clockwise, <b>dextrorotatory (+)</b>; the other rotates it the same amount counterclockwise, <b>levorotatory (−)</b>.</p>
+    <div class="eq">[α]<sub>D</sub> = α / (l × C) &nbsp;&nbsp; α = observed rotation (degrees), l = path length (dm), C = concentration (g/mL)</div>
+    <details class="check"><summary>A 0.50 g/mL solution in a 10 cm tube rotates light +1.2°. What is [α]<sub>D</sub>?</summary><p>10 cm = 1 dm, so [α]<sub>D</sub> = +1.2 / (1 × 0.50) = <b>+2.4°</b>.</p></details>
+    <p>Pasteur (1848) separated two kinds of mirror-image crystals of a tartaric acid salt by hand. They rotated light in opposite directions, which was the first evidence of enantiomers.</p>
+    <div class="trap">The (+)/(−) sign is measured in a lab. R/S comes from drawing the structure. There is <b>no way to predict one from the other</b>.</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§6.5</span>Assigning R and S</h3>
+    <ol>
+      <li>Rank the four groups 1 to 4 with the same <a href="#cip" data-jump="c3">sequence rules as E/Z</a> (higher atomic number first, go outward to break ties, duplicate multiple bonds).</li>
+      <li>Turn the molecule so the <b>lowest priority (4)</b> points <b>away</b> from you, behind the page.</li>
+      <li>Trace 1 → 2 → 3. <b>Clockwise = R</b> (<i>rectus</i>). <b>Counterclockwise = S</b> (<i>sinister</i>).</li>
+    </ol>
+    <figure>
+      <div class="art"><svg viewBox="0 0 360 150" width="360" role="img" aria-label="Steering-wheel view: 1 to 2 to 3 clockwise is R, counterclockwise is S">
+        <g transform="translate(90,72)">
+          <circle r="5" fill="var(--muted)"/><text x="10" y="-6" class="small">4 (behind)</text>
+          <line x1="0" y1="0" x2="0" y2="-46" class="ln"/><line x1="0" y1="0" x2="40" y2="23" class="ln"/><line x1="0" y1="0" x2="-40" y2="23" class="ln"/>
+          <text x="0" y="-52" text-anchor="middle" class="lbl">1</text><text x="48" y="32" class="lbl">2</text><text x="-54" y="32" class="lbl">3</text>
+          <path d="M-22 -48 A54 54 0 0 1 52 -10" class="arrow"/>
+          <text x="0" y="70" text-anchor="middle" class="lbl" font-weight="700">R · clockwise</text>
+        </g>
+        <g transform="translate(270,72)">
+          <circle r="5" fill="var(--muted)"/>
+          <line x1="0" y1="0" x2="0" y2="-46" class="ln"/><line x1="0" y1="0" x2="40" y2="23" class="ln"/><line x1="0" y1="0" x2="-40" y2="23" class="ln"/>
+          <text x="0" y="-52" text-anchor="middle" class="lbl">1</text><text x="48" y="32" class="lbl">3</text><text x="-54" y="32" class="lbl">2</text>
+          <path d="M22 -48 A54 54 0 0 0 -52 -10" class="arrow-o"/>
+          <text x="0" y="70" text-anchor="middle" class="lbl" font-weight="700">S · counterclockwise</text>
+        </g>
+      </svg></div>
+      <figcaption>Looking at the molecule with group 4 pointing away, like holding a steering wheel.</figcaption>
+    </figure>
+    <div class="tip">Two time-savers. (1) If group 4 points <b>toward</b> you (on a wedge), read the direction and then <b>reverse</b> it. (2) <b>Swapping any two groups</b> turns R into S and S into R.</div>
+    <details class="check"><summary>Rank the groups on C2 of butan-2-ol.</summary><p>–OH (O, atomic number 8) &gt; –CH<sub>2</sub>CH<sub>3</sub> (C with C,H,H) &gt; –CH<sub>3</sub> (C with H,H,H) &gt; –H.</p></details>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§6.6</span>Diastereomers</h3>
+    <p>With more than one chirality center, there are more options. A molecule with <b>n</b> chirality centers has <b>up to 2<sup>n</sup></b> stereoisomers.</p>
+    <ul>
+      <li><b>Enantiomers</b>: opposite at <b>every</b> center (2R,3R ↔ 2S,3S).</li>
+      <li><b>Diastereomers</b>: stereoisomers that are <b>not</b> mirror images, opposite at some centers and the same at others (2R,3R vs 2R,3S).</li>
+      <li>Diastereomers have <b>different</b> physical properties (melting point, solubility). Cis/trans isomers are also diastereomers.</li>
+    </ul>
+    <div class="eq">Threonine (2 centers): 2R,3S · 2S,3R · 2R,3R · 2S,3S → 4 stereoisomers, 2 pairs of enantiomers</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§6.7</span>Meso compounds</h3>
+    <p>A <b>meso compound</b> has chirality centers but also has an internal <b>plane of symmetry</b>, so it is <b>achiral</b> and optically inactive. Example: tartaric acid has 2 centers, so you'd expect 4 stereoisomers. But (2R,3S) and (2S,3R) are the same meso molecule, so there are only <b>3</b>: (+), (−) and meso.</p>
+    <div class="tip">Look for meso when the two halves of the molecule carry the <b>same</b> set of groups, and the centers have opposite labels (R,S).</div>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§6.8</span>Racemic mixtures and resolution</h3>
+    <p>A <b>racemic mixture</b> (racemate, written ±) is a 50:50 mix of two enantiomers. The rotations cancel, so it is <b>optically inactive</b> (observed rotation 0°). Reactions that make a chirality center from achiral starting materials usually give racemates.</p>
+    <p><b>Resolution</b> separates a racemate. React a racemic acid with one pure enantiomer of a chiral amine. This gives two <b>diastereomeric salts</b>, which have different properties and can be separated (by crystallization). Then get the acids back.</p>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§6.9</span>A map of isomers</h3>
+    <figure>
+      <div class="art"><svg viewBox="0 0 440 210" width="440" role="img" aria-label="Isomer decision tree">
+        <g class="lbl" text-anchor="middle">
+          <text x="220" y="20">Same formula, different compounds</text>
+          <text x="220" y="40" class="small">Are the atoms connected the same way?</text>
+          <path d="M200 48 L110 82" class="arrow"/><path d="M240 48 L330 82" class="arrow"/>
+          <text x="140" y="62" class="small">no</text><text x="300" y="62" class="small">yes</text>
+          <text x="100" y="100" font-weight="700">Constitutional isomers</text>
+          <text x="100" y="118" class="small">butane vs isobutane</text>
+          <text x="330" y="100" font-weight="700">Stereoisomers</text>
+          <text x="330" y="118" class="small">Mirror images of each other?</text>
+          <path d="M310 126 L260 160" class="arrow"/><path d="M350 126 L400 160" class="arrow"/>
+          <text x="272" y="142" class="small">yes</text><text x="392" y="142" class="small">no</text>
+          <text x="250" y="178" font-weight="700">Enantiomers</text>
+          <text x="392" y="178" font-weight="700">Diastereomers</text>
+          <text x="392" y="196" class="small">incl. cis–trans</text>
+        </g>
+      </svg></div>
+      <figcaption>Ask two questions in order: are the atoms connected the same way, and if so, are they mirror images?</figcaption>
+    </figure>
+  </div>
+
+  <div class="topic">
+    <h3><span class="sec">§6.10</span>Chirality in nature and chiral drugs</h3>
+    <p>Biological receptors and enzymes are chiral, so they often fit only one enantiomer, the way a right glove fits only a right hand. Two enantiomers of the same drug can have different effects, which is why many drugs are now sold as a single enantiomer.</p>
+  </div>
+</section>
+
+<!-- ================= CHEAT SHEET ================= -->
+<section class="view" id="sheet" hidden>
+  <h2 class="section-title">Midterm cheat sheet</h2>
+  <p class="muted" style="margin-bottom:12px">Every reaction in Chapters 4–5 on one table. Type a reagent or product to filter.</p>
+  <input type="search" id="rxnFilter" placeholder="Filter: e.g. KMnO4, cis, ketone, Markovnikov" aria-label="Filter reactions">
+  <div class="tbl" style="margin-top:12px"><table id="rxnTable">
+    <thead><tr><th>Starting material</th><th>Reagents</th><th>Product</th><th>Regio / stereo</th><th>§</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+
+  <h3 class="section-title" style="font-size:1.2rem">Numbers to memorize</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Fact</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>sp<sup>3</sup> / sp<sup>2</sup> / sp bond angles</td><td class="num">109.5° / 120° / 180°</td></tr>
+      <tr><td>NH<sub>3</sub> / H<sub>2</sub>O bond angles</td><td class="num">107° / 104.5°</td></tr>
+      <tr><td>C–C / C=C / C≡C length</td><td class="num">154 / 134 / 120 pm</td></tr>
+      <tr><td>C–C / C=C / C≡C strength</td><td class="num">376 / 728 / 965 kJ/mol</td></tr>
+      <tr><td>Benzene C–C length</td><td class="num">139 pm</td></tr>
+      <tr><td>Ethane rotation barrier</td><td class="num">12 kJ/mol (4.0 per H–H eclipse)</td></tr>
+      <tr><td>Axial methyl penalty (methylcyclohexane)</td><td class="num">7.6 kJ/mol → 95% equatorial</td></tr>
+      <tr><td>C=C rotation barrier (breaks the π bond)</td><td class="num">≈350 kJ/mol</td></tr>
+      <tr><td>pK<sub>a</sub>: HCl / H<sub>3</sub>O<sup>+</sup> / CH<sub>3</sub>COOH / H<sub>2</sub>O / EtOH</td><td class="num">−7 / −1.7 / 4.76 / 15.74 / 16</td></tr>
+      <tr><td>pK<sub>a</sub>: acetone / terminal alkyne / NH<sub>3</sub> / alkene</td><td class="num">19.3 / 25 / 36 / 44</td></tr>
+      <tr><td>Electronegativity: F / O / N, Cl / C / H</td><td class="num">4.0 / 3.5 / 3.0 / 2.5 / 2.1</td></tr>
+      <tr><td>Alkane / cycloalkane formula</td><td class="num">C<sub>n</sub>H<sub>2n+2</sub> / C<sub>n</sub>H<sub>2n</sub></td></tr>
+      <tr><td>Max stereoisomers, n chirality centers</td><td class="num">2<sup>n</sup></td></tr>
+      <tr><td>Specific rotation</td><td class="num">[α]<sub>D</sub> = α / (l·C), l in dm, C in g/mL</td></tr>
+    </tbody></table></div>
+
+  <h3 class="section-title" style="font-size:1.2rem">Rules in one line each</h3>
+  <div class="tbl"><table><tbody>
+    <tr><td><b>Markovnikov</b></td><td>H goes to the carbon with more H's; the rest goes where it makes the most stable carbocation.</td></tr>
+    <tr><td><b>Carbocations</b></td><td>3° &gt; 2° &gt; 1° &gt; methyl; allylic and benzylic get extra stability from resonance.</td></tr>
+    <tr><td><b>Acid–base equilibrium</b></td><td>Favors the side with the weaker acid (higher pK<sub>a</sub>).</td></tr>
+    <tr><td><b>Sequence rules</b></td><td>Higher atomic number first; tie → compare the next atoms out; multiple bonds count double.</td></tr>
+    <tr><td><b>E / Z</b></td><td>High priorities on the same side = Z; opposite = E.</td></tr>
+    <tr><td><b>R / S</b></td><td>Lowest priority away; 1→2→3 clockwise = R. If lowest points toward you, reverse.</td></tr>
+    <tr><td><b>Cyclohexane</b></td><td>Big groups equatorial. Both equatorial is possible for trans-1,2, cis-1,3 and trans-1,4.</td></tr>
+    <tr><td><b>EAS directors</b></td><td>Activators and halogens → o/p. C=O, NO<sub>2</sub>, CN, SO<sub>3</sub>H, NR<sub>3</sub><sup>+</sup> → meta. No meta activators.</td></tr>
+    <tr><td><b>Resonance</b></td><td>Move electrons only, never atoms; the hybrid is more stable than any single form.</td></tr>
+    <tr><td><b>Meso</b></td><td>Has chirality centers and a symmetry plane → achiral, no rotation.</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- ================= PRACTICE ================= -->
+<section class="view" id="practice" hidden>
+  <h2 class="section-title">Practice</h2>
+  <div class="mode" role="group" aria-label="Chapter filter" id="chapFilter"></div>
+
+  <h3 class="section-title" style="font-size:1.2rem">Flashcards</h3>
+  <div class="card" id="card" tabindex="0" role="button" aria-label="Flashcard. Press to flip.">
+    <div class="card-in">
+      <div class="face front"><span class="lab" id="cardLab"></span><div class="q" id="cardQ"></div><span class="muted">Tap to flip</span></div>
+      <div class="face back"><span class="lab">Answer</span><div id="cardA"></div></div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <button class="btn" id="cardPrev">← Previous</button>
+    <button class="btn" id="cardShuffle">Shuffle</button>
+    <button class="btn primary" id="cardNext">Next →</button>
+    <span class="muted" id="cardCount"></span>
+  </div>
+
+  <h3 class="section-title" style="font-size:1.2rem">Quiz</h3>
+  <div class="bar" aria-hidden="true"><i id="quizBar"></i></div>
+  <div id="quizBox" style="display:flex;flex-direction:column;gap:12px;margin-top:12px"></div>
+
+  <h3 class="section-title" style="font-size:1.2rem">Your best scores</h3>
+  <div class="score-grid" id="scores"></div>
+  <p class="muted" style="margin-top:8px">Scores are saved in this browser only.</p>
+</section>
+
+<footer>
+  Study notes written to accompany McMurry, <i>Fundamentals of Organic Chemistry</i>, Chapters 1–6. The explanations are paraphrased summaries, not text from the book. Check against your lecture notes, because professors sometimes add or skip topics.
+</footer>
+</main>
+
+<script>
+(() => {
+"use strict";
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- tabs ---------- */
+const tabs = [...document.querySelectorAll(".tab")];
+const views = [...document.querySelectorAll(".view")];
+function show(id, scroll){
+  if(!document.getElementById(id)) id = "c1";
+  views.forEach(v => v.hidden = v.id !== id);
+  tabs.forEach(t => t.setAttribute("aria-selected", t.dataset.go === id ? "true" : "false"));
+  const t = tabs.find(t => t.dataset.go === id); if(t) t.scrollIntoView({block:"nearest", inline:"nearest"});
+  store.set("og-tab", id);
+  if(scroll !== false) window.scrollTo(0, 0);
+  viewers.forEach(v => v.visible = !!v.el.closest(".view:not([hidden])"));
+}
+tabs.forEach(t => t.addEventListener("click", () => show(t.dataset.go)));
+document.querySelectorAll("[data-jump]").forEach(a => a.addEventListener("click", e => {
+  e.preventDefault(); show(a.dataset.jump, false);
+  const target = document.querySelector(a.getAttribute("href")); if(target) target.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth"});
+}));
+
+/* ---------- section quick links ---------- */
+document.querySelectorAll("section.view[id^='c']").forEach(sec => {
+  const head = sec.querySelector(".why"); if(!head) return;
+  const nav = document.createElement("nav"); nav.className = "toc"; nav.setAttribute("aria-label", "Sections");
+  sec.querySelectorAll(".topic").forEach((tp, i) => {
+    if(!tp.id) tp.id = sec.id + "-t" + i;
+    const a = document.createElement("a"); a.href = "#" + tp.id;
+    a.textContent = tp.querySelector(".sec").textContent;
+    a.addEventListener("click", e => { e.preventDefault(); tp.scrollIntoView({behavior: reduceMotion ? "auto" : "smooth"}); });
+    nav.appendChild(a);
+  });
+  head.after(nav);
+});
+
+/* ---------- chair cyclohexane (projected from 3D) ---------- */
+function chair(){
+  const svg = document.getElementById("chairSvg"); if(!svg) return;
+  const R = 1.45, Z = 0.25, pts = [];
+  for(let k=0;k<6;k++){ const th = k*Math.PI/3; pts.push([R*Math.cos(th), R*Math.sin(th), k%2 ? -Z : Z]); }
+  const tilt = 0.32, yaw = 0.26;
+  const P = ([x,y,z]) => { const x1 = x*Math.cos(yaw) - y*Math.sin(yaw), y1 = x*Math.sin(yaw) + y*Math.cos(yaw);
+    const sy = y1*Math.sin(tilt) - z*Math.cos(tilt); return [180 + x1*72, 100 + sy*72]; };
+  let out = "";
+  const line = (a,b,cls) => { const p=P(a), q=P(b); out += `<line x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${q[0].toFixed(1)}" y2="${q[1].toFixed(1)}" style="stroke:${cls};stroke-width:${cls==='var(--ink)'?2.6:2};stroke-linecap:round"/>`; };
+  pts.forEach((p,i) => {
+    const s = Math.sign(p[2]);
+    line(p, [p[0], p[1], p[2] + s*0.9], "var(--accent)");
+    const n = Math.hypot(p[0], p[1]);
+    line(p, [p[0] + p[0]/n*0.85, p[1] + p[1]/n*0.85, p[2] - s*0.28], "var(--hal)");
+  });
+  for(let i=0;i<6;i++) line(pts[i], pts[(i+1)%6], "var(--ink)");
+  svg.innerHTML = out;
+}
+chair();
+
+/* ---------- mechanism stepper ---------- */
+document.querySelectorAll("[data-stepper]").forEach(st => {
+  const btns = st.querySelectorAll("[data-step]"), panels = st.querySelectorAll("[data-panel]");
+  btns.forEach(b => b.addEventListener("click", () => {
+    btns.forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    panels.forEach(p => p.hidden = p.dataset.panel !== b.dataset.step);
+  }));
+});
+
+/* ---------- tiny 3D molecule viewer ---------- */
+const tet = [[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]].map(v => v.map(c => c/Math.sqrt(3)));
+const sc = (v,s) => v.map(c => c*s);
+function chairMol(){
+  const a = [], R = 1.45, Z = 0.25;
+  for(let k=0;k<6;k++){ const th=k*Math.PI/3, z=k%2?-Z:Z; a.push(["C",R*Math.cos(th),R*Math.sin(th),z]); }
+  for(let k=0;k<6;k++){ const [,x,y,z]=a[k], s=Math.sign(z), n=Math.hypot(x,y);
+    a.push(["H",x,y,z+s*1.09]);
+    const d=[x/n,y/n,-s*0.33], m=Math.hypot(...d); a.push(["H",x+d[0]/m*1.09,y+d[1]/m*1.09,z+d[2]/m*1.09]); }
+  return a;
+}
+function chiral(mirror){
+  const groups = ["H","F","Cl","Br"], len = {H:1.09,F:1.35,Cl:1.77,Br:1.94};
+  const a = [["C",0,0,0]];
+  groups.forEach((g,i) => { const v = sc(tet[i], len[g]); a.push([g, mirror ? -v[0] : v[0], v[1], v[2]]); });
+  return a;
+}
+const MOLS = {
+  methane: {name:"Methane CH₄ · sp³", atoms:[["C",0,0,0], ...tet.map(v=>["H",...sc(v,1.09)])]},
+  ethylene:{name:"Ethylene C₂H₄ · sp²", atoms:[["C",-.67,0,0],["C",.67,0,0],["H",-1.24,.93,0],["H",-1.24,-.93,0],["H",1.24,.93,0],["H",1.24,-.93,0]], dbl:[[0,1]]},
+  acetylene:{name:"Acetylene C₂H₂ · sp", atoms:[["H",-1.66,0,0],["C",-.6,0,0],["C",.6,0,0],["H",1.66,0,0]], tpl:[[1,2]]},
+  ammonia:{name:"Ammonia NH₃ · 107°", atoms:[["N",0,0,.12],["H",.94,0,-.27],["H",-.47,.81,-.27],["H",-.47,-.81,-.27]]},
+  water:{name:"Water H₂O · 104.5°", atoms:[["O",0,0,0],["H",.76,.59,0],["H",-.76,.59,0]]},
+  cyclohexane:{name:"Cyclohexane (chair)", atoms:chairMol(), color:true},
+  benzene:{name:"Benzene (flat)", atoms:(()=>{const a=[];for(let k=0;k<6;k++){const t=k*Math.PI/3;a.push(["C",1.39*Math.cos(t),1.39*Math.sin(t),0]);}for(let k=0;k<6;k++){const t=k*Math.PI/3;a.push(["H",2.48*Math.cos(t),2.48*Math.sin(t),0]);}return a;})()},
+  chiralA:{name:"CHFClBr", atoms:chiral(false)},
+  chiralB:{name:"Its mirror image", atoms:chiral(true)},
+  both:{name:"Both side by side", atoms:[...chiral(false).map(([e,x,y,z])=>[e,x-1.9,y,z]), ...chiral(true).map(([e,x,y,z])=>[e,x+1.9,y,z])]}
+};
+const SETS = { c1:["methane","ethylene","acetylene","ammonia","water"], c2:["cyclohexane","benzene"], c6:["both","chiralA","chiralB"] };
+const RAD = {H:.31,C:.76,N:.71,O:.66,F:.57,Cl:.99,Br:1.14};
+const SIZE = {H:.25,C:.38,N:.38,O:.38,F:.36,Cl:.48,Br:.54};
+const COL = {N:"#3060e0",O:"#e0302a",F:"#40c060",Cl:"#1f9e3a",Br:"#9a2a1e"};
+const viewers = [];
+document.querySelectorAll("[data-viewer]").forEach(el => {
+  const keys = SETS[el.dataset.viewer], canvas = el.querySelector("canvas"), ctx = canvas.getContext("2d"), chips = el.querySelector(".chips");
+  const v = {el, visible:false, yaw:.6, pitch:.35, auto:!reduceMotion, mol:null, bonds:[]};
+  function load(key){
+    const m = MOLS[key]; v.mol = m; v.bonds = [];
+    const A = m.atoms;
+    for(let i=0;i<A.length;i++) for(let j=i+1;j<A.length;j++){
+      const d = Math.hypot(A[i][1]-A[j][1], A[i][2]-A[j][2], A[i][3]-A[j][3]);
+      if(A[i][0]==="H" && A[j][0]==="H") continue;
+      if(d < (RAD[A[i][0]] + RAD[A[j][0]]) * 1.2) v.bonds.push([i,j]);
+    }
+    chips.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.k === key ? "true" : "false"));
+    draw();
+  }
+  keys.forEach(k => { const b = document.createElement("button"); b.className = "chip"; b.dataset.k = k; b.textContent = MOLS[k].name; b.addEventListener("click", () => load(k)); chips.appendChild(b); });
+  function draw(){
+    const cs = getComputedStyle(document.documentElement);
+    const tok = n => cs.getPropertyValue(n).trim();
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const A = v.mol.atoms, cy = Math.cos(v.yaw), sy = Math.sin(v.yaw), cp = Math.cos(v.pitch), sp = Math.sin(v.pitch);
+    let ext = 0; A.forEach(a => ext = Math.max(ext, Math.hypot(a[1],a[2],a[3])));
+    const S = Math.min(W,H) * 0.40 / Math.max(ext, 1.2);
+    const P = A.map(([e,x,y,z]) => { const x1 = x*cy + z*sy, z1 = -x*sy + z*cy; const y1 = y*cp - z1*sp, z2 = y*sp + z1*cp;
+      const f = 1 + z2*0.06; return {e, x: W/2 + x1*S*f, y: H/2 - y1*S*f, z: z2, f}; });
+    const items = [];
+    v.bonds.forEach(([i,j]) => items.push({z:(P[i].z+P[j].z)/2 - .01, bond:[i,j]}));
+    P.forEach((p,i) => items.push({z:p.z, atom:i}));
+    items.sort((a,b) => a.z - b.z);
+    const ink = tok("--muted"), carbon = tok("--carbon"), hyd = tok("--hyd"), line = tok("--line");
+    items.forEach(it => {
+      if(it.bond){ const [i,j] = it.bond, a = P[i], b = P[j];
+        ctx.strokeStyle = ink; ctx.lineCap = "round"; ctx.lineWidth = S*0.12;
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      } else { const p = P[it.atom], r = SIZE[p.e]*S*p.f;
+        const c = p.e === "C" ? carbon : p.e === "H" ? hyd : COL[p.e];
+        ctx.fillStyle = c; ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = line; ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.beginPath(); ctx.arc(p.x - r*.3, p.y - r*.3, r*.35, 0, Math.PI*2); ctx.fill();
+        if(p.e !== "C" && p.e !== "H"){ ctx.fillStyle = "#fff"; ctx.font = `600 ${Math.max(14, r*.8)}px ${tok("--f-body") || "sans-serif"}`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(p.e, p.x, p.y + 1); }
+      }
+    });
+  }
+  let drag = null;
+  canvas.addEventListener("pointerdown", e => { drag = {x:e.clientX, y:e.clientY}; v.auto = false; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", e => { if(!drag) return; v.yaw += (e.clientX - drag.x)*0.01; v.pitch += (e.clientY - drag.y)*0.01; drag = {x:e.clientX, y:e.clientY}; draw(); });
+  canvas.addEventListener("pointerup", () => drag = null);
+  canvas.addEventListener("pointercancel", () => drag = null);
+  v.draw = draw; viewers.push(v); load(keys[0]);
+});
+function tick(){ viewers.forEach(v => { if(v.visible && v.auto){ v.yaw += 0.008; v.draw(); } }); requestAnimationFrame(tick); }
+requestAnimationFrame(tick);
+if(window.matchMedia){ matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => viewers.forEach(v => v.draw())); }
+new MutationObserver(() => viewers.forEach(v => v.draw())).observe(document.documentElement, {attributes:true, attributeFilter:["data-theme"]});
+
+/* ---------- reaction table ---------- */
+const RXN = [
+  ["Alkene","HCl, HBr or HI","Alkyl halide","Markovnikov (X on more substituted C)","4.1"],
+  ["Alkene","H₂O, H₃O⁺ (H₂SO₄ catalyst)","Alcohol","Markovnikov","4.3"],
+  ["Alkene","Br₂ or Cl₂ in CH₂Cl₂","1,2-Dihalide","Anti addition (bromonium ion) → trans on rings","4.4"],
+  ["Alkene","H₂, Pd/C or PtO₂","Alkane","Syn addition","4.5"],
+  ["Alkene","RCO₃H (peroxyacid)","Epoxide","Alkene geometry kept","4.6"],
+  ["Epoxide","H₃O⁺","trans-1,2-Diol","Anti (back-side opening)","4.6"],
+  ["Alkene","KMnO₄, OH⁻, H₂O (basic)","cis-1,2-Diol","Syn","4.6"],
+  ["Alkene","KMnO₄, H₃O⁺ (neutral or acidic)","Ketones / carboxylic acids (C=C cleaved)","=CR₂→ketone, =CHR→acid, =CH₂→CO₂","4.6"],
+  ["Alkene (monomer)","Radical initiator (benzoyl peroxide), heat","Polymer","Radical chain: initiation, propagation, termination","4.7"],
+  ["Conjugated diene","HBr (1 equiv)","1,2- and 1,4-addition products","Via resonance-stabilized allylic cation","4.8"],
+  ["Alkyne","HBr or HCl (1 equiv)","Vinylic halide","Markovnikov; 2 equiv → both X on one C","4.11"],
+  ["Alkyne","Br₂ or Cl₂ (1 or 2 equiv)","1,2-Dihaloalkene / tetrahaloalkane","—","4.11"],
+  ["Alkyne","H₂O, H₂SO₄, HgSO₄","Ketone (via enol)","Markovnikov; terminal → methyl ketone","4.11"],
+  ["Alkyne","2 H₂, Pd/C","Alkane","—","4.11"],
+  ["Alkyne","H₂, Lindlar catalyst","cis-Alkene","Syn","4.11"],
+  ["Terminal alkyne","NaNH₂","Acetylide anion","Needs C≡C–H (pKa 25)","4.11"],
+  ["Acetylide anion","Primary alkyl halide RCH₂X","Internal alkyne (new C–C bond)","Primary halides only","4.11"],
+  ["Benzene","Br₂, FeBr₃","Bromobenzene","EAS","5.3"],
+  ["Benzene","Cl₂, FeCl₃","Chlorobenzene","EAS","5.4"],
+  ["Benzene","HNO₃, H₂SO₄","Nitrobenzene","EAS via NO₂⁺","5.4"],
+  ["Nitrobenzene","Fe, Sn or SnCl₂ in H₃O⁺","Aniline (–NH₂)","Reduction","5.4"],
+  ["Benzene","SO₃, H₂SO₄","Benzenesulfonic acid","EAS","5.4"],
+  ["Benzene","R–Cl, AlCl₃","Alkylbenzene","Friedel–Crafts alkylation; alkyl halides only; fails on deactivated rings","5.5"],
+  ["Benzene","RCOCl, AlCl₃","Aryl ketone","Friedel–Crafts acylation","5.5"],
+  ["Alkylbenzene (with benzylic H)","KMnO₄, H₂O","Benzoic acid","Whole side chain → –COOH; tert-butyl doesn't react","5.8"],
+  ["Benzene ring","H₂, Pt or Rh, high pressure","Cyclohexane","Much harder than alkene hydrogenation","5.8"],
+];
+const tbody = document.querySelector("#rxnTable tbody");
+RXN.forEach(r => { const tr = document.createElement("tr"); r.forEach((c,i) => { const td = document.createElement("td"); td.textContent = c; if(i===4) td.className = "num"; tr.appendChild(td); }); tbody.appendChild(tr); });
+const norm = s => s.toLowerCase().replace(/[₀-₉]/g, d => "0123456789"["₀₁₂₃₄₅₆₇₈₉".indexOf(d)]).replace(/[⁺⁻]/g, "");
+document.getElementById("rxnFilter").addEventListener("input", e => {
+  const q = norm(e.target.value.trim());
+  [...tbody.rows].forEach(tr => tr.hidden = q && !norm(tr.textContent).includes(q));
+});
+
+/* ---------- flashcards ---------- */
+const CARDS = [
+  [1,"σ bond vs π bond","σ: head-on overlap along the bond axis, free rotation. π: sideways overlap of p orbitals, no rotation. Double bond = 1σ + 1π; triple = 1σ + 2π."],
+  [1,"sp³ / sp² / sp: geometry and angle","sp³: tetrahedral 109.5°. sp²: trigonal planar 120° (+1 p). sp: linear 180° (+2 p)."],
+  [1,"How to find hybridization fast","Count groups (atoms + lone pairs): 4 → sp³, 3 → sp², 2 → sp."],
+  [1,"Electronegativity order","F (4.0) > O (3.5) > N = Cl (3.0) > C (2.5) > H (2.1)"],
+  [1,"pKa and acid strength","Lower pKa = stronger acid = weaker conjugate base. Equilibrium favors the weaker acid side."],
+  [1,"Lewis acid vs Lewis base","Acid accepts an electron pair (BF₃, AlCl₃, H⁺). Base donates a pair (H₂O, NH₃, ROH)."],
+  [1,"Why is a carboxylic acid more acidic than an alcohol?","The carboxylate ion's negative charge is shared over two oxygens by resonance, so the conjugate base is more stable."],
+  [2,"Alkane / cycloalkane general formula","CₙH₂ₙ₊₂ / CₙH₂ₙ"],
+  [2,"Steps to name a branched alkane","Longest chain → number from the end nearest a branch → number substituents → alphabetize (ignore di/tri/sec/tert)."],
+  [2,"1°, 2°, 3°, 4° carbon","Bonded to 1, 2, 3 or 4 other carbons."],
+  [2,"Staggered vs eclipsed","Staggered is lower energy. Ethane barrier 12 kJ/mol (torsional strain)."],
+  [2,"Axial vs equatorial","Axial: parallel to the ring axis (up/down). Equatorial: around the ring's equator. Groups prefer equatorial (avoids 1,3-diaxial strain)."],
+  [2,"What does a ring-flip do?","Swaps every axial ↔ equatorial. Up stays up."],
+  [2,"Which disubstituted cyclohexanes can be diequatorial?","trans-1,2 · cis-1,3 · trans-1,4"],
+  [3,"Nucleophile vs electrophile","Nucleophile: electron-rich, donates a pair (Lewis base). Electrophile: electron-poor, accepts a pair (Lewis acid)."],
+  [3,"E vs Z","Rank each carbon's two groups by sequence rules. High priorities same side = Z, opposite = E."],
+  [3,"Sequence rule 1–3","1) Higher atomic number wins. 2) Tie → compare the next atoms out. 3) Multiple bonds count as duplicated atoms."],
+  [3,"Transition state vs intermediate","TS: energy maximum, can't be isolated. Intermediate: energy minimum between two TSs, a real but reactive species."],
+  [3,"What does a catalyst change?","Lowers Eact (faster). Doesn't change ΔH or the equilibrium."],
+  [3,"Four kinds of reactions","Addition, elimination, substitution, rearrangement."],
+  [4,"Markovnikov's rule (and why)","H adds to the carbon with more H's; X to the more substituted carbon, because that path forms the more stable carbocation."],
+  [4,"Carbocation stability","3° > 2° > 1° > methyl. Allylic and benzylic are stabilized by resonance."],
+  [4,"Br₂ + alkene: stereochemistry","Anti addition via a bromonium ion → trans-dibromide on rings."],
+  [4,"Basic KMnO₄ vs acidic KMnO₄","Basic (OH⁻): cis-1,2-diol. Acidic/neutral: cleaves C=C into ketones/acids."],
+  [4,"Epoxide + H₃O⁺","trans-1,2-diol (anti)."],
+  [4,"Alkyne + H₂ / Lindlar","cis-alkene."],
+  [4,"Alkyne + H₂O, H₂SO₄, HgSO₄","Ketone (Markovnikov), via an enol."],
+  [4,"Build a longer alkyne","Terminal alkyne + NaNH₂ → acetylide; + primary alkyl halide → internal alkyne."],
+  [4,"Resonance form rules","Only electrons move; atoms stay put. The hybrid is more stable than any one form."],
+  [5,"Why benzene substitutes instead of adding","Substitution keeps the 6-π-electron aromatic ring, which is especially stable."],
+  [5,"Nitration reagents and electrophile","HNO₃ + H₂SO₄ → NO₂⁺ (nitronium ion)."],
+  [5,"Friedel–Crafts limitations","Alkyl halides only (no aryl/vinyl). Fails on rings with –NO₂, –CN, –SO₃H, –COR."],
+  [5,"Ortho/para directors","–NH₂, –OH, –OR, –NHCOR, alkyl (activating) and halogens (deactivating)."],
+  [5,"Meta directors","–NO₂, –CN, –SO₃H, –CHO, –COR, –COOH, –COOR, –NR₃⁺ (all deactivating)."],
+  [5,"Toluene + KMnO₄","Benzoic acid. Any side chain with a benzylic H becomes –COOH."],
+  [5,"o-, m-, p-","ortho = 1,2 · meta = 1,3 · para = 1,4"],
+  [6,"Chirality center","sp³ carbon with four different groups."],
+  [6,"Assign R/S","Lowest priority away; 1→2→3 clockwise = R, counterclockwise = S. If lowest is toward you, reverse."],
+  [6,"Enantiomers vs diastereomers","Enantiomers: non-superimposable mirror images (opposite at every center). Diastereomers: stereoisomers that are not mirror images."],
+  [6,"Meso compound","Has chirality centers but a plane of symmetry → achiral, optically inactive."],
+  [6,"Racemic mixture","50:50 enantiomers; observed rotation 0°."],
+  [6,"Specific rotation formula","[α]D = α / (l × C), l in dm, C in g/mL."],
+  [6,"Max stereoisomers","2ⁿ for n chirality centers (fewer if a meso form exists)."],
+];
+
+/* ---------- quiz ---------- */
+const QUIZ = [
+  [1,"What is the hybridization of the carbon in formaldehyde, H₂C=O?",["sp³","sp²","sp","Not hybridized"],1,"The carbon has 3 groups (2 H + 1 O; the double bond counts once), so it is sp² with 120° angles."],
+  [1,"Which bond is the most polar?",["C–H","C–Cl","C–O","C–F"],3,"F has the highest electronegativity (4.0), so the C–F difference (1.5) is largest."],
+  [1,"In HCl + H₂O ⇌ Cl⁻ + H₃O⁺, which side is favored?",["Left","Right","Neither, it's 50:50","Can't tell"],1,"HCl (pKa −7) is a stronger acid than H₃O⁺ (−1.7). Equilibrium favors the weaker acid, H₃O⁺, on the right."],
+  [1,"BF₃ acts as a…",["Brønsted acid","Lewis acid","Lewis base","Nucleophile"],1,"Boron has an empty p orbital and accepts an electron pair. It has no H to donate."],
+  [1,"How many σ and π bonds are in acetylene, H–C≡C–H?",["3σ, 2π","2σ, 3π","5σ, 0π","3σ, 1π"],0,"Two C–H σ bonds + one C–C σ bond = 3σ. The triple bond adds 2π."],
+  [1,"The approximate H–N–H bond angle in NH₃ is…",["90°","104.5°","107°","120°"],2,"N is sp³ (3 atoms + 1 lone pair). The lone pair squeezes the angle from 109.5° to about 107°."],
+  [1,"What is the conjugate base of NH₃?",["NH₄⁺","NH₂⁻","N³⁻","NH₃ has none"],1,"Remove one H⁺ from NH₃ to get NH₂⁻ (the amide ion)."],
+  [2,"What is the IUPAC name of (CH₃)₂CHCH₂CH₃?",["Isopentane","2-Methylbutane","3-Methylbutane","2-Ethylpropane"],1,"The longest chain has 4 carbons, with a methyl group on C2. Number from the end nearest the branch."],
+  [2,"Which has the higher boiling point?",["Pentane","2,2-Dimethylpropane","They are equal","Can't tell"],0,"Same formula, but straight-chain pentane has more surface contact, so its dispersion forces are stronger (bp 36 °C vs 9.5 °C)."],
+  [2,"In methylcyclohexane, the methyl group is mostly…",["Axial","Equatorial","50:50","Flat in the ring plane"],1,"Equatorial avoids 1,3-diaxial interactions (7.6 kJ/mol), so about 95% of molecules have it equatorial."],
+  [2,"The most stable chair of trans-1,4-dimethylcyclohexane has…",["Both methyls axial","Both methyls equatorial","One axial, one equatorial","No preferred chair"],1,"Trans-1,4 can put both groups equatorial (or both axial in the flipped chair). Diequatorial wins."],
+  [2,"CH₃COOCH₃ contains which functional group?",["Ether","Ketone","Ester","Carboxylic acid"],2,"A C=O bonded to an O–C is an ester (methyl acetate)."],
+  [2,"The barrier to rotation in ethane is about…",["0 kJ/mol","4 kJ/mol","12 kJ/mol","350 kJ/mol"],2,"12 kJ/mol total (4.0 for each of 3 eclipsed H–H pairs). 350 kJ/mol is the C=C rotation barrier."],
+  [3,"Which group has higher CIP priority?",["–CH(CH₃)₂","–CH₂OH","They tie","Depends on the molecule"],1,"Compare the atoms attached to the first carbon: (O,H,H) vs (C,C,H). O beats C at the first point of difference."],
+  [3,"In a Z alkene, the higher-priority groups are…",["On the same side","On opposite sides","Both on the same carbon","Hydrogen atoms"],0,"Z = zusammen (together) = same side."],
+  [3,"Which statement about a transition state is true?",["It can be isolated at low temperature","It is an energy minimum","It is the energy maximum of a step","It always looks like the products"],2,"A transition state is the highest-energy point of a step and can't be isolated. Intermediates are the minima."],
+  [3,"A catalyst speeds up a reaction by…",["Making ΔH more negative","Lowering the activation energy","Shifting the equilibrium toward products","Raising the temperature"],1,"It provides a lower-Eact pathway. ΔH and the equilibrium position are unchanged."],
+  [3,"What is the IUPAC name of CH₃CH=CHCH₂CH₃?",["Pent-3-ene","Pent-2-ene","Pentene","2-Pentyne"],1,"Number from the end nearer the double bond, so it starts at C2."],
+  [3,"In HBr + alkene, the alkene acts as the…",["Electrophile","Nucleophile","Catalyst","Leaving group"],1,"The electron-rich π bond donates its electrons to the H of HBr."],
+  [4,"What is the major product of HBr + 2-methylpropene?",["1-Bromo-2-methylpropane","2-Bromo-2-methylpropane","2-Bromobutane","No reaction"],1,"Markovnikov: H goes to CH₂, giving a 3° carbocation, and Br⁻ adds there."],
+  [4,"Which carbocation is most stable?",["CH₃⁺","CH₃CH₂⁺","(CH₃)₂CH⁺","(CH₃)₃C⁺"],3,"Tertiary carbocations are the most stable (most alkyl groups donating electrons)."],
+  [4,"What does Br₂ + cyclopentene give?",["cis-1,2-Dibromocyclopentane","trans-1,2-Dibromocyclopentane","Bromocyclopentane","1,1-Dibromocyclopentane"],1,"Anti addition through a bromonium ion gives the trans product."],
+  [4,"Which reagent converts an alkene to a cis-1,2-diol?",["KMnO₄, OH⁻, H₂O","RCO₃H then H₃O⁺","KMnO₄, H₃O⁺","H₂O, H₂SO₄"],0,"Basic KMnO₄ adds both OH's syn. The epoxide route gives trans; acidic KMnO₄ cleaves the C=C."],
+  [4,"Which reagent reduces an alkyne to a cis-alkene?",["H₂, Pd/C","H₂, Lindlar catalyst","NaNH₂","HgSO₄, H₂SO₄"],1,"The Lindlar catalyst stops at the alkene and adds H₂ syn, giving cis."],
+  [4,"What does hydration of propyne (H₂O, H₂SO₄, HgSO₄) give?",["Propanal","Propan-2-ol","Acetone","Propan-1-ol"],2,"Markovnikov hydration gives an enol that tautomerizes to a methyl ketone, acetone."],
+  [4,"Why does HBr + buta-1,3-diene give two products?",["Two different carbocations form","An allylic carbocation shares + between two carbons","Br₂ is formed","The diene rearranges first"],1,"The allylic cation is resonance-stabilized; Br⁻ can attack C2 (1,2-addition) or C4 (1,4-addition)."],
+  [4,"Which pair makes hex-2-yne?",["Propyne + NaNH₂, then 1-bromopropane","Propyne + NaNH₂, then 2-bromopropane","Hex-1-yne + H₂","Acetylene + HBr"],0,"The acetylide from propyne (3 C) plus a primary 3-C halide gives CH₃C≡CCH₂CH₂CH₃. Primary halides are required."],
+  [5,"What reagents nitrate benzene?",["HNO₃, H₂SO₄","NO₂, FeBr₃","HNO₃ alone","NaNO₂, HCl"],0,"H₂SO₄ helps generate the nitronium ion, NO₂⁺."],
+  [5,"An –OH group on benzene is…",["A meta-directing activator","An ortho/para-directing activator","An ortho/para-directing deactivator","A meta-directing deactivator"],1,"O's lone pair donates into the ring by resonance: activating and o/p."],
+  [5,"A –Cl group on benzene is…",["An ortho/para deactivator","A meta deactivator","An ortho/para activator","A meta activator"],0,"Halogens pull by induction (deactivate) but donate a lone pair by resonance (o/p)."],
+  [5,"Which order of steps makes m-bromonitrobenzene?",["Brominate, then nitrate","Nitrate, then brominate","Either order","Neither works"],1,"–NO₂ is a meta director, so it must go on first."],
+  [5,"What does toluene + hot KMnO₄ give?",["Benzyl alcohol","Benzaldehyde","Benzoic acid","Cyclohexane"],2,"Side-chain oxidation turns an alkyl group with a benzylic H into –COOH."],
+  [5,"Which compound will NOT undergo Friedel–Crafts alkylation?",["Toluene","Benzene","Nitrobenzene","Anisole (methoxybenzene)"],2,"Strongly deactivated rings (–NO₂, –CN, –SO₃H, –COR) fail Friedel–Crafts."],
+  [5,"Which group is a meta director?",["–CH₃","–NH₂","–CHO","–Br"],2,"A C=O attached to the ring withdraws electrons, so it is a meta director (and deactivating)."],
+  [6,"Which molecule is chiral?",["Propan-2-ol","Butan-2-ol","2-Methylpropane","Dichloromethane"],1,"C2 of butan-2-ol has four different groups: H, OH, CH₃ and CH₂CH₃."],
+  [6,"How many stereoisomers can a molecule with 3 chirality centers have at most?",["3","6","8","9"],2,"2ⁿ = 2³ = 8."],
+  [6,"With the lowest-priority group pointing toward you, 1→2→3 runs clockwise. The center is…",["R","S","Meso","Can't tell"],1,"Clockwise would be R with group 4 away. Pointing toward you reverses it, so it is S."],
+  [6,"A meso compound is…",["Chiral and optically active","Achiral despite having chirality centers","A 50:50 enantiomer mixture","Always a cis alkene"],1,"It has a plane of symmetry, so it is achiral and optically inactive."],
+  [6,"Enantiomers differ in…",["Boiling point","Solubility in water","Direction of rotation of plane-polarized light","Density"],2,"All ordinary physical properties are identical; the rotations are equal and opposite."],
+  [6,"(2R,3R)- and (2R,3S)-isomers of the same compound are…",["Enantiomers","Diastereomers","Identical","Constitutional isomers"],1,"Same at one center, opposite at the other, so they are not mirror images: diastereomers."],
+  [6,"α = +1.2°, l = 10 cm, C = 0.50 g/mL. What is [α]D?",["+0.24°","+0.6°","+2.4°","+24°"],2,"l = 1 dm, so 1.2 / (1 × 0.50) = +2.4°."],
+  [6,"A racemic mixture has an observed rotation of…",["0°","+ the pure value","− the pure value","Twice the pure value"],0,"Equal amounts of + and − cancel."],
+];
+
+let chap = store.get("og-chap", 0);
+const filter = document.getElementById("chapFilter");
+["All",1,2,3,4,5,6].forEach((c,i) => {
+  const b = document.createElement("button"); b.className = "chip"; b.textContent = i ? "Ch. " + c : "All chapters"; b.dataset.c = i;
+  b.addEventListener("click", () => { chap = i; store.set("og-chap", chap); setFilter(); });
+  filter.appendChild(b);
+});
+let deck = [], ci = 0, qs = [], qi = 0, right = 0, answered = false;
+const card = document.getElementById("card");
+function setFilter(){
+  filter.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", +b.dataset.c === chap ? "true" : "false"));
+  deck = CARDS.filter(c => !chap || c[0] === chap); ci = 0; renderCard();
+  qs = QUIZ.filter(q => !chap || q[0] === chap); qi = 0; right = 0; renderQ();
+}
+function renderCard(){
+  const c = deck[ci]; card.classList.remove("flip");
+  document.getElementById("cardLab").textContent = "Chapter " + c[0];
+  document.getElementById("cardQ").textContent = c[1];
+  setTimeout(() => document.getElementById("cardA").textContent = c[2], reduceMotion ? 0 : 200);
+  document.getElementById("cardCount").textContent = (ci+1) + " / " + deck.length;
+}
+const flip = () => card.classList.toggle("flip");
+card.addEventListener("click", flip);
+card.addEventListener("keydown", e => { if(e.key === " " || e.key === "Enter"){ e.preventDefault(); flip(); } });
+document.getElementById("cardNext").onclick = () => { ci = (ci+1) % deck.length; renderCard(); };
+document.getElementById("cardPrev").onclick = () => { ci = (ci-1+deck.length) % deck.length; renderCard(); };
+document.getElementById("cardShuffle").onclick = () => { for(let i=deck.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [deck[i],deck[j]] = [deck[j],deck[i]]; } ci = 0; renderCard(); };
+
+const box = document.getElementById("quizBox"), bar = document.getElementById("quizBar");
+function renderQ(){
+  box.innerHTML = ""; answered = false;
+  bar.style.width = (qi / qs.length * 100) + "%";
+  if(qi >= qs.length){
+    const key = "og-best-" + chap, best = Math.max(store.get(key, 0), right);
+    store.set(key, best); renderScores();
+    const done = document.createElement("div");
+    done.innerHTML = `<p class="quiz-q">You got ${right} of ${qs.length}.</p><p class="muted">${right === qs.length ? "Perfect score." : "Reread the sections for the questions you missed, then try again."}</p>`;
+    const again = document.createElement("button"); again.className = "btn primary"; again.textContent = "Try again";
+    again.onclick = () => { qi = 0; right = 0; renderQ(); };
+    box.append(done, again); return;
+  }
+  const [c, q, opts, ans, why] = qs[qi];
+  const head = document.createElement("p"); head.className = "muted"; head.textContent = `Question ${qi+1} of ${qs.length} · Chapter ${c} · Score ${right}`;
+  const qq = document.createElement("p"); qq.className = "quiz-q"; qq.textContent = q;
+  const list = document.createElement("div"); list.className = "opts";
+  const exp = document.createElement("p"); exp.className = "explain"; exp.hidden = true;
+  const next = document.createElement("button"); next.className = "btn primary"; next.textContent = qi === qs.length-1 ? "See score" : "Next question"; next.hidden = true;
+  next.onclick = () => { qi++; renderQ(); };
+  opts.forEach((o, i) => {
+    const b = document.createElement("button"); b.className = "opt"; b.textContent = o;
+    b.onclick = () => {
+      if(answered) return; answered = true;
+      if(i === ans) right++;
+      list.querySelectorAll(".opt").forEach((x, k) => { x.disabled = true; if(k === ans) x.classList.add("right"); else if(k === i) x.classList.add("wrong"); });
+      exp.textContent = (i === ans ? "Correct. " : "Not quite. ") + why; exp.hidden = false; next.hidden = false; next.focus();
+    };
+    list.appendChild(b);
+  });
+  box.append(head, qq, list, exp, next);
+}
+function renderScores(){
+  const g = document.getElementById("scores"); g.innerHTML = "";
+  ["All",1,2,3,4,5,6].forEach((c,i) => {
+    const total = QUIZ.filter(q => !i || q[0] === i).length, best = store.get("og-best-" + i, null);
+    const d = document.createElement("div"); d.innerHTML = `<b>${best == null ? "–" : best + "/" + total}</b>${i ? "Chapter " + c : "All chapters"}`; g.appendChild(d);
+  });
+}
+setFilter(); renderScores();
+
+const hash = (location.hash || "").slice(1);
+show(document.getElementById(hash) && hash.match(/^(c[1-6]|sheet|practice)$/) ? hash : store.get("og-tab", "c1"));
+})();
+</script>
