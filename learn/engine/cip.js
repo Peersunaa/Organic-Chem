@@ -6,6 +6,8 @@
 // Only these rules are implemented (they settle every alkene in the course). When they cannot separate two groups the two
 // groups are the same constitution (or need rules this course does not teach), and ezInfo reports `tie: true`.
 // The tests compare every label with RDKit's new CIP labeler (Python rdCIPLabeler) on thousands of alkenes.
+// Lesson 15 adds tetrahedral centres (tetraInfo / chiralCenters at the end of this file): the same three rules rank the four groups on an sp3 carbon,
+// and R/S is read from the SMILES chirality tag. The tests compare every label and every centre with Python rdCIPLabeler / FindMolChiralCenters.
 import { rdkit } from './chem.js';
 
 export const ZNUM = { H: 1, B: 5, C: 6, N: 7, O: 8, F: 9, Si: 14, P: 15, S: 16, Cl: 17, Br: 35, I: 53 };
@@ -18,7 +20,7 @@ export function readGraph(smiles) {
   if (!m) return null;
   try {
     const j = JSON.parse(m.get_json()).molecules[0];
-    const atoms = j.atoms.map((a, idx) => ({ idx, z: a.z ?? 6, sym: symOf(a.z ?? 6), impH: a.impHs ?? 0, chg: a.chg ?? 0, nbrs: [] }));
+    const atoms = j.atoms.map((a, idx) => ({ idx, z: a.z ?? 6, sym: symOf(a.z ?? 6), impH: a.impHs ?? 0, chg: a.chg ?? 0, tag: a.stereo === 'cw' || a.stereo === 'ccw' ? a.stereo : null, nbrs: [] }));
     const bonds = (j.bonds || []).map((b) => ({ a: b.atoms[0], b: b.atoms[1], bo: b.bo ?? 1, stereo: b.stereo || 'unspecified', sa: b.stereoAtoms ? b.stereoAtoms[0] : null, sb: b.stereoAtoms ? b.stereoAtoms[1] : null }));
     for (const b of bonds) { atoms[b.a].nbrs.push({ to: b.b, bo: b.bo }); atoms[b.b].nbrs.push({ to: b.a, bo: b.bo }); }
     return { atoms, bonds };
@@ -177,3 +179,46 @@ export function higherAtoms(smiles, a, b) {
   if (!info) return null;
   return info.ends.map((e) => e.subs[e.hi].atom);
 }
+
+// =====================================================================================================================
+// Lesson 15: tetrahedral (sp3) carbons. Rules 1-3 only, exactly as for double bonds: a centre whose four groups cannot be told apart by them is
+// reported as `tie: true` and NOT as a chirality centre (ring atoms such as C1 of 1,4-dimethylcyclohexane, whose two ring paths are the same, land here).
+/** The usual short way of writing a few carbonyl groups (condensed() writes C(=O)OH). */
+const PRETTY = { 'C(=O)OH': 'CO₂H', 'CH=O': 'CHO', 'C(=O)CH₃': 'COCH₃', 'C(=O)OCH₃': 'CO₂CH₃', 'C(=O)NH₂': 'CONH₂' };
+export const prettyGroup = (s) => PRETTY[s] || s;
+/** Parity (0 even, 1 odd) of the permutation that sorts `arr` (distinct numbers) ascending. */
+function parityOf(arr) { let inv = 0; for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) if (arr[i] > arr[j]) inv++; return inv % 2; }
+
+/**
+ * Every sp3 carbon (neutral, four single-bonded neighbours counting H) of the SMILES:
+ * { atom, subs:[{atom|null (H), node, label}], order:[sub indices from priority 1 to 4], rank:[priority 1..4 of each sub], tie, center, label:'R'|'S'|null,
+ *   firstDiff:[sphere where 1 separates from 2, 2 from 3, 3 from 4] }
+ * `center` = the four groups are all different by rules 1-3. `label` only when the SMILES fixes the configuration.
+ * RDKit stores the chirality tag against the order of the atom's bonds; an implicit H counts as the LAST neighbour (checked against Python in the tests).
+ */
+export function tetraInfo(smiles) {
+  const g = readGraph(smiles);
+  if (!g) return null;
+  const out = [];
+  g.atoms.forEach((at, v) => {
+    if (at.z !== 6 || at.chg !== 0 || at.nbrs.length + at.impH !== 4 || at.nbrs.some((n) => n.bo !== 1)) return;
+    const subs = substituents(g, v, -1);
+    subs.forEach((s) => { s.label = s.atom === null ? 'H' : prettyGroup(condensed(s.node)); });
+    const order = subs.map((_, i) => i).sort((x, y) => -compare(subs[x].node, subs[y].node).cmp || x - y);
+    const cmps = [0, 1, 2].map((k) => compare(subs[order[k]].node, subs[order[k + 1]].node));
+    const tie = cmps.some((c) => c.cmp === 0);
+    const rank = []; order.forEach((si, k) => { rank[si] = k + 1; });
+    let label = null;
+    if (!tie && at.tag) {
+      // neighbour list in tag order = subs order (bonds in index order, then the H); target [4,1,2,3] with 'ccw' means R
+      const par = parityOf(rank.map((r) => (r === 4 ? 0 : r)));
+      const ccw = at.tag === 'ccw';
+      label = (ccw !== (par === 1)) ? 'R' : 'S';
+    }
+    out.push({ atom: v, subs, order, rank, tie, center: !tie, label, firstDiff: cmps.map((c) => c.sphere) });
+  });
+  return out;
+}
+
+/** Atom indices of the chirality centres (rules 1-3), the same set as RDKit's FindMolChiralCenters for the molecules of this course. */
+export function chiralCenters(smiles) { const t = tetraInfo(smiles); return t ? t.filter((x) => x.center).map((x) => x.atom) : null; }

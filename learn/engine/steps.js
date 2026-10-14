@@ -125,6 +125,8 @@ export function checkInput(step, raw) {
   const n = parseNum(raw);
   const accept = [String(step.answer)].concat((step.accept || []).map(String)).map(norm);
   if (accept.includes(norm(raw)) || (n !== null && typeof step.answer === 'number' && n === step.answer)) return { ok: true };
+  // Lesson 15: a numeric answer computed from measured data may carry a tolerance (e.g. specific rotation +/- 0.1)
+  if (n !== null && typeof step.answer === 'number' && step.tolerance != null && Math.abs(n - step.answer) <= step.tolerance + 1e-9) return { ok: true };
   if (n === null && typeof step.answer === 'number') return { ok: false, diagnosis: 'Enter a number, for example 4, 0 or −1.', malformed: true };
   const d = (step.diagnose || []).find((x) => (typeof x.match === 'number' ? n === x.match : norm(x.match) === norm(raw)));
   return { ok: false, diagnosis: d ? d.why : step.fallback || skillRule(step.skill) || 'Not quite. Check the rule and try again.' };
@@ -349,7 +351,7 @@ export function renderProblems(cfg, ctx, host) {
     if (p.kind === 'input') {
       const { form, inp } = inputRow((val, input, btn) => {
         if (settled) return;
-        const r = checkInput({ answer: p.answer, accept: p.accept, name: p.name, diagnoseFn: p.diagnoseFn, diagnose: p.wrong, fallback: p.fallback || p.derive, skill: p.skill, formula: p.formula }, val);
+        const r = checkInput({ answer: p.answer, accept: p.accept, name: p.name, diagnoseFn: p.diagnoseFn, diagnose: p.wrong, fallback: p.fallback || p.derive, skill: p.skill, formula: p.formula, tolerance: p.tolerance }, val);
         if (r.ok) { input.disabled = true; btn.disabled = true; onRight(); }
         else if (r.empty || r.malformed) { fb.className = 'fb bad'; fb.textContent = r.diagnosis; input.focus(); }
         else { onWrong(r.diagnosis); if (!settled) input.select(); else { input.disabled = true; btn.disabled = true; } }

@@ -172,6 +172,7 @@ export function svgPick(smiles, opts = {}) {
   try {
     const n = m.get_num_atoms();
     const details = { width, height, bondLineWidth: 2, padding: 0.12, addAtomIndices: false, atoms: [...Array(n).keys()], highlightRadius: 0.2 };
+    if (opts.molBlockWedging) details.useMolBlockWedging = true; // Lesson 15: draw the wedge and dash bonds exactly as written in the molblock
     let s = m.get_svg_with_highlights(JSON.stringify(details));
     const pts = [];
     s = s.replace(/<ellipse cx='([\d.]+)' cy='([\d.]+)'[^>]*class='atom-(\d+)'[^>]*\/>/g, (all, x, y, i) => { pts[Number(i)] = { x: (Number(x) / width) * 100, y: (Number(y) / height) * 100 }; return ''; });

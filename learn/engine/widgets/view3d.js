@@ -4,7 +4,7 @@
 //            used when WebGL or 3Dmol is unavailable. It is a real fallback: every widget keeps working.
 //
 // scene = { atoms:[{el,x,y,z}], bonds:[[i,j]], colors:{idx:'#rrggbb'}, rings:[idx], lines:[{a:[x,y,z],b:[x,y,z],dashed,color}],
-//           labels:[{p:[x,y,z],text}], pickable:[idx]|true, tags:{idx:'accessible name'} }
+//           labels:[{p:[x,y,z],text,big?}], pickable:[idx]|true, tags:{idx:'accessible name'} }
 import { loadLib } from './model3d.js';
 import { toMolblock } from './geom.js';
 
@@ -48,7 +48,7 @@ function svgBackend(box, opts, state) {
     const isPick = (i) => scene.pickable === true || (scene.pickable && scene.pickable.includes(i));
     // depth-sorted bonds + atoms
     const items = [];
-    (scene.rings || []).forEach((i) => items.push({ z: pts[i].z - 0.01, s: `<circle cx="${pts[i].x.toFixed(1)}" cy="${pts[i].y.toFixed(1)}" r="${(SVG_R[A[i].el] || 0.4) * k * 1.8 + 3}" class="v3-ring"/>` }));
+    (scene.rings || []).forEach((i) => items.push({ z: pts[i].z - 0.01, s: `<circle cx="${pts[i].x.toFixed(1)}" cy="${pts[i].y.toFixed(1)}" r="${scene.ringR ? (scene.ringR * k).toFixed(1) : (SVG_R[A[i].el] || 0.4) * k * 1.8 + 3}" class="v3-ring"/>` }));
     scene.bonds.forEach(([i, j]) => {
       const a = pts[i], b = pts[j];
       items.push({ z: (a.z + b.z) / 2 - 0.2, s: `<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" class="v3-bond" style="stroke-width:${Math.max(2, 0.17 * k).toFixed(1)}"/>` });
@@ -61,11 +61,11 @@ function svgBackend(box, opts, state) {
     });
     (scene.lines || []).forEach((l) => {
       const a = T({ x: l.a[0], y: l.a[1], z: l.a[2] }), b = T({ x: l.b[0], y: l.b[1], z: l.b[2] });
-      items.push({ z: -99, s: `<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" class="v3-line" stroke="${l.color || 'currentColor'}"${l.dashed ? ' stroke-dasharray="5 4"' : ''}/>` });
+      items.push({ z: l.front ? 99 : -99, s: `<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" class="v3-line" stroke="${l.color || 'currentColor'}"${l.thick ? ' stroke-width="4" stroke-linecap="round"' : ''}${l.dashed ? ' stroke-dasharray="5 4"' : ''}/>` });
     });
     items.sort((p, q) => p.z - q.z);
     items.forEach((it) => parts.push(it.s));
-    (scene.labels || []).forEach((l) => { const t = T({ x: l.p[0], y: l.p[1], z: l.p[2] }); parts.push(`<text x="${t.x.toFixed(1)}" y="${t.y.toFixed(1)}" class="v3-label">${l.text}</text>`); });
+    (scene.labels || []).forEach((l) => { const t = T({ x: l.p[0], y: l.p[1], z: l.p[2] }); parts.push(`<text x="${t.x.toFixed(1)}" y="${t.y.toFixed(1)}" class="v3-label${l.big ? ' big' : ''}">${l.text}</text>`); });
     svg.innerHTML = parts.join('');
   };
   // drag to rotate, pinch to zoom, tap to pick
@@ -98,6 +98,7 @@ function svgBackend(box, opts, state) {
 
 function dmolBackend(box, opts, $3Dmol) {
   const v = $3Dmol.createViewer(box, { backgroundAlpha: 0, antialias: true });
+  if (opts.ortho && typeof v.setProjection === 'function') { try { v.setProjection('orthographic'); } catch (e) { /* perspective is fine */ } }
   let first = true, scene = null;
   const render = () => {
     v.removeAllModels(); v.removeAllShapes(); v.removeAllLabels();
@@ -105,9 +106,13 @@ function dmolBackend(box, opts, $3Dmol) {
     const byColor = {};
     scene.atoms.forEach((a, i) => { (byColor[colorOf(scene, i)] = byColor[colorOf(scene, i)] || []).push(i); });
     for (const [col, idx] of Object.entries(byColor)) v.setStyle({ index: idx }, { stick: { radius: 0.13, color: hexNum(col) }, sphere: { scale: 0.27, color: hexNum(col) } });
-    (scene.rings || []).forEach((i) => { const a = scene.atoms[i]; v.addSphere({ center: { x: a.x, y: a.y, z: a.z }, radius: 0.62, color: 0xf2b33d, alpha: 0.38 }); });
-    (scene.lines || []).forEach((l) => v.addLine({ start: { x: l.a[0], y: l.a[1], z: l.a[2] }, end: { x: l.b[0], y: l.b[1], z: l.b[2] }, color: l.color && l.color !== 'currentColor' ? l.color : '#8a9ea5', dashed: !!l.dashed, dashLength: 0.25, gapLength: 0.18 }));
-    (scene.labels || []).forEach((l) => v.addLabel(l.text, { position: { x: l.p[0], y: l.p[1], z: l.p[2] }, fontSize: 13, backgroundOpacity: 0.55, inFront: true }));
+    (scene.rings || []).forEach((i) => { const a = scene.atoms[i]; v.addSphere({ center: { x: a.x, y: a.y, z: a.z }, radius: scene.ringR || 0.62, color: 0xf2b33d, alpha: 0.38 }); });
+    (scene.lines || []).forEach((l) => {
+      const col = l.color && l.color !== 'currentColor' ? l.color : '#8a9ea5';
+      if (l.thick && typeof v.addCylinder === 'function') v.addCylinder({ start: { x: l.a[0], y: l.a[1], z: l.a[2] }, end: { x: l.b[0], y: l.b[1], z: l.b[2] }, radius: 0.045, color: col, fromCap: 1, toCap: 1 });
+      else v.addLine({ start: { x: l.a[0], y: l.a[1], z: l.a[2] }, end: { x: l.b[0], y: l.b[1], z: l.b[2] }, color: col, dashed: !!l.dashed, dashLength: 0.25, gapLength: 0.18 });
+    });
+    (scene.labels || []).forEach((l) => v.addLabel(l.text, { position: { x: l.p[0], y: l.p[1], z: l.p[2] }, fontSize: l.big ? 17 : 13, backgroundOpacity: 0.55, inFront: true }));
     if (scene.pickable) v.setClickable(scene.pickable === true ? {} : { index: scene.pickable }, true, (atom) => { if (atom && opts.onPick) opts.onPick(atom.index); });
     if (first || opts.refit) { v.zoomTo(); first = false; }
     v.render();
@@ -129,7 +134,7 @@ function sweep() { for (const v of [...live]) if (!v.box.isConnected) { try { v.
 
 /**
  * Create a viewer inside `host` (a block element; give it a height in CSS via class v3).
- * opts: { onPick(atomIndex), label, forceSvg }. Returns { show(scene), kind (after ready), ready:Promise, destroy() }.
+ * opts: { onPick(atomIndex), label, forceSvg, ortho (3Dmol: orthographic camera, for the view-plane arcs of Lesson 15) }. scene.lines may carry front:true (svg: drawn over the atoms) and thick:true; scene.labels big:true, scene.ringR (ring radius in model units). Returns { show(scene), kind (after ready), ready:Promise, destroy() }.
  */
 export function createView(host, opts = {}) {
   const box = document.createElement('div');

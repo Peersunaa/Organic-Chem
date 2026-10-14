@@ -428,6 +428,33 @@ h3 { font: 600 .8rem/1 var(--mono); letter-spacing: .08em; text-transform: upper
 .rd-find { display: grid; gap: 8px; padding: 12px; border-radius: 14px; border: 2px solid var(--electron); background: var(--surface-2); } .rd-find-h, .rd-find-msg { margin: 0; } .rd-find-msg:empty { display: none; }
 .rd-find-row { display: flex; flex-wrap: wrap; gap: 8px; } .rd-find-msg.ok { color: var(--ok); font-weight: 600; } .rd-find-msg.bad { color: var(--bad); font-weight: 500; }
 .sp-pool { gap: 6px 10px; } .sp-pm { display: grid; gap: 2px; justify-items: center; text-align: center; max-width: 150px; } .sp-and { font-weight: 700; color: var(--accent); }
+
+/* Lesson 15: mirror-pair, rs-assigner, stereocenter-finder */
+.spin-host { position: relative; } .spin-overlay { position: absolute; inset: 0; z-index: 3; touch-action: none; cursor: grab; border-radius: 14px; }
+.spin-overlay.grab { cursor: grabbing; } .spin-overlay:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.v3-label.big { font-size: 16px; font-weight: 800; fill: var(--ink); paint-order: stroke; stroke: var(--model-bg); stroke-width: 4px; stroke-linejoin: round; }
+.mp, .rsa, .scf { display: grid; gap: 12px; min-width: 0; }
+.mp-views { display: grid; grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr); gap: 6px; align-items: stretch; }
+.mp-fig { margin: 0; display: grid; gap: 6px; min-width: 0; } .mp-fig figcaption { font-weight: 600; font-size: .88rem; text-align: center; }
+.mp .v3 { height: 230px; } .mp-over { max-width: 340px; margin: 0 auto; width: 100%; } .mp-over .v3 { height: 210px; }
+.mp-mirror { position: relative; border-left: 3px dashed var(--accent); margin: 0 auto; width: 3px; } .mp-mirror span { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-90deg); background: var(--surface); padding: 0 6px; font-size: .78rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.mp-result, .mp-live { margin: 0; color: var(--muted); font-size: .92rem; min-height: 1.4em; } .mp-result:not(:empty) { color: var(--ink); }
+.mp-ask { display: grid; gap: 10px; } .mp-note { margin: 0; }
+.rs-fig { display: grid; justify-items: center; gap: 8px; min-width: 0; } .rs-fig > div:not(.gf-stage) { width: 100%; }
+.rsa .v3 { height: 250px; }
+.rs-stage { max-width: 360px; width: 100%; } .rs-stage .gf-atom { width: 38px; height: 38px; margin: -19px 0 0 -19px; }
+.rs-badge { position: absolute; transform: translate(-50%, -50%); width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 .88rem/24px var(--mono); text-align: center; pointer-events: none; box-shadow: 0 0 0 2px var(--surface); }
+.rs-arc { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; } .rs-arc-path { fill: none; stroke: #f0861f; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.rs-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.rs-chip { min-height: 46px; padding: 6px 14px; border: 2px solid var(--line-strong); border-radius: 12px; background: var(--surface); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; touch-action: manipulation; font: 600 1rem var(--mono); color: var(--ink); }
+.rs-chip:hover:not(:disabled) { border-color: var(--accent); } .rs-chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.rs-chip.bad, .rs-opt.bad { border-color: var(--bad); background: var(--bad-soft); animation: rs-shake .35s; } .rs-chip:disabled { cursor: default; }
+.rs-num { display: inline-grid; place-items: center; min-width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: .8rem; } .rs-num:empty { display: none; }
+.rs-opt.good { border-color: var(--ok); background: var(--ok-soft); } .rs-q { display: grid; gap: 8px; } .rs-q .cf-ans .btn { flex: 1 1 130px; }
+.rs-bar:empty { display: none; }
+@keyframes rs-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.scf-stage { max-width: 360px; } .gf-atom.miss { border: 2px dashed var(--accent); }
+@media (max-width: 460px) { .mp .v3 { height: 190px; } .mp-mirror span { font-size: .7rem; } }
 </style>
 
 <div id="app" aria-live="off"><p class="muted" style="padding:24px 16px">Loading Orgo Learn…</p></div>
