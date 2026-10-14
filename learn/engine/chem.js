@@ -164,7 +164,7 @@ export function svg(smiles, opts = {}) {
  */
 export function svgPick(smiles, opts = {}) {
   const { width = 300, height = 200 } = opts;
-  const m = rdkit().get_mol(smiles);
+  const m = opts.keepHs ? rdkit().get_mol(smiles, JSON.stringify({ removeHs: false })) : rdkit().get_mol(smiles);
   if (!m) return null;
   try {
     const n = m.get_num_atoms();

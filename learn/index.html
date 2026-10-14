@@ -157,6 +157,15 @@ h3 { font: 600 .8rem/1 var(--mono); letter-spacing: .08em; text-transform: upper
 @keyframes ct-pop { from { opacity: 0; transform: scale(.4); } }
 @media (prefers-reduced-motion: reduce) { .ct-num { animation: none; } }
 .pair.figs .mol { flex: 1 1 130px; max-width: 220px; }
+.cip-stage { max-width: 340px; }
+.cip-ez { display: flex; gap: 10px; } .cip-q { margin: 4px 0 0; font-weight: 600; }
+.cip-ez-btn { min-width: 64px; min-height: 44px; font: 700 1.1rem var(--mono); }
+.cip-ez-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.cip-tables { display: grid; gap: 10px; min-width: 0; } .cip-wrap { overflow-x: auto; max-width: 100%; }
+.cip-table { border-collapse: collapse; font-size: .88rem; width: 100%; } .cip-table caption { text-align: left; font-weight: 600; padding-bottom: 4px; }
+.cip-table th, .cip-table td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; font-family: var(--mono); white-space: nowrap; } .cip-table thead th { font-family: inherit; background: var(--surface-2); }
+.m3-view.m3-tall { min-height: 220px; }
+
 .sb-formula { font: 700 clamp(1.2rem, 5vw, 1.6rem) var(--mono); text-align: center; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); overflow-wrap: anywhere; }
 
 

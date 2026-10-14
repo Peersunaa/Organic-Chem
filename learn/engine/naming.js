@@ -6,7 +6,8 @@
 //   isopropyl = propan-2-yl, sec-butyl = butan-2-yl, isobutyl = 2-methylpropyl; tert-butyl is kept in both (as McMurry does).
 // Anything outside the scope (heteroatoms, multiple bonds, 2+ rings, substituents beyond methyl..butyl incl. iso/sec/tert,
 // stereo-SMILES, unresolved ties) returns null instead of guessing.
-import { analyze } from './chem.js';
+import { analyze, canon } from './chem.js';
+import { ezInfo, readGraph } from './cip.js';
 
 export const MODES = ['new', 'old'];
 const ROOT = ['meth', 'eth', 'prop', 'but', 'pent', 'hex', 'hept', 'oct', 'non', 'dec', 'undec', 'dodec', 'tridec', 'tetradec', 'pentadec', 'hexadec', 'heptadec', 'octadec', 'nonadec', 'icos'];
@@ -414,5 +415,322 @@ export function buildSmiles(spec) {
     out += frag;
   }
   if (spec.kind === 'ring' && n < 3) return null;
+  return out;
+}
+
+
+// =====================================================================================================================
+// Alkenes, alkynes and cycloalkenes (Lesson 07)
+//   parent     : the longest chain that contains EVERY multiple bond (a chain that misses the C=C is never the parent)
+//   numbering  : lowest locants to the multiple bonds together, then to the substituents, then the first-cited substituent
+//                alphabetically, then Z before E
+//   new style  : locant before the ending (but-2-ene, buta-1,3-diene, pent-1-yne); old style: locant in front (2-butene, 1,3-butadiene)
+//   cycloalkene: the C=C is C1=C2, so the ring is numbered from it; the locant of the double bond is left out (3-methylcyclohexene)
+//   E/Z        : "(E)-" in front when the SMILES fixes the geometry of a stereogenic C=C, "(2E,4Z)-" when there are several
+// Out of scope (returns null): heteroatoms, enynes (mixed C=C and C≡C), cumulated bonds, more than two multiple bonds, ring plus
+// chain multiple bonds, substituents beyond methyl..butyl, E/Z inside a ring, anything where the chain choice is not clear-cut.
+// =====================================================================================================================
+const STEM = ROOT; // meth eth prop but pent hex ...
+
+function ringOf(adj, n) {
+  const deg = adj.map((x) => x.length); const alive = new Set(adj.keys());
+  const q = [...alive].filter((v) => deg[v] === 1);
+  while (q.length) { const v = q.pop(); alive.delete(v); for (const w of adj[v]) if (alive.has(w)) { deg[w]--; if (deg[w] === 1) q.push(w); } }
+  const start = Math.min(...alive); const ring = [start]; let prev = -1, cur = start;
+  for (;;) { const nx = adj[cur].find((w) => alive.has(w) && w !== prev); if (nx === undefined || nx === start) break; ring.push(nx); prev = cur; cur = nx; if (ring.length > alive.size) break; }
+  return ring.length === alive.size && ring.length >= 3 ? ring : null;
+}
+
+/** Graph of a carbon-only hydrocarbon with multiple bonds. Atom indices are those of the SMILES as written. */
+export function parseAlkene(smiles) {
+  if (typeof smiles !== 'string' || /[[@]|[a-z]/.test(smiles.replace(/Cl|Br/g, ''))) return null;
+  let g = null;
+  try { g = readGraph(smiles); } catch (e) { return null; }
+  if (!g || !g.atoms.length || g.atoms.length > 20) return null;
+  if (g.atoms.some((a) => a.z !== 6 || a.chg !== 0 || a.impH < 0)) return null;
+  if (g.bonds.some((b) => b.bo > 3)) return null;
+  const n = g.atoms.length;
+  const adj = g.atoms.map((a) => a.nbrs.map((x) => x.to));
+  const seen = new Set([0]); const stack = [0];
+  while (stack.length) { const v = stack.pop(); for (const w of adj[v]) if (!seen.has(w)) { seen.add(w); stack.push(w); } }
+  if (seen.size !== n) return null;
+  const rings = g.bonds.length - n + 1;
+  if (rings > 1) return null;
+  const mult = g.bonds.filter((b) => b.bo > 1);
+  if (!mult.length) return null;
+  const ring = rings === 1 ? ringOf(adj, n) : null;
+  if (rings === 1 && !ring) return null;
+  return { n, adj, ring, g, mult };
+}
+
+/** Substituent prefixes with a locant on every group (rings keep the locant of a single group). */
+export function prefixString(subs, mode) {
+  const groups = {};
+  subs.forEach((s) => { (groups[s.id] ||= []).push(s.loc); });
+  const ids = Object.keys(groups).sort((a, b) => cmpStr(keyOf(a, mode), keyOf(b, mode)));
+  return ids.map((id) => {
+    const locs = groups[id].slice().sort((x, y) => x - y);
+    const info = subInfo(id); const nm = info[mode]; const complex = info.par[mode]; const n = locs.length;
+    let pref;
+    if (n === 1) pref = complex ? `(${nm})` : nm;
+    else if (complex) pref = `${BIS[n] || MULT[n]}(${nm})`;
+    else pref = (MULT[n] || '') + (/^(sec|tert)-/.test(nm) ? '-' : '') + nm;
+    return locs.join(',') + '-' + pref;
+  }).join('-');
+}
+
+const zFirst = (a, b) => { for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) return a[i] === 'Z' ? -1 : 1; return 0; };
+
+function stereoParts(P, ez, order) {
+  // order: atom -> position (1-based). Returns {error} | {desc:[{loc,label}]}
+  const chain = ez.filter((e) => e.capable);
+  const labelled = chain.filter((e) => e.label);
+  if (labelled.length && labelled.length !== chain.length) return { error: true };
+  if (labelled.some((e) => e.ring)) return { error: true };
+  const desc = labelled.map((e) => ({ loc: Math.min(order(e.a), order(e.b)), label: e.label, a: e.a, b: e.b })).sort((x, y) => x.loc - y.loc);
+  return { desc };
+}
+
+function stereoPrefix(desc) {
+  if (!desc.length) return '';
+  if (desc.length === 1) return `(${desc[0].label})-`;
+  return `(${desc.map((d) => d.loc + d.label).join(',')})-`;
+}
+
+function buildAlkeneName(parent, mode, subs, multLocs, type, stereo) {
+  const L = parent.size;
+  const pre = prefixString(subs, mode);
+  if (parent.kind === 'ring') return stereoPrefix(stereo) + pre + 'cyclo' + STEM[L - 1] + 'ene';
+  const count = multLocs.length;
+  const needLoc = !(L === 2) && !(L === 3 && subs.length === 0);
+  let base;
+  if (mode === 'new') base = count === 1 ? `${STEM[L - 1]}${needLoc ? `-${multLocs[0]}-` : ''}${type}` : `${STEM[L - 1]}a-${multLocs.join(',')}-di${type}`;
+  else base = count === 1 ? `${needLoc ? multLocs[0] + '-' : ''}${STEM[L - 1]}${type}` : `${multLocs.join(',')}-${STEM[L - 1]}adi${type}`;
+  const body = pre ? (mode === 'new' ? pre + base : pre + '-' + base) : base;
+  return stereoPrefix(stereo) + body;
+}
+
+/**
+ * Full analysis of an alkene / alkyne / cycloalkene. Returns null outside the scope, otherwise
+ * { kind:'chain'|'ring', parent:{kind,size}, parentAtoms:[atoms in numbering order], mult:[locants], type:'ene'|'yne', subs:[{id,loc,at,root}],
+ *   stereo:[{loc,label,a,b}], name, core (name without the (E)/(Z) prefix), ez }
+ */
+export function alkeneInfo(smiles, mode = 'new') {
+  const P = parseAlkene(smiles);
+  if (!P) return null;
+  const { adj, ring, mult, g } = P;
+  const bo = mult[0].bo;
+  if (mult.some((b) => b.bo !== bo) || mult.length > 2) return null;
+  if (mult.length === 2 && mult[0].a !== undefined && [mult[0].a, mult[0].b].some((v) => v === mult[1].a || v === mult[1].b)) return null; // cumulated
+  const type = bo === 2 ? 'ene' : 'yne';
+  const ez = ezInfo(smiles);
+  if (!ez) return null;
+
+  if (ring) {
+    if (mult.length !== 1 || bo !== 2) return null;
+    const ringSet = new Set(ring);
+    const bd = mult[0];
+    if (!ringSet.has(bd.a) || !ringSet.has(bd.b)) return null;
+    const n = ring.length;
+    if (ez.some((e) => e.label)) return null; // E/Z inside a ring: out of scope
+    const pa = ring.indexOf(bd.a), pb = ring.indexOf(bd.b);
+    const fwd = (pa + 1) % n === pb; // b follows a around the ring
+    const starts = [{ s: pa, d: fwd ? 1 : -1 }, { s: pb, d: fwd ? -1 : 1 }];
+    const opts = starts.map(({ s, d }) => {
+      const order = ring.map((_, j) => ring[(((s + j * d) % n) + n) % n]);
+      const subs = [];
+      order.forEach((r, i) => { for (const w of adj[r]) if (!ringSet.has(w)) subs.push({ at: r, idx: i, root: w, id: branchId(adj, w, r, null), loc: i + 1 }); });
+      return { path: order, subs };
+    });
+    opts.sort((x, y) => cmpNums(x.subs.map((t) => t.loc).sort((p, q) => p - q), y.subs.map((t) => t.loc).sort((p, q) => p - q)));
+    const tied = opts.filter((o) => cmpNums(o.subs.map((t) => t.loc).sort((p, q) => p - q), opts[0].subs.map((t) => t.loc).sort((p, q) => p - q)) === 0);
+    if (tied.some((o) => o.subs.some((t) => !t.id))) return null;
+    tied.sort((x, y) => cmpScore(scoreOf(x.subs, mode), scoreOf(y.subs, mode)));
+    const best = tied.filter((o) => cmpScore(scoreOf(o.subs, mode), scoreOf(tied[0].subs, mode)) === 0);
+    const parent = { kind: 'ring', size: n };
+    const names = new Set(best.map((o) => buildAlkeneName(parent, mode, o.subs, [1], 'ene', [])));
+    if (names.size !== 1) return null;
+    const b = best[0];
+    return { kind: 'ring', parent, parentAtoms: b.path, mult: [1], type: 'ene', subs: b.subs, stereo: [], name: [...names][0], core: [...names][0], ez, g };
+  }
+
+  // ---- acyclic
+  const nodes = [...adj.keys()];
+  const paths = allPaths(nodes, adj);
+  const edges = mult.map((b) => [b.a, b.b]);
+  const holdsAll = (p) => p.length >= 2 && edges.every(([x, y]) => { const i = p.indexOf(x); return i >= 0 && (p[i + 1] === y || p[i - 1] === y); });
+  const cand = paths.filter(holdsAll);
+  if (!cand.length) return null;
+  const maxLen = Math.max(...cand.map((p) => p.length));
+  const opts = [];
+  for (const p0 of cand.filter((p) => p.length === maxLen)) for (const rev of [false, true]) {
+    const path = rev ? p0.slice().reverse() : p0.slice();
+    const pos = new Map(path.map((v, i) => [v, i + 1]));
+    const subs = [];
+    path.forEach((v, i) => { for (const w of adj[v]) if (!pos.has(w)) subs.push({ at: v, idx: i, root: w, id: branchId(adj, w, v, null), loc: i + 1 }); });
+    const multLocs = edges.map(([x, y]) => Math.min(pos.get(x), pos.get(y))).sort((x, y) => x - y);
+    const st = stereoParts(P, ez, (v) => pos.get(v));
+    if (st.error) return null;
+    opts.push({ path, subs, multLocs, stereo: st.desc });
+  }
+  const pick = (pool) => {
+    const sorted = pool.slice().sort((x, y) => cmpNums(x.multLocs, y.multLocs) || cmpNums(x.subs.map((t) => t.loc).sort((p, q) => p - q), y.subs.map((t) => t.loc).sort((p, q) => p - q)));
+    const first = sorted[0];
+    const tied = sorted.filter((o) => cmpNums(o.multLocs, first.multLocs) === 0 && cmpNums(o.subs.map((t) => t.loc).sort((p, q) => p - q), first.subs.map((t) => t.loc).sort((p, q) => p - q)) === 0);
+    if (tied.some((o) => o.subs.some((t) => !t.id))) return null;
+    tied.sort((x, y) => cmpScore(scoreOf(x.subs, mode), scoreOf(y.subs, mode)));
+    let best = tied.filter((o) => cmpScore(scoreOf(o.subs, mode), scoreOf(tied[0].subs, mode)) === 0);
+    best = best.slice().sort((x, y) => zFirst(x.stereo.map((d) => d.label), y.stereo.map((d) => d.label)));
+    best = best.filter((o) => zFirst(o.stereo.map((d) => d.label), best[0].stereo.map((d) => d.label)) === 0);
+    const names = new Set(best.map((o) => buildAlkeneName({ kind: 'chain', size: maxLen }, mode, o.subs, o.multLocs, type, o.stereo)));
+    return names.size === 1 ? { o: best[0], name: [...names][0] } : null;
+  };
+  const A = pick(opts);
+  if (!A) return null;
+  const maxSubs = Math.max(...opts.map((o) => o.subs.length));
+  const B = pick(opts.filter((o) => o.subs.length === maxSubs));
+  if (!B || B.name !== A.name) return null; // the choice between equally long chains would depend on the convention: leave it out
+  const o = A.o;
+  const core = buildAlkeneName({ kind: 'chain', size: maxLen }, mode, o.subs, o.multLocs, type, []);
+  return { kind: 'chain', parent: { kind: 'chain', size: maxLen }, parentAtoms: o.path, mult: o.multLocs, type, subs: o.subs, stereo: o.stereo, name: A.name, core, ez, g };
+}
+
+export function nameAlkene(smiles, mode = 'new') { const i = alkeneInfo(smiles, mode); return i ? i.name : null; }
+export function nameAlkeneBoth(smiles) {
+  const a = nameAlkene(smiles, 'new'), b = nameAlkene(smiles, 'old');
+  return a && b ? { new: a, old: b } : null;
+}
+
+// ---- other spellings the course accepts when a learner types a name
+const COMMON = { 'C=C': ['ethylene'], 'CC=C': ['propylene'], 'C#C': ['acetylene'], 'CC(=C)C=C': ['isoprene'] };
+/** Alternative correct names (not the ones the engine writes): locant forms, common names, cis/trans for 1,2-disubstituted alkenes. */
+export function alkeneAltNames(smiles) {
+  const nb = nameAlkeneBoth(smiles);
+  if (!nb) return [];
+  const out = new Set();
+  for (const mode of MODES) {
+    const info = alkeneInfo(smiles, mode);
+    const nm = info.name;
+    if (info.stereo.length === 1 && info.kind === 'chain') out.add(`(${info.stereo[0].loc}${info.stereo[0].label})-` + info.core);
+    if (info.kind === 'chain' && info.parent.size === 3 && info.mult.length === 1 && info.subs.length && info.type === 'ene') out.add(stereoPrefix(info.stereo) + prefixString(info.subs, mode) + 'propene');
+    if (info.kind === 'ring') out.add(nm.replace(/cyclo([a-z]+)ene$/, (m, r) => `cyclo${r}-1-ene`));
+    // cis / trans: only for a 1,2-disubstituted C=C (each carbon has exactly one H), where cis = Z and trans = E
+    if (info.stereo.length === 1 && info.kind === 'chain') {
+      const e = info.ez.find((x) => x.capable && x.label);
+      if (e && e.ends.every((end) => end.subs.filter((x) => x.atom === null).length === 1)) out.add((e.label === 'Z' ? 'cis-' : 'trans-') + info.core);
+    }
+  }
+  const c = canon(smiles);
+  for (const [k, v] of Object.entries(COMMON)) if (canon(k) === c) v.forEach((x) => out.add(x));
+  [nb.new, nb.old].forEach((x) => out.delete(x));
+  return [...out];
+}
+/** Every name accepted for the molecule (both styles plus the alternatives). */
+export function acceptedAlkeneNames(smiles) {
+  const nb = nameAlkeneBoth(smiles);
+  return nb ? [...new Set([nb.new, nb.old, ...alkeneAltNames(smiles)])] : [];
+}
+export function matchesAlkene(smiles, typed) { const t = normName(typed); return acceptedAlkeneNames(smiles).some((n) => normName(n) === t); }
+
+// ---- explaining mistakes in typed alkene names
+const STEM_RE = '(undec|dodec|tridec|tetradec|pentadec|hexadec|heptadec|octadec|nonadec|icos|meth|eth|prop|but|pent|hex|hept|oct|non|dec)';
+const stripStereo = (s) => String(s).trim().toLowerCase().replace(/[−–‒—]/g, '-').replace(/^\(\s*(?:\d+)?[ez](?:\s*,\s*(?:\d+)?[ez])*\s*\)\s*-?\s*/, '').replace(/^(cis|trans)\s*-?\s*/, '');
+const stereoOf = (s) => { const m = /^\s*\(\s*((?:\d+)?[ez](?:\s*,\s*(?:\d+)?[ez])*)\s*\)/i.exec(String(s)); return m ? m[1].toUpperCase().replace(/\s+/g, '') : null; };
+const endGroupText = (end) => end.subs.map((x) => x.label).join(' and ');
+
+export function diagnoseAlkene(smiles, typed) {
+  const info = alkeneInfo(smiles, 'new');
+  const infoO = alkeneInfo(smiles, 'old');
+  if (!info || !infoO) return null;
+  const raw = String(typed);
+  const t = normName(stripStereo(raw));
+  const typedStereo = stereoOf(raw) || (/^\s*(cis|trans)/i.test(raw) ? 'CT' : null);
+  const wantStereo = info.stereo.length > 0;
+  const coreNew = normName(info.core), coreOld = normName(infoO.core);
+  const coreMatch = t === coreNew || t === coreOld;
+  const first = info.ez.find((e) => e.label) || info.ez.find((e) => e.capable);
+  // E/Z prefix problems (only meaningful when the rest of the name is right)
+  if (coreMatch && wantStereo && !typedStereo) return 'The name is right so far, but this alkene has two different groups on each double-bond carbon, so the geometry matters: start the name with (E) or (Z).';
+  if (coreMatch && !wantStereo && typedStereo) {
+    const tie = info.ez.find((e) => !e.capable && e.ends.some((x) => x.tie && x.nsubs === 2));
+    if (tie) { const end = tie.ends.find((x) => x.tie && x.nsubs === 2); return `The name is right, but there is no E or Z here: carbon ${info.parentAtoms.indexOf(end.atom) + 1} carries two identical groups (${endGroupText(end)}), so the double bond has no cis/trans isomers.`; }
+    return 'The name is right, but this drawing does not fix the geometry of the double bond, so it gets no (E) or (Z) in front.';
+  }
+  if (coreMatch && wantStereo && typedStereo) {
+    if (typedStereo === 'CT') return 'cis and trans work for simple 1,2-disubstituted alkenes. Here use E or Z instead: rank the two groups on each carbon with the sequence rules; the higher-ranked groups on the same side make Z, on opposite sides make E.';
+    const got = typedStereo.replace(/\d/g, '');
+    const want = info.stereo.map((d) => d.label).join('');
+    if (got !== want && info.stereo.length === 1) {
+      const hiA = first.ends[0].subs[first.ends[0].hi].label, hiB = first.ends[1].subs[first.ends[1].hi].label;
+      return `The name is right but the letter is not. The higher-ranked groups are ${hiA} and ${hiB}; they are on ${first.label === 'Z' ? 'the same side, so Z (zusammen, together)' : 'opposite sides, so E (entgegen, opposite)'}.`;
+    }
+    if (got !== want) return 'The name is right, but check each double bond: the higher-ranked groups on the same side give Z, on opposite sides E. Write the locant of each one, such as (2E,4Z).';
+    return 'Check the locants in the E/Z bracket: each letter goes with the lower number of its double bond.';
+  }
+  // the rest of the name
+  const endM = /(ane|ene|yne)$/.exec(t);
+  if (!endM) return 'A name ends with its parent and the suffix: -ene for a double bond (-yne for a triple bond), such as but-2-ene, or cycloalkene such as cyclohexene.';
+  const want = info.type;
+  if (endM[1] === 'ane') return `This molecule has ${info.type === 'ene' ? 'a C=C double bond' : 'a C≡C triple bond'}, so the name ends in -${info.type} (not -ane).`;
+  if (endM[1] !== want && !(info.mult.length === 2 && (endM[1] === 'ene' || endM[1] === 'yne'))) return `The multiple bond here is a ${info.type === 'ene' ? 'double bond: -ene' : 'triple bond: -yne'}.`;
+  const gotDi = /di(ene|yne)$/.test(t);
+  if (info.mult.length === 2 && !gotDi) return 'Two multiple bonds: use diene (or diyne), with a locant for each, such as buta-1,3-diene (traditional style 1,3-butadiene).';
+  if (info.mult.length === 1 && gotDi) return 'Only one multiple bond here, so the ending is -ene (or -yne), not -diene.';
+  const stem = new RegExp('(cyclo)?' + STEM_RE + '(a)?(\\d[\\d,]*)?(di)?(ene|yne)$').exec(t);
+  const wantRing = info.parent.kind === 'ring';
+  if (stem) {
+    const gotRing = !!stem[1];
+    if (gotRing !== wantRing) return wantRing ? 'The double bond is inside the ring, so the ring is the parent: a cycloalkene such as cyclohexene.' : 'The parent is a chain here, not a ring.';
+    const gi = STEM.indexOf(stem[2]) + 1;
+    if (gi !== info.parent.size) return wantRing ? `The ring has ${info.parent.size} carbons.` : (gi < info.parent.size ? `Your parent has ${gi} carbons, but the longest chain that contains the double bond has ${info.parent.size}. The parent must include the C=C.` : `Your parent has ${gi} carbons, but the longest chain that contains the double bond has only ${info.parent.size}.`);
+  }
+  const nums = (s) => (s.match(/\d+/g) || []).map(Number).sort((a, b) => a - b);
+  const have = nums(t);
+  const expect = nums(coreNew);
+  const sameList = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+  const L = info.parent.size;
+  if (have.length && !sameList(have, expect)) {
+    if (!wantRing) {
+      const mirror = info.mult.map((m) => L - m).concat(info.subs.map((s) => L + 1 - s.loc)).sort((a, b) => a - b);
+      if (sameList(have, mirror)) return 'Number from the other end: the double bond must get the lowest possible number (the substituents come second).';
+      const multTyped = (t.match(/(\d+)(?:,\d+)*(?=-?(?:[a-z]*?)(?:di)?(?:ene|yne)$)/) || [])[0];
+      if (info.mult.length === 1 && multTyped !== undefined && Number(multTyped) !== info.mult[0]) return `Where does the double bond sit? Number the chain from the end nearer the multiple bond; here it starts at C${info.mult[0]}.`;
+    }
+    if (wantRing) return 'Number the ring so that the double bond is C1=C2, then choose the direction that gives the substituents the lowest numbers.';
+    return 'Check the numbers: the multiple bond gets the lowest possible locant first, then the substituents.';
+  }
+  const counts = {};
+  info.subs.forEach((s) => { counts[s.id] = (counts[s.id] || 0) + 1; });
+  const needMult = Object.values(counts).some((c) => c > 1);
+  if (needMult && !/(di|tri|tetra|bis|tris)(?!ene|yne)/.test(t.replace(/(di)(ene|yne)$/, '$2'))) return 'When the same branch appears more than once, say how many: di-, tri- or tetra-.';
+  if (info.subs.length && have.length < expect.length) return 'Every branch needs its own locant.';
+  return 'The numbers look right, so check the order of the prefixes (alphabetical, ignoring di- and tri-), the spelling of the root, and the punctuation. One word, with hyphens and commas.';
+}
+
+/** Likely wrong names, each with the reason it is wrong ([{name, why}]). */
+export function wrongAlkeneNames(smiles) {
+  const out = [];
+  const right = new Set(acceptedAlkeneNames(smiles).map(normName));
+  const add = (name, why) => { if (name && !right.has(normName(name)) && !out.some((x) => normName(x.name) === normName(name))) out.push({ name, why }); };
+  for (const mode of MODES) {
+    const info = alkeneInfo(smiles, mode);
+    if (!info) continue;
+    const L = info.parent.size;
+    if (info.kind === 'chain') {
+      const mirrored = { multLocs: info.mult.map((m) => L - m).sort((a, b) => a - b), subs: info.subs.map((s) => ({ id: s.id, loc: L + 1 - s.loc })) };
+      const flip = info.stereo.map((d) => ({ ...d, loc: L - d.loc }));
+      add(buildAlkeneName(info.parent, mode, mirrored.subs, mirrored.multLocs, info.type, flip), 'You numbered from the wrong end. Number from the end nearer the double bond so it gets the lowest locant.');
+    }
+    if (info.stereo.length) {
+      add(info.core, 'This alkene has two different groups on each double-bond carbon, so it needs (E) or (Z) in front.');
+      if (info.stereo.length === 1) {
+        const other = info.stereo[0].label === 'E' ? 'Z' : 'E';
+        add(`(${other})-` + info.core, `Not ${other}: put the higher-ranked group on each carbon side by side. Same side is Z, opposite sides is E.`);
+      }
+    } else {
+      const capable = info.ez.some((e) => e.capable);
+      if (!capable) { add('(E)-' + info.core, 'No E or Z here: a carbon of the double bond has two identical groups, so there is only one geometry.'); add('(Z)-' + info.core, 'No E or Z here: a carbon of the double bond has two identical groups, so there is only one geometry.'); }
+    }
+  }
   return out;
 }

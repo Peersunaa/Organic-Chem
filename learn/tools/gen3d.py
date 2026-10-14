@@ -14,6 +14,8 @@ MOLS = {
     # 1,2-dimethylcyclopropanes (cis = same face, checked in tests by the ring mean plane)
     "ethane": "CC", "bromoethane": "CCBr", "cyclopropane": "C1CC1",
     "cis-dmcp": "C[C@H]1C[C@H]1C", "trans-dmcp": "C[C@H]1C[C@@H]1C",
+    # Lesson 07: the two but-2-enes (C-C=C-C dihedral ~0 for cis, ~180 for trans; checked in the tests)
+    "cis-but-2-ene": "C/C=C\\C", "trans-but-2-ene": "C/C=C/C",
 }
 # Conformers that must be a specific shape: id -> (check on the embedded molecule).
 # butane must be the anti (zig-zag) conformer: lowest-energy of many embeds, C1-C2-C3-C4 dihedral ~180.

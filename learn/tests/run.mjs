@@ -29,6 +29,7 @@ import { ARROW_BASES, ARROW_ACIDS, arrowScene, LEWIS_POOL } from '../engine/gene
 import * as NR from '../engine/widgets/newman-rotator.js';
 import * as CC from '../engine/widgets/chair-core.js';
 import { lesson06 } from './lesson06.mjs';
+import { lesson07 } from './lesson07.mjs';
 
 const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
@@ -122,8 +123,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 10 && PLANNED[0].id === '07' && PLANNED[9].id === '16', 'placeholders 07-16');
-ok(LESSONS.length === 6 && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-06 registered and unlocked');
+ok(PLANNED.length === 9 && PLANNED[0].id === '08' && PLANNED[8].id === '16', 'placeholders 08-16');
+ok(LESSONS.length === 7 && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-07 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -257,7 +258,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -1127,6 +1128,9 @@ eq(analyze('CC=O').totalValence, 18, 'acetaldehyde valence e'); eq(analyze('[NH4
 
 // ---- Lesson 06: 3D geometry (ethane dihedrals, chair angles, axial/equatorial, ring flip, cis/trans), widgets, chairs generator (tests/lesson06.mjs)
 await lesson06({ ok, eq });
+
+// ---- Lesson 07: alkene naming engine (OPSIN), CIP E/Z (RDKit new CIP labeler), cip-ranker widget, generator, lesson steps (tests/lesson07.mjs)
+await lesson07({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

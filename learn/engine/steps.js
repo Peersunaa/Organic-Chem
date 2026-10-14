@@ -277,7 +277,7 @@ export function renderProblems(cfg, ctx, host) {
     const card = h('div', { class: 'problem' });
     stage.append(card);
     card.append(p.promptHtml ? rich(p.promptHtml, 'h2', 'prompt') : h('h2', { class: 'prompt' }, p.prompt));
-    if (p.kind !== 'builder' && p.kind !== 'polarity' && p.kind !== 'arrows' && p.kind !== 'groupfind' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
+    if (p.kind !== 'builder' && p.kind !== 'polarity' && p.kind !== 'arrows' && p.kind !== 'groupfind' && p.kind !== 'cip' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
     const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
     const hints = h('div', { class: 'hints' });
     let wrong = 0, settled = false;
@@ -335,6 +335,10 @@ export function renderProblems(cfg, ctx, host) {
       const box = h('div', { class: 'widget' });
       card.append(box);
       WIDGETS['group-finder'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
+    } else if (p.kind === 'cip') {
+      const box = h('div', { class: 'widget' });
+      card.append(box);
+      WIDGETS['cip-ranker'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
     } else if (p.kind === 'polarity') {
       const box = h('div', { class: 'widget' });
       card.append(box);
