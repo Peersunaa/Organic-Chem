@@ -4,8 +4,14 @@
 // config: { atoms:[{el,x,y,charge?,label?}], bonds:[{a,b,order}], arrows:[{from:{lp:i}|{bond:[i,j]}, to:{atom:i}|{bond:[i,j]}, note?, missing?}],
 //           products?: [smiles], extraHint? }
 // Lone pairs are computed from the structure, never listed in the config.
+// Extras (Lesson 08, all optional): to:{bond:[c,k]} where the bond does not exist yet = "form a new bond"; the head points at the far atom k.
+//   preset:true      show config.arrows as already drawn (no tapping, no buttons); with arrows:[] it is a plain scene viewer.
+//                    A preset arrow may start at an atom (from:{atom:i}) so a WRONG mechanism can be shown ("arrow from H+").
+//   caption          text under a preset scene.
+//   play()           (returned) animates the drawn arrows and sends two electron dots along each curve; resolves when finished
+//                    (immediately under prefers-reduced-motion).
 import { NAME } from '../chem.js';
-import { SCALE, radius, P, lpCount, lpPoints, keyOf, grade, badStart, curve, describeSource, describeDest } from './arrow-core.js';
+import { SCALE, radius, P, lpCount, lpPoints, keyOf, grade, badStart, curve, describeSource, describeDest, headAtom } from './arrow-core.js';
 import { freeAngles } from './lewis-core.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -15,17 +21,19 @@ export default {
   id: 'arrow-draw',
   mount(host, config, ctx) {
     const { atoms, bonds } = config;
-    let drawn = [];       // {from, to}
+    const preset = !!config.preset;
+    let drawn = preset ? config.arrows.map((a) => ({ from: a.from, to: a.to })) : [];       // {from, to}
+    const geo = [];       // per drawn arrow: {start, c, end} in px (for the electron animation)
     let src = null;       // {lp: i, t?} | {bond: [i,j]}
-    let finished = false;
+    let finished = preset;
     let badIdx = [];
     let lastAdded = -1;
 
     host.innerHTML = `
       <div class="lb ad">
         <svg class="lb-svg ad-svg" role="group" aria-label="Curved arrow workspace"></svg>
-        <p class="lb-help ad-status" aria-live="polite">Tap the electrons the arrow starts from (a pair of dots or a bond), then tap where they go.</p>
-        <div class="lb-actions">
+        <p class="lb-help ad-status" aria-live="polite">${preset ? (config.caption || '') : 'Tap the electrons the arrow starts from (a pair of dots or a bond), then tap where they go.'}</p>
+        <div class="lb-actions"${preset ? ' hidden' : ''}>
           <button type="button" class="btn ghost" data-act="undo">Undo arrow</button>
           <button type="button" class="btn ghost" data-act="reset">Clear</button>
           <button type="button" class="btn primary" data-act="check">Check</button>
@@ -53,6 +61,7 @@ export default {
     const bondEnds = (b) => { const A = atoms[b.a], B = atoms[b.b]; return [P(A), P(B)]; };
 
     function srcPoint(from, toward) {
+      if (from.atom != null) { const [ax, ay] = P(atoms[from.atom]); return { x: ax, y: ay - radius(atoms[from.atom].el) * 0.9 }; }
       if (from.bond) {
         const [p, q] = [P(atoms[from.bond[0]]), P(atoms[from.bond[1]])];
         return { x: (p[0] + q[0]) / 2, y: (p[1] + q[1]) / 2 };
@@ -64,8 +73,10 @@ export default {
       for (const p of pts) { let d = Math.abs(p.t - want) % (2 * Math.PI); if (d > Math.PI) d = 2 * Math.PI - d; if (d < bd) { bd = d; best = p; } }
       return { x: best.x, y: best.y };
     }
-    function destPoint(to) {
+    function destPoint(to, from) {
       if (to.atom != null) { const [x, y] = P(atoms[to.atom]); return { x, y, r: radius(atoms[to.atom].el) + 4 }; }
+      const nb = from && headAtom(config, { from, to });
+      if (nb) { const [x, y] = P(atoms[nb.atom]); return { x, y, r: radius(atoms[nb.atom].el) + 4 }; } // a bond that is about to form
       const [p, q] = [P(atoms[to.bond[0]]), P(atoms[to.bond[1]])];
       return { x: (p[0] + q[0]) / 2, y: (p[1] + q[1]) / 2, r: 4 };
     }
@@ -141,9 +152,10 @@ export default {
       });
       // arrows
       drawn.forEach((ar, n) => {
-        const dest = destPoint(ar.to);
+        const dest = destPoint(ar.to, ar.from);
         const start = srcPoint(ar.from, dest);
         const c = curve(start, dest, dest.r);
+        geo[n] = { start, c: c.ctrl, end: c.stem };
         const bad = badIdx.includes(n);
         const g = el('g', { class: 'ad-arrow' + (bad ? ' bad' : '') + (n === lastAdded && !reduceMotion() ? ' draw' : '') });
         g.appendChild(el('path', { d: c.d, class: 'ad-path', pathLength: '1' }));
@@ -195,7 +207,32 @@ export default {
       draw();
       ctx.onResult(r);
     });
+    function play() {
+      const groups = [...svg.querySelectorAll('.ad-arrow')];
+      if (!groups.length || reduceMotion()) return Promise.resolve();
+      groups.forEach((g) => g.classList.add('pre'));
+      return Promise.all(groups.map((g, n) => new Promise((resolve) => {
+        setTimeout(() => {
+          g.classList.remove('pre', 'draw'); void g.getBoundingClientRect(); g.classList.add('draw');
+          setTimeout(() => {
+            const q = geo[n];
+            const e1 = el('circle', { r: 3.6, class: 'ad-e' }), e2 = el('circle', { r: 3.6, class: 'ad-e' });
+            svg.append(e1, e2);
+            const T = 850, t0 = performance.now();
+            const at = (t) => ({ x: (1 - t) * (1 - t) * q.start.x + 2 * (1 - t) * t * q.c.x + t * t * q.end.x, y: (1 - t) * (1 - t) * q.start.y + 2 * (1 - t) * t * q.c.y + t * t * q.end.y });
+            const step = (now) => {
+              const u = Math.min(1, (now - t0) / T), t = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+              const a = at(t), b = at(Math.max(0, t - 0.06));
+              e1.setAttribute('cx', a.x.toFixed(1)); e1.setAttribute('cy', a.y.toFixed(1));
+              e2.setAttribute('cx', b.x.toFixed(1)); e2.setAttribute('cy', b.y.toFixed(1));
+              if (u < 1) requestAnimationFrame(step); else { e1.remove(); e2.remove(); resolve(); }
+            };
+            requestAnimationFrame(step);
+          }, 420);
+        }, n * 320);
+      })));
+    }
     draw();
-    return { destroy() {}, getDrawn: () => drawn };
+    return { destroy() {}, getDrawn: () => drawn, play };
   }
 };

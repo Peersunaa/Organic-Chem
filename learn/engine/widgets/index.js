@@ -10,4 +10,7 @@ import chainTracer from './chain-tracer.js';
 import newmanRotator from './newman-rotator.js';
 import chairFlip from './chair-flip.js';
 import cipRanker from './cip-ranker.js';
-export const WIDGETS = { 'lewis-builder': lewisBuilder, 'valence-strip': valenceStrip, model3d, 'polarity-mark': polarityMark, 'arrow-draw': arrowDraw, 'equilibrium-arrow': equilibriumArrow, 'group-finder': groupFinder, 'skeletal-builder': skeletalBuilder, 'chain-tracer': chainTracer, 'newman-rotator': newmanRotator, 'chair-flip': chairFlip, 'cip-ranker': cipRanker };
+import mechanismPlayer from './mechanism-player.js';
+import energyDiagram from './energy-diagram.js';
+import sitePicker from './site-picker.js';
+export const WIDGETS = { 'lewis-builder': lewisBuilder, 'valence-strip': valenceStrip, model3d, 'polarity-mark': polarityMark, 'arrow-draw': arrowDraw, 'equilibrium-arrow': equilibriumArrow, 'group-finder': groupFinder, 'skeletal-builder': skeletalBuilder, 'chain-tracer': chainTracer, 'newman-rotator': newmanRotator, 'chair-flip': chairFlip, 'cip-ranker': cipRanker, 'mechanism-player': mechanismPlayer, 'energy-diagram': energyDiagram, 'site-picker': sitePicker };

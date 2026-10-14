@@ -1,5 +1,5 @@
 // Step renderers. Each renderer fills `host` and reports through ctx.
-import { svg as rdSvg } from './chem.js';
+import { svg as rdSvg, analyze } from './chem.js';
 import { gradeFormula } from './skeletal.js';
 import { WIDGETS } from './widgets/index.js';
 import { skillRule } from './skills.js';
@@ -31,6 +31,24 @@ export function molFigure(smiles, label, opts = {}) {
   fig.append(h('div', { class: 'mol-svg', html: rdSvg(smiles, opts), role: 'img', 'aria-label': label || smiles }));
   if (label) fig.append(h('figcaption', {}, label));
   return fig;
+}
+
+/**
+ * A reaction equation drawn as structures: eq = {reactants:[smiles | {smiles,label}], products:[...], cond?: 'acid catalyst', style?: 'auto'|'full'|'skeletal'}.
+ * 'auto' (default) draws small species (3 heavy atoms or fewer) with every H and larger ones skeletal, so H transfers stay visible.
+ */
+export function equationRow(eq) {
+  const row = h('div', { class: 'eqn', role: 'img', 'aria-label': 'Reaction equation' });
+  const fig = (x) => {
+    const o = typeof x === 'string' ? { smiles: x } : x;
+    const style = eq.style && eq.style !== 'auto' ? eq.style : (analyze(o.smiles).heavy.length <= 3 ? 'full' : 'skeletal');
+    return molFigure(o.smiles, o.label || '', { style, width: 170, height: 120, showCharge: true });
+  };
+  const side = (list) => list.forEach((x, i) => { if (i) row.append(h('span', { class: 'eqn-op', 'aria-hidden': 'true' }, '+')); row.append(fig(x)); });
+  side(eq.reactants);
+  row.append(h('span', { class: 'eqn-arrow', 'aria-hidden': 'true' }, '→', eq.cond ? h('small', {}, eq.cond) : null));
+  if (eq.products.length) side(eq.products); else row.append(h('span', { class: 'eqn-op' }, '?'));
+  return row;
 }
 
 let iupacMode = 'new';
@@ -123,10 +141,25 @@ function addPrompt(host, step) {
   if (step.figures) host.append(h('div', { class: 'pair figs' }, step.figures.map((f) => molFigure(f.smiles, f.label || '', { highlight: f.highlight || [] }))));
   else if (step.smiles && step.both) host.append(molPair(step.smiles, '', { highlight: step.highlight || [] }));
   else if (step.smiles) host.append(molFigure(step.smiles, '', { highlight: step.highlight || [], style: step.drawing }));
+  if (step.equation) host.append(equationRow(step.equation));
   if (step.visual) mountVisual(host, step.visual);
 }
 
 function mountVisual(host, visual) {
+  if (Array.isArray(visual)) {
+    // several panels side by side (each may have a caption in `title`), e.g. a wrong mechanism and the product it gives
+    const grid = h('div', { class: 'rv' });
+    host.append(grid);
+    visual.forEach((v) => {
+      const cell = h('div', { class: 'visual' });
+      if (v.title) cell.append(h('p', { class: 'rv-cap' }, v.title));
+      grid.append(cell);
+      const inner = h('div', { class: 'widget' });
+      cell.append(inner);
+      WIDGETS[v.widget].mount(inner, v.config, { onResult() {} });
+    });
+    return;
+  }
   const box = h('div', { class: 'visual' });
   host.append(box);
   const w = WIDGETS[visual.widget];
@@ -212,6 +245,8 @@ const RENDER = {
       const mv = step.moves[k++];
       const card = h('div', { class: 'move' });
       card.append(rich(mv.ask, 'p', 'ask'));
+      if (mv.equation) card.append(equationRow(mv.equation));
+      if (mv.visual) mountVisual(card, mv.visual);
       const opts = h('div', { class: 'opts', role: 'group' });
       const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
       mv.options.forEach((o) => {
@@ -222,7 +257,7 @@ const RENDER = {
             b.classList.add('good');
             fb.className = 'fb ok'; fb.innerHTML = '';
             fb.append(rich(o.why + (mv.then ? ' ' + mv.then : ''), 'p'));
-            if (mv.figure) fb.append(molFigure(mv.figure.smiles, mv.figure.label || '', { style: mv.figure.drawing, highlight: mv.figure.highlight || [] }));
+            if (mv.figure) fb.append(molFigure(mv.figure.smiles, mv.figure.label || '', { style: mv.figure.drawing, highlight: mv.figure.highlight || [], showCharge: !!mv.figure.showCharge }));
             next();
           } else {
             b.classList.add('bad'); b.disabled = true;
@@ -278,6 +313,8 @@ export function renderProblems(cfg, ctx, host) {
     stage.append(card);
     card.append(p.promptHtml ? rich(p.promptHtml, 'h2', 'prompt') : h('h2', { class: 'prompt' }, p.prompt));
     if (p.kind !== 'builder' && p.kind !== 'polarity' && p.kind !== 'arrows' && p.kind !== 'groupfind' && p.kind !== 'cip' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
+    if (p.equation) card.append(equationRow(p.equation));
+    if (p.visual) mountVisual(card, p.visual);
     const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
     const hints = h('div', { class: 'hints' });
     let wrong = 0, settled = false;

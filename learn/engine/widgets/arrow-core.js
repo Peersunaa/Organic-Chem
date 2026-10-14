@@ -87,6 +87,7 @@ export function describeSource(config, f) {
 }
 export function describeDest(config, f, d) {
   if (d.atom != null) return (f.bond ? 'onto ' : 'to ') + atomName(config, d.atom);
+  if (findBond(config.bonds, d.bond[0], d.bond[1]) < 0) return `to form a new bond between ${atomName(config, d.bond[0])} and ${atomName(config, d.bond[1])}`;
   return `into the bond between ${atomName(config, d.bond[0])} and ${atomName(config, d.bond[1])}`;
 }
 
@@ -99,8 +100,31 @@ export function badStart(config, i) {
   return `That arrow starts at an atom with no lone pair (${e}). Arrows start at electrons: a lone pair or a bond.${short ? ` ${e} is short of electrons, so it is where an arrow ENDS.` : ''}`;
 }
 
+/**
+ * A learner points the arrow from a bond (e.g. a C=C pi bond) at an atom outside it (e.g. the H of HCl); the data stores that as a
+ * NEW BOND to:{bond:[c, k]} so we know which end of the pi bond bonds to k. If the expected arrows hold exactly that, the drawn arrow
+ * is read as the expected one. Anything else is left alone (so Lesson 03 grading is unchanged).
+ */
+export function normalizeDrawn(config, d) {
+  if (!d.from.bond || d.to.atom == null || d.from.bond.includes(d.to.atom)) return d;
+  const k = d.to.atom;
+  const e = config.arrows.find((x) => x.to.bond && keyOf(x.from) === keyOf(d.from) && x.to.bond.includes(k) && x.to.bond.some((n) => d.from.bond.includes(n)));
+  return e ? { from: d.from, to: e.to } : d;
+}
+
+/** The atom an arrow head points at on screen: a new-bond destination points at the atom that is not the source atom/bond. */
+export function headAtom(config, ar) {
+  const d = ar.to;
+  if (d.atom != null) return { atom: d.atom };
+  if (findBond(config.bonds, d.bond[0], d.bond[1]) >= 0) return null; // an existing bond: point at its middle
+  const srcAtoms = ar.from.lp != null ? [ar.from.lp] : ar.from.bond || [];
+  const far = d.bond.find((n) => !srcAtoms.includes(n));
+  return far == null ? null : { atom: far };
+}
+
 /** drawn: arrows in the same shape as config.arrows (any order). */
-export function grade(config, drawn) {
+export function grade(config, drawnRaw) {
+  const drawn = drawnRaw.map((d) => normalizeDrawn(config, d));
   const exp = config.arrows;
   if (!drawn.length) return { ok: false, code: 'empty', diagnosis: 'Draw at least one arrow: tap the electrons it starts from, then the atom that receives them.', wrong: [], missing: exp.map((_, i) => i) };
   const expKeys = exp.map(arrowKey);
@@ -119,7 +143,7 @@ export function grade(config, drawn) {
     const d = drawn[wrong[0]];
     const sameFrom = exp.find((e) => keyOf(e.from) === keyOf(d.from));
     if (sameFrom) {
-      return { ok: false, code: 'dest', wrong, missing, diagnosis: `This arrow starts in the right place, but it points ${describeDest(config, d.from, d.to)}. ${sameFrom.note || `The electrons need to end up ${describeDest(config, sameFrom.from, sameFrom.to)}.`}` };
+      return { ok: false, code: 'dest', wrong, missing, diagnosis: `This arrow starts in the right place, but it points ${describeDest(config, d.from, d.to)}. ${sameFrom.note || `The electrons need to end up ${sameFrom.to.bond && findBond(config.bonds, sameFrom.to.bond[0], sameFrom.to.bond[1]) < 0 ? `as a new bond between ${atomName(config, sameFrom.to.bond[0])} and ${atomName(config, sameFrom.to.bond[1])}` : describeDest(config, sameFrom.from, sameFrom.to)}.`}` };
     }
     if (d.from.bond) {
       const rev = exp.find((e) => e.from.lp != null && e.to.atom != null && d.from.bond.includes(e.to.atom));
@@ -203,5 +227,5 @@ export function curve(p, q, endGap = 0) {
   const head = [[end.x, end.y], [base.x - t.y * w, base.y + t.x * w], [base.x + t.y * w, base.y - t.x * w]];
   // stop the stem slightly inside the head
   const stem = { x: end.x - t.x * (h - 3), y: end.y - t.y * (h - 3) };
-  return { d: `M${p.x.toFixed(1)} ${p.y.toFixed(1)} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${stem.x.toFixed(1)} ${stem.y.toFixed(1)}`, head: head.map((v) => v.map((n) => n.toFixed(1)).join(',')).join(' '), ctrl: c };
+  return { d: `M${p.x.toFixed(1)} ${p.y.toFixed(1)} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${stem.x.toFixed(1)} ${stem.y.toFixed(1)}`, head: head.map((v) => v.map((n) => n.toFixed(1)).join(',')).join(' '), ctrl: c, p0: p, stem };
 }

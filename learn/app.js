@@ -151,7 +151,7 @@ function lessonView(L) {
 }
 
 function practice(skill) {
-  setDrawStyle(['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names'].includes(generatorForSkill(skill)) ? 'skeletal' : 'full');
+  setDrawStyle(['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics'].includes(generatorForSkill(skill)) ? 'skeletal' : 'full');
   const host = h('div', { class: 'step' });
   const card = h('article', { class: 'card' }, host);
   const ctx = {

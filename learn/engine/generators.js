@@ -7,6 +7,7 @@ import { generateFg, FG_SKILLS } from './generators-fg.js';
 import { generateNames, NAMING_SKILLS } from './generators-names.js';
 import { generateChairs, CHAIR_SKILLS } from './generators-chairs.js';
 import { generateAlkenes, ALKENE_SKILLS } from './generators-alkenes.js';
+import { generateMech, MECH_SKILLS } from './generators-mech.js';
 
 export const POOL = ['CN', 'CC#N', 'OC=O', 'C[O-]', '[NH4+]', 'CCl', 'C=C', 'CC=O', 'CC(=O)O', 'COC', '[OH3+]', '[CH3+]', '[CH3-]', 'O=C=O'];
 const MINUS = '−';
@@ -166,6 +167,7 @@ export function generate(generatorId, count, { skill = null, rng = Math.random }
   if (generatorId === 'alkane-names') return generateNames(count, { skill, rng });
   if (generatorId === 'chairs') return generateChairs(count, { skill, rng });
   if (generatorId === 'alkene-names') return generateAlkenes(count, { skill, rng });
+  if (generatorId === 'mechanism-basics') return generateMech(count, { skill, rng });
   const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : BASIC_TASKS;
   const out = [];
   let last = null;
@@ -177,9 +179,9 @@ export function generate(generatorId, count, { skill = null, rng = Math.random }
   }
   return out;
 }
-export const GENERATORS = { 'lewis-basic': true, 'shape-basic': true, 'acid-base': true, 'skeletal-fg': true, 'alkane-names': true, 'chairs': true, 'alkene-names': true };
+export const GENERATORS = { 'lewis-basic': true, 'shape-basic': true, 'acid-base': true, 'skeletal-fg': true, 'alkane-names': true, 'chairs': true, 'alkene-names': true, 'mechanism-basics': true };
 /** Which generator serves "Practise this" for a weak-spot skill. */
-export function generatorForSkill(skill) { return ALKENE_SKILLS.includes(skill) ? 'alkene-names' : CHAIR_SKILLS.includes(skill) ? 'chairs' : NAMING_SKILLS.includes(skill) ? 'alkane-names' : FG_SKILLS.includes(skill) ? 'skeletal-fg' : ACID_SKILLS.includes(skill) ? 'acid-base' : SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
+export function generatorForSkill(skill) { return MECH_SKILLS.includes(skill) ? 'mechanism-basics' : ALKENE_SKILLS.includes(skill) ? 'alkene-names' : CHAIR_SKILLS.includes(skill) ? 'chairs' : NAMING_SKILLS.includes(skill) ? 'alkane-names' : FG_SKILLS.includes(skill) ? 'skeletal-fg' : ACID_SKILLS.includes(skill) ? 'acid-base' : SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
 
 const SUBS = '₀₁₂₃₄₅₆₇₈₉';
 const subNum = (n) => (n === 1 ? '' : String(n).split('').map((d) => SUBS[d]).join(''));

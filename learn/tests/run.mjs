@@ -30,8 +30,9 @@ import * as NR from '../engine/widgets/newman-rotator.js';
 import * as CC from '../engine/widgets/chair-core.js';
 import { lesson06 } from './lesson06.mjs';
 import { lesson07 } from './lesson07.mjs';
+import { lesson08 } from './lesson08.mjs';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -123,8 +124,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 9 && PLANNED[0].id === '08' && PLANNED[8].id === '16', 'placeholders 08-16');
-ok(LESSONS.length === 7 && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-07 registered and unlocked');
+ok(PLANNED.length === 8 && PLANNED[0].id === '09' && PLANNED[7].id === '16', 'placeholders 09-16');
+ok(LESSONS.length === 8 && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-08 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -144,7 +145,7 @@ for (const L of LESSONS) {
     for (const o of s.options || []) if (o.smiles) ok(canon(o.smiles) !== null, `${t} option smiles ${o.smiles} parses`);
     if (s.config && s.config.target) ok(canon(s.config.target) !== null, `${t} target parses`);
     if (s.derive && s.derive.smiles) ok(canon(s.derive.smiles) !== null, `${t} derive smiles parses`);
-    if (s.visual) ok((s.visual.widget === 'model3d' && models[s.visual.config.mol]) || (s.visual.widget === 'newman-rotator' && NR.MOLS[s.visual.config.mol] && models[s.visual.config.mol]) || (s.visual.widget === 'chair-flip' && CC.CHAIRS[s.visual.config.model]), `${t} visual model exists`);
+    if (s.visual) ok((s.visual.widget === 'model3d' && models[s.visual.config.mol]) || (s.visual.widget === 'newman-rotator' && NR.MOLS[s.visual.config.mol] && models[s.visual.config.mol]) || (s.visual.widget === 'chair-flip' && CC.CHAIRS[s.visual.config.model]) || (s.visual.widget === 'energy-diagram' && Array.isArray(s.visual.config.levels)), `${t} visual model exists`);
     // options
     if (s.type === 'predict' || s.type === 'choice') {
       ok(s.options.filter((o) => o.correct).length === 1, `${t} exactly one correct option`);
@@ -258,7 +259,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -1131,6 +1132,9 @@ await lesson06({ ok, eq });
 
 // ---- Lesson 07: alkene naming engine (OPSIN), CIP E/Z (RDKit new CIP labeler), cip-ranker widget, generator, lesson steps (tests/lesson07.mjs)
 await lesson07({ ok, eq });
+
+// ---- Lesson 08: mechanism-player data + arrow application, energy-diagram logic, site table, reaction kinds, `mechanism-basics` generator, lesson steps (tests/lesson08.mjs)
+await lesson08({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

@@ -68,8 +68,9 @@ export function canon(input) {
 }
 
 /** Per-atom facts computed from RDKit atom data. */
-export function analyze(smiles) {
-  const m = rdkit().get_mol(smiles);
+export function analyze(smiles, opts = {}) {
+  // opts.keepHs: keep explicit H atoms as atoms (SMILES like [H]O[H], or a molblock with H) instead of folding them into impH
+  const m = opts.keepHs ? rdkit().get_mol(smiles, JSON.stringify({ removeHs: false })) : rdkit().get_mol(smiles);
   if (!m) return null;
   try {
     const j = JSON.parse(m.get_json()).molecules[0];
@@ -140,7 +141,8 @@ export function svg(smiles, opts = {}) {
       if (h) {
         m.delete(); m = h;
         const labels = {};
-        JSON.parse(m.get_json()).molecules[0].atoms.forEach((a, i) => { if ((a.z ?? 6) === 6) labels[i] = 'C'; });
+        JSON.parse(m.get_json()).molecules[0].atoms.forEach((a, i) => { if ((a.z ?? 6) === 6) labels[i] = a.chg && opts.showCharge ? 'C<sup>' + (a.chg > 0 ? (a.chg > 1 ? a.chg : '') + '+' : (a.chg < -1 ? -a.chg : '') + '-') + '</sup>' : 'C'; });
+        // opts.showCharge keeps the charge of a charged carbon (carbocations, carbanions); off by default so the formal-charge exercises of Lessons 1-3 do not show their answer
         details.atomLabels = labels;
       }
     }
