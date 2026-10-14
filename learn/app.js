@@ -1,5 +1,5 @@
 // Orgo Learn: router, Home, lesson player, IUPAC toggle, weak-spot panel.
-import { ready } from './engine/chem.js';
+import { ready, setDrawStyle } from './engine/chem.js';
 import * as store from './engine/store.js';
 import { renderStep, renderProblems, h, setIupacMode } from './engine/steps.js';
 import { skillLabel } from './engine/skills.js';
@@ -90,6 +90,7 @@ function home() {
 
 // ---------------------------------------------------------------- Lesson player
 function lessonView(L) {
+  setDrawStyle(L.drawing || 'full');
   const steps = [...L.steps,
     { id: 'mastery', type: 'mastery', skill: 'mastery', mastery: L.mastery },
     { id: 'useit', type: 'useit', skill: 'useit', useIt: L.useIt }];

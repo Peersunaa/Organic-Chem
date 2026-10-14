@@ -101,15 +101,38 @@ export function coords2d(smiles) {
 
 const COLORS = { '#FF0000': 'var(--c-O, #d33)', '#0000FF': 'var(--c-N, #36c)', '#33CCCC': 'var(--c-F, #2aa)', '#00CC00': 'var(--c-Cl, #2a2)', '#FFCC33': 'var(--hl, #fc3)', '#CC00FF': 'var(--c-P, #a2c)' };
 
+/**
+ * Drawing style for depictions. 'full' = every atom written out (C labels + all H),
+ * used before skeletal structures are taught (Lessons 1–3). 'skeletal' = normal
+ * line drawing. A lesson sets it with `drawing: 'full' | 'skeletal'`.
+ */
+let drawStyle = 'full';
+export function setDrawStyle(s) { drawStyle = s === 'skeletal' ? 'skeletal' : 'full'; }
+export function getDrawStyle() { return drawStyle; }
+
 /** Themed RDKit depiction (no hardcoded black/white). */
 export function svg(smiles, opts = {}) {
-  const { width = 200, height = 140, highlight = [] } = opts;
-  const m = rdkit().get_mol(smiles);
+  const { width = 200, height = 140, highlight = [], style = drawStyle } = opts;
+  const R = rdkit();
+  let m = R.get_mol(smiles);
   if (!m) return '';
   try {
     const details = { width, height, bondLineWidth: 2, padding: 0.12, addAtomIndices: false };
-    if (highlight.length) { details.atoms = highlight; details.highlightColour = [1, 0.8, 0.2]; details.highlightRadius = 0.4; }
+    if (style === 'full') {
+      // add explicit H atoms (heavy-atom indices stay the same, so highlights still match)
+      const mb = m.add_hs();
+      const h = R.get_mol(mb, JSON.stringify({ removeHs: false }));
+      if (h) {
+        m.delete(); m = h;
+        const labels = {};
+        JSON.parse(m.get_json()).molecules[0].atoms.forEach((a, i) => { if ((a.z ?? 6) === 6) labels[i] = 'C'; });
+        details.atomLabels = labels;
+      }
+    }
+    if (highlight.length) { details.atoms = highlight; details.highlightColour = [1, 0.8, 0.2]; details.highlightRadius = 0.45; }
     let s = m.get_svg_with_highlights(JSON.stringify(details));
+    // highlights as a soft translucent ring so the atom underneath stays readable
+    s = s.replace(/<ellipse([^>]*?)style='[^']*'/g, "<ellipse$1style='fill:var(--hl, #fc3);fill-opacity:0.28;stroke:var(--hl, #fc3);stroke-width:2px;stroke-opacity:0.9'");
     s = s.replace(/<\?xml[^>]*\?>/, '')
       .replace(/<rect [^>]*fill:#FFFFFF[^>]*>\s*<\/rect>/, '')
       .replace(/width='\d+(\.\d+)?px' height='\d+(\.\d+)?px'/, '')

@@ -52,6 +52,8 @@ Rules for every graded step:
 - Every wrong attempt logs `{skill, stepId, lessonId, diagnosis, t}` to the weak-spot log.
 - Correct → one-line confirmation + short reinforcement, then "Continue".
 
+Drawing style: lesson field `drawing: 'full' | 'skeletal'` (default `'full'`). `full` writes every C and all H atoms; use it until skeletal structures are taught (Lessons 1–3), then `'skeletal'`. Highlights are translucent rings so the atom stays readable.
+
 Molecules in text: `<mol smiles="CO" label="methanol">` renders an RDKit SVG inline. Names: `{name:{new:"but-2-ene", old:"2-butene"}}` renders with the global IUPAC toggle (header switch "New IUPAC / Old IUPAC", persisted).
 
 ## 3. Lesson player UX
