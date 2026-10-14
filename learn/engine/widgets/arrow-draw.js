@@ -10,6 +10,8 @@
 //   caption          text under a preset scene.
 //   regio            Lesson 09: {pi:[hC,pC], H, ends:[{idx,text},{idx,text}], wrongWhy}. When the learner sends the pi bond [hC,pC] to the atom H, a two-button question
 //                    asks which carbon bonds to H (the arrow is stored as to:{bond:[carbon,H]}). arrow-core grade() gives wrongWhy for the wrong end.
+//   judge(drawn)     Lesson 11: replaces the grading against config.arrows (no expected arrows needed); returns {ok, diagnosis, wrong?: [arrow indices], message?}.
+//   regio.alt        Lesson 11: more {pi, H, ends} for the mirror-image C=C of a symmetric diene (the question is asked for either C=C).
 //   play()           (returned) animates the drawn arrows and sends two electron dots along each curve; resolves when finished
 //                    (immediately under prefers-reduced-motion).
 import { NAME } from '../chem.js';
@@ -174,8 +176,7 @@ export default {
     }
 
     function closeChooser() { if (chooser) { chooser.remove(); chooser = null; } }
-    function askEnd() {
-      const rg = config.regio;
+    function askEnd(rg = config.regio) {
       closeChooser();
       chooser = document.createElement('div');
       chooser.className = 'ad-regio';
@@ -221,7 +222,8 @@ export default {
       if (same) { src = null; say('Arrow cancelled. Tap the electrons the arrow starts from.'); draw(); return; }
       const from = src.bond ? { bond: src.bond } : { lp: src.lp };
       const to = t.kind === 'bond' ? { bond: t.bond } : { atom: t.atom };
-      if (config.regio && from.bond && keyOf(from) === keyOf({ bond: config.regio.pi }) && to.atom === config.regio.H) { askEnd(); return; }
+      const rgHit = config.regio && from.bond && to.atom != null && [config.regio, ...(config.regio.alt || [])].find((r) => keyOf(from) === keyOf({ bond: r.pi }) && to.atom === r.H);
+      if (rgHit) { askEnd(rgHit); return; }
       if (to.atom != null && from.lp === to.atom) { say('An arrow cannot point back to its own atom. Tap the atom that receives the electrons.'); return; }
       if (drawn.some((d) => keyOf(d.from) + '>' + keyOf(d.to) === keyOf(from) + '>' + keyOf(to))) { src = null; say('You already drew that arrow.'); draw(); return; }
       drawn.push({ from, to });
@@ -235,9 +237,9 @@ export default {
     host.querySelector('[data-act="reset"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn = []; badIdx = []; src = null; lastAdded = -1; say('Cleared. Tap the electrons the arrow starts from.'); draw(); });
     host.querySelector('[data-act="check"]').addEventListener('click', () => {
       if (finished) return;
-      const r = grade(config, drawn);
+      const r = config.judge ? config.judge(drawn) : grade(config, drawn);   // Lesson 11: config.judge(drawn) -> {ok, diagnosis, wrong?, message?} replaces grading against config.arrows (resonance-drawer)
       badIdx = r.wrong || [];
-      if (r.ok) { finished = true; host.querySelector('.lb-actions').hidden = true; say('All arrows correct.'); }
+      if (r.ok) { finished = true; host.querySelector('.lb-actions').hidden = true; say(r.message || 'All arrows correct.'); }
       lastAdded = -1;
       draw();
       ctx.onResult(r);

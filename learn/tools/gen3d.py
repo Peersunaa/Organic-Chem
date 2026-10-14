@@ -21,11 +21,13 @@ MOLS = {
     # Lesson 10: the cyclic bromonium ion of cyclohexene (Br+ bridges both carbons on one face). Neither MMFF nor UFF has parameters for Br+, so the
     # geometry is made for the isoelectronic selenirane stand-in (Se, same size and valence, neutral) and the Se atom is then relabelled Br with charge +1.
     "bromonium-cyclohexene": "C1CC[C@H]2[Br+][C@H]2C1",
+    # Lesson 11: buta-1,3-diene as the lowest-energy conformer (s-trans, C1=C2-C3=C4 dihedral ~180): the four sp2 carbons lie in one plane
+    "buta-1-3-diene": "C=CC=C",
 }
 STAND_IN = {"bromonium-cyclohexene": "C1CC[C@H]2[Se][C@H]2C1"}
 # Conformers that must be a specific shape: id -> (check on the embedded molecule).
 # butane must be the anti (zig-zag) conformer: lowest-energy of many embeds, C1-C2-C3-C4 dihedral ~180.
-MANY_CONFS = {"butane"}
+MANY_CONFS = {"butane", "buta-1-3-diene"}
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "3d")
 os.makedirs(out, exist_ok=True)
 # Existing models are kept byte-for-byte; only ids missing from models.js are generated (add --all to redo everything).
@@ -49,6 +51,12 @@ for name, smi in MOLS.items():
         m = m2
         d = abs(rdMolTransforms.GetDihedralDeg(m.GetConformer(), 0, 1, 2, 3))
         assert d > 170, (name, d)
+        if name == "buta-1-3-diene":
+            # the four carbons are coplanar: the C4 position lies in the plane of C1, C2, C3
+            import numpy as np
+            P = m.GetConformer().GetPositions()
+            nrm = np.cross(P[1] - P[0], P[2] - P[0]); nrm /= np.linalg.norm(nrm)
+            assert abs(np.dot(P[3] - P[0], nrm)) < 0.05, (name, np.dot(P[3] - P[0], nrm))
     else:
         assert AllChem.EmbedMolecule(m, randomSeed=7) == 0, name
         # MMFF pyramidalises a bare C+ a little (angle sum ~356 deg); UFF keeps the trigonal-planar sp2 centre

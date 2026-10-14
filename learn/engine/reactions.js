@@ -301,3 +301,6 @@ export { MINUS, formulaOf, hText };
 
 // Lesson 10: halogens, H2, epoxidation, KMnO4 and polymers (stereo-aware). Extends this module additively.
 export * from './reactions-additions.js';
+
+// Lesson 11: conjugated dienes + HX (1,2- and 1,4-addition through the allylic cation). Extends this module additively.
+export * from './reactions-dienes.js';

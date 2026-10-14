@@ -60,7 +60,7 @@ export function nameSpan(n) { const s = h('span', { class: 'iupac', 'data-name-n
 export function enhance(root) {
   root.querySelectorAll('mol').forEach((m) => {
     const draw = m.getAttribute('draw');
-    m.replaceWith(molFigure(m.getAttribute('smiles'), m.getAttribute('label') || '', draw ? { style: draw } : {}));
+    m.replaceWith(molFigure(m.getAttribute('smiles'), m.getAttribute('label') || '', { ...(draw ? { style: draw } : {}), ...(m.hasAttribute('raw') ? { raw: true } : {}) }));
   });
   root.querySelectorAll('molpair').forEach((m) => {
     const hl = (m.getAttribute('hl') || '').split(',').filter(Boolean).map(Number);
@@ -198,7 +198,7 @@ const RENDER = {
     const g = grader(step, ctx, host);
     const list = h('div', { class: 'opts' + (step.options.some((o) => o.smiles) ? ' mols' : ''), role: 'group' });
     step.options.forEach((o) => {
-      const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.label || '') : rich(o.text, 'span'));
+      const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.label || '', o.raw ? { raw: true, showCharge: true } : {}) : rich(o.text, 'span'));
       b.addEventListener('click', () => {
         if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); g.right(o.why); }
         else { b.classList.add('bad'); b.disabled = true; g.wrong(o.why); }
@@ -358,7 +358,7 @@ export function renderProblems(cfg, ctx, host) {
     } else if (p.kind === 'choice') {
       const list = h('div', { class: 'opts' + (p.options.some((o) => o.smiles) ? ' mols' : ''), role: 'group' });
       p.options.forEach((o) => {
-        const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.text || '') : rich(o.text, 'span'));
+        const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.text || '', o.raw ? { raw: true, showCharge: true } : {}) : rich(o.text, 'span'));
         b.addEventListener('click', () => {
           if (settled) return;
           if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); onRight(); }

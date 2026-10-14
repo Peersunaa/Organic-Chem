@@ -359,6 +359,28 @@ h3 { font: 600 .8rem/1 var(--mono); letter-spacing: .08em; text-transform: upper
 .cl-end { position: absolute; width: 24px; height: 24px; margin: -30px 0 0 -12px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 .8rem/24px var(--mono); text-align: center; pointer-events: none; }
 .fa-out:empty { display: none; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* Lesson 11: resonance-drawer */
+.rd { display: grid; gap: 12px; min-width: 0; }
+.rd-count { margin: 0; font-size: 1.05rem; }
+.rd-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; }
+.rd-arrow { font-size: 1.5rem; font-weight: 700; color: var(--accent); padding: 0 2px; }
+.rd-thumb { display: inline-grid; place-items: center; width: clamp(96px, 28vw, 138px); aspect-ratio: 1.25 / 1; padding: 4px; border-radius: 12px; border: 2px solid var(--line-strong); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.rd-thumb.on { border-color: var(--accent); background: var(--accent-soft); }
+.rd-thumb.ghost { border-style: dashed; color: var(--muted); font-size: 1.6rem; cursor: default; }
+.rd-form-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.rd-bond { stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; fill: none; }
+.rd-bond.rd-dash { stroke-dasharray: 5 4; }
+.rd-el { font: 600 15px var(--body); fill: currentColor; }
+.rd-el-O { fill: var(--c-O); } .rd-el-N { fill: var(--c-N); } .rd-el-Cl { fill: var(--c-Cl); } .rd-el-Br, .rd-el-I { fill: var(--c-P); } .rd-el-F { fill: var(--c-F); }
+.rd-chg { fill: var(--surface); stroke-width: 1.6; } .rd-chg.pos { stroke: var(--c-N); } .rd-chg.neg { stroke: var(--c-O); }
+.rd-chgt { font: 700 12px var(--body); fill: currentColor; }
+.rd-delta { font: 700 13px var(--body); } .rd-delta.pos { fill: var(--c-N); } .rd-delta.neg { fill: var(--c-O); }
+.rd-note { margin: 0; } .rd-stage { min-width: 0; } .rd-canvas { min-width: 0; }
+.rd-hybrid { display: grid; gap: 6px; justify-items: start; padding: 12px; border-radius: 14px; border: 2px solid var(--ok); background: var(--ok-soft); }
+.rd-hybrid .rd-form-svg { max-width: 240px; } .rd-hyb-h { margin: 0; } .rd-ok { margin: 0; color: var(--ok); font-weight: 600; }
+.rl-res { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; } .rl-double { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+.rl-res .rl-cat { flex: 0 1 160px; }
 </style>
 
 <div id="app" aria-live="off"><p class="muted" style="padding:24px 16px">Loading Orgo Learn…</p></div>

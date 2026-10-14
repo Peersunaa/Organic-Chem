@@ -130,11 +130,12 @@ export function getDrawStyle() { return drawStyle; }
 export function svg(smiles, opts = {}) {
   const { width = 200, height = 140, highlight = [], style = drawStyle } = opts;
   const R = rdkit();
-  let m = R.get_mol(smiles);
+  // Lesson 11: opts.raw draws a structure RDKit would refuse (a carbon with five bonds, for the 'not a valid resonance form' traps), without sanitising it
+  let m = opts.raw ? R.get_mol(smiles, JSON.stringify({ sanitize: false })) : R.get_mol(smiles);
   if (!m) return '';
   try {
     const details = { width, height, bondLineWidth: 2, padding: 0.12, addAtomIndices: false };
-    if (style === 'full') {
+    if (style === 'full' && !opts.raw) {
       // add explicit H atoms (heavy-atom indices stay the same, so highlights still match)
       const mb = m.add_hs();
       const h = R.get_mol(mb, JSON.stringify({ removeHs: false }));

@@ -140,7 +140,7 @@ export function grade(config, drawnRaw) {
   for (const m of config.equiv) {
     const mapped = drawnRaw.map((d) => ({ from: swap(d.from, m), to: swap(d.to, m) }));
     const r = gradeCore(config, mapped);
-    if (r.ok) return r;
+    if (r.ok || r.code === 'regio') return r;      // Lesson 11: a wrong H position on the mirror-image C=C of a symmetric diene gets its regiochemistry diagnosis
   }
   return first;
 }
