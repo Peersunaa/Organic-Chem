@@ -121,6 +121,35 @@ export function freeAngles(occupied, k) {
   return out;
 }
 
+/**
+ * Angles for k lone pairs on an atom whose bonds point along `bondAngs`.
+ * Pairs go into the open gaps between bonds, spread evenly inside each gap,
+ * always filling the gap that leaves the widest spacing (so water's two pairs
+ * sit on the open side, not squeezed between the O–H bonds).
+ */
+export function lonePairAngles(bondAngs, k) {
+  if (k <= 0) return [];
+  if (!bondAngs.length) return Array.from({ length: k }, (_, i) => -Math.PI / 2 + (i * TAU) / Math.max(k, 4));
+  const s = bondAngs.map((t) => ((t % TAU) + TAU) % TAU).sort((a, b) => a - b);
+  const gaps = s.map((t, i) => {
+    const next = i + 1 < s.length ? s[i + 1] : s[0] + TAU;
+    return { start: t, size: next - t, n: 0 };
+  });
+  // on equal gaps prefer the one facing up (screen angle −90°), the way pairs are usually drawn
+  const upness = (g) => angDist(g.start + g.size / 2, -Math.PI / 2);
+  for (let p = 0; p < k; p++) {
+    let best = gaps[0];
+    for (const g of gaps) {
+      const a = g.size / (g.n + 2), b = best.size / (best.n + 2);
+      if (a > b + 1e-6 || (Math.abs(a - b) <= 1e-6 && upness(g) < upness(best))) best = g;
+    }
+    best.n++;
+  }
+  const out = [];
+  for (const g of gaps) for (let j = 1; j <= g.n; j++) out.push(g.start + (g.size * j) / (g.n + 1));
+  return out;
+}
+
 export function bondAngles(state, i) {
   const a = state.atoms[i];
   const out = [];

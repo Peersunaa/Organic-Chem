@@ -1,6 +1,6 @@
 // Widget: Lewis structure builder (tap bonds to cycle order, tap atoms to add lone pairs / charge).
 import { NAME } from '../chem.js';
-import { initialState, evaluate, bondOrderSum, freeAngles, bondAngles, fmtCharge } from './lewis-core.js';
+import { initialState, evaluate, bondOrderSum, freeAngles, lonePairAngles, bondAngles, fmtCharge } from './lewis-core.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const SCALE = 64;
@@ -89,9 +89,9 @@ export default {
         const [x, y] = P(a);
         const r = radius(a.el);
         const g = el('g', { class: 'lb-atom' + (sel === i ? ' sel' : '') });
+        const bAngs = bondAngles(state, i);
+        const angs = a.el !== 'H' ? lonePairAngles(bAngs, a.lp) : [];
         if (a.el !== 'H') {
-          const occ = bondAngles(state, i).concat([-Math.PI / 4]);
-          const angs = freeAngles(occ, a.lp);
           angs.forEach((t, k) => {
             const cx = x + Math.cos(t) * (r + 9), cy = y + Math.sin(t) * (r + 9);
             const px = -Math.sin(t) * 4.5, py = Math.cos(t) * 4.5;
@@ -104,8 +104,11 @@ export default {
         g.appendChild(el('circle', { cx: x, cy: y, r, class: 'lb-disc' }));
         g.appendChild(el('text', { x, y: y + 0.5, class: 'lb-el' }, a.el));
         if (a.charge) {
-          g.appendChild(el('circle', { cx: x + r * 0.95, cy: y - r * 0.95, r: 9, class: 'lb-chg' }));
-          g.appendChild(el('text', { x: x + r * 0.95, y: y - r * 0.95 + 0.5, class: 'lb-chgt' }, a.charge > 0 ? '+' : '−'));
+          // put the charge badge in the widest gap left after bonds and lone pairs
+          const [ct] = freeAngles(bAngs.concat(angs), 1);
+          const cx = x + Math.cos(ct) * r * 1.35, cy = y + Math.sin(ct) * r * 1.35;
+          g.appendChild(el('circle', { cx, cy, r: 9, class: 'lb-chg' }));
+          g.appendChild(el('text', { x: cx, y: cy + 0.5, class: 'lb-chgt' }, a.charge > 0 ? '+' : '−'));
         }
         const hitc = el('circle', { cx: x, cy: y, r: r + 10, class: 'lb-hit-atom' });
         g.appendChild(hitc);
