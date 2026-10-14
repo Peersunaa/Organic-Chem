@@ -2,6 +2,10 @@
 import { LESSONS, PLANNED } from '../lessons/index.js';
 import { ready, rdkit, canon, analyze, VALENCE, ENEG, groupCount, hybridOf, sigmaPi, bondClass } from '../engine/chem.js';
 import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { SHAPE_POOL, bondTypes } from '../engine/generators-shape.js';
 import * as pm from '../engine/widgets/polarity-mark.js';
 import { generate, generatorForSkill, POOL, formula } from '../engine/generators.js';
@@ -18,6 +22,9 @@ import * as gf from '../engine/widgets/group-finder.js';
 import * as sb from '../engine/widgets/skeletal-builder.js';
 import { FG, FG_POOL, QUIZ_GROUPS, GROUP_IDS, classify, matchGroup, allMatches, singleGroups } from '../engine/functional-groups.js';
 import { hCount, lineCount, formulaCounts, hill, formulaOf, parseFormula, gradeFormula, condensedToSmiles, sameCounts } from '../engine/skeletal.js';
+import { nameAlkane, nameBoth, alkaneInfo, normName, acceptedNames, matchesName, wrongNames, buildSmiles, carbonClass, parentInfo, numberingEnds, locantsFrom, diagnoseTyped, subInfo, SUB_IDS, parseAlkane, assembleName } from '../engine/naming.js';
+import * as ct from '../engine/widgets/chain-tracer.js';
+import { randomAcyclic, randomRing, randomMolecule, makeNameProblem } from '../engine/generators-names.js';
 import { ARROW_BASES, ARROW_ACIDS, arrowScene, LEWIS_POOL } from '../engine/generators-acid.js';
 
 const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships']);
@@ -112,8 +119,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 12 && PLANNED[0].id === '05' && PLANNED[11].id === '16', 'placeholders 05-16');
-ok(LESSONS.length === 4 && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04', 'lessons 01-04 registered and unlocked');
+ok(PLANNED.length === 11 && PLANNED[0].id === '06' && PLANNED[10].id === '16', 'placeholders 06-16');
+ok(LESSONS.length === 5 && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05', 'lessons 01-05 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -247,7 +254,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -596,7 +603,7 @@ function checkArrowConfig(t, c, reactants, products) {
   ok(seen.size > 8, `skeletal-fg varies molecules (${seen.size})`);
   ok(generatorForSkill('skeletal') === 'skeletal-fg' && generatorForSkill('functional-groups') === 'skeletal-fg' && generatorForSkill('hybridization') === 'shape-basic' && generatorForSkill('pka-direction') === 'acid-base', 'generatorForSkill routes skeletal and functional-groups');
   // the highlighted-atom count in name problems: every quiz group can be asked
-  const asked = new Set(); for (let i = 0; i < 400; i++) generate('skeletal-fg', 1, { skill: 'functional-groups' }).forEach((p) => { if (p.kind === 'choice') asked.add(p.options.find((o) => o.correct).text); });
+  const asked = new Set(); let seedFG = 12345; const rngFG = () => (seedFG = (seedFG * 16807) % 2147483647) / 2147483647; for (let i = 0; i < 1500; i++) generate('skeletal-fg', 1, { skill: 'functional-groups', rng: rngFG }).forEach((p) => { if (p.kind === 'choice') asked.add(p.options.find((o) => o.correct).text); });
   ok(QUIZ_GROUPS.filter((g) => g !== 'alkane').every((g) => asked.has(FG[g].name)), `name task reaches every group (${[...asked].length})`);
 }
 
@@ -829,6 +836,290 @@ eq(analyze('CC=O').totalValence, 18, 'acetaldehyde valence e'); eq(analyze('[NH4
   ok(models.co2.molblock.split('\n')[4].includes(' O ') && models.acetylene.smiles === 'C#C' && models.ethylene.smiles === 'C=C', '3D atom order as lesson indices assume');
   const hcn = models.hcn.molblock.split('\n');
   ok(modelAngle(models.hcn.molblock, 0, 1, 2) > 170 || modelAngle(models.hcn.molblock, 1, 0, 2) > 170 || modelAngle(models.hcn.molblock, 2, 0, 1) > 170, `HCN is linear (${hcn.length} lines)`);
+}
+
+// ---- Lesson 05: naming engine, OPSIN round-trips, hand-checked fixture, widget, generator, lesson specifics
+{
+  const HERE = path.dirname(fileURLToPath(import.meta.url));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'orgo-names-'));
+  /** OPSIN (py2opsin) name -> SMILES for a batch of names; '' where OPSIN cannot parse. */
+  function opsin(names) {
+    const uniq = [...new Set(names)];
+    const inp = path.join(tmp, 'in.json'), out = path.join(tmp, 'out.json');
+    fs.writeFileSync(inp, JSON.stringify(uniq));
+    execFileSync('python3', [path.join(HERE, '..', 'tools', 'check_names.py'), inp, out], { stdio: ['ignore', 'ignore', 'ignore'] });
+    return JSON.parse(fs.readFileSync(out, 'utf8'));
+  }
+  const tagChecks = [];
+  const queue = []; // {name, smiles, label}: every name is checked against OPSIN in one batch at the end of this block
+  const expectOpsin = (name, smiles, label) => queue.push({ name, smiles, label });
+
+  // ---- (2) hand-checked fixture
+  const fx = JSON.parse(fs.readFileSync(path.join(HERE, 'fixtures', 'alkane-names.json'), 'utf8')).names;
+  ok(fx.length >= 25, `fixture has at least 25 names (${fx.length})`);
+  const fxSmiles = new Set(fx.map((f) => canon(f.smiles)));
+  ok(fxSmiles.size === fx.length, 'fixture structures are all different');
+  let fxMatch = 0;
+  for (const f of fx) {
+    const want = { new: f.new, old: f.old || f.new };
+    const got = nameBoth(f.smiles);
+    const same = !!got && got.new === want.new && got.old === want.old;
+    if (same) fxMatch++;
+    ok(same, `fixture ${f.smiles}: engine ${JSON.stringify(got)} vs hand-checked ${JSON.stringify(want)}`);
+    expectOpsin(want.new, f.smiles, 'fixture new');
+    if (want.old !== want.new) expectOpsin(want.old, f.smiles, 'fixture old');
+  }
+  for (const must of ['4-ethyl-2-methylhexane', '2,2,4-trimethylpentane', '3-methylhexane', '3-ethyl-2-methylpentane', '1,1-dimethylcyclohexane', '1-ethyl-3-methylcyclopentane', 'propylcyclohexane', '1-tert-butyl-4-methylcyclohexane', '2-methyl-4-(propan-2-yl)heptane'])
+    ok(fx.some((f) => f.new === must), `fixture includes the trap ${must}`);
+  ok(fx.some((f) => f.old === '4-isopropyl-2-methylheptane' && f.new === '2-methyl-4-(propan-2-yl)heptane'), 'fixture has the old/new pair isopropyl vs propan-2-yl');
+
+  // ---- scope: outside it returns null
+  for (const bad of ['CCO', 'C=C', 'C#C', 'c1ccccc1', 'CC(Cl)C', 'C1CC1C1CC1', 'C[C@H](F)CC', 'C1CC2CCC1C2', '[CH3+]', 'CC.CC', 'not a smiles', 'CC(C)C(C)C1CCCCC1'])
+    ok(nameAlkane(bad, 'new') === null, `out of scope returns null: ${bad}`);
+
+  // ---- independent checks on the structure -> name logic (no OPSIN, no engine code): a brute-force longest path
+  function longestPathLen(smi) {
+    const info = analyze(smi); const adj = info.atoms.map((a) => a.nbrs);
+    let best = 0;
+    const dfs = (v, seen) => { best = Math.max(best, seen.size); for (const w of adj[v]) if (!seen.has(w)) { seen.add(w); dfs(w, seen); seen.delete(w); } };
+    info.atoms.forEach((_, i) => dfs(i, new Set([i])));
+    return best;
+  }
+  for (const smi of ['CC(C)CC(CC)CC', 'CCC(C)CCC', 'CC(C)C(CC)CC', 'CCC(CC)C(C)(C)CCC', 'CC(C)(C)CC(C)C', 'CCCC(CCC)C(C)(C)C', 'CC(C)(C)C(CC)CCC']) {
+    const pi = parentInfo(smi);
+    ok(pi.L === longestPathLen(smi), `longest chain of ${smi}: engine ${pi.L} vs brute force ${longestPathLen(smi)}`);
+    ok(pi.best.every((p) => p.length === pi.L) && pi.longest.every((p) => p.length === pi.L), `${smi} candidate chains all have the longest length`);
+  }
+
+  // ---- typed answers: either style, any case/spaces/hyphens
+  ok(normName(' 2-Methyl-4-(Propan-2-yl) HEPTANE ') === '2methyl4propan2ylheptane', 'normName ignores case, spaces, hyphens, brackets');
+  const IP = 'CC(C)CC(CCC)C(C)C';
+  ok(matchesName(IP, '2-methyl-4-(propan-2-yl)heptane') && matchesName(IP, '4-Isopropyl-2-methylheptane') && matchesName(IP, '2 methyl 4 propan-2-yl heptane') && matchesName(IP, '4 isopropyl 2 methyl heptane'), 'both styles accepted, spacing/case/hyphens normalized');
+  ok(!matchesName(IP, '2-methyl-4-isopropylheptane') && !matchesName(IP, '4-(propan-2-yl)-2-methylheptane') && !matchesName(IP, '4-isopropyl-6-methylheptane'), 'wrong order or wrong end rejected');
+  eq(acceptedNames('CC(C)CC(CC)CC'), ['4-ethyl-2-methylhexane'], 'identical styles are stored once');
+  eq(acceptedNames(IP), ['2-methyl-4-(propan-2-yl)heptane', '4-isopropyl-2-methylheptane'], 'accepted names for the isopropyl case');
+  ok(carbonClass('CC(C)(C)CC(C)C', 1) === 4 && carbonClass('CC(C)(C)CC(C)C', 4) === 2 && carbonClass('CC(C)(C)CC(C)C', 5) === 3 && carbonClass('CC(C)(C)CC(C)C', 0) === 1, 'carbon classes of 2,2,4-trimethylpentane');
+
+  // ---- structure building round trips (buildSmiles -> nameAlkane -> same carbon count) over every substituent
+  for (const id of SUB_IDS) {
+    const s = buildSmiles({ kind: 'ring', size: 6, subs: [{ id, loc: 1 }] });
+    const nb = nameBoth(s);
+    ok(!!nb, `ring with ${id} is in scope`);
+    expectOpsin(nb.new, s, `ring ${id} new`); expectOpsin(nb.old, s, `ring ${id} old`);
+  }
+
+  // ---- (1) random molecules: every generated name (both styles) must come back from OPSIN as the same structure
+  const rng = Math.random;
+  const mols = [];
+  for (let i = 0; i < 150; i++) mols.push(randomMolecule(rng));
+  let nulls = 0;
+  for (const smi of mols) {
+    const nb = nameBoth(smi);
+    if (!nb) { nulls++; continue; }
+    expectOpsin(nb.new, smi, 'random new'); expectOpsin(nb.old, smi, 'random old');
+    const info = alkaneInfo(smi, 'new');
+    const carbons = analyze(smi).atoms.length;
+    ok(info.parent.size + info.subs.reduce((t, x) => t + (subInfo(x.id).size), 0) === carbons, `carbon bookkeeping for ${smi} (${nb.new})`);
+    const f = hillIndependent(smi);
+    ok(f === (info.kind === 'ring' ? `C${carbons}H${2 * carbons}` : `C${carbons}H${2 * carbons + 2}`), `${smi} formula ${f} is CnH2n(+2)`);
+  }
+  ok(nulls === 0, `generator only emits molecules the engine names (${nulls} nulls out of ${mols.length})`);
+  ok(mols.some((m) => parseAlkane(m).ring) && mols.some((m) => !parseAlkane(m).ring), 'both acyclic and ring molecules appear');
+  for (const smi of mols.filter((m) => !parseAlkane(m).ring)) { const n = analyze(smi).atoms.length; ok(n >= 5 && n <= 9, `acyclic problem has 5-9 carbons (${smi}: ${n})`); }
+
+  // ---- mastery generator "alkane-names": 50 problems (fresh each run)
+  const probs = generate('alkane-names', 50);
+  ok(probs.length === 50, 'alkane-names makes 50 problems');
+  const kinds = new Set();
+  for (const p of probs) {
+    kinds.add(p.kind + ':' + (p.name ? 'name' : p.target ? 'pick' : 'class'));
+    ok(p.prompt && p.derive && p.hints.length === 2 && p.hints.every((x) => x.length > 5) && p.skill === 'naming' && TAXONOMY.has(p.skill), 'names gen fields');
+    if (p.name) {
+      const nb = nameBoth(p.smiles);
+      ok(!!nb && p.answer === nb.new && (p.accept.length === 0 ? nb.old === nb.new : p.accept[0] === nb.old), `name task answer from engine ${p.smiles}`);
+      const st = { answer: p.answer, accept: p.accept, name: p.name, diagnoseFn: p.diagnoseFn, diagnose: p.wrong, fallback: p.fallback, skill: p.skill };
+      ok(checkInput(st, nb.new).ok && checkInput(st, nb.old).ok && checkInput(st, nb.new.toUpperCase().replace(/-/g, ' ')).ok, `name task accepts both styles, case, spaces and hyphens ${p.smiles}`);
+      ok(!checkInput(st, nb.new + 'x').ok && !checkInput(st, '').ok, 'name task rejects a wrong name');
+      for (const w of p.wrong) {
+        const r = checkInput(st, w.match);
+        ok(!r.ok && r.diagnosis === w.why, `wrong variant ${w.match} routes to its diagnosis`);
+        ok(w.why.length > 30, 'wrong variant has a specific diagnosis');
+        expectOpsin(w.match, p.smiles, 'wrong-variant is an alternative (non-preferred) name of the same molecule');
+      }
+      ok(typeof checkInput(st, 'hexane').diagnosis === 'string' && checkInput(st, 'hexane').diagnosis.length > 20, 'typed nonsense still gets a diagnosis');
+    } else if (p.target) {
+      ok(p.options.length === 4 && p.options.filter((o) => o.correct).length === 1, 'pick task: 4 options, one correct');
+      const cs = p.options.map((o) => canon(o.smiles));
+      ok(new Set(cs).size === 4 && cs.every(Boolean), 'pick task: options are distinct valid structures');
+      ok(p.options.every((o) => (canon(o.smiles) === canon(p.target)) === !!o.correct), 'pick task: graded by canonical SMILES');
+      ok(p.options.every((o) => o.why && o.why.length > 20) && p.options.every((o) => nameBoth(o.smiles)), 'pick task: every option has a why and is in scope');
+      const m = /new="([^"]+)" old="([^"]+)"/.exec(p.promptHtml);
+      ok(!!m, 'pick task prompt carries both styles');
+      expectOpsin(m[1], p.target, 'pick prompt new'); expectOpsin(m[2], p.target, 'pick prompt old');
+      ok(p.options.filter((o) => !o.correct).every((o) => nameBoth(o.smiles).new !== m[1]), 'pick distractors are different compounds');
+    } else {
+      const idx = p.highlight[0];
+      const info = atomsIndependent(p.smiles);
+      const nC = info[idx].bondsTo.filter((k) => info[k].sym === 'C').length;
+      ok(p.options.filter((o) => o.correct).length === 1 && p.options.find((o) => o.correct).text.startsWith(nC + '°'), `class task ${p.smiles} atom ${idx}: ${nC} carbon neighbours`);
+      ok(p.options.every((o) => o.why.length > 20), 'class task whys');
+    }
+  }
+  ok(kinds.size >= 3, `name, pick and class tasks all appear (${[...kinds]})`);
+  const run = () => generate('alkane-names', 6).map((p) => p.smiles || p.target).join('|');
+  ok(new Set([run(), run(), run(), run(), run()]).size > 1, 'alkane-names is fresh each run');
+  ok(generatorForSkill('naming') === 'alkane-names', 'weak-spot "naming" routes to the alkane-names generator');
+
+  // ---- chain-tracer widget
+  {
+    const t10 = { smiles: 'CC(C)CC(CC)CC', task: 'trace' };
+    const sol = ct.solution(t10);
+    ok(ct.grade(t10, sol).ok, 'tracer accepts a longest chain');
+    ok(ct.grade(t10, []).empty === true, 'tracer empty is not ok');
+    const pi = parentInfo(t10.smiles);
+    ok(pi.best.every((c) => ct.grade(t10, c).ok), 'tracer accepts every longest chain with the most branches');
+    ok(!ct.grade(t10, sol.slice(0, 4)).ok && /early|shorter/.test(ct.grade(t10, sol.slice(0, 4)).diagnosis), 'tracer rejects a chain that stops early');
+    ok(/shorter chain/.test(ct.grade(t10, [0, 1, 3, 4]).diagnosis) || /early/.test(ct.grade(t10, [0, 1, 3, 4]).diagnosis), 'tracer shorter-chain diagnosis');
+    ok(/not one unbroken chain/.test(ct.grade(t10, [0, 6]).diagnosis), 'tracer rejects a disconnected pick');
+    ok(/cannot fork/.test(ct.grade(t10, [1, 0, 2, 3]).diagnosis), 'tracer rejects a forked pick');
+    const t11 = { smiles: 'CC(C)C(CC)CC', task: 'trace' };
+    const lens = parentInfo(t11.smiles);
+    ok(lens.L === 5 && lens.longest.length > lens.best.length, 'L05 tie case: more 5-carbon chains than the ones with most branches');
+    const loser = lens.longest.find((p) => !lens.best.some((b) => b.length === p.length && b.every((x) => p.includes(x))));
+    ok(!!loser && !ct.grade(t11, loser).ok && /more branches/.test(ct.grade(t11, loser).diagnosis), 'tracer: equal-length chain with fewer branches loses the tie');
+    const t12 = { smiles: 'CC(C)CC(CC)CC', task: 'number' };
+    const info = alkaneInfo(t12.smiles, 'new');
+    const ends = numberingEnds(t12.smiles);
+    ok(ends.length >= 1 && ends.every((e) => ct.grade(t12, [e]).ok), 'number: the correct end is accepted');
+    const c1 = info.parentAtoms[0], other = info.parentAtoms[info.parentAtoms.length - 1];
+    ok(ends.includes(c1) && !ends.includes(other) && !ct.grade(t12, [other]).ok, 'number: the other end is rejected');
+    const dg = ct.grade(t12, [other]).diagnosis;
+    ok(/3, 5/.test(dg) && /2, 4/.test(dg), 'number: diagnosis shows the locants from each end');
+    eq(locantsFrom(t12.smiles, c1), [2, 4], 'number: locants from the right end');
+    eq(locantsFrom(t12.smiles, other), [3, 5], 'number: locants from the wrong end');
+    ok(!ct.grade(t12, [0, 0].length ? [999] : []).ok, 'number: an atom off the chain is rejected');
+    const mid = info.parentAtoms[2];
+    ok(!ct.grade(t12, [mid]).ok && /end/.test(ct.grade(t12, [mid]).diagnosis), 'number: a middle carbon is not C1');
+    const t17 = { smiles: 'CCCC1CCCC1', task: 'parent' };
+    const pr = parentInfo(t17.smiles);
+    ok(pr.kind === 'ring' && pr.ringSize === 5 && pr.chainLen === 3, 'parent: ring 5 vs chain 3 -> ring');
+    ok(ct.grade(t17, ct.solution(t17)).ok && ct.grade(t17, pr.ring).ok, 'parent: whole ring accepted');
+    ok(!ct.grade(t17, pr.chains[0]).ok && /ring is at least as big/.test(ct.grade(t17, pr.chains[0]).diagnosis), 'parent: picking the chain is rejected with a reason');
+    ok(!ct.grade(t17, [...pr.ring, ...pr.chains[0]]).ok, 'parent: both together rejected');
+    const flip = { smiles: 'CCCCC1CC1', task: 'parent' };
+    const pf = parentInfo(flip.smiles);
+    ok(pf.kind === 'chain' && pf.chainLen === 4 && pf.ringSize === 3 && ct.grade(flip, pf.chains[0]).ok && !ct.grade(flip, pf.ring).ok && /chain/.test(ct.grade(flip, pf.ring).diagnosis), 'parent: chain 4 vs ring 3 -> chain');
+    ok(parentInfo('CCCC1CC1').kind === 'ring', 'parent: equal ring and chain -> ring');
+  }
+
+  // ---- Lesson 05 specifics
+  {
+    const l = LESSONS.find((x) => x.id === '05');
+    ok(l.steps.length >= 15 && l.steps.length <= 18, `L05 has 15-18 steps (${l.steps.length})`);
+    ok(l.drawing === 'skeletal' && l.minutes === 25 && l.chapter === 2, 'L05 drawing skeletal, 25 min, chapter 2');
+    eq(l.sections, ['2.2', '2.3', '2.7'], 'L05 sections');
+    eq(l.mastery, { count: 3, generator: 'alkane-names' }, 'L05 mastery uses alkane-names');
+    ok(l.steps[0].type === 'predict' && l.steps.findIndex((s) => s.type === 'explain') > 1, 'L05 acts before it explains');
+    ok(l.steps.every((s) => TYPES.has(s.type)), 'L05 step types');
+    ok(l.steps.every((s) => s.skill === 'naming'), 'L05 steps tagged naming');
+    // (a) chain tracer, (b) numbering, (c) worked, (d) name -> structure, (e) carbon classes, (f) 3D isomers
+    const tr = l.steps.filter((s) => s.widget === 'chain-tracer');
+    ok(tr.some((s) => s.config.task === 'trace') && tr.some((s) => s.config.task === 'number') && tr.some((s) => s.config.task === 'parent'), 'L05 (a)(b) chain-tracer trace, number and parent steps');
+    for (const s of tr) {
+      const c = s.config;
+      ok(ct.grade(c, ct.solution(c)).ok && ct.grade(c, []).empty, `${s.id} tracer solution accepted`);
+      if (c.task === 'trace') ok(parentInfo(c.smiles).best.every((b) => ct.grade(c, b).ok), `${s.id} every best chain accepted`);
+    }
+    ok(tr.find((s) => s.config.task === 'trace' && s.config.smiles === 'CC(C)C(CC)CC'), 'L05 tie-rule tracing step');
+    const w = l.steps.find((s) => s.type === 'worked');
+    ok(w && w.moves.length >= 5 && /IUPAC name/.test(w.problem) && alkaneInfo(w.smiles, 'new').name === '3-ethyl-4,4-dimethylheptane', 'L05 (c) worked example: chain, number, branches, alphabetical, assemble');
+    w.moves.forEach((m) => { if (m.figure) ok(canon(m.figure.smiles) !== null && m.figure.highlight.every((i) => i < analyze(m.figure.smiles).atoms.length), 'worked figure valid'); });
+    const wp = w.moves[0].figure.highlight;
+    ok(wp.length === 7 && parentInfo(w.smiles).best.some((c) => c.length === wp.length && c.every((x) => wp.includes(x))), 'worked figure highlights a longest chain (7 carbons)');
+    const pickStep = l.steps.find((s) => s.type === 'choice' && s.options.length === 4 && s.options.every((o) => o.smiles) && /<name/.test(s.prompt));
+    ok(!!pickStep, 'L05 (d) name -> structure choice with 4 drawn options');
+    const pm2 = /new="([^"]+)" old="([^"]+)"/.exec(pickStep.prompt);
+    const correct = pickStep.options.find((o) => o.correct);
+    ok(new Set(pickStep.options.map((o) => canon(o.smiles))).size === 4, 'L05 (d) options distinct');
+    expectOpsin(pm2[1], correct.smiles, 'L05 pick step name');
+    ok(pickStep.options.filter((o) => !o.correct).every((o) => nameBoth(o.smiles) && nameBoth(o.smiles).new !== pm2[1]), 'L05 (d) distractors are other compounds');
+    ok(l.steps.some((s) => s.type === 'choice' && s.highlight && /primary/.test(s.prompt) && carbonClass(s.smiles, s.highlight[0]) === 4 && /Quaternary/.test(s.options.find((o) => o.correct).text)), 'L05 (e) carbon class step recomputed');
+    const td = l.steps.find((s) => s.visual && s.visual.config.mol === 'butane' && s.visual.config.compare === 'isobutane');
+    ok(!!td && td.type === 'choice', 'L05 (f) 3D butane vs isobutane');
+    ok(l.steps.some((s) => s.type === 'input' && s.derive && s.derive.quantity === 'formula' && s.formula), 'L05 CnH2n+2 formula step recomputed');
+    // IUPAC toggle: every <name> tag matches the engine in both styles, names come from the engine, and a step shows the switch
+    ok(l.steps.some((s) => s.type === 'choice' && /switch/i.test(s.prompt) && /<name /.test(s.prompt)), 'L05 has a step that shows the New/Old toggle');
+    let tags = 0;
+    for (const s of l.steps) {
+      const html = htmlStrings(s).join(' ');
+      const ref = s.smiles || (s.config && s.config.smiles) || (s.options || []).find((o) => o.correct && o.smiles)?.smiles;
+      for (const m of html.matchAll(/<name new="([^"]*)" old="([^"]*)"/g)) {
+        tags++;
+        if (SUB_IDS.some((id) => subInfo(id).new === m[1] && subInfo(id).old === m[2])) continue; // an alkyl group, not a molecule
+        tagChecks.push({ id: s.id, n: m[1], o: m[2], ref });
+        expectOpsin(m[1], null, 'tag new'); expectOpsin(m[2], null, 'tag old');
+      }
+    }
+    ok(tags >= 6, `L05 renders names through <name new old> (${tags} tags)`);
+    for (const s of l.steps.filter((x) => x.type === 'input' && x.name)) {
+      const nb = nameBoth(s.smiles);
+      ok(s.answer === nb.new && (nb.old === nb.new || (s.accept || []).includes(nb.old)), `${s.id} typed name: answer new + accept old from the engine`);
+      ok(checkInput(s, nb.new).ok && checkInput(s, nb.old).ok && checkInput(s, nb.old.toUpperCase()).ok, `${s.id} accepts both styles`);
+      ok(typeof checkInput(s, 'octane').diagnosis === 'string' && checkInput(s, 'octane').diagnosis.length > 20, `${s.id} gives a diagnosis for an unlisted name`);
+      expectOpsin(nb.new, s.smiles, `${s.id} new`); expectOpsin(nb.old, s.smiles, `${s.id} old`);
+      for (const d of s.diagnose || []) { const r = checkInput(s, d.match); ok(!r.ok && r.diagnosis === d.why && !matchesName(s.smiles, d.match), `${s.id} diagnose ${d.match} is rejected with its own reason`); }
+    }
+    eq(l.useIt.book, ['2.4', '2.5', '2.6', '2.7', '2.8', '2.9', '2.10', '2.11', '2.18', '2.19', '2.29', '2.41', '2.43', '2.45', '2.46', '2.48', '2.49', '2.50', '2.56'], 'L05 book problems');
+    ok(l.useIt.endFrom === 29, 'L05 end-of-chapter exercises start at 2.29');
+    // style-dependent substituent names appear only through <name new old> (steps s08 and s15 compare the two styles on purpose)
+    for (const s of l.steps.filter((x) => !['s08', 's15'].includes(x.id))) {
+      const text = htmlStrings(s).join(' ').replace(/<name[^>]*><\/name>/g, '');
+      ok(!/propan-2-yl|butan-2-yl|2-methylpropyl|isopropyl|isobutyl|sec-butyl/i.test(text), `${s.id} has no hard-coded style-dependent name outside <name>`);
+    }
+  }
+
+  // ---- 3D butane and isobutane
+  {
+    ok(models.isobutane && canon(models.isobutane.molblock) === canon('CC(C)C') && canon(models.butane.molblock) === canon('CCCC'), '3D butane and isobutane match their SMILES');
+    ok(models.isobutane.smiles === 'CC(C)C', 'isobutane atom order: C0, central C1, C2, C3');
+    const mb = models.isobutane.molblock.split('\n');
+    const bonds = []; const nA = parseInt(mb[3].slice(0, 3), 10), nB = parseInt(mb[3].slice(3, 6), 10);
+    for (let i = 0; i < nB; i++) { const l2 = mb[4 + nA + i]; bonds.push([parseInt(l2.slice(0, 3), 10) - 1, parseInt(l2.slice(3, 6), 10) - 1]); }
+    const sym = (i) => mb[4 + i].slice(31, 34).trim();
+    const cn = (i) => bonds.filter((b) => b.includes(i)).map((b) => (b[0] === i ? b[1] : b[0])).filter((k) => sym(k) === 'C').length;
+    ok(cn(1) === 3 && [0, 2, 3].every((i) => cn(i) === 1), 'isobutane: central carbon has three carbon neighbours');
+    const ang = [[0, 1, 2], [0, 1, 3], [2, 1, 3]].map(([a, c, b]) => modelAngle(models.isobutane.molblock, c, a, b));
+    ok(ang.every((x) => x > 106 && x < 114), `isobutane C-C-C angles tetrahedral (${ang.map((x) => x.toFixed(1))})`);
+    ok(formula('CCCC') === formula('CC(C)C'), 'butane and isobutane share a formula (constitutional isomers)');
+    ok(canon('CCCC') !== canon('CC(C)C'), 'butane and isobutane are different compounds');
+  }
+
+  // ---- OPSIN round trips (one batch): every name above means the structure it came from
+  {
+    const res = opsin(queue.map((q) => q.name));
+    let n = 0, good = 0;
+    for (const q of queue) {
+      n++;
+      const out = res[q.name];
+      const match = !!out && (q.smiles === null ? canon(out) !== null : canon(out) === canon(q.smiles));
+      if (match) good++;
+      ok(match, `OPSIN round-trip (${q.label}): "${q.name}" -> ${out || 'unparsed'} expected ${canon(q.smiles)}`);
+    }
+    // every <name new old> tag in the lesson: both styles resolve (OPSIN) to one structure, and the engine writes exactly this pair for it
+    for (const t of tagChecks) {
+      const a = res[t.n], b = res[t.o];
+      ok(!!a && !!b && canon(a) === canon(b), `${t.id} tag ${t.n} / ${t.o}: both styles are the same compound in OPSIN`);
+      const nb = a && nameBoth(canon(a));
+      // either the engine's own pair, or a deliberately non-preferred name of the molecule drawn in the step (s11 shows what NOT to call it)
+      const engineOwn = !!nb && nb.new === t.n && nb.old === t.o;
+      const altOfRef = !!t.ref && canon(a) === canon(t.ref) && !!nameBoth(t.ref) && nameBoth(t.ref).new !== t.n;
+      ok(engineOwn || altOfRef, `${t.id} tag ${t.n} / ${t.o} equals the engine's names for that compound (${JSON.stringify(nb)})`);
+      if (t.ref) ok(canon(a) === canon(t.ref), `${t.id} tag names the molecule drawn in the step`);
+    }
+    console.log(`  OPSIN round-trips: ${good}/${n} names (${new Set(queue.map((q) => q.name)).size} distinct); fixture matches: ${fxMatch}/${fx.length}`);
+    ok(n >= 200 && good === n, `OPSIN agreed on all ${n} names`);
+  }
+  fs.rmSync(tmp, { recursive: true, force: true });
 }
 
 // ---- store: weak spots (memory fallback in Node)

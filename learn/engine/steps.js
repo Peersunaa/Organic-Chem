@@ -4,6 +4,7 @@ import { gradeFormula } from './skeletal.js';
 import { WIDGETS } from './widgets/index.js';
 import { skillRule } from './skills.js';
 import { generate } from './generators.js';
+import { normName } from './naming.js';
 
 export function h(tag, props, ...kids) {
   const e = document.createElement(tag);
@@ -93,6 +94,14 @@ export function checkInput(step, raw) {
     const d = (step.diagnose || []).find((x) => gradeFormula(x.match, raw).ok);
     return { ok: false, malformed: r.malformed, diagnosis: d ? d.why : r.diagnosis };
   }
+  if (step.name) {
+    // IUPAC names: case, spaces, hyphens and brackets are ignored; any accepted style counts
+    const got = normName(raw);
+    if ([step.answer].concat(step.accept || []).some((a) => normName(a) === got)) return { ok: true };
+    const d = (step.diagnose || []).find((x) => normName(x.match) === got);
+    const dyn = !d && step.diagnoseFn ? step.diagnoseFn(raw) : null;
+    return { ok: false, diagnosis: d ? d.why : dyn || step.fallback || skillRule(step.skill) || 'Not quite. Check the rules and try again.' };
+  }
   const n = parseNum(raw);
   const accept = [String(step.answer)].concat((step.accept || []).map(String)).map(norm);
   if (accept.includes(norm(raw)) || (n !== null && typeof step.answer === 'number' && n === step.answer)) return { ok: true };
@@ -111,7 +120,8 @@ function inputRow(onSubmit, placeholder = 'Your answer') {
 
 function addPrompt(host, step) {
   host.append(rich(step.prompt, 'h2', 'prompt'));
-  if (step.smiles && step.both) host.append(molPair(step.smiles, '', { highlight: step.highlight || [] }));
+  if (step.figures) host.append(h('div', { class: 'pair figs' }, step.figures.map((f) => molFigure(f.smiles, f.label || '', { highlight: f.highlight || [] }))));
+  else if (step.smiles && step.both) host.append(molPair(step.smiles, '', { highlight: step.highlight || [] }));
   else if (step.smiles) host.append(molFigure(step.smiles, '', { highlight: step.highlight || [], style: step.drawing }));
   if (step.visual) mountVisual(host, step.visual);
 }
@@ -189,6 +199,7 @@ const RENDER = {
   worked(step, ctx, host) {
     host.append(h('p', { class: 'eyebrow' }, 'Worked example'));
     host.append(rich(step.problem, 'h2', 'prompt'));
+    if (step.smiles) host.append(molFigure(step.smiles, '', { highlight: step.highlight || [] }));
     const wrap = h('div', { class: 'moves' });
     host.append(wrap);
     let k = 0;
@@ -211,7 +222,7 @@ const RENDER = {
             b.classList.add('good');
             fb.className = 'fb ok'; fb.innerHTML = '';
             fb.append(rich(o.why + (mv.then ? ' ' + mv.then : ''), 'p'));
-            if (mv.figure) fb.append(molFigure(mv.figure.smiles, mv.figure.label || '', { style: mv.figure.drawing }));
+            if (mv.figure) fb.append(molFigure(mv.figure.smiles, mv.figure.label || '', { style: mv.figure.drawing, highlight: mv.figure.highlight || [] }));
             next();
           } else {
             b.classList.add('bad'); b.disabled = true;
@@ -265,7 +276,7 @@ export function renderProblems(cfg, ctx, host) {
     const step = { id: 'mastery', skill: p.skill, hints: p.hints, worked: null };
     const card = h('div', { class: 'problem' });
     stage.append(card);
-    card.append(h('h2', { class: 'prompt' }, p.prompt));
+    card.append(p.promptHtml ? rich(p.promptHtml, 'h2', 'prompt') : h('h2', { class: 'prompt' }, p.prompt));
     if (p.kind !== 'builder' && p.kind !== 'polarity' && p.kind !== 'arrows' && p.kind !== 'groupfind' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
     const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
     const hints = h('div', { class: 'hints' });
@@ -298,7 +309,7 @@ export function renderProblems(cfg, ctx, host) {
     if (p.kind === 'input') {
       const { form, inp } = inputRow((val, input, btn) => {
         if (settled) return;
-        const r = checkInput({ answer: p.answer, diagnose: p.wrong, fallback: p.derive, skill: p.skill, formula: p.formula }, val);
+        const r = checkInput({ answer: p.answer, accept: p.accept, name: p.name, diagnoseFn: p.diagnoseFn, diagnose: p.wrong, fallback: p.fallback || p.derive, skill: p.skill, formula: p.formula }, val);
         if (r.ok) { input.disabled = true; btn.disabled = true; onRight(); }
         else if (r.empty || r.malformed) { fb.className = 'fb bad'; fb.textContent = r.diagnosis; input.focus(); }
         else { onWrong(r.diagnosis); if (!settled) input.select(); else { input.disabled = true; btn.disabled = true; } }

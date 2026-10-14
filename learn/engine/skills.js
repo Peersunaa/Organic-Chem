@@ -15,6 +15,7 @@ export const SKILLS = {
   'lewis-acid-base': { label: 'Lewis acids & bases', rule: 'A Lewis base donates an electron pair (it has a lone pair). A Lewis acid accepts one (an atom short of an octet, or a positive ion).' },
   'skeletal': { label: 'Skeletal structures', rule: 'In a skeletal drawing there is a C at every corner and line end. Hydrogens on carbon are not drawn: each carbon has 4 minus (lines into it) H, and a double bond counts as 2 lines. Atoms other than C and H are always written.' },
   'functional-groups': { label: 'Functional groups', rule: 'A functional group is a small unit of atoms with its own chemistry. Look at what is on the C=O carbon (H, C, O or N) and what the O or N is bonded to.' },
+  'naming': { label: 'Naming alkanes & rings', rule: 'Find the parent (the longest chain, or the ring when it is at least as big as any chain on it). Number from the end that gives the first branch the lowest number, name each branch, put the prefixes in alphabetical order (ignoring di-, tri-, sec- and tert-) and write one word with commas and hyphens.' },
   'electron-count-total': { label: 'Total valence electrons', rule: 'Add each atom’s valence electrons (H 1, C 4, N 5, O 6, halogens 7). Subtract 1 for each + charge, add 1 for each − charge.' }
 };
 export function skillLabel(s) { return (SKILLS[s] && SKILLS[s].label) || s; }

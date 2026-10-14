@@ -9,7 +9,7 @@ MOLS = {
     "water": "O", "ammonia": "N", "methane": "C",
     "formaldehyde": "C=O", "hcn": "C#N",
     "ethylene": "C=C", "acetylene": "C#C", "co2": "O=C=O",
-    "butane": "CCCC",
+    "butane": "CCCC", "isobutane": "CC(C)C",
 }
 # Conformers that must be a specific shape: id -> (check on the embedded molecule).
 # butane must be the anti (zig-zag) conformer: lowest-energy of many embeds, C1-C2-C3-C4 dihedral ~180.
