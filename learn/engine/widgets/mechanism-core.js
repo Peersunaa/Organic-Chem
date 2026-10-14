@@ -115,7 +115,9 @@ export function checkMechanism(mech) {
     }
     if (n === 0 && !sameSet(st.before, [...mech.reactants, ...(mech.reagents || [])])) errs.push('step 1 does not start from the reactants (and reagents)');
     // `added` = fresh species that join this step (e.g. a second water molecule from the solvent); everything else must come from the previous step
-    if (prev && !sameSet(st.before, [...prev.after, ...(st.added || [])])) errs.push(`${t}: before is not the previous after${st.added ? ' plus the added species' : ''}`);
+    // Lesson 12: `dropped` = by-products set aside after the previous step (NH3 after the acetylide forms); they are not drawn in this step
+    const carried = (st.dropped || []).length ? prev && prev.after.filter((x) => !st.dropped.map((d) => canon(d)).includes(canon(x))) : prev && prev.after;
+    if (prev && !sameSet(st.before, [...carried, ...(st.added || [])])) errs.push(`${t}: before is not the previous after${st.added ? ' plus the added species' : ''}${st.dropped ? ' minus the dropped species' : ''}`);
     prev = st;
   });
   if (prev && !sameSet(prev.after, mech.products)) errs.push('the last step does not end at the products');

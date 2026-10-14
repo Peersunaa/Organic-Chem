@@ -304,3 +304,7 @@ export * from './reactions-additions.js';
 
 // Lesson 11: conjugated dienes + HX (1,2- and 1,4-addition through the allylic cation). Extends this module additively.
 export * from './reactions-dienes.js';
+
+// Lesson 12: alkynes (HX, X2, hydration, Lindlar / Pd, acetylide alkylation) and the synthesis planner's sequence engine. Extends this module additively.
+export * from './reactions-alkynes.js';
+export * from './synthesis.js';

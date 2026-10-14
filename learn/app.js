@@ -75,7 +75,7 @@ function home() {
     const pct = pr.complete ? 100 : Math.round((pr.done.length / total) * 100);
     ul.append(h('li', {}, h('a', { class: 'lesson', href: '#lesson-' + l.id },
       h('span', { class: 'num' }, l.id),
-      h('span', { class: 'ltxt' }, h('b', {}, l.title), h('span', { class: 'muted small' }, `Chapter ${l.chapter} · sections ${l.sections[0]}–${l.sections[l.sections.length - 1]} · ${l.minutes} min`),
+      h('span', { class: 'ltxt' }, h('b', {}, l.title), h('span', { class: 'muted small' }, `Chapter ${l.chapter} · ${l.sections.length > 1 && l.sections[0] !== l.sections[l.sections.length - 1] ? `sections ${l.sections[0]}–${l.sections[l.sections.length - 1]}` : `section ${l.sections[0]}`} · ${l.minutes} min`),
         pct ? h('span', { class: 'mini', role: 'img', 'aria-label': `${pct}% done` }, h('i', { style: `width:${pct}%` })) : null),
       h('span', { class: 'chip ' + (pr.complete ? 'ok' : 'next') }, pr.complete ? 'Done' : pr.done.length ? 'In progress' : 'Next'))));
   });

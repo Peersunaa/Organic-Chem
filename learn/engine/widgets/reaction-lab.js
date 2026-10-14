@@ -8,11 +8,15 @@
 // oxidant), and Br2 / Cl2 offer the bromonium (chloronium) mechanism.
 // Lesson 11: config.dienes = ids of LAB_DIENES (conjugated dienes) with the reagents HCl / HBr / HI. The learner predicts the product SET (1,2- and 1,4-addition, or one product
 // when the two meet), then the lab shows the allylic cation with its resonance form (↔), the products tagged 1,2 / 1,4, and both mechanisms.
+// Lesson 12: config.alkynes = ids of LAB_ALKYNES with the ALKYNE_LAB_KEYS reagents (HBr / Br2 with 1 or 2 equivalents, H2O + HgSO4, H2 + Lindlar, H2 + Pd/C). The learner
+// predicts the product(s) (equivalents, Markovnikov, anti geometry, cis alkene, ketone or mixture), then the lab explains why, shows the overall equation and, for HBr with 1
+// equivalent, plays the two-step mechanism.
 // config: { alkenes?: [ids of LAB_ALKENES or LAB_ALKENES2], reagents?: [ids of REAGENT_IDS or REAGENT_IDS2], need?: n (correct predictions before ctx.onResult({ok:true}), default 1),
 //           start?: {alkene, reagent}, seed?: number }
 // ctx.onResult({ok:false, diagnosis}) on every wrong prediction; ctx.onResult({ok:true}) once `need` predictions were right.
 import { svg as rdSvg } from '../chem.js';
-import { LAB_ALKENES, REAGENT_IDS, REAGENTS, ALKENE_BY_ID, predict, productChoices, CLASS_NAME, CLASS_SHORT, stabilityFraction, alkeneName, REAGENTS2, ALKENE2_BY_ID, predictAdd, productChoices2, rightWhy, DIENE_BY_ID, HX, HX_DIENE_IDS, predictDiene, dieneChoices, dieneName } from '../reactions.js';
+import { LAB_ALKENES, REAGENT_IDS, REAGENTS, ALKENE_BY_ID, predict, productChoices, CLASS_NAME, CLASS_SHORT, stabilityFraction, alkeneName, REAGENTS2, ALKENE2_BY_ID, predictAdd, productChoices2, rightWhy, DIENE_BY_ID, HX, HX_DIENE_IDS, predictDiene, dieneChoices, dieneName, ALKYNE_BY_ID, ALKYNE_RXN, ALKYNE_LAB_KEYS, predictAlkyne, alkyneChoices, alkyneRightWhy, alkyneHXMechanism } from '../reactions.js';
+import { nameBothAny } from '../naming-chain.js';
 import mechanismPlayer from './mechanism-player.js';
 import { getIupac } from '../store.js';
 
@@ -22,15 +26,15 @@ function rng32(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Mat
 function shuffle(rng, arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 export function nameHtml(smiles) {
   let n = null;
-  try { n = dieneName(smiles) || alkeneName(smiles); } catch (e) { n = dieneName(smiles); }
+  try { n = dieneName(smiles) || alkeneName(smiles) || nameBothAny(smiles); } catch (e) { n = dieneName(smiles) || nameBothAny(smiles); }
   if (!n) return smiles;
   return `<span class="iupac" data-name-new="${n.new}" data-name-old="${n.old}">${getIupac() === 'old' ? n.old : n.new}</span>`;
 }
 
-const ALK = { ...ALKENE_BY_ID, ...ALKENE2_BY_ID, ...DIENE_BY_ID };
-const RCFG = (id) => REAGENTS[id] || REAGENTS2[id] || HX[id];
+const ALK = { ...ALKENE_BY_ID, ...ALKENE2_BY_ID, ...DIENE_BY_ID, ...ALKYNE_BY_ID };
+const RCFG = (id) => REAGENTS[id] || REAGENTS2[id] || HX[id] || ALKYNE_RXN[id];
 /** Equation of an addition/oxidation (Lesson 10): structures for organic species, plain chips for [O], H2O, X2 and H2. */
-const CHIP = { '[O]': '[O]', O: 'H₂O', BrBr: 'Br₂', ClCl: 'Cl₂', '[H][H]': 'H₂' };
+const CHIP = { '[O]': '[O]', O: 'H₂O', BrBr: 'Br₂', ClCl: 'Cl₂', '[H][H]': 'H₂', Br: 'HBr', Cl: 'HCl', I: 'HI' };
 export function eqHtml(eq) {
   const part = (s) => (CHIP[s] ? `<span class="rl-reag">${CHIP[s]}</span>` : `<span class="rl-svg">${rdSvg(s, { style: 'skeletal', width: 130, height: 96 })}</span>`);
   const side = (list) => list.map((s) => part(s)).join('<span class="rl-plus">+</span>');
@@ -42,8 +46,9 @@ export default {
   mount(host, config, ctx) {
     // Lesson 11: config.dienes = ids of LAB_DIENES (conjugated dienes + HCl / HBr / HI: 1,2- and 1,4-addition through the allylic cation)
     const dieneMode = !!config.dienes && !config.alkenes;
-    const alkenes = (dieneMode ? config.dienes : (config.alkenes || LAB_ALKENES.map((a) => a.id))).map((id) => ALK[id]);
-    const reagents = config.reagents || (dieneMode ? HX_DIENE_IDS : REAGENT_IDS);
+    const alkyneMode = !!config.alkynes && !config.alkenes && !config.dienes;       // Lesson 12
+    const alkenes = (alkyneMode ? config.alkynes : dieneMode ? config.dienes : (config.alkenes || LAB_ALKENES.map((a) => a.id))).map((id) => ALK[id]);
+    const reagents = config.reagents || (alkyneMode ? ALKYNE_LAB_KEYS : dieneMode ? HX_DIENE_IDS : REAGENT_IDS);
     const need = config.need || 1;
     const rng = config.seed != null ? rng32(config.seed) : Math.random;
     let alkene = config.start ? ALK[config.start.alkene] : null;
@@ -56,7 +61,7 @@ export default {
 
     function pickers() {
       const box = h('div', 'rl-pick');
-      box.append(h('p', 'rl-h', dieneMode ? '<b>1. Pick a diene</b>' : '<b>1. Pick an alkene</b>'));
+      box.append(h('p', 'rl-h', alkyneMode ? '<b>1. Pick an alkyne</b>' : dieneMode ? '<b>1. Pick a diene</b>' : '<b>1. Pick an alkene</b>'));
       const g1 = h('div', 'rl-alk');
       alkenes.forEach((a) => {
         const b = h('button', 'rl-btn'); b.type = 'button';
@@ -178,6 +183,45 @@ export default {
       box.append(act);
     }
 
+    /** Reveal for the Lesson 12 alkynes: why (equivalents, Markovnikov, anti, syn), the product(s), the enol and its ketone, the overall equation, the HBr mechanism. */
+    function reveal4(pred, box) {
+      box.append(h('p', 'rl-h', '<b>Why</b>'));
+      box.append(h('p', 'rl-why', alkyneRightWhy(pred).replace(/^Yes\. /, '')));
+      const prod = h('div', 'rl-prod');
+      prod.append(h('p', 'rl-h', `<b>Product${pred.products.length > 1 ? 's' : ''}</b>`));
+      const row = h('div', 'rl-prow');
+      pred.products.forEach((sm, i) => {
+        if (i) row.append(h('span', 'rl-plus', pred.outcome === 'mixture' ? 'and' : '+'));
+        const nm = nameBothAny(sm);
+        row.append(h('figure', 'mol', `<div class="mol-svg">${fig(sm, 170, 120)}</div>${nm ? `<figcaption>${nameHtml(sm)}</figcaption>` : ''}`));
+      });
+      prod.append(row);
+      if (pred.rx.kind === 'hydration' && pred.enol) {
+        prod.append(h('p', 'muted small', 'The first product is the enol, drawn here; it is not isolated, because the enol and the ketone interconvert (tautomers) and the equilibrium lies strongly on the side of the ketone.'));
+        prod.append(h('div', 'rl-eq', `${fig(pred.enol, 130, 96)}<span class="rl-arrow" aria-label="equilibrium, ketone favoured">⇌</span>${fig(pred.products[0], 130, 96)}`));
+      }
+      if (pred.outcome === 'mixture') prod.append(h('p', 'muted small', 'Both ends of the triple bond are different, so OH can go on either carbon: a mixture of the two ketones.'));
+      box.append(prod);
+      if (pred.equation) {
+        box.append(h('p', 'rl-h', '<b>Overall equation</b>'));
+        box.append(h('div', 'rl-eq', eqHtml({ lhs: pred.equation.lhs, rhs: pred.equation.rhs })));
+      }
+      let mech = null;
+      if (pred.rx.kind === 'HX' && pred.rx.equiv === 1) { try { mech = alkyneHXMechanism(pred.alkyne, pred.rx.X); } catch (e) { mech = null; } }
+      if (mech) {
+        const mpBox = h('div', 'rl-mech');
+        const stage = h('div', 'rl-mp');
+        const play = h('button', 'btn primary'); play.type = 'button'; play.textContent = 'Play the mechanism';
+        play.addEventListener('click', () => { play.remove(); mpBox.append(stage); mp?.destroy?.(); mp = mechanismPlayer.mount(stage, { mech, mode: 'watch', drawing: 'skeletal' }, { onResult() {} }); });
+        box.append(play, mpBox);
+      }
+      const again = h('button', 'btn ' + (right >= need ? 'primary' : '')); again.type = 'button';
+      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} predicted)`;
+      again.addEventListener('click', () => { alkene = null; reagent = null; render(); root.scrollIntoView?.({ block: 'nearest' }); });
+      const act = h('div', 'lb-actions'); act.append(again);
+      box.append(act);
+    }
+
     /** Reveal for the Lesson 10 reagents: why (syn / anti, racemate), the product(s), the overall equation, the bromonium mechanism for Br2 / Cl2. */
     function reveal2(pred, box) {
       box.append(h('p', 'rl-h', '<b>Why</b>'));
@@ -223,14 +267,15 @@ export default {
       let pred;
       const fam2 = !!REAGENTS2[reagent];
       const fam3 = !!DIENE_BY_ID[alkene.id];
-      try { pred = fam3 ? predictDiene(alkene.smiles, reagent) : fam2 ? predictAdd(alkene.smiles, reagent) : predict(alkene.smiles, reagent); } catch (e) { root.append(h('p', 'fb bad', 'This combination is outside the lesson.')); return; }
+      const fam4 = !!ALKYNE_BY_ID[alkene.id];
+      try { pred = fam4 ? predictAlkyne(alkene.smiles, reagent) : fam3 ? predictDiene(alkene.smiles, reagent) : fam2 ? predictAdd(alkene.smiles, reagent) : predict(alkene.smiles, reagent); } catch (e) { root.append(h('p', 'fb bad', 'This combination is outside the lesson.')); return; }
       const box = h('div', 'rl-run');
       const R = RCFG(reagent);
       box.append(h('p', 'rl-h', `<b>3. Predict</b>: the major product of ${nameHtml(alkene.smiles)} + ${R.label}`));
       const eq = h('div', 'rl-eq');
       eq.innerHTML = `${fig(alkene.smiles, 130, 96)}<span class="rl-plus">+</span><span class="rl-reag">${R.label}</span><span class="rl-arrow">→ ?</span>`;
       box.append(eq);
-      const choices = shuffle(rng, fam3 ? dieneChoices(pred) : fam2 ? productChoices2(pred) : productChoices(pred));
+      const choices = shuffle(rng, fam4 ? alkyneChoices(pred) : fam3 ? dieneChoices(pred) : fam2 ? productChoices2(pred) : productChoices(pred));
       const list = h('div', 'rl-opts', null);
       const fb = h('div', 'fb'); fb.setAttribute('aria-live', 'polite');
       choices.forEach((o) => list.append(optionCard(o, (btn) => {
@@ -240,7 +285,7 @@ export default {
           fb.className = 'fb ok'; fb.textContent = o.why;
           list.after(fb);
           right++;
-          if (fam3) reveal3(pred, box); else if (fam2) reveal2(pred, box); else reveal(pred, box);
+          if (fam4) reveal4(pred, box); else if (fam3) reveal3(pred, box); else if (fam2) reveal2(pred, box); else reveal(pred, box);
           if (right >= need && !doneSent) { doneSent = true; ctx.onResult({ ok: true }); }
           else if (ctx.onProgress) ctx.onProgress();
         } else {
@@ -248,7 +293,7 @@ export default {
           fb.className = 'fb bad'; fb.textContent = o.why;
           ctx.onResult({ ok: false, diagnosis: o.why });
         }
-      }, fam2 || fam3)));
+      }, fam2 || fam3 || fam4)));
       box.append(list, fb);
       root.append(box);
     }

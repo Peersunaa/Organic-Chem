@@ -23,6 +23,8 @@ MOLS = {
     "bromonium-cyclohexene": "C1CC[C@H]2[Br+][C@H]2C1",
     # Lesson 11: buta-1,3-diene as the lowest-energy conformer (s-trans, C1=C2-C3=C4 dihedral ~180): the four sp2 carbons lie in one plane
     "buta-1-3-diene": "C=CC=C",
+    # Lesson 12: but-2-yne (sp carbons: the four carbons lie on one straight line, C-C-C angles about 180 degrees). The Lindlar product (Z)-but-2-ene is the existing cis-but-2-ene model.
+    "but-2-yne": "CC#CC",
 }
 STAND_IN = {"bromonium-cyclohexene": "C1CC[C@H]2[Se][C@H]2C1"}
 # Conformers that must be a specific shape: id -> (check on the embedded molecule).
@@ -63,6 +65,12 @@ for name, smi in MOLS.items():
         if name == "tert-butyl-cation": AllChem.UFFOptimizeMolecule(m, maxIters=2000)
         elif name in STAND_IN: AllChem.UFFOptimizeMolecule(m, maxIters=5000)
         else: AllChem.MMFFOptimizeMolecule(m)
+    if name == "but-2-yne":
+        # both C-C#C angles must be 180 degrees (linear), and the four carbons are collinear
+        cc = m.GetConformer()
+        for (i, j, k) in ((0, 1, 2), (1, 2, 3)):
+            ang = rdMolTransforms.GetAngleDeg(cc, i, j, k)
+            assert ang > 178, (name, ang)
     if name == "tert-butyl-cation":
         # the three C-C-C angles at the cation centre must add to 360 (planar), i.e. trigonal planar sp2
         cc = m.GetConformer(); tot = sum(rdMolTransforms.GetAngleDeg(cc, a, 1, b) for a, b in ((0, 2), (0, 3), (2, 3)))

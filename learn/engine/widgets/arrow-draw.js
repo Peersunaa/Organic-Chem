@@ -181,7 +181,7 @@ export default {
       chooser = document.createElement('div');
       chooser.className = 'ad-regio';
       chooser.setAttribute('role', 'group');
-      chooser.innerHTML = '<p class="ad-regio-q"><b>Which carbon of the double bond bonds to H?</b></p>';
+      chooser.innerHTML = `<p class="ad-regio-q"><b>Which carbon of the ${rg.bondWord || 'double bond'} bonds to H?</b></p>`;   // Lesson 12: bondWord 'triple bond' for alkynes
       const row = document.createElement('div'); row.className = 'ad-regio-row';
       rg.ends.forEach((e) => {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = e.text[0].toUpperCase() + e.text.slice(1);
@@ -200,7 +200,7 @@ export default {
       row.appendChild(cancel);
       chooser.appendChild(row);
       host.querySelector('.ad').insertBefore(chooser, host.querySelector('.lb-actions'));
-      say('The π electrons form a new bond to H. Which carbon of the C=C does H bond to?');
+      say(`The π electrons form a new bond to H. Which carbon of the ${rg.bondWord === 'triple bond' ? 'C≡C' : 'C=C'} does H bond to?`);
       row.querySelector('button').focus({ preventScroll: true });
     }
 
