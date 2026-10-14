@@ -10,11 +10,12 @@ import l09 from './09-alkene-additions-1.js';
 import l10 from './10-alkene-additions-2.js';
 import l11 from './11-resonance-dienes.js';
 import l12 from './12-alkynes.js';
+import l13 from './13-benzene-eas.js';
 
-export const LESSONS = [l01, l02, l03, l04, l05, l06, l07, l08, l09, l10, l11, l12];
+export const LESSONS = [l01, l02, l03, l04, l05, l06, l07, l08, l09, l10, l11, l12, l13];
 
 // Locked placeholders (content files arrive later).
 export const PLANNED = [
-  ['13', 'Benzene & EAS'], ['14', 'Directors & synthesis'],
+  ['14', 'Directors & synthesis'],
   ['15', 'Chirality & R/S'], ['16', 'Diastereomers, meso & racemates']
 ].map(([id, title]) => ({ id, title, locked: true }));

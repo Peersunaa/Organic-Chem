@@ -6,6 +6,8 @@ import { analyze, canon } from './chem.js';
 import { ALKYNE_RXN, alkyneSites, predictAlkyne, acetylideOf, halideClass, alkylateAcetylide, ALKYNE_PKA, deprotonates, saturate } from './reactions-alkynes.js';
 import { nameBothAny } from './naming-chain.js';
 import { ACID } from './acidbase.js';
+import { predictEAS, reduceNitro, BENZENE, EAS } from './reactions-aromatic.js';
+import { arene } from './naming-arene.js';
 
 /** Reagent cards. kind: 'base' (NaNH₂, NaOH), 'rx' (an alkyl halide), 'rxn' (a reagent that reacts with the C≡C: key into ALKYNE_RXN). */
 export const CARDS = {
@@ -20,6 +22,36 @@ export const CARDS = {
   ...Object.fromEntries(['H2O_Hg', 'H2_Lindlar', 'H2_Pd', 'HBr_1', 'HBr_2', 'Br2_1', 'Br2_2', 'HCl_1', 'HCl_2', 'Cl2_1', 'Cl2_2'].map((k) => [k, { id: k, kind: 'rxn', key: k, label: ALKYNE_RXN[k].label }]))
 };
 export const CARD_IDS = Object.keys(CARDS);
+// Lesson 13: reagent cards for aromatic substitution on benzene and the nitro -> amine reduction (applied by applyAreneCard below).
+Object.assign(CARDS, {
+  Br2_FeBr3: { id: 'Br2_FeBr3', kind: 'eas', label: 'Br₂, FeBr₃', reagent: 'Br2' },
+  Cl2_FeCl3: { id: 'Cl2_FeCl3', kind: 'eas', label: 'Cl₂, FeCl₃', reagent: 'Cl2' },
+  HNO3_H2SO4: { id: 'HNO3_H2SO4', kind: 'eas', label: 'HNO₃, H₂SO₄', reagent: 'HNO3' },
+  SO3_H2SO4: { id: 'SO3_H2SO4', kind: 'eas', label: 'SO₃, H₂SO₄', reagent: 'SO3' },
+  MeCl_AlCl3: { id: 'MeCl_AlCl3', kind: 'eas', label: 'CH₃Cl, AlCl₃', reagent: 'RCl', halide: 'CCl' },
+  EtCl_AlCl3: { id: 'EtCl_AlCl3', kind: 'eas', label: 'CH₃CH₂Cl, AlCl₃', reagent: 'RCl', halide: 'CCCl' },
+  tBuCl_AlCl3: { id: 'tBuCl_AlCl3', kind: 'eas', label: '(CH₃)₃CCl, AlCl₃', reagent: 'RCl', halide: 'CC(C)(C)Cl' },
+  AcCl_AlCl3: { id: 'AcCl_AlCl3', kind: 'eas', label: 'CH₃COCl, AlCl₃', reagent: 'RCOCl', halide: 'CC(=O)Cl' },
+  Fe_H3O: { id: 'Fe_H3O', kind: 'red', label: 'Fe (or Sn, SnCl₂), H₃O⁺; then HO⁻' }
+});
+
+/** A card on a molecule with a benzene ring (Lesson 13). Returns the same {ok, state, note} / {ok:false, code, diag} shape as applyCard. */
+function applyAreneCard(state, card) {
+  if (state.kind === 'acetylide') return { ok: false, code: 'anion', diag: 'The acetylide anion is not a benzene ring: this card needs a ring to react with.' };
+  const isRing = !!arene(state.smiles);
+  if (card.kind === 'red') {
+    const out = isRing ? reduceNitro(state.smiles) : null;
+    if (!out) return { ok: false, code: 'noNitro', diag: 'Fe with H₃O⁺ (then HO⁻) reduces a nitro group, –NO₂, to an amine, –NH₂. There is no nitro group on the ring at this point, so there is nothing to reduce: nitrate the ring first.' };
+    return { ok: true, state: { kind: 'neutral', smiles: out }, note: 'Fe (or Sn, SnCl₂) with H₃O⁺ reduces –NO₂ to –NH₃⁺; HO⁻ then removes the extra H⁺, so the product is the arylamine, –NH₂.' };
+  }
+  if (!isRing) return { ok: false, code: 'noRing', diag: 'This is an aromatic substitution reagent, and there is no benzene ring in the molecule at this point.' };
+  const pred = predictEAS(state.smiles, card.reagent, card.halide || null);
+  if (!pred.ok) {
+    const why = pred.code === 'notBenzene' ? 'The ring already carries a group, so where the next group would go depends on directing effects (Lesson 14). The plans here need only ONE substitution on the ring.' : pred.why;
+    return { ok: false, code: pred.code, diag: why };
+  }
+  return { ok: true, state: { kind: 'neutral', smiles: pred.product }, note: `${EAS[card.reagent].Elabel === 'R⁺' ? 'The carbocation' : 'The electrophile ' + EAS[card.reagent].Elabel} is attacked by the ring’s π electrons, then H⁺ leaves: one H on the ring is replaced.` };
+}
 export const primaryHalideCards = () => CARD_IDS.filter((id) => CARDS[id].kind === 'rx' && ['methyl', 'primary'].includes(halideClass(CARDS[id].smiles)));
 
 const nameOf = (smi) => { const n = nameBothAny(smi); return n ? n.new : null; };
@@ -52,6 +84,8 @@ const protonated = (acetylide) => acetylide.replace('[C-]', 'C');
 export function applyCard(state, cardId) {
   const card = CARDS[cardId];
   if (!card) throw new Error('unknown card ' + cardId);
+  if (card.kind === 'eas' || card.kind === 'red') return applyAreneCard(state, card);
+  if (state.kind === 'neutral' && arene(state.smiles)) return { ok: false, code: 'notAlkyne', diag: 'This card is one of the alkyne reactions of Lesson 12. It does nothing useful to a benzene ring here.' };
   const { kind, smiles } = state;
   const sp = kind === 'acetylide' ? { type: 'anion' } : speciesType(smiles);
   const alkyne = kind === 'neutral' && sp.type === 'alkyne' ? alkyneSites(smiles) : null;
@@ -129,6 +163,15 @@ export function runSequence(start, ids) {
 
 /** Why the final product is not the target: one concrete sentence per kind of slip. */
 export function mismatchWhy(finalSmiles, target, ids = []) {
+  if (arene(target) || arene(finalSmiles)) {
+    const head0 = `You made ${say(finalSmiles)}, but the target is ${say(target)}.`;
+    const tips0 = [];
+    if (canon(finalSmiles) === BENZENE) tips0.push('The ring still has no group on it.');
+    else if (reduceNitro(finalSmiles) && !reduceNitro(target)) tips0.push('The nitro group is still there: Fe (or Sn, SnCl₂) with H₃O⁺ (then HO⁻) reduces it.');
+    else if (reduceNitro(target) && !reduceNitro(finalSmiles) && !arene(finalSmiles)) tips0.push('Check which group the target has on the ring.');
+    else tips0.push('The group on the ring is not the one the target has: check which reagent puts that group on.');
+    return [head0, ...tips0].join(' ');
+  }
   const f = speciesType(finalSmiles), t = speciesType(target);
   const last = ids[ids.length - 1];
   const head = `You made ${say(finalSmiles)}, but the target is ${say(target)}.`;

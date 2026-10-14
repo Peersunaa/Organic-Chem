@@ -11,11 +11,15 @@
 // Lesson 12: config.alkynes = ids of LAB_ALKYNES with the ALKYNE_LAB_KEYS reagents (HBr / Br2 with 1 or 2 equivalents, H2O + HgSO4, H2 + Lindlar, H2 + Pd/C). The learner
 // predicts the product(s) (equivalents, Markovnikov, anti geometry, cis alkene, ketone or mixture), then the lab explains why, shows the overall equation and, for HBr with 1
 // equivalent, plays the two-step mechanism.
+// Lesson 13: config.eas = ids of LAB_EAS (aromatic substitution on benzene: Br2/FeBr3, Cl2/FeCl3, I2, HNO3/H2SO4, SO3/H2SO4, Friedel-Crafts alkylation and acylation). The learner predicts the
+// monosubstituted product (substitution, not addition), then the lab shows the electrophile and how it forms, the sigma complex with its three resonance forms, the product, the overall equation
+// and the mechanism. Directing effects are Lesson 14, so the ring is always benzene.
 // config: { alkenes?: [ids of LAB_ALKENES or LAB_ALKENES2], reagents?: [ids of REAGENT_IDS or REAGENT_IDS2], need?: n (correct predictions before ctx.onResult({ok:true}), default 1),
 //           start?: {alkene, reagent}, seed?: number }
 // ctx.onResult({ok:false, diagnosis}) on every wrong prediction; ctx.onResult({ok:true}) once `need` predictions were right.
 import { svg as rdSvg } from '../chem.js';
 import { LAB_ALKENES, REAGENT_IDS, REAGENTS, ALKENE_BY_ID, predict, productChoices, CLASS_NAME, CLASS_SHORT, stabilityFraction, alkeneName, REAGENTS2, ALKENE2_BY_ID, predictAdd, productChoices2, rightWhy, DIENE_BY_ID, HX, HX_DIENE_IDS, predictDiene, dieneChoices, dieneName, ALKYNE_BY_ID, ALKYNE_RXN, ALKYNE_LAB_KEYS, predictAlkyne, alkyneChoices, alkyneRightWhy, alkyneHXMechanism } from '../reactions.js';
+import { LAB_EAS, LAB_EAS_BY_ID, EAS, predictEAS, easChoices, generationOf, netOf, easMechanism, labLabel, BENZENE } from '../reactions.js';
 import { nameBothAny } from '../naming-chain.js';
 import mechanismPlayer from './mechanism-player.js';
 import { getIupac } from '../store.js';
@@ -34,7 +38,7 @@ export function nameHtml(smiles) {
 const ALK = { ...ALKENE_BY_ID, ...ALKENE2_BY_ID, ...DIENE_BY_ID, ...ALKYNE_BY_ID };
 const RCFG = (id) => REAGENTS[id] || REAGENTS2[id] || HX[id] || ALKYNE_RXN[id];
 /** Equation of an addition/oxidation (Lesson 10): structures for organic species, plain chips for [O], H2O, X2 and H2. */
-const CHIP = { '[O]': '[O]', O: 'H₂O', BrBr: 'Br₂', ClCl: 'Cl₂', '[H][H]': 'H₂', Br: 'HBr', Cl: 'HCl', I: 'HI' };
+const CHIP = { '[O]': '[O]', O: 'H₂O', BrBr: 'Br₂', ClCl: 'Cl₂', II: 'I₂', '[H][H]': 'H₂', Br: 'HBr', Cl: 'HCl', I: 'HI' };
 export function eqHtml(eq) {
   const part = (s) => (CHIP[s] ? `<span class="rl-reag">${CHIP[s]}</span>` : `<span class="rl-svg">${rdSvg(s, { style: 'skeletal', width: 130, height: 96 })}</span>`);
   const side = (list) => list.map((s) => part(s)).join('<span class="rl-plus">+</span>');
@@ -47,11 +51,13 @@ export default {
     // Lesson 11: config.dienes = ids of LAB_DIENES (conjugated dienes + HCl / HBr / HI: 1,2- and 1,4-addition through the allylic cation)
     const dieneMode = !!config.dienes && !config.alkenes;
     const alkyneMode = !!config.alkynes && !config.alkenes && !config.dienes;       // Lesson 12
-    const alkenes = (alkyneMode ? config.alkynes : dieneMode ? config.dienes : (config.alkenes || LAB_ALKENES.map((a) => a.id))).map((id) => ALK[id]);
-    const reagents = config.reagents || (alkyneMode ? ALKYNE_LAB_KEYS : dieneMode ? HX_DIENE_IDS : REAGENT_IDS);
+    const easMode = !!config.eas && !config.alkenes && !config.dienes && !config.alkynes;   // Lesson 13
+    const BENZ = { id: 'benzene', smiles: BENZENE };
+    const alkenes = easMode ? [BENZ] : (alkyneMode ? config.alkynes : dieneMode ? config.dienes : (config.alkenes || LAB_ALKENES.map((a) => a.id))).map((id) => ALK[id]);
+    const reagents = easMode ? config.eas : config.reagents || (alkyneMode ? ALKYNE_LAB_KEYS : dieneMode ? HX_DIENE_IDS : REAGENT_IDS);
     const need = config.need || 1;
     const rng = config.seed != null ? rng32(config.seed) : Math.random;
-    let alkene = config.start ? ALK[config.start.alkene] : null;
+    let alkene = easMode ? BENZ : config.start ? ALK[config.start.alkene] : null;
     let reagent = config.start ? config.start.reagent : null;
     let right = 0, doneSent = false, mp = null;
 
@@ -61,7 +67,7 @@ export default {
 
     function pickers() {
       const box = h('div', 'rl-pick');
-      box.append(h('p', 'rl-h', alkyneMode ? '<b>1. Pick an alkyne</b>' : dieneMode ? '<b>1. Pick a diene</b>' : '<b>1. Pick an alkene</b>'));
+      box.append(h('p', 'rl-h', easMode ? '<b>1. The substrate is benzene</b>' : alkyneMode ? '<b>1. Pick an alkyne</b>' : dieneMode ? '<b>1. Pick a diene</b>' : '<b>1. Pick an alkene</b>'));
       const g1 = h('div', 'rl-alk');
       alkenes.forEach((a) => {
         const b = h('button', 'rl-btn'); b.type = 'button';
@@ -71,12 +77,12 @@ export default {
         g1.append(b);
       });
       box.append(g1);
-      box.append(h('p', 'rl-h', '<b>2. Pick a reagent</b>'));
+      box.append(h('p', 'rl-h', easMode ? '<b>2. Pick the reagents</b>' : '<b>2. Pick a reagent</b>'));
       const g2 = h('div', 'rl-rea');
       reagents.forEach((id) => {
         const b = h('button', 'btn rl-rbtn'); b.type = 'button';
         b.setAttribute('aria-pressed', String(reagent === id));
-        b.textContent = RCFG(id).label;
+        b.textContent = easMode ? labLabel(LAB_EAS_BY_ID[id]) : RCFG(id).label;
         b.addEventListener('click', () => { reagent = id; render(); });
         g2.append(b);
       });
@@ -256,6 +262,45 @@ export default {
       box.append(act);
     }
 
+    /** Reveal for Lesson 13 (aromatic substitution): the electrophile and how it forms, the sigma complex with its three resonance forms, the product, the overall equation, the mechanism. */
+    function reveal5(pred, box) {
+      const Rg = EAS[pred.reagent];
+      const row = (list, w = 120, hh = 88) => {
+        const groups = []; list.forEach((x) => { const g = groups.find((y) => y.s === x); if (g) g.n++; else groups.push({ s: x, n: 1 }); });
+        return groups.map((g) => (CHIP[g.s] ? `<span class="rl-reag">${g.n > 1 ? g.n + ' ' : ''}${CHIP[g.s]}</span>` : `${g.n > 1 ? `<span class="rl-n">${g.n}</span>` : ''}${fig(g.s, w, hh)}`)).join('<span class="rl-plus">+</span>');
+      };
+      const gen = generationOf(pred.reagent, pred.halide);
+      box.append(h('p', 'rl-h', `<b>Step 1: make the electrophile, ${Rg.Elabel}</b>`));
+      box.append(h('div', 'rl-eq', `${row(gen.reactants)}<span class="rl-arrow">→</span>${row(gen.products)}${gen.eMinus ? `<span class="rl-reag">+ ${gen.eMinus} e⁻ to the oxidant</span>` : ''}`));
+      box.append(h('p', 'rl-why', gen.text));
+      box.append(h('p', 'rl-h', '<b>Step 2: the π electrons of the ring attack the electrophile</b>'));
+      const cats = h('div', 'rl-cats rl-res');
+      cats.innerHTML = pred.formSmiles.map((f) => `<div class="rl-cat fav">${fig(f, 130, 100)}</div>`).join('<span class="rl-arrow rl-double" aria-label="resonance arrow">↔</span>');
+      box.append(cats);
+      box.append(h('p', 'rl-why', 'The ring is no longer aromatic: one carbon is sp³ (it holds H and the new group) and the + charge is shared by three carbons (ortho, para, ortho). That carbocation is resonance-stabilised but far less stable than benzene, so this step is the slow one.'));
+      box.append(h('p', 'rl-h', '<b>Step 3: a base removes H⁺ from the sp³ carbon</b>'));
+      box.append(h('div', 'rl-prow', `<figure class="mol">${fig(pred.product, 160, 116)}<figcaption>${nameHtml(pred.product)}</figcaption></figure>`));
+      box.append(h('p', 'rl-why', `The two C–H electrons go back into the ring, so it is aromatic again and the substituted product forms (${Rg.HBlabel}${Rg.catalystLabel && Rg.kind !== 'acid' ? ' and ' + Rg.catalystLabel + ' come back' : ''}).`));
+      const net = netOf(pred.reagent, pred.halide);
+      box.append(h('p', 'rl-h', '<b>Overall equation</b>'));
+      box.append(h('div', 'rl-eq', eqHtml({ lhs: net.reactants, rhs: net.products })));
+      box.append(h('p', 'muted small', `${Rg.catalystLabel ? Rg.catalystLabel + ' is a catalyst: it is used up in step 1 and given back in step 3.' : ''} ${net.note || ''}`));
+      let mech = null;
+      try { mech = easMechanism(pred.reagent, pred.halide); } catch (e) { mech = null; }
+      if (mech) {
+        const mpBox = h('div', 'rl-mech');
+        const stage = h('div', 'rl-mp');
+        const play = h('button', 'btn primary'); play.type = 'button'; play.textContent = 'Play the mechanism';
+        play.addEventListener('click', () => { play.remove(); mpBox.append(stage); mp?.destroy?.(); mp = mechanismPlayer.mount(stage, { mech, mode: 'watch', drawing: 'skeletal' }, { onResult() {} }); });
+        box.append(play, mpBox);
+      }
+      const again = h('button', 'btn ' + (right >= need ? 'primary' : '')); again.type = 'button';
+      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} predicted)`;
+      again.addEventListener('click', () => { alkene = BENZ; reagent = null; render(); root.scrollIntoView?.({ block: 'nearest' }); });
+      const act = h('div', 'lb-actions'); act.append(again);
+      box.append(act);
+    }
+
     function render() {
       root.innerHTML = '';
       mp?.destroy?.(); mp = null;
@@ -268,14 +313,15 @@ export default {
       const fam2 = !!REAGENTS2[reagent];
       const fam3 = !!DIENE_BY_ID[alkene.id];
       const fam4 = !!ALKYNE_BY_ID[alkene.id];
-      try { pred = fam4 ? predictAlkyne(alkene.smiles, reagent) : fam3 ? predictDiene(alkene.smiles, reagent) : fam2 ? predictAdd(alkene.smiles, reagent) : predict(alkene.smiles, reagent); } catch (e) { root.append(h('p', 'fb bad', 'This combination is outside the lesson.')); return; }
+      const entry = easMode ? LAB_EAS_BY_ID[reagent] : null;
+      try { pred = easMode ? predictEAS(BENZENE, entry.reagent, entry.halide || null) : fam4 ? predictAlkyne(alkene.smiles, reagent) : fam3 ? predictDiene(alkene.smiles, reagent) : fam2 ? predictAdd(alkene.smiles, reagent) : predict(alkene.smiles, reagent); } catch (e) { root.append(h('p', 'fb bad', 'This combination is outside the lesson.')); return; }
       const box = h('div', 'rl-run');
-      const R = RCFG(reagent);
+      const R = easMode ? { label: labLabel(entry) } : RCFG(reagent);
       box.append(h('p', 'rl-h', `<b>3. Predict</b>: the major product of ${nameHtml(alkene.smiles)} + ${R.label}`));
       const eq = h('div', 'rl-eq');
       eq.innerHTML = `${fig(alkene.smiles, 130, 96)}<span class="rl-plus">+</span><span class="rl-reag">${R.label}</span><span class="rl-arrow">→ ?</span>`;
       box.append(eq);
-      const choices = shuffle(rng, fam4 ? alkyneChoices(pred) : fam3 ? dieneChoices(pred) : fam2 ? productChoices2(pred) : productChoices(pred));
+      const choices = shuffle(rng, easMode ? easChoices(pred) : fam4 ? alkyneChoices(pred) : fam3 ? dieneChoices(pred) : fam2 ? productChoices2(pred) : productChoices(pred));
       const list = h('div', 'rl-opts', null);
       const fb = h('div', 'fb'); fb.setAttribute('aria-live', 'polite');
       choices.forEach((o) => list.append(optionCard(o, (btn) => {
@@ -285,7 +331,7 @@ export default {
           fb.className = 'fb ok'; fb.textContent = o.why;
           list.after(fb);
           right++;
-          if (fam4) reveal4(pred, box); else if (fam3) reveal3(pred, box); else if (fam2) reveal2(pred, box); else reveal(pred, box);
+          if (easMode) reveal5(pred, box); else if (fam4) reveal4(pred, box); else if (fam3) reveal3(pred, box); else if (fam2) reveal2(pred, box); else reveal(pred, box);
           if (right >= need && !doneSent) { doneSent = true; ctx.onResult({ ok: true }); }
           else if (ctx.onProgress) ctx.onProgress();
         } else {

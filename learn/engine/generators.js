@@ -12,6 +12,7 @@ import { generateMarkovnikov, MARK_SKILLS } from './generators-markovnikov.js';
 import { generateAdditions2, ADD2_SKILLS } from './generators-additions2.js';
 import { generateResonance, RES_SKILLS } from './generators-resonance.js';
 import { generateAlkynes, ALKYNE_SKILLS } from './generators-alkynes.js';
+import { generateEas, EAS_SKILLS } from './generators-eas.js';
 
 export const POOL = ['CN', 'CC#N', 'OC=O', 'C[O-]', '[NH4+]', 'CCl', 'C=C', 'CC=O', 'CC(=O)O', 'COC', '[OH3+]', '[CH3+]', '[CH3-]', 'O=C=O'];
 const MINUS = '−';
@@ -176,6 +177,7 @@ export function generate(generatorId, count, { skill = null, rng = Math.random }
   if (generatorId === 'alkene-additions-2') return generateAdditions2(count, { skill, rng });
   if (generatorId === 'resonance') return generateResonance(count, { skill, rng });
   if (generatorId === 'alkynes') return generateAlkynes(count, { skill, rng });
+  if (generatorId === 'eas-basics') return generateEas(count, { skill, rng });
   const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : BASIC_TASKS;
   const out = [];
   let last = null;
@@ -187,9 +189,9 @@ export function generate(generatorId, count, { skill = null, rng = Math.random }
   }
   return out;
 }
-export const GENERATORS = { 'lewis-basic': true, 'shape-basic': true, 'acid-base': true, 'skeletal-fg': true, 'alkane-names': true, 'chairs': true, 'alkene-names': true, 'mechanism-basics': true, 'markovnikov': true, 'alkene-additions-2': true, 'resonance': true, 'alkynes': true };
+export const GENERATORS = { 'lewis-basic': true, 'shape-basic': true, 'acid-base': true, 'skeletal-fg': true, 'alkane-names': true, 'chairs': true, 'alkene-names': true, 'mechanism-basics': true, 'markovnikov': true, 'alkene-additions-2': true, 'resonance': true, 'alkynes': true, 'eas-basics': true };
 /** Which generator serves "Practise this" for a weak-spot skill. */
-export function generatorForSkill(skill) { return ALKYNE_SKILLS.includes(skill) ? 'alkynes' : RES_SKILLS.includes(skill) ? 'resonance' : ADD2_SKILLS.includes(skill) ? 'alkene-additions-2' : MARK_SKILLS.includes(skill) ? 'markovnikov' : MECH_SKILLS.includes(skill) ? 'mechanism-basics' : ALKENE_SKILLS.includes(skill) ? 'alkene-names' : CHAIR_SKILLS.includes(skill) ? 'chairs' : NAMING_SKILLS.includes(skill) ? 'alkane-names' : FG_SKILLS.includes(skill) ? 'skeletal-fg' : ACID_SKILLS.includes(skill) ? 'acid-base' : SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
+export function generatorForSkill(skill) { return EAS_SKILLS.includes(skill) ? 'eas-basics' : ALKYNE_SKILLS.includes(skill) ? 'alkynes' : RES_SKILLS.includes(skill) ? 'resonance' : ADD2_SKILLS.includes(skill) ? 'alkene-additions-2' : MARK_SKILLS.includes(skill) ? 'markovnikov' : MECH_SKILLS.includes(skill) ? 'mechanism-basics' : ALKENE_SKILLS.includes(skill) ? 'alkene-names' : CHAIR_SKILLS.includes(skill) ? 'chairs' : NAMING_SKILLS.includes(skill) ? 'alkane-names' : FG_SKILLS.includes(skill) ? 'skeletal-fg' : ACID_SKILLS.includes(skill) ? 'acid-base' : SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
 
 const SUBS = '₀₁₂₃₄₅₆₇₈₉';
 const subNum = (n) => (n === 1 ? '' : String(n).split('').map((d) => SUBS[d]).join(''));

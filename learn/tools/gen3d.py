@@ -25,6 +25,8 @@ MOLS = {
     "buta-1-3-diene": "C=CC=C",
     # Lesson 12: but-2-yne (sp carbons: the four carbons lie on one straight line, C-C-C angles about 180 degrees). The Lindlar product (Z)-but-2-ene is the existing cis-but-2-ene model.
     "but-2-yne": "CC#CC",
+    # Lesson 13: benzene (flat hexagon, all six C-C bonds equal, 139 pm in the book; MMFF gives about 1.40 A). Checked below and in the tests.
+    "benzene": "c1ccccc1",
 }
 STAND_IN = {"bromonium-cyclohexene": "C1CC[C@H]2[Se][C@H]2C1"}
 # Conformers that must be a specific shape: id -> (check on the embedded molecule).
@@ -64,6 +66,7 @@ for name, smi in MOLS.items():
         # MMFF pyramidalises a bare C+ a little (angle sum ~356 deg); UFF keeps the trigonal-planar sp2 centre
         if name == "tert-butyl-cation": AllChem.UFFOptimizeMolecule(m, maxIters=2000)
         elif name in STAND_IN: AllChem.UFFOptimizeMolecule(m, maxIters=5000)
+        elif name == "benzene": AllChem.MMFFOptimizeMolecule(m, maxIters=20000)   # the default 200 iterations stop on a slightly twisted ring
         else: AllChem.MMFFOptimizeMolecule(m)
     if name == "but-2-yne":
         # both C-C#C angles must be 180 degrees (linear), and the four carbons are collinear
@@ -71,6 +74,15 @@ for name, smi in MOLS.items():
         for (i, j, k) in ((0, 1, 2), (1, 2, 3)):
             ang = rdMolTransforms.GetAngleDeg(cc, i, j, k)
             assert ang > 178, (name, ang)
+    if name == "benzene":
+        # the six C-C bonds are equal within 0.01 A and all twelve atoms lie in one plane
+        import numpy as np
+        cc = m.GetConformer()
+        L = [rdMolTransforms.GetBondLength(cc, b.GetBeginAtomIdx(), b.GetEndAtomIdx()) for b in m.GetBonds() if b.GetBeginAtom().GetSymbol() == "C" and b.GetEndAtom().GetSymbol() == "C"]
+        assert len(L) == 6 and max(L) - min(L) < 0.01 and 1.37 < min(L) and max(L) < 1.42, (name, L)
+        P = cc.GetPositions(); Q = P - P.mean(axis=0)
+        nrm = np.linalg.svd(Q)[2][-1]
+        assert np.abs(Q @ nrm).max() < 0.01, (name, np.abs(Q @ nrm).max())   # every atom within 0.01 A of one plane
     if name == "tert-butyl-cation":
         # the three C-C-C angles at the cation centre must add to 360 (planar), i.e. trigonal planar sp2
         cc = m.GetConformer(); tot = sum(rdMolTransforms.GetAngleDeg(cc, a, 1, b) for a, b in ((0, 2), (0, 3), (2, 3)))

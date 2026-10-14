@@ -308,3 +308,5 @@ export * from './reactions-dienes.js';
 // Lesson 12: alkynes (HX, X2, hydration, Lindlar / Pd, acetylide alkylation) and the synthesis planner's sequence engine. Extends this module additively.
 export * from './reactions-alkynes.js';
 export * from './synthesis.js';
+// Lesson 13: benzene and electrophilic aromatic substitution (Br2/FeBr3, Cl2/FeCl3, I2, HNO3/H2SO4, SO3, Friedel-Crafts alkylation and acylation, nitro -> amine). Extends this module additively.
+export * from './reactions-aromatic.js';

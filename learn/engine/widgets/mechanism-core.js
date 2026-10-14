@@ -85,7 +85,8 @@ export function octetViolations(state) {
   state.atoms.forEach((a, i) => {
     const lp = a.lp != null ? a.lp : lpCount(state.atoms, state.bonds, i);
     const e = 2 * Math.max(0, lp) + 2 * bondOrderSum(state.atoms, state.bonds, i);
-    if (e > (a.el === 'H' ? 2 : 8)) out.push({ idx: i, el: a.el, electrons: e });
+    // Lesson 13: sulfur in a sulfonic acid / hydrogen sulfate has six bonds (12 electrons, an expanded octet); every other atom is held to 8
+    if (e > (a.el === 'H' ? 2 : a.el === 'S' ? 12 : 8)) out.push({ idx: i, el: a.el, electrons: e });
   });
   return out;
 }

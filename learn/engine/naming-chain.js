@@ -9,6 +9,7 @@
 import { analyze } from './chem.js';
 import { ezInfo } from './cip.js';
 import { nameAlkane, nameAlkene } from './naming.js';
+import { nameArene, findRing } from './naming-arene.js';
 
 const STEM = ['meth', 'eth', 'prop', 'but', 'pent', 'hex', 'hept', 'oct', 'non', 'dec'];
 const MULT = { 1: '', 2: 'di', 3: 'tri', 4: 'tetra', 5: 'penta', 6: 'hexa' };
@@ -97,6 +98,8 @@ export function nameAny(smiles, mode = 'new') {
   let info = null;
   try { info = analyze(smiles); } catch (e) { info = null; }
   if (!info) return null;
+  // Lesson 13: a molecule with a benzene ring is named by engine/naming-arene.js (or not at all); the chain engines would call it a cyclohexatriene
+  if (findRing(info)) return nameArene(smiles, mode);
   if (info.atoms.every((a) => a.sym === 'C')) {
     const multi = info.bonds.some((b) => (b.bo ?? 1) > 1);
     return multi ? nameAlkene(smiles, mode) : nameAlkane(smiles, mode);

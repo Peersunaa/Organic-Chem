@@ -1,8 +1,8 @@
 // RDKit loader + chemistry helpers. Works in the browser and in Node (tests).
-export const VALENCE = { H: 1, C: 4, N: 5, O: 6, F: 7, Cl: 7, Br: 7, I: 7, S: 6, P: 5, B: 3, Li: 1, Mg: 2 };
-export const SYMBOL = { 1: 'H', 3: 'Li', 5: 'B', 6: 'C', 7: 'N', 8: 'O', 9: 'F', 12: 'Mg', 15: 'P', 16: 'S', 17: 'Cl', 35: 'Br', 53: 'I' };
-export const NAME = { H: 'Hydrogen', C: 'Carbon', N: 'Nitrogen', O: 'Oxygen', F: 'Fluorine', Cl: 'Chlorine', Br: 'Bromine', I: 'Iodine', S: 'Sulfur', P: 'Phosphorus', B: 'Boron', Li: 'Lithium', Mg: 'Magnesium' };
-export const GROUP = { H: 1, C: 14, N: 15, O: 16, F: 17, Cl: 17, Br: 17, I: 17, S: 16, P: 15, B: 13, Li: 1, Mg: 2 };
+export const VALENCE = { H: 1, C: 4, N: 5, O: 6, F: 7, Cl: 7, Br: 7, I: 7, S: 6, P: 5, B: 3, Li: 1, Mg: 2, Al: 3, Fe: 3 }; // Al and Fe (Lesson 13): FeBr3 / AlCl3 are neutral with 3 bonds and no lone pairs; FeBr4- / AlCl4- have 4 bonds and charge -1
+export const SYMBOL = { 1: 'H', 3: 'Li', 5: 'B', 6: 'C', 7: 'N', 8: 'O', 9: 'F', 12: 'Mg', 13: 'Al', 15: 'P', 16: 'S', 17: 'Cl', 26: 'Fe', 35: 'Br', 53: 'I' };
+export const NAME = { H: 'Hydrogen', C: 'Carbon', N: 'Nitrogen', O: 'Oxygen', F: 'Fluorine', Cl: 'Chlorine', Br: 'Bromine', I: 'Iodine', S: 'Sulfur', P: 'Phosphorus', B: 'Boron', Li: 'Lithium', Mg: 'Magnesium', Al: 'Aluminum', Fe: 'Iron' };
+export const GROUP = { H: 1, C: 14, N: 15, O: 16, F: 17, Cl: 17, Br: 17, I: 17, S: 16, P: 15, B: 13, Li: 1, Mg: 2, Al: 13, Fe: 8 };
 
 // Pauling electronegativities (McMurry Fig. 1.14). Bond polarity is always computed from this table.
 export const ENEG = { H: 2.1, Li: 1.0, Mg: 1.2, B: 2.0, C: 2.5, N: 3.0, O: 3.5, F: 4.0, Cl: 3.0, Br: 2.8, I: 2.5, S: 2.5, P: 2.1 };
