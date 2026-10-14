@@ -93,7 +93,9 @@ function grader(step, ctx, host) {
       }
       return wrong;
     },
-    right(msg) { say('ok', msg || 'Correct.'); ctx.done(); }
+    right(msg) { say('ok', msg || 'Correct.'); ctx.done(); },
+    // a widget made partial progress (e.g. 1 of 2 predictions right): drop stale wrong-answer feedback
+    clear() { fb.className = 'fb'; fb.innerHTML = ''; }
   };
 }
 
@@ -225,7 +227,8 @@ const RENDER = {
     host.append(box);
     const g = grader(step, ctx, host);
     WIDGETS[step.widget].mount(box, step.config, {
-      onResult(r) { if (r.ok) g.right(step.confirm || 'Correct.'); else g.wrong(r.diagnosis); }
+      onResult(r) { if (r.ok) g.right(step.confirm || 'Correct.'); else g.wrong(r.diagnosis); },
+      onProgress() { g.clear(); }
     });
   },
 
@@ -368,6 +371,11 @@ export function renderProblems(cfg, ctx, host) {
       const box = h('div', { class: 'widget' });
       card.append(box);
       WIDGETS['arrow-draw'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
+    } else if (p.kind === 'widget') {
+      // Lesson 09: any widget by name (p.widget, p.config); it reports {ok} like the others
+      const box = h('div', { class: 'widget' });
+      card.append(box);
+      WIDGETS[p.widget].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
     } else if (p.kind === 'groupfind') {
       const box = h('div', { class: 'widget' });
       card.append(box);

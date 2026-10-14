@@ -2,7 +2,9 @@
 //
 // config: { levels:[{label, kind:'R'|'TS'|'I'|'P', E}], mode?: 'tasks'|'view'|'catalyst' (default 'tasks'),
 //           tasks?: ['ts','intermediate','eact:1','dh','dhsign','rds','faster','nsteps' | {task, ask?}], showValues?: bool, unit?: 'kJ/mol',
-//           caption?, catalyst?: {minDrop} }
+//           caption?, catalyst?: {minDrop}, overlay?: {levels, label}, label? }
+// overlay (Lesson 09, view mode only): a SECOND pathway drawn on the same axes (same number of levels), dashed, e.g. the 1° cation pathway against the 3°
+//   one. `label` (main) and `overlay.label` become the legend. Both curves share one energy scale.
 // tasks : the learner taps peaks / valleys / numbered brackets (or answers a two-button question). Every answer is graded from the levels
 //         (energy-core.gradeTask); each wrong tap gets a diagnosis through ctx.onResult({ok:false, diagnosis}); ctx.onResult({ok:true})
 //         after the last task.
@@ -42,7 +44,9 @@ export default {
     const mode = config.mode || 'tasks';
     const unit = config.unit || 'kJ/mol';
     const N = levels.length;
-    const allE = levels.map((l) => l.E);
+    const ov = mode === 'view' && config.overlay ? config.overlay.levels.map((l) => ({ ...l })) : null;
+    if (ov) { const e2 = validate(ov); if (e2.length || ov.length !== levels.length) throw new Error('energy-diagram overlay: ' + (e2.join('; ') || 'needs the same number of levels')); }
+    const allE = levels.map((l) => l.E).concat(ov ? ov.map((l) => l.E) : []);
     const pad = mode === 'catalyst' ? 36 : 14;
     const eMin = Math.min(...allE) - pad, eMax = Math.max(...allE) + (mode === 'catalyst' ? 26 : pad);
     const X = (i) => ML + ((i + 0.5) / N) * (W - ML - MR);
@@ -181,6 +185,12 @@ export default {
       }
       // platforms and curve
       levels.forEach((l, i) => svg.append(svgEl('line', { x1: X(i) - 18, x2: X(i) + 18, y1: Y(l.E), y2: Y(l.E), class: 'ed-plat' + (revealed.has(i) ? ' ' + l.kind : '') })));
+      if (ov) {
+        const pts2 = ov.map((l, i) => ({ x: X(i), y: Y(l.E) }));
+        ov.forEach((l, i) => svg.append(svgEl('line', { x1: X(i) - 18, x2: X(i) + 18, y1: Y(l.E), y2: Y(l.E), class: 'ed-plat alt' })));
+        svg.append(svgEl('path', { d: pathD(pts2), class: 'ed-curve alt' }));
+        ov.forEach((l, i) => { if (l.kind === 'TS' || l.kind === 'I') svg.append(svgEl('circle', { cx: X(i), cy: Y(l.E), r: 4.5, class: 'ed-dot alt' })); });
+      }
       svg.append(svgEl('path', { d: pathD(pts), class: 'ed-curve' }));
       // markers + tags
       levels.forEach((l, i) => {
@@ -227,6 +237,10 @@ export default {
 
     function drawLegend() {
       legend.innerHTML = '';
+      if (ov) {
+        legend.append(html('li', null, `<span class="ed-sw"></span> ${config.label || 'pathway 1'}`), html('li', null, `<span class="ed-sw alt"></span> ${config.overlay.label || 'pathway 2'}`));
+        return;
+      }
       levels.forEach((l, i) => { if (l.label) legend.append(html('li', null, `<b>${letter(i)}</b> ${l.label}`)); });
     }
 

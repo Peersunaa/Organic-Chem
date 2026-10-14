@@ -16,6 +16,8 @@ MOLS = {
     "cis-dmcp": "C[C@H]1C[C@H]1C", "trans-dmcp": "C[C@H]1C[C@@H]1C",
     # Lesson 07: the two but-2-enes (C-C=C-C dihedral ~0 for cis, ~180 for trans; checked in the tests)
     "cis-but-2-ene": "C/C=C\\C", "trans-but-2-ene": "C/C=C/C",
+    # Lesson 09: the tert-butyl cation (planar sp2 C+ with an empty p orbital) next to isobutane (tetrahedral C-H), the neutral parent above
+    "tert-butyl-cation": "C[C+](C)C",
 }
 # Conformers that must be a specific shape: id -> (check on the embedded molecule).
 # butane must be the anti (zig-zag) conformer: lowest-energy of many embeds, C1-C2-C3-C4 dihedral ~180.
@@ -45,7 +47,13 @@ for name, smi in MOLS.items():
         assert d > 170, (name, d)
     else:
         assert AllChem.EmbedMolecule(m, randomSeed=7) == 0, name
-        AllChem.MMFFOptimizeMolecule(m)
+        # MMFF pyramidalises a bare C+ a little (angle sum ~356 deg); UFF keeps the trigonal-planar sp2 centre
+        if name == "tert-butyl-cation": AllChem.UFFOptimizeMolecule(m, maxIters=2000)
+        else: AllChem.MMFFOptimizeMolecule(m)
+    if name == "tert-butyl-cation":
+        # the three C-C-C angles at the cation centre must add to 360 (planar), i.e. trigonal planar sp2
+        cc = m.GetConformer(); tot = sum(rdMolTransforms.GetAngleDeg(cc, a, 1, b) for a, b in ((0, 2), (0, 3), (2, 3)))
+        assert abs(tot - 360) < 3, (name, tot)
     mb = Chem.MolToMolBlock(m)
     blocks[name] = {"smiles": smi, "molblock": mb}
     with open(os.path.join(out, name + ".mol"), "w") as f:

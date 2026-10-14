@@ -31,8 +31,9 @@ import * as CC from '../engine/widgets/chair-core.js';
 import { lesson06 } from './lesson06.mjs';
 import { lesson07 } from './lesson07.mjs';
 import { lesson08 } from './lesson08.mjs';
+import { lesson09 } from './lesson09.mjs';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -124,8 +125,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 8 && PLANNED[0].id === '09' && PLANNED[7].id === '16', 'placeholders 09-16');
-ok(LESSONS.length === 8 && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-08 registered and unlocked');
+ok(PLANNED.length === 7 && PLANNED[0].id === '10' && PLANNED[6].id === '16', 'placeholders 10-16');
+ok(LESSONS.length === 9 && LESSONS[8].id === '09' && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-09 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -259,7 +260,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -1135,6 +1136,9 @@ await lesson07({ ok, eq });
 
 // ---- Lesson 08: mechanism-player data + arrow application, energy-diagram logic, site table, reaction kinds, `mechanism-basics` generator, lesson steps (tests/lesson08.mjs)
 await lesson08({ ok, eq });
+
+// ---- Lesson 09: reactions engine (HX / hydration, Markovnikov) vs Python RDKit and a hand-checked fixture, regiochemistry-aware arrow grading, widgets, `markovnikov` generator, lesson steps (tests/lesson09.mjs)
+await lesson09({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

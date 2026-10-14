@@ -13,4 +13,6 @@ import cipRanker from './cip-ranker.js';
 import mechanismPlayer from './mechanism-player.js';
 import energyDiagram from './energy-diagram.js';
 import sitePicker from './site-picker.js';
-export const WIDGETS = { 'lewis-builder': lewisBuilder, 'valence-strip': valenceStrip, model3d, 'polarity-mark': polarityMark, 'arrow-draw': arrowDraw, 'equilibrium-arrow': equilibriumArrow, 'group-finder': groupFinder, 'skeletal-builder': skeletalBuilder, 'chain-tracer': chainTracer, 'newman-rotator': newmanRotator, 'chair-flip': chairFlip, 'cip-ranker': cipRanker, 'mechanism-player': mechanismPlayer, 'energy-diagram': energyDiagram, 'site-picker': sitePicker };
+import cationRank from './cation-rank.js';
+import reactionLab from './reaction-lab.js';
+export const WIDGETS = { 'lewis-builder': lewisBuilder, 'valence-strip': valenceStrip, model3d, 'polarity-mark': polarityMark, 'arrow-draw': arrowDraw, 'equilibrium-arrow': equilibriumArrow, 'group-finder': groupFinder, 'skeletal-builder': skeletalBuilder, 'chain-tracer': chainTracer, 'newman-rotator': newmanRotator, 'chair-flip': chairFlip, 'cip-ranker': cipRanker, 'mechanism-player': mechanismPlayer, 'energy-diagram': energyDiagram, 'site-picker': sitePicker, 'cation-rank': cationRank, 'reaction-lab': reactionLab };

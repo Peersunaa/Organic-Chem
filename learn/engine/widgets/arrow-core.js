@@ -126,6 +126,13 @@ export function headAtom(config, ar) {
 export function grade(config, drawnRaw) {
   const drawn = drawnRaw.map((d) => normalizeDrawn(config, d));
   const exp = config.arrows;
+  // Lesson 09, regiochemistry: when config.regio = {pi:[hC,pC], H, wrongWhy} the learner also says which end of the pi bond bonds to H
+  // (to:{bond:[carbon, H]}). The end the expected arrow names is right; the other end gets the specific regiochemistry diagnosis.
+  if (config.regio) {
+    const rg = config.regio;
+    const bad = drawn.findIndex((d) => d.from.bond && d.to.bond && keyOf(d.from) === keyOf({ bond: rg.pi }) && d.to.bond.includes(rg.H) && !exp.some((e) => arrowKey(e) === arrowKey(d)));
+    if (bad >= 0) return { ok: false, code: 'regio', wrong: [bad], missing: [], diagnosis: rg.wrongWhy };
+  }
   if (!drawn.length) return { ok: false, code: 'empty', diagnosis: 'Draw at least one arrow: tap the electrons it starts from, then the atom that receives them.', wrong: [], missing: exp.map((_, i) => i) };
   const expKeys = exp.map(arrowKey);
   const used = new Set();

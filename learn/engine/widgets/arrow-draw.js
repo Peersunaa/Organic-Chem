@@ -8,6 +8,8 @@
 //   preset:true      show config.arrows as already drawn (no tapping, no buttons); with arrows:[] it is a plain scene viewer.
 //                    A preset arrow may start at an atom (from:{atom:i}) so a WRONG mechanism can be shown ("arrow from H+").
 //   caption          text under a preset scene.
+//   regio            Lesson 09: {pi:[hC,pC], H, ends:[{idx,text},{idx,text}], wrongWhy}. When the learner sends the pi bond [hC,pC] to the atom H, a two-button question
+//                    asks which carbon bonds to H (the arrow is stored as to:{bond:[carbon,H]}). arrow-core grade() gives wrongWhy for the wrong end.
 //   play()           (returned) animates the drawn arrows and sends two electron dots along each curve; resolves when finished
 //                    (immediately under prefers-reduced-motion).
 import { NAME } from '../chem.js';
@@ -28,6 +30,7 @@ export default {
     let finished = preset;
     let badIdx = [];
     let lastAdded = -1;
+    let chooser = null;   // the 'which carbon bonds to H?' question (regio config only)
 
     host.innerHTML = `
       <div class="lb ad">
@@ -170,9 +173,40 @@ export default {
       g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } else if (e.key === 'Escape' && src) { src = null; say('Arrow cancelled.'); draw(); } });
     }
 
+    function closeChooser() { if (chooser) { chooser.remove(); chooser = null; } }
+    function askEnd() {
+      const rg = config.regio;
+      closeChooser();
+      chooser = document.createElement('div');
+      chooser.className = 'ad-regio';
+      chooser.setAttribute('role', 'group');
+      chooser.innerHTML = '<p class="ad-regio-q"><b>Which carbon of the double bond bonds to H?</b></p>';
+      const row = document.createElement('div'); row.className = 'ad-regio-row';
+      rg.ends.forEach((e) => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = e.text[0].toUpperCase() + e.text.slice(1);
+        b.addEventListener('click', () => {
+          const other = rg.pi.find((c) => c !== e.idx);
+          const from = { bond: [e.idx, other] }, to = { bond: [e.idx, rg.H] };
+          closeChooser();
+          drawn.push({ from, to }); lastAdded = drawn.length - 1; src = null;
+          say(`Arrow added: ${describeSource(config, from)} ${describeDest(config, from, to)}. Add another arrow or press Check.`);
+          draw();
+        });
+        row.appendChild(b);
+      });
+      const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'btn ghost'; cancel.textContent = 'Cancel';
+      cancel.addEventListener('click', () => { closeChooser(); src = null; say('Arrow cancelled. Tap the electrons the arrow starts from.'); draw(); });
+      row.appendChild(cancel);
+      chooser.appendChild(row);
+      host.querySelector('.ad').insertBefore(chooser, host.querySelector('.lb-actions'));
+      say('The π electrons form a new bond to H. Which carbon of the C=C does H bond to?');
+      row.querySelector('button').focus({ preventScroll: true });
+    }
+
     function tap(t) {
       if (finished) return;
       badIdx = [];
+      if (chooser) closeChooser();
       if (!src) {
         if (t.kind === 'lp') { src = { lp: t.atom, k: t.k }; }
         else if (t.kind === 'bond') { src = { bond: t.bond }; }
@@ -187,6 +221,7 @@ export default {
       if (same) { src = null; say('Arrow cancelled. Tap the electrons the arrow starts from.'); draw(); return; }
       const from = src.bond ? { bond: src.bond } : { lp: src.lp };
       const to = t.kind === 'bond' ? { bond: t.bond } : { atom: t.atom };
+      if (config.regio && from.bond && keyOf(from) === keyOf({ bond: config.regio.pi }) && to.atom === config.regio.H) { askEnd(); return; }
       if (to.atom != null && from.lp === to.atom) { say('An arrow cannot point back to its own atom. Tap the atom that receives the electrons.'); return; }
       if (drawn.some((d) => keyOf(d.from) + '>' + keyOf(d.to) === keyOf(from) + '>' + keyOf(to))) { src = null; say('You already drew that arrow.'); draw(); return; }
       drawn.push({ from, to });
@@ -196,8 +231,8 @@ export default {
       draw();
     }
 
-    host.querySelector('[data-act="undo"]').addEventListener('click', () => { if (finished) return; drawn.pop(); badIdx = []; src = null; lastAdded = -1; say('Last arrow removed.'); draw(); });
-    host.querySelector('[data-act="reset"]').addEventListener('click', () => { if (finished) return; drawn = []; badIdx = []; src = null; lastAdded = -1; say('Cleared. Tap the electrons the arrow starts from.'); draw(); });
+    host.querySelector('[data-act="undo"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn.pop(); badIdx = []; src = null; lastAdded = -1; say('Last arrow removed.'); draw(); });
+    host.querySelector('[data-act="reset"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn = []; badIdx = []; src = null; lastAdded = -1; say('Cleared. Tap the electrons the arrow starts from.'); draw(); });
     host.querySelector('[data-act="check"]').addEventListener('click', () => {
       if (finished) return;
       const r = grade(config, drawn);

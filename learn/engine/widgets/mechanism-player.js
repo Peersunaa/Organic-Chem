@@ -122,7 +122,7 @@ export default {
         return;
       }
       prompt.textContent = `Step ${n + 1} of ${N}: draw the curved arrows. Tap the electrons an arrow starts from, then the atom that receives them.`;
-      inst = arrowDraw.mount(box, { atoms: cfg.atoms, bonds: cfg.bonds, arrows: step.arrows, products: step.after, extraHint: config.extraHint }, {
+      inst = arrowDraw.mount(box, { atoms: cfg.atoms, bonds: cfg.bonds, arrows: step.arrows, products: step.after, extraHint: config.extraHint, regio: cfg.regio }, {
         onResult(r) {
           if (token !== gen) return;
           if (r.ok) { wrongHere = 0; clearFeedback(); prompt.textContent = `Step ${n + 1} of ${N}: correct. Watch the electrons move.`; inst.play().then(() => showAfter(step, token)); return; }

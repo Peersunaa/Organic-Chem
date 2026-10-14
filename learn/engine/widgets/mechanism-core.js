@@ -36,7 +36,9 @@ export function buildScene(step) {
 /** The widget config (arrow-draw format) for one step. */
 export function stepConfig(step) {
   const sc = buildScene(step);
-  return { atoms: sc.atoms, bonds: sc.bonds, arrows: step.arrows, products: step.after };
+  const cfg = { atoms: sc.atoms, bonds: sc.bonds, arrows: step.arrows, products: step.after };
+  if (step.regio) cfg.regio = step.regio; // Lesson 09: the learner must also say WHICH carbon of an unsymmetrical C=C bonds to H (see arrow-core grade)
+  return cfg;
 }
 
 /** State after the arrows: {atoms, bonds} with lone pairs and charges recomputed. */
@@ -97,7 +99,8 @@ export function checkMechanism(mech) {
       if (got !== want) errs.push(`${t}: arrows give ${got} but after is ${want}`);
     }
     if (n === 0 && !sameSet(st.before, [...mech.reactants, ...(mech.reagents || [])])) errs.push('step 1 does not start from the reactants (and reagents)');
-    if (prev && !sameSet(st.before, prev.after)) errs.push(`${t}: before is not the previous after`);
+    // `added` = fresh species that join this step (e.g. a second water molecule from the solvent); everything else must come from the previous step
+    if (prev && !sameSet(st.before, [...prev.after, ...(st.added || [])])) errs.push(`${t}: before is not the previous after${st.added ? ' plus the added species' : ''}`);
     prev = st;
   });
   if (prev && !sameSet(prev.after, mech.products)) errs.push('the last step does not end at the products');
