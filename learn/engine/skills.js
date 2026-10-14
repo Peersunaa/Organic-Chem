@@ -9,6 +9,10 @@ export const SKILLS = {
   'hybridization': { label: 'Hybridization & shape', rule: 'Count electron groups on the atom: atoms bonded to it (a double or triple bond is still one neighbour) plus lone pairs. 4 groups = sp³ (109.5°), 3 = sp² (120°), 2 = sp (180°).' },
   'sigma-pi': { label: 'σ and π bonds', rule: 'Every bond has exactly one σ bond (head-on overlap). A double bond adds one π bond and a triple bond adds two (sideways p overlap). Bonds to H are σ bonds too.' },
   'polarity': { label: 'Bond polarity', rule: 'Compare electronegativities (H 2.1, C 2.5, N 3.0, O 3.5, Cl 3.0, Li 1.0). The more electronegative atom is δ−. A difference under 0.5 is nearly nonpolar.' },
+  'conjugate-pairs': { label: 'Acids, bases & conjugate pairs', rule: 'A Brønsted–Lowry acid donates H⁺ and a base accepts it. The acid minus H⁺ is its conjugate base; the base plus H⁺ is its conjugate acid.' },
+  'pka-direction': { label: 'pKa & equilibrium direction', rule: 'A smaller pKa means a stronger acid and a weaker conjugate base. An equilibrium favours the side with the weaker acid (the higher pKa).' },
+  'curved-arrows': { label: 'Curved arrows', rule: 'A curved arrow starts at electrons (a lone pair or a bond) and points to the atom that receives them. It never starts at an atom without electrons, such as H⁺.' },
+  'lewis-acid-base': { label: 'Lewis acids & bases', rule: 'A Lewis base donates an electron pair (it has a lone pair). A Lewis acid accepts one (an atom short of an octet, or a positive ion).' },
   'electron-count-total': { label: 'Total valence electrons', rule: 'Add each atom’s valence electrons (H 1, C 4, N 5, O 6, halogens 7). Subtract 1 for each + charge, add 1 for each − charge.' }
 };
 export function skillLabel(s) { return (SKILLS[s] && SKILLS[s].label) || s; }

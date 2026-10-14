@@ -11,8 +11,12 @@ import { modelAngle } from '../engine/widgets/model3d.js';
 import models from '../data/3d/models.js';
 import { checkInput } from '../engine/steps.js';
 import * as store from '../engine/store.js';
+import { ACIDS, ACID, reaction, deprotonate, protonate, conjugateBase, labelCounts, lewisRole, strongerAcid, weakerAcid } from '../engine/acidbase.js';
+import * as arrow from '../engine/widgets/arrow-core.js';
+import * as eqw from '../engine/widgets/equilibrium-arrow.js';
+import { ARROW_BASES, ARROW_ACIDS, arrowScene, LEWIS_POOL } from '../engine/generators-acid.js';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -53,6 +57,13 @@ function sigmaPiIndependent(smi) {
 }
 
 function recompute(d) {
+  if (d.quantity === 'strongerAcid') return d.ids.reduce((b, i) => (ACID[i].pka < ACID[b].pka ? i : b));
+  if (d.quantity === 'weakestAcid') return d.ids.reduce((b, i) => (ACID[i].pka > ACID[b].pka ? i : b));
+  if (d.quantity === 'pka') return ACID[d.id].pka;
+  if (d.quantity === 'pkaFromExp') return -d.exp;
+  if (d.quantity === 'favoured') { const l = ACID[d.a].pka, r = ACID[d.b].pka; return r > l ? 'right' : 'left'; }
+  if (d.quantity === 'deprotonates') { const ok1 = d.ids.filter((i) => ACID[i].pka < ACID[d.base].pka); if (ok1.length !== 1) throw new Error('deprotonates needs exactly one'); return ok1[0]; }
+  if (d.quantity === 'lewis') { const r = lewisRole(analyze(d.smiles)); return r; }
   if (d.quantity === 'moreEN') return ENEG[d.a] > ENEG[d.b] ? d.a : d.b;
   if (d.quantity === 'valence') return VALENCE[d.element];
   if (d.quantity === 'bonds') return d.element === 'H' ? 1 : 8 - VALENCE[d.element];
@@ -77,8 +88,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 14 && PLANNED[0].id === '03' && PLANNED[13].id === '16', 'placeholders 03-16');
-ok(LESSONS.length === 2 && LESSONS[1].id === '02', 'lesson 02 registered and unlocked');
+ok(PLANNED.length === 13 && PLANNED[0].id === '04' && PLANNED[12].id === '16', 'placeholders 04-16');
+ok(LESSONS.length === 3 && LESSONS[1].id === '02' && LESSONS[2].id === '03', 'lessons 01-03 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -181,7 +192,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -206,6 +217,231 @@ for (const L of LESSONS) {
     const res = JSON.parse(execFileSync('python3', ['-I', '-c', py, JSON.stringify(SHAPE_POOL)], { encoding: 'utf8' }));
     for (const smi of SHAPE_POOL) analyze(smi).atoms.forEach((a, i) => { if (a.sym === 'C') ok(res[smi][i] === hybridOf(a).toUpperCase(), `python RDKit hybridization ${smi} atom ${i}: ${res[smi][i]} vs ${hybridOf(a)}`); });
   } catch (e) { console.log('  (python RDKit unavailable, skipped hybridization cross-check)'); }
+}
+
+// ---- reaction balance helpers (spec 6: atoms and charge)
+function tally(smiles) {
+  const info = analyze(smiles);
+  const c = {};
+  info.atoms.forEach((a) => { c[a.sym] = (c[a.sym] || 0) + 1; if (a.impH) c.H = (c.H || 0) + a.impH; });
+  return { c, q: info.netCharge };
+}
+function balanced(reactants, products) {
+  const sum = (arr) => arr.reduce((t, s) => { const x = tally(s); for (const k in x.c) t.c[k] = (t.c[k] || 0) + x.c[k]; t.q += x.q; return t; }, { c: {}, q: 0 });
+  const A = sum(reactants), B = sum(products);
+  const keys = new Set([...Object.keys(A.c), ...Object.keys(B.c)]);
+  for (const k of keys) if ((A.c[k] || 0) !== (B.c[k] || 0)) return false;
+  return A.q === B.q;
+}
+function findReactions(o, out = []) {
+  if (Array.isArray(o)) o.forEach((x) => findReactions(x, out));
+  else if (o && typeof o === 'object') { if (Array.isArray(o.reactants) && Array.isArray(o.products)) out.push(o); Object.values(o).forEach((x) => findReactions(x, out)); }
+  return out;
+}
+{
+  eq(balanced(['Cl', 'O'], ['[OH3+]', '[Cl-]']), true, 'balance helper accepts HCl + H2O');
+  eq(balanced(['Cl', 'O'], ['[OH3+]', 'Cl']), false, 'balance helper rejects wrong charge');
+  eq(balanced(['Cl', 'O'], ['[OH2+]', '[Cl-]']), false, 'balance helper rejects wrong atoms');
+}
+
+// ---- pKa table (McMurry Table 1.2 + text) and the acidbase helpers
+{
+  const want = { ethanol: 16.00, water: 15.74, hcn: 9.31, h2po4: 7.21, acetic: 4.76, h3po4: 2.16, hno3: -1.3, hcl: -7.0, acetone: 19.3, acetylene: 25, ammonia: 36 };
+  eq(Object.fromEntries(ACIDS.map((a) => [a.id, a.pka])), want, 'pKa table holds exactly the allowed values');
+  for (const A of ACIDS) {
+    const t = `acid ${A.id}`;
+    ok(canon(A.ha) && canon(A.a), `${t} smiles parse`);
+    eq(conjugateBase(A.id), canon(A.a), `${t} conjugate base = acid minus H+ at its site`);
+    const ia = analyze(A.ha), ib = analyze(A.a);
+    ok(ia.atoms[A.site].impH >= 1, `${t} site atom carries an H`);
+    ok(balanced([A.ha], [A.a, '[H+]']), `${t} HA -> A- + H+ balances`);
+    ok(ib.netCharge === ia.netCharge - 1, `${t} charge drops by 1`);
+    ok(ia.atoms.every((x) => Number.isInteger(x.lp) && x.lp >= 0) && ib.atoms.every((x) => Number.isInteger(x.lp) && x.lp >= 0), `${t} lone pairs valid`);
+    // display labels agree with the structures
+    for (const [lab, smi] of [[A.haLabel, A.ha], [A.aLabel, A.a]]) {
+      const L = labelCounts(lab), T = tally(smi);
+      const srt = (o) => Object.fromEntries(Object.entries(o).sort());
+      eq(srt(L.counts), srt(T.c), `label ${lab} elements match ${smi}`);
+      eq(L.charge, T.q, `label ${lab} charge matches ${smi}`);
+    }
+    const prot = protonate(A.ha, A.site);
+    ok(prot === null || balanced([A.ha, '[H+]'], [prot]), `${t} protonated form balances when valid`);
+    ok(Number(A.pkaText.replace('−', '-').replace('≈ ', '')) === A.pka, `${t} pka text agrees with number`);
+  }
+  eq(strongerAcid(['hcl', 'acetic']), 'hcl', 'stronger acid = lower pKa');
+  eq(weakerAcid(['acetic', 'water']), 'water', 'weaker acid = higher pKa');
+  // every ordered pair: the reaction balances, and the favoured side holds the higher pKa
+  let pairs = 0;
+  for (const a of ACIDS) for (const b of ACIDS) {
+    if (a.id === b.id) continue;
+    const rx = reaction(a.id, b.id);
+    ok(balanced(rx.reactants, rx.products), `reaction ${rx.text} balances`);
+    const L = a.pka, R = b.pka;
+    eq(rx.favoured, R > L ? 'right' : 'left', `favoured ${rx.text}`);
+    const fav = rx.favoured === 'left' ? rx.left[0] : rx.right[1];
+    const oth = rx.favoured === 'left' ? rx.right[1] : rx.left[0];
+    ok(fav.pka > oth.pka, `favoured side holds the weaker acid ${rx.text}`);
+    pairs++;
+  }
+  eq(pairs, ACIDS.length * (ACIDS.length - 1), 'all ordered acid pairs checked');
+  // widget logic
+  const cfg = { a: 'hcn', b: 'acetic' };
+  const sol = eqw.solution(cfg);
+  eq(sol, { acids: ['L0', 'R1'], side: 'left' }, 'equilibrium-arrow solution for HCN/acetate');
+  ok(eqw.ACID_KEYS.every((k) => eqw.tapSpecies(cfg, k).ok) && !eqw.tapSpecies(cfg, 'L1').ok && !eqw.tapSpecies(cfg, 'R0').ok, 'equilibrium-arrow acid taps graded');
+  ok(/base on this side/.test(eqw.tapSpecies(cfg, 'L1').diagnosis), 'equilibrium-arrow base diagnosis');
+  ok(eqw.gradeSide(cfg, 'left').ok && !eqw.gradeSide(cfg, 'right').ok && /weaker acid/.test(eqw.gradeSide(cfg, 'right').diagnosis), 'equilibrium-arrow side graded with diagnosis');
+  for (const a of ACIDS) for (const b of ACIDS) if (a !== b) { const c = { a: a.id, b: b.id }; ok(eqw.gradeSide(c, eqw.solution(c).side).ok && !eqw.gradeSide(c, eqw.solution(c).side === 'left' ? 'right' : 'left').ok, `eq widget side ${a.id}/${b.id}`); }
+}
+
+// ---- curved-arrow engine: validity, grading, and the arrows really make the products
+function checkArrowConfig(t, c, reactants, products) {
+  const errs = arrow.validate(c);
+  ok(errs.length === 0, `${t} arrow data valid: ${errs.join('; ')}`);
+  c.arrows.forEach((a, n) => {
+    if (a.from.lp != null) ok(arrow.lpCount(c.atoms, c.bonds, a.from.lp) >= 1, `${t} arrow ${n} lone pair source has electrons`);
+    else ok(arrow.findBond(c.bonds, a.from.bond[0], a.from.bond[1]) >= 0, `${t} arrow ${n} bond source is a real bond`);
+  });
+  // lone pairs of the drawn scene agree with RDKit for the reactants
+  const mine = c.atoms.map((a, i) => `${a.el}${arrow.lpCount(c.atoms, c.bonds, i)}`).sort();
+  const ref = [];
+  reactants.forEach((smi) => { const info = analyze(smi); info.atoms.forEach((a) => ref.push(`${a.sym}${a.lp}`)); info.atoms.forEach((a) => { for (let k = 0; k < a.impH; k++) ref.push('H0'); }); });
+  eq(mine, ref.sort(), `${t} scene lone pairs match RDKit`);
+  // grading
+  ok(arrow.grade(c, c.arrows).ok, `${t} solution accepted`);
+  ok(arrow.grade(c, c.arrows.slice().reverse()).ok, `${t} solution accepted in any order`);
+  ok(!arrow.grade(c, []).ok && arrow.grade(c, []).code === 'empty', `${t} empty rejected`);
+  if (c.arrows.length > 1) {
+    const part = arrow.grade(c, [c.arrows[0]]);
+    ok(!part.ok && part.code === 'missing' && /You also need/.test(part.diagnosis), `${t} missing-arrow diagnosis`);
+  }
+  // applying the arrows gives exactly the products
+  const st = arrow.applyArrows(c);
+  eq(canon(buildMolblock(st)), canon(products.join('.')), `${t} arrows produce the products`);
+  ok(st.atoms.every((a) => Number.isInteger(a.lp) && a.lp >= 0), `${t} product lone pairs valid`);
+  ok(new Set(c.atoms.map((a) => a.x.toFixed(2) + ',' + a.y.toFixed(2))).size === c.atoms.length, `${t} atom positions distinct`);
+}
+{
+  // wrong-arrow diagnoses (spec wording) on a tiny H2O + HCl scene
+  const sc = arrowScene('O', 'hcl');
+  const c = { atoms: sc.atoms, bonds: sc.bonds, arrows: sc.arrows };
+  const O = sc.baseSite, H = sc.hIdx, Cl = sc.acidSite;
+  ok(/not at H⁺/.test(arrow.badStart(c, H)), 'arrow from H: "Arrows start at electrons, not at H⁺"');
+  ok(/no lone pair/.test(arrow.badStart({ atoms: [{ el: 'B' }, { el: 'F' }, { el: 'F' }, { el: 'F' }], bonds: [{ a: 0, b: 1 }, { a: 0, b: 2 }, { a: 0, b: 3 }], arrows: [] }, 0)), 'arrow from B: no lone pair');
+  eq(arrow.grade(c, [sc.arrows[0]]).diagnosis.includes(`You also need the arrow showing the H−Cl bond electrons moving onto Cl`), true, 'missing second arrow message (H-Cl bond onto Cl)');
+  const wrongDest = arrow.grade(c, [{ from: { lp: O }, to: { atom: Cl } }, sc.arrows[1]]);
+  ok(!wrongDest.ok && wrongDest.code === 'dest' && /right place/.test(wrongDest.diagnosis), 'right start, wrong end diagnosed');
+  const rev = arrow.grade(c, [sc.arrows[0], { from: { bond: [H, Cl] }, to: { atom: H } }]);
+  ok(!rev.ok && rev.code === 'dest', 'bond electrons to H diagnosed as wrong end');
+  const extra = arrow.grade(c, [...sc.arrows, { from: { lp: Cl }, to: { atom: H } }]);
+  ok(!extra.ok && extra.code === 'extra', 'extra arrow from Cl lone pair rejected');
+  ok(arrow.validate({ atoms: sc.atoms, bonds: sc.bonds, arrows: [{ from: { lp: H }, to: { atom: Cl } }] }).length > 0, 'validate: source atom without lone pair is invalid');
+  ok(arrow.validate({ atoms: sc.atoms, bonds: sc.bonds, arrows: [{ from: { bond: [O, Cl] }, to: { atom: Cl } }] }).length > 0, 'validate: source that is not a bond is invalid');
+}
+
+// ---- Lesson 03 specifics
+{
+  const l = LESSONS.find((x) => x.id === '03');
+  ok(l.steps.length >= 15 && l.steps.length <= 18, `L03 has 15-18 steps (${l.steps.length})`);
+  ok(l.drawing === 'full' && l.minutes === 25 && l.chapter === 1, 'L03 drawing full, 25 min');
+  eq(l.sections, ['1.10', '1.11', '1.12'], 'L03 sections');
+  eq(l.mastery, { count: 3, generator: 'acid-base' }, 'L03 mastery uses acid-base');
+  ok(l.steps.some((s) => s.type === 'worked' && /hydroxide/.test(s.problem)), 'L03 has the hydroxide / acetic acid worked example');
+  ok(l.steps.some((s) => s.widget === 'equilibrium-arrow') && l.steps.filter((s) => s.widget === 'arrow-draw').length === 2, 'L03 uses equilibrium-arrow once and arrow-draw twice');
+  ok(l.steps.every((s) => ['predict', 'choice', 'input', 'try', 'worked', 'explain'].includes(s.type)), 'L03 step types');
+  ok(l.steps[0].type === 'predict' && l.steps.findIndex((s) => s.type === 'explain') > 0, 'L03 predicts before it explains');
+  ok(l.steps.filter((s) => s.skill === 'curved-arrows').length >= 3, 'L03 trains curved-arrows');
+  // each skill used is in the weak-spot taxonomy; book problems are real numbers from ch.1
+  eq(l.useIt.book, ['1.20', '1.21', '1.22', '1.23', '1.24', '1.25', '1.56', '1.57', '1.58', '1.59', '1.60', '1.61', '1.62', '1.63'], 'L03 book problems');
+  // every reaction in the lesson balances (atoms and charge)
+  const rxs = findReactions(l);
+  ok(rxs.length >= 7, `L03 declares reactions (${rxs.length})`);
+  rxs.forEach((r, i) => ok(r.reactants.every((x) => canon(x)) && r.products.every((x) => canon(x)) && balanced(r.reactants, r.products), `L03 reaction ${i} balances: ${r.reactants.join(' + ')} -> ${r.products.join(' + ')}`));
+  // widget-derived reactions
+  for (const s of l.steps.filter((x) => x.widget === 'equilibrium-arrow')) { const rx = reaction(s.config.a, s.config.b); ok(balanced(rx.reactants, rx.products), `L03 ${s.id} widget reaction balances`); eq(canon(s.reaction.reactants.join('.')), canon(rx.reactants.join('.')), `L03 ${s.id} declared reactants match widget`); }
+  // arrow steps
+  for (const s of l.steps.filter((x) => x.widget === 'arrow-draw')) {
+    checkArrowConfig(`L03/${s.id}`, s.config, s.reaction.reactants, s.reaction.products);
+    eq(canon(s.config.products.join('.')), canon(s.reaction.products.join('.')), `L03/${s.id} config products = reaction products`);
+  }
+  const hcl = l.steps.find((x) => x.id === 's15').config;
+  eq(hcl.arrows.map((a) => [a.from.lp ?? a.from.bond, a.to.atom]), [[0, 3], [[3, 4], 4]], 'H2O + HCl arrows: O lp -> H, H-Cl bond -> Cl');
+  const bf3 = l.steps.find((x) => x.id === 's17').config;
+  eq(bf3.arrows.map((a) => [a.from.lp, a.to.atom]), [[0, 4]], 'NH3 + BF3 arrow: N lp -> B');
+  eq([arrow.lpCount(bf3.atoms, bf3.bonds, 0), arrow.lpCount(bf3.atoms, bf3.bonds, 4)], [1, 0], 'NH3 has 1 lone pair, BF3 boron 0');
+  ok(arrow.applyArrows(bf3).atoms[0].charge === 1 && arrow.applyArrows(bf3).atoms[4].charge === -1, 'NH3 + BF3 gives N+ and B-');
+  // Lewis spotting
+  eq(['N', 'B(F)(F)F', '[Mg+2]', 'CCO', 'O'].map((x) => lewisRole(analyze(x))), ['base', 'acid', 'acid', 'base', 'base'], 'Lewis roles from structure');
+  eq(analyze('CN').atoms[1].lp, 1, 'methylamine N has 1 lone pair'); eq(analyze('CN').atoms[0].lp, 0, 'methylamine C has none');
+  // pKa numbers quoted in text are table values
+  const allowed = new Set(['16.00', '15.74', '9.31', '7.21', '4.76', '2.16', '1.3', '7.0', '19.3', '25', '36', '9.25', '10.66']);
+  const text = htmlStrings(l.steps).join(' ');
+  const quoted = [...text.matchAll(/pKa (?:≈ )?(?:−)?(\d+(?:\.\d+)?)/g)].map((m) => m[1]);
+  ok(quoted.length > 8 && quoted.every((q) => allowed.has(q)), `L03 only quotes allowed pKa values (${[...new Set(quoted)].join(', ')})`);
+}
+
+// ---- acid-base generator
+{
+  const kinds = new Set();
+  for (const skill of [null, 'pka-direction', 'conjugate-pairs', 'curved-arrows', 'lewis-acid-base']) {
+    const probs = generate('acid-base', 50, { skill });
+    ok(probs.length === 50, `acid-base gen ${skill} count`);
+    for (const p of probs) {
+      kinds.add(p.kind + ':' + p.skill);
+      const t = `acid-base ${skill}/${p.skill}`;
+      ok(p.prompt && p.derive && p.hints.length === 2 && p.hints.every((x) => x.length > 5), `${t} fields`);
+      ok(TAXONOMY.has(p.skill), `${t} skill tag`);
+      if (p.reaction) ok(p.reaction.reactants.every(canon) && p.reaction.products.every(canon) && balanced(p.reaction.reactants, p.reaction.products), `${t} reaction balances: ${p.reaction.reactants} -> ${p.reaction.products}`);
+      if (p.kind === 'choice') {
+        ok(p.options.filter((o) => o.correct).length === 1 && p.options.every((o) => o.why.length > 10), `${t} one correct + whys`);
+        const right = p.options.find((o) => o.correct);
+        if (p.skill === 'pka-direction' && /equilibrium favour/.test(p.prompt)) {
+          const m = /acids: (.+?) pKa ([^,)]+), (.+?) pKa ([^,)]+)\)/.exec(p.prompt);
+          const L = ACIDS.find((a) => a.haLabel === m[1]), R = ACIDS.find((a) => a.haLabel === m[3]);
+          ok(L && R && L.pkaText === m[2] && R.pkaText === m[4], `${t} acids and pKa shown agree with table`);
+          const textRx = `${L.haLabel} + `;
+          ok(p.prompt.includes(reaction(L.id, ACIDS.find((a) => a.haLabel === R.haLabel).id).text) || p.prompt.includes('⇌'), `${t} shows reaction`);
+          // recompute independently from numbers
+          ok(Math.abs(L.pka - R.pka) >= 1, `${t} pKa gap at least 1`);
+          eq(right.side, R.pka > L.pka ? 'right' : 'left', `${t} side = higher-pKa acid side`);
+        } else if (p.skill === 'pka-direction') {
+          const m = /stronger acid: (.+?) \(pKa ([^)]+)\) or (.+?) \(pKa ([^)]+)\)\?/.exec(p.prompt);
+          ok(!!m, `${t} stronger prompt parses`);
+          const A = ACIDS.find((a) => a.name === m[1]), B = ACIDS.find((a) => a.name === m[3]);
+          ok(A && B && A.pkaText === m[2] && B.pkaText === m[4], `${t} pKa shown agrees with table`);
+          const want = A.pka < B.pka ? A : B;
+          ok(right.text.startsWith(want.name), `${t} stronger = lower pKa (${want.name})`);
+        } else if (p.skill === 'conjugate-pairs') {
+          const A = ACIDS.find((a) => a.ha === p.smiles);
+          ok(!!A, `${t} acid from table`);
+          eq(canon(right.smiles), conjugateBase(A.id), `${t} correct option = acid minus H+ (canonical SMILES)`);
+          ok(p.options.filter((o) => canon(o.smiles) === canon(right.smiles)).length === 1, `${t} no duplicate of the answer`);
+          ok(new Set(p.options.map((o) => canon(o.smiles))).size === p.options.length && p.options.length >= 3, `${t} distinct options`);
+          p.options.forEach((o) => ok(canon(o.smiles) !== null, `${t} option parses`));
+          ok(p.options.filter((o) => !o.correct).every((o) => analyze(o.smiles).netCharge !== analyze(A.ha).netCharge - 1 || canon(o.smiles) !== conjugateBase(A.id)), `${t} distractors are not the answer`);
+        } else if (p.skill === 'lewis-acid-base') {
+          const role = lewisRole(analyze(p.smiles));
+          ok(role === 'acid' || role === 'base', `${t} unambiguous role`);
+          ok(right.text.toLowerCase().includes(role), `${t} answer = ${role}`);
+        }
+      } else if (p.kind === 'arrows') {
+        checkArrowConfig(t + ' ' + p.reaction.reactants, p.config, p.reaction.reactants, p.reaction.products);
+        const c = p.config;
+        // a learner who starts at the H cannot start an arrow
+        ok(arrow.validate({ ...c, arrows: [{ from: { lp: p.config.arrows[1].from.bond[0] }, to: { atom: p.config.arrows[1].to.atom } }] }).length > 0, `${t} H cannot be an arrow source`);
+        ok(!arrow.grade(c, [c.arrows[1]]).ok && !arrow.grade(c, [c.arrows[0]]).ok, `${t} one arrow alone is not enough`);
+        eq(canon(c.products.join('.')), canon(p.reaction.products.join('.')), `${t} products agree`);
+      } else ok(false, 'unknown acid-base kind ' + p.kind);
+    }
+  }
+  ok(['choice:pka-direction', 'choice:conjugate-pairs', 'arrows:curved-arrows', 'choice:lewis-acid-base'].every((k) => kinds.has(k)), 'acid-base covers all task types');
+  const dflt = generate('acid-base', 50).map((p) => p.skill);
+  ok(dflt.includes('pka-direction') && dflt.includes('conjugate-pairs'), 'default mix has direction + conjugate-base problems');
+  ok(generatorForSkill('pka-direction') === 'acid-base' && generatorForSkill('curved-arrows') === 'acid-base' && generatorForSkill('conjugate-pairs') === 'acid-base' && generatorForSkill('lewis-acid-base') === 'acid-base' && generatorForSkill('polarity') === 'shape-basic', 'generatorForSkill routes L03 skills');
+  const f1 = generate('acid-base', 6).map((p) => p.prompt).join('|'), f2 = generate('acid-base', 6).map((p) => p.prompt).join('|');
+  ok(f1.length > 0 && f2.length > 0, 'acid-base fresh runs');
+  ok(LEWIS_POOL.every((x) => ['acid', 'base'].includes(lewisRole(analyze(x.smiles)))), 'Lewis pool entries are unambiguous');
+  ARROW_BASES.forEach((b) => ARROW_ACIDS.forEach((id) => { const sc = arrowScene(b.smiles, id); ok(balanced(sc.reactants, sc.products), `arrow scene ${b.smiles}+${id} balances`); checkArrowConfig(`arrowScene ${b.smiles}+${id}`, { atoms: sc.atoms, bonds: sc.bonds, arrows: sc.arrows }, sc.reactants, sc.products); }));
 }
 
 // ---- builder diagnosis behaviours (spec wording)
