@@ -1,0 +1,293 @@
+{
+ "_comment": "Hand-checked IUPAC names for alkenes, alkynes and cycloalkenes (not produced by the engine). 'new' = book style (locant before -ene/-yne), 'old' = traditional (locant in front). (E)/(Z) are written only where the SMILES fixes the geometry of a stereogenic C=C; several descriptors are written (2E,4Z)-. If the engine and this file disagree, report it; do not edit the file to match.",
+ "names": [
+  {
+   "smiles": "CC=CC",
+   "new": "but-2-ene",
+   "old": "2-butene",
+   "note": "no E/Z written: the SMILES does not fix the geometry"
+  },
+  {
+   "smiles": "C/C=C/C",
+   "new": "(E)-but-2-ene",
+   "old": "(E)-2-butene",
+   "note": "trans: CH3 groups on opposite sides"
+  },
+  {
+   "smiles": "C/C=C\\C",
+   "new": "(Z)-but-2-ene",
+   "old": "(Z)-2-butene",
+   "note": "cis: CH3 groups on the same side"
+  },
+  {
+   "smiles": "CC/C=C\\C",
+   "new": "(Z)-pent-2-ene",
+   "old": "(Z)-2-pentene",
+   "note": "ethyl (higher on C3) and CH3 (higher on C2) on the same side"
+  },
+  {
+   "smiles": "CCC=CC",
+   "new": "pent-2-ene",
+   "old": "2-pentene",
+   "note": "geometry not drawn"
+  },
+  {
+   "smiles": "CCC=C(C)C",
+   "new": "2-methylpent-2-ene",
+   "old": "2-methyl-2-pentene",
+   "note": "no E/Z: C2 carries two methyl groups"
+  },
+  {
+   "smiles": "CC=C(C)C",
+   "new": "2-methylbut-2-ene",
+   "old": "2-methyl-2-butene",
+   "note": "no E/Z: one carbon has two methyls"
+  },
+  {
+   "smiles": "C/C=C(/CC)C",
+   "new": "(E)-3-methylpent-2-ene",
+   "old": "(E)-3-methyl-2-pentene",
+   "note": "C2: CH3 > H; C3: ethyl > methyl; opposite sides = E"
+  },
+  {
+   "smiles": "C/C=C(\\CC)C",
+   "new": "(Z)-3-methylpent-2-ene",
+   "old": "(Z)-3-methyl-2-pentene",
+   "note": "same drawing with the ethyl flipped: Z"
+  },
+  {
+   "smiles": "C=CC=C",
+   "new": "buta-1,3-diene",
+   "old": "1,3-butadiene",
+   "note": "two double bonds: buta-, locants 1,3"
+  },
+  {
+   "smiles": "CC(=C)C=C",
+   "new": "2-methylbuta-1,3-diene",
+   "old": "2-methyl-1,3-butadiene",
+   "note": "isoprene"
+  },
+  {
+   "smiles": "C=C(C)C(C)=C",
+   "new": "2,3-dimethylbuta-1,3-diene",
+   "old": "2,3-dimethyl-1,3-butadiene",
+   "note": "two methyls, each on a C2/C3"
+  },
+  {
+   "smiles": "C=CCC=C",
+   "new": "penta-1,4-diene",
+   "old": "1,4-pentadiene",
+   "note": "isolated double bonds"
+  },
+  {
+   "smiles": "C=CCCC=C",
+   "new": "hexa-1,5-diene",
+   "old": "1,5-hexadiene",
+   "note": "isolated double bonds, symmetrical"
+  },
+  {
+   "smiles": "CCCC#C",
+   "new": "pent-1-yne",
+   "old": "1-pentyne",
+   "note": "terminal alkyne"
+  },
+  {
+   "smiles": "CCC#CCC",
+   "new": "hex-3-yne",
+   "old": "3-hexyne",
+   "note": "internal alkyne, symmetrical"
+  },
+  {
+   "smiles": "CC#CC",
+   "new": "but-2-yne",
+   "old": "2-butyne",
+   "note": "internal alkyne"
+  },
+  {
+   "smiles": "CC#CC(C)C",
+   "new": "4-methylpent-2-yne",
+   "old": "4-methyl-2-pentyne",
+   "note": "the triple bond takes the lowest number, not the methyl"
+  },
+  {
+   "smiles": "C#CCCC(C)C",
+   "new": "5-methylhex-1-yne",
+   "old": "5-methyl-1-hexyne",
+   "note": "number from the triple-bond end"
+  },
+  {
+   "smiles": "C#CC(C)CC",
+   "new": "3-methylpent-1-yne",
+   "old": "3-methyl-1-pentyne",
+   "note": "branch on C3"
+  },
+  {
+   "smiles": "CC#CC(C)(C)C",
+   "new": "4,4-dimethylpent-2-yne",
+   "old": "4,4-dimethyl-2-pentyne",
+   "note": "two methyls on C4"
+  },
+  {
+   "smiles": "CC1C=CCCC1",
+   "new": "3-methylcyclohexene",
+   "old": "3-methylcyclohexene",
+   "note": "double bond is C1=C2; the methyl gets 3"
+  },
+  {
+   "smiles": "CC1=CCCC1",
+   "new": "1-methylcyclopentene",
+   "old": "1-methylcyclopentene",
+   "note": "methyl on a double-bond carbon: C1"
+  },
+  {
+   "smiles": "CC1(C)C=CCCC1",
+   "new": "3,3-dimethylcyclohexene",
+   "old": "3,3-dimethylcyclohexene",
+   "note": "two methyls on the same carbon"
+  },
+  {
+   "smiles": "CC1CC=CCC1",
+   "new": "4-methylcyclohexene",
+   "old": "4-methylcyclohexene",
+   "note": "count from C2 round the short way: 3, 4"
+  },
+  {
+   "smiles": "CC1=C(C)CCCC1",
+   "new": "1,2-dimethylcyclohexene",
+   "old": "1,2-dimethylcyclohexene",
+   "note": "both methyls on the double bond"
+  },
+  {
+   "smiles": "CC1C=CCC1C",
+   "new": "3,4-dimethylcyclopentene",
+   "old": "3,4-dimethylcyclopentene",
+   "note": "lowest set 3,4 (not 4,5)"
+  },
+  {
+   "smiles": "C1=CCCCC1",
+   "new": "cyclohexene",
+   "old": "cyclohexene",
+   "note": "no substituents: no numbers"
+  },
+  {
+   "smiles": "C1=CCC1",
+   "new": "cyclobutene",
+   "old": "cyclobutene",
+   "note": "four-membered ring"
+  },
+  {
+   "smiles": "CC/C(C)=C/CC",
+   "new": "(E)-3-methylhex-3-ene",
+   "old": "(E)-3-methyl-3-hexene",
+   "note": "the two ethyl groups (higher-ranked) are on opposite sides"
+  },
+  {
+   "smiles": "CC/C(C)=C\\CC",
+   "new": "(Z)-3-methylhex-3-ene",
+   "old": "(Z)-3-methyl-3-hexene",
+   "note": "the two ethyl groups on the same side"
+  },
+  {
+   "smiles": "CC/C=C\\CC",
+   "new": "(Z)-hex-3-ene",
+   "old": "(Z)-3-hexene",
+   "note": "cis hex-3-ene"
+  },
+  {
+   "smiles": "CCC(CC)=CC",
+   "new": "3-ethylpent-2-ene",
+   "old": "3-ethyl-2-pentene",
+   "note": "no E/Z: C3 carries two ethyl groups"
+  },
+  {
+   "smiles": "CC(C)=C(C)C",
+   "new": "2,3-dimethylbut-2-ene",
+   "old": "2,3-dimethyl-2-butene",
+   "note": "tetrasubstituted, no E/Z"
+  },
+  {
+   "smiles": "CC(C)=C",
+   "new": "2-methylprop-1-ene",
+   "old": "2-methyl-1-propene",
+   "note": "a branch on propene needs the locant; also called 2-methylpropene"
+  },
+  {
+   "smiles": "C=CC(C)C",
+   "new": "3-methylbut-1-ene",
+   "old": "3-methyl-1-butene",
+   "note": "terminal double bond, branch on C3"
+  },
+  {
+   "smiles": "C=CC(C)(C)C",
+   "new": "3,3-dimethylbut-1-ene",
+   "old": "3,3-dimethyl-1-butene",
+   "note": "tert-butyl on a vinyl carbon"
+  },
+  {
+   "smiles": "C=CCC",
+   "new": "but-1-ene",
+   "old": "1-butene",
+   "note": "terminal"
+  },
+  {
+   "smiles": "C/C=C/C(C)C",
+   "new": "(E)-4-methylpent-2-ene",
+   "old": "(E)-4-methyl-2-pentene",
+   "note": "isopropyl on C4; trans"
+  },
+  {
+   "smiles": "C/C=C/C=C/C",
+   "new": "(2E,4E)-hexa-2,4-diene",
+   "old": "(2E,4E)-2,4-hexadiene",
+   "note": "each double bond gets its own locant and letter"
+  },
+  {
+   "smiles": "C/C=C\\C=C\\C",
+   "new": "(2Z,4E)-hexa-2,4-diene",
+   "old": "(2Z,4E)-2,4-hexadiene",
+   "note": "a tie in numbering: Z gets the lower locant"
+  },
+  {
+   "smiles": "C=C/C=C/C",
+   "new": "(E)-penta-1,3-diene",
+   "old": "(E)-1,3-pentadiene",
+   "note": "only the C3=C4 bond is stereogenic"
+  },
+  {
+   "smiles": "C=C(CCC)CCC",
+   "new": "2-propylpent-1-ene",
+   "old": "2-propyl-1-pentene",
+   "note": "the parent contains the C=C: a pentene, not a heptane"
+  },
+  {
+   "smiles": "CC(C)C=CC(C)C",
+   "new": "2,5-dimethylhex-3-ene",
+   "old": "2,5-dimethyl-3-hexene",
+   "note": "symmetrical; geometry not drawn"
+  },
+  {
+   "smiles": "C=C",
+   "new": "ethene",
+   "old": "ethene",
+   "note": "no locant needed"
+  },
+  {
+   "smiles": "CC=C",
+   "new": "propene",
+   "old": "propene",
+   "note": "no locant needed"
+  },
+  {
+   "smiles": "C#C",
+   "new": "ethyne",
+   "old": "ethyne",
+   "note": "no locant needed"
+  },
+  {
+   "smiles": "CC#C",
+   "new": "propyne",
+   "old": "propyne",
+   "note": "no locant needed"
+  }
+ ]
+}

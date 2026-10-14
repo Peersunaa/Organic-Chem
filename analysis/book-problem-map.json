@@ -1,0 +1,566 @@
+{
+ "source": "McMurry, Fundamentals of Organic Chemistry, Ch 1-6. Counts of book problems by section/category; no question text copied.",
+ "chapters": {
+  "1": {
+   "in_chapter_problems_by_section": {
+    "1.2 Atomic Structure: Electron Conﬁgurations": 2,
+    "1.3 Development of Chemical Bonding Theory": 2,
+    "1.4 The Nature of Chemical Bonds": 3,
+    "1.5 Forming Covalent Bonds: Valence Bond Theory": 3,
+    "1.8 Other Kinds of Hybrid Orbitals: sp2 and sp": 5,
+    "1.9 Polar Covalent Bonds: Electronegativity": 4,
+    "1.10 Acids and Bases: The Brønsted–Lowry Deﬁnition": 3,
+    "1.12 Acids and Bases: The Lewis Deﬁnition": 3
+   },
+   "end_of_chapter_by_category": {
+    "Electron Configurations": {
+     "count": 2,
+     "problems": [
+      "1.31",
+      "1.32"
+     ]
+    },
+    "Electron-Dot Structures": {
+     "count": 4,
+     "problems": [
+      "1.33",
+      "1.34",
+      "1.35",
+      "1.36"
+     ]
+    },
+    "Structural Formulas": {
+     "count": 7,
+     "problems": [
+      "1.37",
+      "1.38",
+      "1.39",
+      "1.40"
+     ]
+    },
+    "Electronegativity": {
+     "count": 7,
+     "problems": [
+      "1.44",
+      "1.45",
+      "1.46",
+      "1.47"
+     ]
+    },
+    "Hybridization": {
+     "count": 5,
+     "problems": [
+      "1.51",
+      "1.52",
+      "1.53",
+      "1.54"
+     ]
+    },
+    "Acids And Bases": {
+     "count": 8,
+     "problems": [
+      "1.56",
+      "1.57",
+      "1.58",
+      "1.59"
+     ]
+    },
+    "General Problems": {
+     "count": 6,
+     "problems": [
+      "1.64",
+      "1.65",
+      "1.66",
+      "1.67"
+     ]
+    },
+    "In the Medicine Cabinet": {
+     "count": 1,
+     "problems": [
+      "1.70"
+     ]
+    }
+   }
+  },
+  "2": {
+   "in_chapter_problems_by_section": {
+    "2.1 Functional Groups": 3,
+    "2.2 Alkanes and Alkyl Groups: Isomers": 5,
+    "2.3 Naming Branched-Chain Alkanes": 3,
+    "2.5 Conformations of Ethane": 3,
+    "2.6 Drawing Chemical Structures": 3,
+    "2.7 Cycloalkanes": 2,
+    "2.8 Cis–Trans Isomerism in Cycloalkanes": 4,
+    "2.10 Axial and Equatorial Bonds in Cyclohexane": 1,
+    "2.11 Conformational Mobility of Cyclohexane": 4
+   },
+   "end_of_chapter_by_category": {
+    "Functional Groups And Isomerism": {
+     "count": 11,
+     "problems": [
+      "2.34",
+      "2.35",
+      "2.36",
+      "2.37"
+     ]
+    },
+    "Naming And Drawing Chemical Structures": {
+     "count": 7,
+     "problems": [
+      "2.45",
+      "2.46",
+      "2.47",
+      "2.48"
+     ]
+    },
+    "Conformations And Cis–Trans Isomerism": {
+     "count": 10,
+     "problems": [
+      "2.52",
+      "2.53",
+      "2.54",
+      "2.55"
+     ]
+    },
+    "Generalproblems": {
+     "count": 9,
+     "problems": [
+      "2.62",
+      "2.63",
+      "2.64",
+      "2.65"
+     ]
+    },
+    "In the Medicine Cabinet": {
+     "count": 3,
+     "problems": [
+      "2.71",
+      "2.72",
+      "2.73"
+     ]
+    },
+    "In the Field": {
+     "count": 1,
+     "problems": [
+      "2.74"
+     ]
+    }
+   }
+  },
+  "3": {
+   "in_chapter_problems_by_section": {
+    "3.1 Naming Alkenes and Alkynes": 5,
+    "3.3 Cis–Trans Isomers of Alkenes": 2,
+    "3.4 Sequence Rules: The E,Z Designation": 3,
+    "3.5 Kinds of Organic Reactions": 1,
+    "3.6 How Reactions Occur: Mechanisms": 3,
+    "3.7 The Mechanism of an Organic Reaction:": 2,
+    "3.8 Describing a Reaction: Transition": 3
+   },
+   "end_of_chapter_by_category": {
+    "Naming Alkenes, Alkynes, And Cycloalkenes": {
+     "count": 6,
+     "problems": [
+      "3.29",
+      "3.30",
+      "3.31",
+      "3.32"
+     ]
+    },
+    "Double–Bond Isomers": {
+     "count": 11,
+     "problems": [
+      "3.35",
+      "3.36",
+      "3.37",
+      "3.38"
+     ]
+    },
+    "Energy Diagrams": {
+     "count": 6,
+     "problems": [
+      "3.46",
+      "3.47",
+      "3.48",
+      "3.49"
+     ]
+    },
+    "General Problems": {
+     "count": 9,
+     "problems": [
+      "3.52",
+      "3.53",
+      "3.54",
+      "3.55"
+     ]
+    },
+    "In the Medicine Cabinet": {
+     "count": 2,
+     "problems": [
+      "3.61",
+      "3.62"
+     ]
+    },
+    "In the Field": {
+     "count": 1,
+     "problems": [
+      "3.63"
+     ]
+    }
+   }
+  },
+  "4": {
+   "in_chapter_problems_by_section": {
+    "4.1 Addition of HX to Alkenes: Markovnikov’s Rule": 2,
+    "4.2 Carbocation Structure and Stability": 1,
+    "4.3 Addition of Water to Alkenes": 2,
+    "4.4 Addition of Halogens to Alkenes": 2,
+    "4.5 Reduction of Alkenes: Hydrogenation": 1,
+    "4.6 Oxidation of Alkenes: Epoxidation,": 2,
+    "4.7 Addition of Radicals to Alkenes: Polymers": 1,
+    "4.9 Stability of Allylic Carbocations: Resonance": 1,
+    "4.10 Drawing and Interpreting Resonance Forms": 3,
+    "4.11 Alkynes and Their Reactions": 5
+   },
+   "end_of_chapter_by_category": {
+    "Naming Alkenes And Alkynes": {
+     "count": 6,
+     "problems": [
+      "4.27",
+      "4.28",
+      "4.29",
+      "4.30"
+     ]
+    },
+    "Predict The Products": {
+     "count": 7,
+     "problems": [
+      "4.33",
+      "4.34",
+      "4.35",
+      "4.36"
+     ]
+    },
+    "Predict The Reactants": {
+     "count": 5,
+     "problems": [
+      "4.40",
+      "4.41",
+      "4.42",
+      "4.43"
+     ]
+    },
+    "Synthesis": {
+     "count": 3,
+     "problems": [
+      "4.45",
+      "4.46",
+      "4.47"
+     ]
+    },
+    "Resonance": {
+     "count": 4,
+     "problems": [
+      "4.48",
+      "4.49",
+      "4.50",
+      "4.51"
+     ]
+    },
+    "Polymers": {
+     "count": 3,
+     "problems": [
+      "4.52",
+      "4.53",
+      "4.54"
+     ]
+    },
+    "General Problems": {
+     "count": 11,
+     "problems": [
+      "4.55",
+      "4.56",
+      "4.57",
+      "4.58"
+     ]
+    },
+    "In the Medicine Cabinet": {
+     "count": 1,
+     "problems": [
+      "4.66"
+     ]
+    },
+    "In the Field": {
+     "count": 2,
+     "problems": [
+      "4.67",
+      "4.68"
+     ]
+    }
+   }
+  },
+  "5": {
+   "in_chapter_problems_by_section": {
+    "5.1 Structure of Benzene": 1,
+    "5.2 Naming Aromatic Compounds": 3,
+    "5.3 Electrophilic Aromatic Substitution": 1,
+    "5.4 Other Electrophilic Aromatic Substitution Reactions": 3,
+    "5.5 The Friedel–Crafts Alkylation and Acylation Reactions": 2,
+    "5.6 Substituent Effects in Electrophilic Aromatic Substitution": 2,
+    "5.7 An Explanation of Substituent Effects": 3,
+    "5.8 Oxidation and Reduction of Aromatic Compounds": 1,
+    "5.9 Other Aromatic Compounds": 1,
+    "5.10 Organic Synthesis": 3
+   },
+   "end_of_chapter_by_category": {
+    "Naming Aromatic Compounds": {
+     "count": 4,
+     "problems": [
+      "5.26",
+      "5.27",
+      "5.28",
+      "5.29"
+     ]
+    },
+    "Reactions And Substituent Effects": {
+     "count": 13,
+     "problems": [
+      "5.30",
+      "5.31",
+      "5.32",
+      "5.33"
+     ]
+    },
+    "Mechanisms": {
+     "count": 4,
+     "problems": [
+      "5.43",
+      "5.44",
+      "5.45",
+      "5.46"
+     ]
+    },
+    "Synthesis": {
+     "count": 3,
+     "problems": [
+      "5.47",
+      "5.48",
+      "5.49"
+     ]
+    },
+    "General Problems": {
+     "count": 10,
+     "problems": [
+      "5.50",
+      "5.51",
+      "5.52",
+      "5.53"
+     ]
+    },
+    "In the Medicine Cabinet": {
+     "count": 1,
+     "problems": [
+      "5.60"
+     ]
+    },
+    "In the Field": {
+     "count": 2,
+     "problems": [
+      "5.61",
+      "5.62"
+     ]
+    }
+   }
+  },
+  "6": {
+   "in_chapter_problems_by_section": {
+    "6.2 The Reason for Handedness in Molecules: Chirality": 5,
+    "6.3 Optical Activity": 2,
+    "6.5 Sequence Rules for Specifying Conﬁguration": 4,
+    "6.6 Diastereomers": 5,
+    "6.7 Meso Compounds": 2,
+    "6.8 Racemic Mixtures and the Resolution of Enantiomers": 1,
+    "6.9 A Brief Review of Isomerism": 1,
+    "6.10 Chirality in Nature and Chiral Environments": 1
+   },
+   "end_of_chapter_by_category": {
+    "Identifying Chirality Centers": {
+     "count": 7,
+     "problems": [
+      "6.26",
+      "6.27",
+      "6.28",
+      "6.29"
+     ]
+    },
+    "Optical Activity": {
+     "count": 3,
+     "problems": [
+      "6.33",
+      "6.34",
+      "6.35"
+     ]
+    },
+    "Assigning R,S Configuration To Chirality Centers": {
+     "count": 7,
+     "problems": [
+      "6.36",
+      "6.37",
+      "6.38",
+      "6.39"
+     ]
+    },
+    "Stereochemical Relationships": {
+     "count": 8,
+     "problems": [
+      "6.43",
+      "6.44",
+      "6.45",
+      "6.46"
+     ]
+    },
+    "General Problems": {
+     "count": 7,
+     "problems": [
+      "6.51",
+      "6.52",
+      "6.53",
+      "6.54"
+     ]
+    },
+    "In the Medicine Cabinet": {
+     "count": 1,
+     "problems": [
+      "6.65"
+     ]
+    },
+    "In the Field": {
+     "count": 1,
+     "problems": [
+      "6.66"
+     ]
+    }
+   }
+  }
+ },
+ "topic_ranking": [
+  {
+   "rank": 1,
+   "topic": "Stereochemistry: chirality centers, R/S, enantiomer/diastereomer/meso",
+   "chapter": 6,
+   "problems": 44,
+   "skills": [
+    "identify chirality",
+    "assign R/S",
+    "relationships",
+    "optical activity calc"
+   ]
+  },
+  {
+   "rank": 2,
+   "topic": "Bonding, Lewis/structural formulas, electronegativity, hybridization",
+   "chapter": 1,
+   "problems": 38,
+   "skills": [
+    "electron counting",
+    "hybridization",
+    "polarity"
+   ]
+  },
+  {
+   "rank": 3,
+   "topic": "Aromatic compounds: EAS reactions, directing effects, synthesis order",
+   "chapter": 5,
+   "problems": 35,
+   "skills": [
+    "product prediction",
+    "mechanism",
+    "synthesis"
+   ]
+  },
+  {
+   "rank": 4,
+   "topic": "Naming (alkanes, cycloalkanes, alkenes, alkynes, aromatics)",
+   "chapter": "2-5",
+   "problems": 34,
+   "skills": [
+    "naming",
+    "drawing from name"
+   ]
+  },
+  {
+   "rank": 5,
+   "topic": "Alkene and alkyne reactions: products, reactants, synthesis",
+   "chapter": 4,
+   "problems": 31,
+   "skills": [
+    "product prediction",
+    "predict reactants",
+    "synthesis",
+    "mechanism"
+   ]
+  },
+  {
+   "rank": 6,
+   "topic": "Conformations, cyclohexane chairs, cis-trans in rings",
+   "chapter": 2,
+   "problems": 24,
+   "skills": [
+    "Newman",
+    "chair flip",
+    "stability"
+   ]
+  },
+  {
+   "rank": 7,
+   "topic": "Alkene isomers: cis-trans and E/Z",
+   "chapter": 3,
+   "problems": 16,
+   "skills": [
+    "CIP priority",
+    "E/Z"
+   ]
+  },
+  {
+   "rank": 8,
+   "topic": "Mechanism language and energy diagrams",
+   "chapter": 3,
+   "problems": 15,
+   "skills": [
+    "curved arrows",
+    "nucleophile/electrophile",
+    "energy diagrams"
+   ]
+  },
+  {
+   "rank": 9,
+   "topic": "Functional groups and isomers",
+   "chapter": 2,
+   "problems": 14,
+   "skills": [
+    "identify groups",
+    "constitutional isomers"
+   ]
+  },
+  {
+   "rank": 10,
+   "topic": "Acids and bases, pKa, equilibrium direction",
+   "chapter": 1,
+   "problems": 14,
+   "skills": [
+    "pKa",
+    "equilibrium direction",
+    "Lewis acid/base"
+   ]
+  },
+  {
+   "rank": 11,
+   "topic": "Resonance (allylic cations, dienes)",
+   "chapter": 4,
+   "problems": 8,
+   "skills": [
+    "draw resonance forms"
+   ]
+  }
+ ]
+}
