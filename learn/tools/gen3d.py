@@ -18,7 +18,11 @@ MOLS = {
     "cis-but-2-ene": "C/C=C\\C", "trans-but-2-ene": "C/C=C/C",
     # Lesson 09: the tert-butyl cation (planar sp2 C+ with an empty p orbital) next to isobutane (tetrahedral C-H), the neutral parent above
     "tert-butyl-cation": "C[C+](C)C",
+    # Lesson 10: the cyclic bromonium ion of cyclohexene (Br+ bridges both carbons on one face). Neither MMFF nor UFF has parameters for Br+, so the
+    # geometry is made for the isoelectronic selenirane stand-in (Se, same size and valence, neutral) and the Se atom is then relabelled Br with charge +1.
+    "bromonium-cyclohexene": "C1CC[C@H]2[Br+][C@H]2C1",
 }
+STAND_IN = {"bromonium-cyclohexene": "C1CC[C@H]2[Se][C@H]2C1"}
 # Conformers that must be a specific shape: id -> (check on the embedded molecule).
 # butane must be the anti (zig-zag) conformer: lowest-energy of many embeds, C1-C2-C3-C4 dihedral ~180.
 MANY_CONFS = {"butane"}
@@ -34,7 +38,7 @@ if os.path.exists(models_js) and "--all" not in sys.argv:
 for name, smi in MOLS.items():
     if name in blocks:
         continue
-    m = Chem.AddHs(Chem.MolFromSmiles(smi))
+    m = Chem.AddHs(Chem.MolFromSmiles(STAND_IN.get(name, smi)))
     if name in MANY_CONFS:
         ids = list(AllChem.EmbedMultipleConfs(m, 30, randomSeed=7))
         res = AllChem.MMFFOptimizeMoleculeConfs(m)
@@ -49,11 +53,18 @@ for name, smi in MOLS.items():
         assert AllChem.EmbedMolecule(m, randomSeed=7) == 0, name
         # MMFF pyramidalises a bare C+ a little (angle sum ~356 deg); UFF keeps the trigonal-planar sp2 centre
         if name == "tert-butyl-cation": AllChem.UFFOptimizeMolecule(m, maxIters=2000)
+        elif name in STAND_IN: AllChem.UFFOptimizeMolecule(m, maxIters=5000)
         else: AllChem.MMFFOptimizeMolecule(m)
     if name == "tert-butyl-cation":
         # the three C-C-C angles at the cation centre must add to 360 (planar), i.e. trigonal planar sp2
         cc = m.GetConformer(); tot = sum(rdMolTransforms.GetAngleDeg(cc, a, 1, b) for a, b in ((0, 2), (0, 3), (2, 3)))
         assert abs(tot - 360) < 3, (name, tot)
+    if name in STAND_IN:
+        for a in m.GetAtoms():
+            if a.GetSymbol() == "Se":
+                a.SetAtomicNum(35); a.SetFormalCharge(1)
+        Chem.SanitizeMol(m)
+        assert Chem.MolToSmiles(Chem.RemoveHs(m)) == Chem.MolToSmiles(Chem.MolFromSmiles(smi)), name
     mb = Chem.MolToMolBlock(m)
     blocks[name] = {"smiles": smi, "molblock": mb}
     with open(os.path.join(out, name + ".mol"), "w") as f:

@@ -298,3 +298,6 @@ export function rankOrder(items) {
 }
 
 export { MINUS, formulaOf, hText };
+
+// Lesson 10: halogens, H2, epoxidation, KMnO4 and polymers (stereo-aware). Extends this module additively.
+export * from './reactions-additions.js';

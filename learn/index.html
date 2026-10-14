@@ -351,6 +351,13 @@ h3 { font: 600 .8rem/1 var(--mono); letter-spacing: .08em; text-transform: upper
 .rl-cat p { margin: 0; } .rl-bar { width: 100%; max-width: 150px; height: 10px; border-radius: 6px; background: var(--line); overflow: hidden; } .rl-bar i { display: block; height: 100%; background: var(--ok); }
 .rl-why { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--surface-2); border-left: 3px solid var(--electron); }
 .rl-prow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; } .rl-prow .mol { flex: 0 1 170px; } .rl-tabs { display: flex; gap: 8px; margin-bottom: 8px; } .rl-tabs .on { border-color: var(--accent); background: var(--accent-soft); } .rl-mech { min-width: 0; }
+/* Lesson 10: cleave-it and face-attack */
+.cl, .fa { display: grid; gap: 12px; min-width: 0; } .cl-ask { margin: 0; } .cl-stage { max-width: 340px; }
+.cl-q { display: grid; gap: 10px; min-width: 0; } .cl-card { padding: 10px 12px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface-2); display: grid; gap: 8px; min-width: 0; } .cl-cq { margin: 0; }
+.cl-opts { display: flex; flex-wrap: wrap; gap: 8px; } .cl-opt { text-align: left; } .cl-opt.good { border-color: var(--ok); background: var(--ok-soft); } .cl-opt.bad { border-color: var(--bad); background: var(--bad-soft); }
+.cl-fb { margin: 0; } .cl-fb:empty { display: none; }
+.cl-end { position: absolute; width: 24px; height: 24px; margin: -30px 0 0 -12px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 .8rem/24px var(--mono); text-align: center; pointer-events: none; }
+.fa-out:empty { display: none; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 

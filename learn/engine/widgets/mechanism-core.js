@@ -7,7 +7,7 @@
 // the SMILES parts in order, each part's heavy atoms first (in SMILES order) and then its hydrogens, heavy atom by heavy atom.
 // (A lone pair is never listed: it is computed from the structure.)  A pi bond that attacks an atom k is written
 // from:{bond:[c1,c2]} to:{bond:[c1,k]}, i.e. "these electrons make the new bond c1-k".
-import { analyze, canon, VALENCE } from '../chem.js';
+import { analyze, canon, VALENCE, rdkit } from '../chem.js';
 import { sceneFromSmiles, applyArrows, validate, lpCount, bondOrderSum, findBond } from './arrow-core.js';
 import { buildMolblock } from './lewis-core.js';
 
@@ -37,12 +37,27 @@ export function buildScene(step) {
 export function stepConfig(step) {
   const sc = buildScene(step);
   const cfg = { atoms: sc.atoms, bonds: sc.bonds, arrows: step.arrows, products: step.after };
+  if (step.equiv) cfg.equiv = step.equiv; // Lesson 10: swaps that give the same mechanism (arrow-core grade)
   if (step.regio) cfg.regio = step.regio; // Lesson 09: the learner must also say WHICH carbon of an unsymmetrical C=C bonds to H (see arrow-core grade)
   return cfg;
 }
 
 /** State after the arrows: {atoms, bonds} with lone pairs and charges recomputed. */
 export function stepResult(step) { return applyArrows(stepConfig(step)); }
+
+/** Canonical SMILES WITHOUT stereochemistry (Lesson 10: the arrows move electrons in a flat scene, so a stereo-marked `after` is compared flat). */
+export function canonFlat(input) {
+  const iso = JSON.stringify({ doIsomericSmiles: false });
+  let m = rdkit().get_mol(input), out = null;
+  if (!m) return null;
+  try { out = m.get_smiles(iso); } finally { m.delete(); }
+  for (let i = 0; i < 3 && out && out.includes('[H]') && out.length > 5; i++) {
+    m = rdkit().get_mol(out);
+    if (!m) break;
+    try { out = m.get_smiles(iso); } finally { m.delete(); }
+  }
+  return out;
+}
 
 export const sorted = (arr) => arr.map((s) => canon(s)).sort();
 const sameSet = (a, b) => JSON.stringify(sorted(a)) === JSON.stringify(sorted(b));
@@ -94,8 +109,8 @@ export function checkMechanism(mech) {
       if (state.atoms.some((a) => !Number.isInteger(a.lp) || a.lp < 0)) errs.push(`${t}: the arrows leave an impossible lone-pair count`);
       const ov = octetViolations(state);
       if (ov.length) errs.push(`${t}: octet exceeded on ${ov.map((o) => o.el).join(', ')}`);
-      const got = canon(buildMolblock(state));
-      const want = canon(st.after.join('.'));
+      const got = canonFlat(buildMolblock(state));
+      const want = canonFlat(st.after.join('.'));
       if (got !== want) errs.push(`${t}: arrows give ${got} but after is ${want}`);
     }
     if (n === 0 && !sameSet(st.before, [...mech.reactants, ...(mech.reagents || [])])) errs.push('step 1 does not start from the reactants (and reagents)');

@@ -122,8 +122,31 @@ export function headAtom(config, ar) {
   return far == null ? null : { atom: far };
 }
 
-/** drawn: arrows in the same shape as config.arrows (any order). */
+/**
+ * Lesson 10: config.equiv = [ {atomIdx: atomIdx, ...}, ... ] lists swaps of atoms that give the very same mechanism (the two carbons of the C=C when
+ * a bromine bridges both, the two Br atoms of Br2). A drawing that is wrong as written but right after one of these swaps counts as right.
+ */
 export function grade(config, drawnRaw) {
+  const first = gradeCore(config, drawnRaw);
+  if (first.ok || !config.equiv || !config.equiv.length) return first;
+  const swap = (e, m) => {
+    const f = (i) => (m[i] != null ? m[i] : i);
+    const r = {};
+    if (e.lp != null) r.lp = f(e.lp);
+    if (e.atom != null) r.atom = f(e.atom);
+    if (e.bond) r.bond = e.bond.map(f);
+    return r;
+  };
+  for (const m of config.equiv) {
+    const mapped = drawnRaw.map((d) => ({ from: swap(d.from, m), to: swap(d.to, m) }));
+    const r = gradeCore(config, mapped);
+    if (r.ok) return r;
+  }
+  return first;
+}
+
+/** drawn: arrows in the same shape as config.arrows (any order). */
+function gradeCore(config, drawnRaw) {
   const drawn = drawnRaw.map((d) => normalizeDrawn(config, d));
   const exp = config.arrows;
   // Lesson 09, regiochemistry: when config.regio = {pi:[hC,pC], H, wrongWhy} the learner also says which end of the pi bond bonds to H

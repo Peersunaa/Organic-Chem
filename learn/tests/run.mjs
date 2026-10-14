@@ -32,8 +32,9 @@ import { lesson06 } from './lesson06.mjs';
 import { lesson07 } from './lesson07.mjs';
 import { lesson08 } from './lesson08.mjs';
 import { lesson09 } from './lesson09.mjs';
+import { lesson10 } from './lesson10.mjs';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -125,8 +126,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 7 && PLANNED[0].id === '10' && PLANNED[6].id === '16', 'placeholders 10-16');
-ok(LESSONS.length === 9 && LESSONS[8].id === '09' && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-09 registered and unlocked');
+ok(PLANNED.length === 6 && PLANNED[0].id === '11' && PLANNED[5].id === '16', 'placeholders 11-16');
+ok(LESSONS.length === 10 && LESSONS[9].id === '10' && LESSONS[8].id === '09' && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-09 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -260,7 +261,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -1139,6 +1140,9 @@ await lesson08({ ok, eq });
 
 // ---- Lesson 09: reactions engine (HX / hydration, Markovnikov) vs Python RDKit and a hand-checked fixture, regiochemistry-aware arrow grading, widgets, `markovnikov` generator, lesson steps (tests/lesson09.mjs)
 await lesson09({ ok, eq });
+
+// ---- Lesson 10: stereo-aware alkene additions (X2, H2, RCO3H, epoxide + H3O+, KMnO4, polymers) vs Python RDKit 3D, hand-checked fixture with OPSIN, bromonium 3D model, mechanisms, cleave-it, reaction-lab, generator, lesson steps (tests/lesson10.mjs)
+await lesson10({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {
