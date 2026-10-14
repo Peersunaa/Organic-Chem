@@ -10,6 +10,10 @@ MOLS = {
     "formaldehyde": "C=O", "hcn": "C#N",
     "ethylene": "C=C", "acetylene": "C#C", "co2": "O=C=O",
     "butane": "CCCC", "isobutane": "CC(C)C",
+    # Lesson 06: staggered ethane / bromoethane (rotated in the browser about the C-C bond), cyclopropane and the two
+    # 1,2-dimethylcyclopropanes (cis = same face, checked in tests by the ring mean plane)
+    "ethane": "CC", "bromoethane": "CCBr", "cyclopropane": "C1CC1",
+    "cis-dmcp": "C[C@H]1C[C@H]1C", "trans-dmcp": "C[C@H]1C[C@@H]1C",
 }
 # Conformers that must be a specific shape: id -> (check on the embedded molecule).
 # butane must be the anti (zig-zag) conformer: lowest-energy of many embeds, C1-C2-C3-C4 dihedral ~180.
