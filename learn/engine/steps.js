@@ -92,6 +92,7 @@ function inputRow(onSubmit, placeholder = 'Your answer') {
 function addPrompt(host, step) {
   host.append(rich(step.prompt, 'h2', 'prompt'));
   if (step.smiles) host.append(molFigure(step.smiles, '', { highlight: step.highlight || [] }));
+  if (step.visual) mountVisual(host, step.visual);
 }
 
 function mountVisual(host, visual) {
@@ -110,7 +111,6 @@ const RENDER = {
   predict(step, ctx, host) {
     host.append(h('p', { class: 'eyebrow' }, 'Predict first'));
     addPrompt(host, step);
-    if (step.visual) mountVisual(host, step.visual);
     const list = h('div', { class: 'opts', role: 'group' });
     const out = h('div', { class: 'after' });
     step.options.forEach((o) => {
@@ -243,7 +243,7 @@ export function renderProblems(cfg, ctx, host) {
     const card = h('div', { class: 'problem' });
     stage.append(card);
     card.append(h('h2', { class: 'prompt' }, p.prompt));
-    if (p.kind === 'input' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
+    if (p.kind !== 'builder' && p.kind !== 'polarity' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
     const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
     const hints = h('div', { class: 'hints' });
     let wrong = 0, settled = false;
@@ -261,7 +261,7 @@ export function renderProblems(cfg, ctx, host) {
       if (wrong >= 1) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 1 '), p.hints[0]));
       if (wrong >= 2) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 2 '), p.hints[1]));
       if (wrong >= 3 && !settled) {
-        const ans = p.kind === 'input' ? `The answer is ${p.answer}. ` : '';
+        const ans = p.kind === 'input' ? `The answer is ${p.answer}. ` : p.kind === 'choice' ? `The answer is ${p.options.find((o) => o.correct).text}. ` : '';
         hints.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), ans + p.derive));
         advance(false);
       }
@@ -281,6 +281,22 @@ export function renderProblems(cfg, ctx, host) {
         else { onWrong(r.diagnosis); if (!settled) input.select(); else { input.disabled = true; btn.disabled = true; } }
       });
       card.append(form);
+    } else if (p.kind === 'choice') {
+      const list = h('div', { class: 'opts', role: 'group' });
+      p.options.forEach((o) => {
+        const b = h('button', { type: 'button', class: 'opt' }, rich(o.text, 'span'));
+        b.addEventListener('click', () => {
+          if (settled) return;
+          if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); onRight(); }
+          else { b.classList.add('bad'); b.disabled = true; onWrong(o.why); if (settled) [...list.children].forEach((x) => { x.disabled = true; }); }
+        });
+        list.append(b);
+      });
+      card.append(list);
+    } else if (p.kind === 'polarity') {
+      const box = h('div', { class: 'widget' });
+      card.append(box);
+      WIDGETS['polarity-mark'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
     } else {
       const box = h('div', { class: 'widget' });
       card.append(box);

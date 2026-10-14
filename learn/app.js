@@ -1,6 +1,7 @@
 // Orgo Learn: router, Home, lesson player, IUPAC toggle, weak-spot panel.
 import { ready, setDrawStyle } from './engine/chem.js';
 import * as store from './engine/store.js';
+import { generatorForSkill } from './engine/generators.js';
 import { renderStep, renderProblems, h, setIupacMode } from './engine/steps.js';
 import { skillLabel } from './engine/skills.js';
 import { LESSONS, PLANNED } from './lessons/index.js';
@@ -159,7 +160,7 @@ function practice(skill) {
     done: () => host.append(h('a', { class: 'btn primary', href: '#home' }, 'Back to home'))
   };
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Practise: ' + skillLabel(skill))), card);
-  chemP.then(() => { renderProblems({ count: 3, generator: 'lewis-basic', skill }, ctx, host); setIupacMode(store.getIupac()); });
+  chemP.then(() => { renderProblems({ count: 3, generator: generatorForSkill(skill), skill }, ctx, host); setIupacMode(store.getIupac()); });
 }
 
 // ---------------------------------------------------------------- Router

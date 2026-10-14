@@ -27,7 +27,7 @@ export function modelAngle(molblock, center, a, b) {
   const P = (i) => { const l = lines[4 + i]; return [parseFloat(l.slice(0, 10)), parseFloat(l.slice(10, 20)), parseFloat(l.slice(20, 30))]; };
   const c = P(center), u = P(a).map((v, i) => v - c[i]), w = P(b).map((v, i) => v - c[i]);
   const dot = u.reduce((s, v, i) => s + v * w[i], 0);
-  return (Math.acos(dot / (Math.hypot(...u) * Math.hypot(...w))) * 180) / Math.PI;
+  return (Math.acos(Math.max(-1, Math.min(1, dot / (Math.hypot(...u) * Math.hypot(...w))))) * 180) / Math.PI;
 }
 
 export default {

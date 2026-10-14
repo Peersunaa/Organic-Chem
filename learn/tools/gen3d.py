@@ -8,6 +8,7 @@ from rdkit.Chem import AllChem
 MOLS = {
     "water": "O", "ammonia": "N", "methane": "C",
     "formaldehyde": "C=O", "hcn": "C#N",
+    "ethylene": "C=C", "acetylene": "C#C", "co2": "O=C=O",
 }
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "3d")
 os.makedirs(out, exist_ok=True)

@@ -1,8 +1,23 @@
 // RDKit loader + chemistry helpers. Works in the browser and in Node (tests).
-export const VALENCE = { H: 1, C: 4, N: 5, O: 6, F: 7, Cl: 7, Br: 7, I: 7, S: 6, P: 5, B: 3 };
-export const SYMBOL = { 1: 'H', 5: 'B', 6: 'C', 7: 'N', 8: 'O', 9: 'F', 15: 'P', 16: 'S', 17: 'Cl', 35: 'Br', 53: 'I' };
-export const NAME = { H: 'Hydrogen', C: 'Carbon', N: 'Nitrogen', O: 'Oxygen', F: 'Fluorine', Cl: 'Chlorine', Br: 'Bromine', I: 'Iodine', S: 'Sulfur', P: 'Phosphorus', B: 'Boron' };
-export const GROUP = { H: 1, C: 14, N: 15, O: 16, F: 17, Cl: 17, Br: 17, I: 17, S: 16, P: 15, B: 13 };
+export const VALENCE = { H: 1, C: 4, N: 5, O: 6, F: 7, Cl: 7, Br: 7, I: 7, S: 6, P: 5, B: 3, Li: 1, Mg: 2 };
+export const SYMBOL = { 1: 'H', 3: 'Li', 5: 'B', 6: 'C', 7: 'N', 8: 'O', 9: 'F', 12: 'Mg', 15: 'P', 16: 'S', 17: 'Cl', 35: 'Br', 53: 'I' };
+export const NAME = { H: 'Hydrogen', C: 'Carbon', N: 'Nitrogen', O: 'Oxygen', F: 'Fluorine', Cl: 'Chlorine', Br: 'Bromine', I: 'Iodine', S: 'Sulfur', P: 'Phosphorus', B: 'Boron', Li: 'Lithium', Mg: 'Magnesium' };
+export const GROUP = { H: 1, C: 14, N: 15, O: 16, F: 17, Cl: 17, Br: 17, I: 17, S: 16, P: 15, B: 13, Li: 1, Mg: 2 };
+
+// Pauling electronegativities (McMurry Fig. 1.14). Bond polarity is always computed from this table.
+export const ENEG = { H: 2.1, Li: 1.0, Mg: 1.2, B: 2.0, C: 2.5, N: 3.0, O: 3.5, F: 4.0, Cl: 3.0, Br: 2.8, I: 2.5, S: 2.5, P: 2.1 };
+/** Rough bond classes from the electronegativity difference. */
+export function bondClass(diff) { const d = Math.round(diff * 100) / 100; return d < 0.5 ? 'nonpolar' : d <= 2 ? 'polar' : 'ionic'; }
+
+/** Electron groups on an atom = atoms bonded to it (incl. implicit H) + lone pairs. 4 sp3, 3 sp2, 2 sp. */
+export function groupCount(a) { return a.nbrs.length + a.impH + a.lp; }
+export function hybridOf(a) { const g = groupCount(a); return g === 4 ? 'sp3' : g === 3 ? 'sp2' : g === 2 ? 'sp' : null; }
+/** sigma = one per bond (any order) incl. bonds to implicit H; pi = extra bonds beyond the first. */
+export function sigmaPi(info) {
+  const sigma = info.bonds.length + info.atoms.reduce((s, a) => s + a.impH, 0);
+  const pi = info.bonds.reduce((s, b) => s + ((b.bo ?? 1) - 1), 0);
+  return { sigma, pi };
+}
 
 let R = null;
 let loading = null;

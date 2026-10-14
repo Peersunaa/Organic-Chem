@@ -1,7 +1,10 @@
 // node learn/tests/run.mjs  - validates every lesson, generator and widget target.
 import { LESSONS, PLANNED } from '../lessons/index.js';
-import { ready, canon, analyze, VALENCE } from '../engine/chem.js';
-import { generate, POOL, formula } from '../engine/generators.js';
+import { ready, rdkit, canon, analyze, VALENCE, ENEG, groupCount, hybridOf, sigmaPi, bondClass } from '../engine/chem.js';
+import { execFileSync } from 'node:child_process';
+import { SHAPE_POOL, bondTypes } from '../engine/generators-shape.js';
+import * as pm from '../engine/widgets/polarity-mark.js';
+import { generate, generatorForSkill, POOL, formula } from '../engine/generators.js';
 import { solutionState, initialState, evaluate, buildMolblock, bondOrderSum } from '../engine/widgets/lewis-core.js';
 import { grade as stripGrade, expected as stripExpected } from '../engine/widgets/valence-strip.js';
 import { modelAngle } from '../engine/widgets/model3d.js';
@@ -9,7 +12,25 @@ import models from '../data/3d/models.js';
 import { checkInput } from '../engine/steps.js';
 import * as store from '../engine/store.js';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'polarity', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships']);
+/** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
+function planarity(mb) {
+  const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
+  const P = Array.from({ length: n }, (_, i) => [0, 10, 20].map((o) => parseFloat(lines[4 + i].slice(o, o + 10))));
+  const c = [0, 1, 2].map((k) => P.reduce((s, p) => s + p[k], 0) / n);
+  const Q = P.map((p) => p.map((v, k) => v - c[k]));
+  // plane normal = cross of the two longest-spread directions: use brute-force over atom triples, keep best
+  let best = Infinity;
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) for (let k = j + 1; k < n; k++) {
+    const u = Q[j].map((v, t) => v - Q[i][t]), w = Q[k].map((v, t) => v - Q[i][t]);
+    const nrm = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
+    const len = Math.hypot(...nrm); if (len < 1e-6) continue;
+    const dev = Math.max(...Q.map((q) => Math.abs(q.reduce((s, v, t) => s + v * nrm[t], 0) / len - Q[i].reduce((s, v, t) => s + v * nrm[t], 0) / len)));
+    best = Math.min(best, dev);
+  }
+  return best;
+}
+
 const TYPES = new Set(['predict', 'choice', 'input', 'try', 'worked', 'explain']);
 const GRADED = new Set(['choice', 'input', 'try']);
 
@@ -21,11 +42,27 @@ const eq = (a, b, msg) => ok(JSON.stringify(a) === JSON.stringify(b), `${msg}: g
 await ready();
 
 /** Independent recompute of a derived quantity from SMILES. */
+/** sigma/pi via a different route: add explicit H atoms, then every bond is one sigma and extra order is pi. */
+function sigmaPiIndependent(smi) {
+  const R = rdkit();
+  const m0 = R.get_mol(smi);
+  const mb = m0.add_hs(); m0.delete();
+  const m = R.get_mol(mb, JSON.stringify({ removeHs: false }));
+  const j = JSON.parse(m.get_json()).molecules[0]; m.delete();
+  return { sigma: j.bonds.length, pi: j.bonds.reduce((t, b) => t + ((b.bo ?? 1) - 1), 0) };
+}
+
 function recompute(d) {
+  if (d.quantity === 'moreEN') return ENEG[d.a] > ENEG[d.b] ? d.a : d.b;
   if (d.quantity === 'valence') return VALENCE[d.element];
   if (d.quantity === 'bonds') return d.element === 'H' ? 1 : 8 - VALENCE[d.element];
   const info = analyze(d.smiles);
   if (d.quantity === 'total') return info.totalValence;
+  if (d.quantity === 'sigma') return sigmaPiIndependent(d.smiles).sigma;
+  if (d.quantity === 'pi') return sigmaPiIndependent(d.smiles).pi;
+  if (d.quantity === 'groups') return groupCount(info.atoms[d.atom]);
+  if (d.quantity === 'hyb') return hybridOf(info.atoms[d.atom]);
+  if (d.quantity === 'angle') return { sp3: 109.5, sp2: 120, sp: 180 }[hybridOf(info.atoms[d.atom])];
   const a = info.atoms[d.atom];
   if (d.quantity === 'fc') return a.fc;
   if (d.quantity === 'lp') return a.lp;
@@ -40,7 +77,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 15 && PLANNED[0].id === '02' && PLANNED[14].id === '16', 'placeholders 02-16');
+ok(PLANNED.length === 14 && PLANNED[0].id === '03' && PLANNED[13].id === '16', 'placeholders 03-16');
+ok(LESSONS.length === 2 && LESSONS[1].id === '02', 'lesson 02 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -85,7 +123,25 @@ for (const L of LESSONS) {
     if (s.derive && s.derive.quantity) {
       const val = recompute(s.derive);
       if (s.type === 'input') ok(s.answer === val, `${t} input answer ${s.answer} == recomputed ${val}`);
-      if (s.type === 'predict') ok(s.options.find((o) => o.correct).text === String(s.derive.value) && s.derive.value === val, `${t} predict answer recomputed (${val})`);
+      if ((s.type === 'predict' || s.type === 'choice') && s.options.some((o) => o.val !== undefined)) {
+        ok(s.options.find((o) => o.correct).val === val, `${t} correct option val ${s.options.find((o) => o.correct).val} == recomputed ${val}`);
+        if (s.derive.value !== undefined) ok(s.derive.value === val, `${t} derive.value ${s.derive.value} == recomputed ${val}`);
+      } else if (s.type === 'predict') ok(s.options.find((o) => o.correct).text === String(s.derive.value) && s.derive.value === val, `${t} predict answer recomputed (${val})`);
+    }
+    if (s.visual && s.visual.config.compare) ok(models[s.visual.config.compare], `${t} compare model exists`);
+    if (s.type === 'worked') s.moves.forEach((m, i) => {
+      if (!m.check) return;
+      const val = recompute(m.check);
+      ok(m.options.find((o) => o.correct).val === val, `${t} move ${i} correct val ${m.options.find((o) => o.correct).val} == recomputed ${val}`);
+    });
+    if (s.type === 'try' && s.widget === 'polarity-mark') {
+      const c = s.config;
+      ok(!pm.grade(c, c.bonds.map(() => null)).ok, `${t} polarity empty is not ok`);
+      const sol = pm.solution(c);
+      ok(pm.grade(c, sol).ok, `${t} polarity solution accepted`);
+      ok(sol.every((x, i) => pm.grade(c, sol.map((y, k) => (k === i ? (x === 'a' ? 'b' : x === 'b' ? 'a' : 'a') : y))).ok === false), `${t} polarity wrong picks rejected`);
+      pm.expected(c).forEach((e) => ok(e.answer === 'none' ? e.diff < 0.5 : (e.answer === 'a' ? ENEG[e.A] > ENEG[e.B] : ENEG[e.B] > ENEG[e.A]), `${t} polarity answer from EN table (${e.A}-${e.B})`));
+      if (s.id === 's16') eq(sol, ['b', 'a', 'none'], `${t} methanol polarity C-O, O-H, C-H`);
     }
     if (s.type === 'input') {
       ok(checkInput(s, String(s.answer)).ok, `${t} accepts answer`);
@@ -125,7 +181,31 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic'].includes(L.mastery.generator), `${tag} generator known`);
+}
+
+// ---- Lesson 02 specifics
+{
+  const l = LESSONS.find((x) => x.id === '02');
+  ok(l.steps.length >= 14 && l.steps.length <= 18, `L02 has 14-18 steps (${l.steps.length})`);
+  ok(l.drawing === 'full', 'L02 drawing full');
+  ok(l.steps.some((s) => s.type === 'worked'), 'L02 has a worked example');
+  ok(l.steps.some((s) => s.widget === 'polarity-mark'), 'L02 has a polarity task');
+  ok(l.steps.filter((s) => s.visual && s.visual.widget === 'model3d').length >= 7, 'L02 uses 3D models heavily');
+  const used = new Set(l.steps.filter((s) => s.visual).flatMap((s) => [s.visual.config.mol, s.visual.config.compare].filter(Boolean)));
+  for (const mname of ['methane', 'ammonia', 'water', 'ethylene', 'acetylene', 'co2']) ok(used.has(mname), `L02 uses 3D ${mname}`);
+  // acrylonitrile: C=CC#N
+  eq(['sp2', 'sp2', 'sp', 'sp'], [0, 1, 2, 3].map((i) => hybridOf(analyze('C=CC#N').atoms[i])), 'acrylonitrile hybridizations (incl. N)');
+  eq(sigmaPi(analyze('C=CC#N')), { sigma: 6, pi: 3 }, 'acrylonitrile sigma/pi');
+  // known EN values and classes
+  eq([ENEG.H, ENEG.C, ENEG.N, ENEG.O, ENEG.F, ENEG.Cl, ENEG.Br, ENEG.I], [2.1, 2.5, 3.0, 3.5, 4.0, 3.0, 2.8, 2.5], 'Pauling EN values');
+  eq([bondClass(0.4), bondClass(0.5), bondClass(1.4), bondClass(2), bondClass(2.1)], ['nonpolar', 'polar', 'polar', 'polar', 'ionic'], 'bond classes');
+  // cross-check hybridization of every pool carbon with Python RDKit (independent implementation)
+  try {
+    const py = "import sys,json\nfrom rdkit import Chem\nout={}\nfor smi in json.loads(sys.argv[1]):\n  m=Chem.MolFromSmiles(smi)\n  out[smi]=[str(a.GetHybridization()) for a in m.GetAtoms()]\nprint(json.dumps(out))";
+    const res = JSON.parse(execFileSync('python3', ['-I', '-c', py, JSON.stringify(SHAPE_POOL)], { encoding: 'utf8' }));
+    for (const smi of SHAPE_POOL) analyze(smi).atoms.forEach((a, i) => { if (a.sym === 'C') ok(res[smi][i] === hybridOf(a).toUpperCase(), `python RDKit hybridization ${smi} atom ${i}: ${res[smi][i]} vs ${hybridOf(a)}`); });
+  } catch (e) { console.log('  (python RDKit unavailable, skipped hybridization cross-check)'); }
 }
 
 // ---- builder diagnosis behaviours (spec wording)
@@ -205,6 +285,65 @@ for (const L of LESSONS) {
   eq(formula('CC#N'), 'C₂H₃N', 'formula CC#N'); eq(formula('C[O-]'), 'CH₃O⁻', 'formula methoxide');
 }
 
+// ---- shape-basic generator
+{
+  const seenK = new Set();
+  for (const skill of [null, 'hybridization', 'sigma-pi', 'polarity']) {
+    const probs = generate('shape-basic', 50, { skill });
+    ok(probs.length === 50, `shape gen ${skill} count`);
+    for (const p of probs) {
+      seenK.add(p.kind + ':' + p.skill);
+      ok(p.prompt && p.derive && p.hints.length === 2 && p.hints.every((x) => x.length > 5), `shape gen ${skill} fields`);
+      ok(TAXONOMY.has(p.skill), 'shape gen skill tag');
+      ok(SHAPE_POOL.includes(p.smiles) && analyze(p.smiles).heavy.length <= 5, `shape gen pool ${p.smiles}`);
+      const info = analyze(p.smiles);
+      if (p.kind === 'choice') {
+        ok(p.options.filter((o) => o.correct).length === 1 && p.options.every((o) => o.why.length > 10), `shape choice one correct + whys (${p.prompt})`);
+        const right = p.options.find((o) => o.correct);
+        ok(right.text === p.answer, 'shape choice answer matches');
+        if (/hybridization/.test(p.prompt) || /bond angle/.test(p.prompt)) {
+          const a = info.atoms[p.highlight[0]];
+          ok(a.sym === 'C', 'shape hybrid asks about carbon');
+          const want = hybridOf(a);
+          // independent: Python-free rule from bonds (carbon has no lone pairs here)
+          const bo = info.bonds.filter((b) => b.atoms.includes(a.idx)).map((b) => b.bo ?? 1);
+          const rule = bo.includes(3) || bo.filter((x) => x === 2).length === 2 ? 'sp' : bo.includes(2) ? 'sp2' : 'sp3';
+          ok(want === rule, `shape hybrid rule agrees ${p.smiles}: ${want} vs ${rule}`);
+          ok(right.text === (/hybridization/.test(p.prompt) ? { sp3: 'sp³', sp2: 'sp²', sp: 'sp' }[want] : { sp3: '109.5°', sp2: '120°', sp: '180°' }[want]), `shape hybrid/angle answer ${p.smiles}`);
+        } else {
+          const m = /Which bond is more polar: (.+) or (.+)\?/.exec(p.prompt);
+          ok(!!m, 'polar2 prompt');
+          const types = bondTypes(p.smiles);
+          const find = (lab) => types.find((t) => t.label === lab);
+          const x = find(m[1]), y = find(m[2]);
+          ok(x && y && x.diff !== y.diff, `polar2 both bonds exist and differ ${p.smiles}`);
+          const en = (e) => ENEG[e];
+          const dx = Math.abs(en(x.a) - en(x.b)), dy = Math.abs(en(y.a) - en(y.b));
+          ok(right.text === (dx > dy ? x.label : y.label), `polar2 answer from EN table ${p.smiles} ${m[1]}/${m[2]}`);
+        }
+      } else if (p.kind === 'input') {
+        const ref = sigmaPiIndependent(p.smiles);
+        if (/σ bonds/.test(p.prompt)) ok(p.answer === ref.sigma, `shape sigma ${p.smiles} ${p.answer}==${ref.sigma}`);
+        else { ok(/π bonds/.test(p.prompt), 'pi prompt'); ok(p.answer === ref.pi && p.answer >= 1, `shape pi ${p.smiles} ${p.answer}==${ref.pi}`); }
+        ok(checkInput({ answer: p.answer, diagnose: p.wrong }, String(p.answer)).ok, 'shape input accepts answer');
+        (p.wrong || []).forEach((w) => ok(w.match !== p.answer && checkInput({ answer: p.answer, diagnose: p.wrong }, String(w.match)).diagnosis === w.why, 'shape wrong routes'));
+      } else if (p.kind === 'polarity') {
+        const c = p.config;
+        const e = pm.expected(c)[0];
+        ok(e.cls === 'polar' && e.diff >= 0.5 && e.diff <= 2, `shape delta bond is polar ${p.smiles}`);
+        const hi = ENEG[e.A] > ENEG[e.B] ? e.A : e.B;
+        ok(p.answer === hi, 'shape delta answer is more EN element');
+        ok(pm.grade(c, [e.answer]).ok && !pm.grade(c, [e.answer === 'a' ? 'b' : 'a']).ok && !pm.grade(c, ['none']).ok, `shape delta grading ${p.smiles}`);
+        ok(c.bonds[0].a === 'H' || c.bonds[0].b === 'H' || (typeof c.bonds[0].a === 'number' && typeof c.bonds[0].b === 'number'), 'delta bond indices valid');
+        [c.bonds[0].a, c.bonds[0].b].filter((x) => typeof x === 'number').forEach((i) => ok(i >= 0 && i < info.atoms.length, 'delta idx in range'));
+      } else ok(false, 'unknown shape kind ' + p.kind);
+    }
+  }
+  ok(['choice:hybridization', 'input:sigma-pi', 'choice:polarity', 'polarity:polarity'].every((k) => seenK.has(k)), 'shape-basic covers all task types');
+  ok(generatorForSkill('hybridization') === 'shape-basic' && generatorForSkill('polarity') === 'shape-basic' && generatorForSkill('sigma-pi') === 'shape-basic' && generatorForSkill('lone-pairs') === 'lewis-basic', 'generatorForSkill routing');
+  for (const smi of SHAPE_POOL) { const i = analyze(smi); ok(i && i.atoms.length <= 5 && i.atoms.every((x) => Number.isInteger(x.lp) && x.lp >= 0), `shape pool ${smi} valid`); }
+}
+
 // ---- known values of the pool (cross-check against hand knowledge)
 eq(analyze('C[O-]').atoms[1].fc, -1, 'methoxide O charge'); eq(analyze('C[O-]').atoms[1].lp, 3, 'methoxide O lp');
 eq(analyze('[NH4+]').atoms[0].fc, 1, 'ammonium'); eq(analyze('[CH3-]').atoms[0].lp, 1, 'carbanion lp');
@@ -213,11 +352,25 @@ eq(analyze('CC=O').totalValence, 18, 'acetaldehyde valence e'); eq(analyze('[NH4
 
 // ---- 3D models (computed by learn/tools/gen3d.py)
 {
-  for (const id of ['water', 'ammonia', 'methane', 'formaldehyde', 'hcn']) ok(models[id] && canon(models[id].molblock) === canon(models[id].smiles), `3D model ${id} matches its SMILES`);
+  for (const id of ['water', 'ammonia', 'methane', 'formaldehyde', 'hcn', 'ethylene', 'acetylene', 'co2']) ok(models[id] && canon(models[id].molblock) === canon(models[id].smiles), `3D model ${id} matches its SMILES`);
   const ang = modelAngle(models.water.molblock, 0, 1, 2);
   ok(ang >= 100 && ang <= 110, `water H-O-H angle ${ang.toFixed(1)} within 100-110`);
   const nh = modelAngle(models.ammonia.molblock, 0, 1, 2);
   ok(nh > 100 && nh < 112, `ammonia H-N-H ${nh.toFixed(1)}`);
+  const meth = [[1, 0, 2], [1, 0, 3], [1, 0, 4], [2, 0, 3], [2, 0, 4], [3, 0, 4]].map(([a, c, b]) => modelAngle(models.methane.molblock, c, a, b));
+  ok(meth.every((x) => Math.abs(x - 109.5) < 2), `methane all H-C-H ~109.5 (${meth.map((x) => x.toFixed(1))})`);
+  ok(models.ammonia.molblock && nh >= 105 && nh <= 109, `ammonia H-N-H 105-109 (${nh.toFixed(1)})`);
+  ok(ang >= 100 && ang <= 110, 'water 100-110');
+  // ethylene: atoms C0 C1 H2 H3 (on C0) H4 H5 (on C1)
+  const et = models.ethylene.molblock;
+  const ethAngles = [[2, 0, 1], [3, 0, 1], [4, 1, 0], [5, 1, 0]].map(([a, c, b]) => modelAngle(et, c, a, b));
+  ok(ethAngles.every((x) => x > 115 && x < 125), `ethylene H-C=C ~120 (${ethAngles.map((x) => x.toFixed(1))})`);
+  ok(modelAngle(et, 0, 2, 3) > 112 && modelAngle(et, 0, 2, 3) < 123, 'ethylene H-C-H ~117');
+  ok(planarity(et) < 0.05, `ethylene planar (max out-of-plane ${planarity(et).toFixed(3)} A)`);
+  ok(planarity(models.formaldehyde.molblock) < 0.05, 'formaldehyde planar');
+  ok(modelAngle(models.acetylene.molblock, 0, 2, 1) > 177 && modelAngle(models.acetylene.molblock, 1, 3, 0) > 177, 'acetylene linear ~180');
+  ok(modelAngle(models.co2.molblock, 1, 0, 2) > 177, `CO2 linear (${modelAngle(models.co2.molblock, 1, 0, 2).toFixed(1)})`);
+  ok(models.co2.molblock.split('\n')[4].includes(' O ') && models.acetylene.smiles === 'C#C' && models.ethylene.smiles === 'C=C', '3D atom order as lesson indices assume');
   const hcn = models.hcn.molblock.split('\n');
   ok(modelAngle(models.hcn.molblock, 0, 1, 2) > 170 || modelAngle(models.hcn.molblock, 1, 0, 2) > 170 || modelAngle(models.hcn.molblock, 2, 0, 1) > 170, `HCN is linear (${hcn.length} lines)`);
 }

@@ -1,6 +1,7 @@
 // Mastery / practice problem generators. All answers are computed from RDKit at runtime.
 import { analyze, coords2d, VALENCE, NAME, GROUP } from './chem.js';
 import { hydrogenPositions } from './widgets/lewis-core.js';
+import { generateShape, SHAPE_SKILLS } from './generators-shape.js';
 
 export const POOL = ['CN', 'CC#N', 'OC=O', 'C[O-]', '[NH4+]', 'CCl', 'C=C', 'CC=O', 'CC(=O)O', 'COC', '[OH3+]', '[CH3+]', '[CH3-]', 'O=C=O'];
 const MINUS = '−';
@@ -154,6 +155,7 @@ const BY_SKILL = { 'lone-pairs': ['lp'], 'formal-charge': ['fc'], 'electron-coun
 
 /** generate(generatorId, count, {skill, rng}) -> problems. Fresh random molecules each call. */
 export function generate(generatorId, count, { skill = null, rng = Math.random } = {}) {
+  if (generatorId === 'shape-basic') return generateShape(count, { skill, rng });
   const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : BASIC_TASKS;
   const out = [];
   let last = null;
@@ -165,7 +167,9 @@ export function generate(generatorId, count, { skill = null, rng = Math.random }
   }
   return out;
 }
-export const GENERATORS = { 'lewis-basic': true };
+export const GENERATORS = { 'lewis-basic': true, 'shape-basic': true };
+/** Which generator serves "Practise this" for a weak-spot skill. */
+export function generatorForSkill(skill) { return SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
 
 const SUBS = '₀₁₂₃₄₅₆₇₈₉';
 const subNum = (n) => (n === 1 ? '' : String(n).split('').map((d) => SUBS[d]).join(''));
