@@ -13,10 +13,9 @@ import l12 from './12-alkynes.js';
 import l13 from './13-benzene-eas.js';
 import l14 from './14-directors-synthesis.js';
 import l15 from './15-chirality-rs.js';
+import l16 from './16-diastereomers-meso.js';
 
-export const LESSONS = [l01, l02, l03, l04, l05, l06, l07, l08, l09, l10, l11, l12, l13, l14, l15];
+export const LESSONS = [l01, l02, l03, l04, l05, l06, l07, l08, l09, l10, l11, l12, l13, l14, l15, l16];
 
-// Locked placeholders (content files arrive later).
-export const PLANNED = [
-  ['16', 'Diastereomers, meso & racemates']
-].map(([id, title]) => ({ id, title, locked: true }));
+// All 16 lessons are written; nothing is left locked.
+export const PLANNED = [];

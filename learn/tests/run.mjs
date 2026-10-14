@@ -38,8 +38,9 @@ import { lesson12 } from './lesson12.mjs';
 import { lesson13 } from './lesson13.mjs';
 import { lesson14 } from './lesson14.mjs';
 import { lesson15 } from './lesson15.mjs';
+import { lesson16 } from './lesson16.mjs';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -131,8 +132,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 1 && PLANNED[0].id === '16', 'placeholder 16 (Lesson 15 is unlocked)');
-ok(LESSONS.length === 15 && LESSONS[14].id === '15' && LESSONS[13].id === '14' && LESSONS[12].id === '13' && LESSONS[11].id === '12' && LESSONS[10].id === '11' && LESSONS[9].id === '10' && LESSONS[8].id === '09' && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-15 registered and unlocked');
+ok(PLANNED.length === 0, 'no locked placeholders are left (Lesson 16 is unlocked)');
+ok(LESSONS.length === 16 && LESSONS[15].id === '16' && LESSONS[14].id === '15' && LESSONS[13].id === '14' && LESSONS[12].id === '13' && LESSONS[11].id === '12' && LESSONS[10].id === '11' && LESSONS[9].id === '10' && LESSONS[8].id === '09' && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-16 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -266,7 +267,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'alkynes', 'eas-basics', 'directors', 'rs'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'alkynes', 'eas-basics', 'directors', 'rs', 'stereo-relationships'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -1163,6 +1164,9 @@ await lesson14({ ok, eq });
 
 // ---- Lesson 15: chirality and R/S (centers and labels vs Python RDKit rdCIPLabeler / FindMolChiralCenters, wedge drawings read back from coordinates, mirror images + Kabsch superposition, hand-checked fixture with OPSIN), mirror-pair, rs-assigner, stereocenter-finder, `rs` generator, lesson steps (tests/lesson15.mjs)
 await lesson15({ ok, eq });
+
+// ---- Lesson 16: diastereomers, meso compounds and racemates (relationship()/isMeso() and the counts of stereoisomers vs Python RDKit EnumerateStereoisomers with inverted centres, cis/trans in 3D, planes of symmetry and Kabsch on solid meso models, resolution logic, hand-checked fixture given by name with OPSIN), stereo-grid, symmetry-plane, relationship-drill, resolution-flow, isomer-tree, `stereo-relationships` generator, lesson steps (tests/lesson16.mjs)
+await lesson16({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

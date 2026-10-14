@@ -1,0 +1,294 @@
+// Lesson 16: Diastereomers, meso compounds & racemates (McMurry ch. 6, sections 6.6 to 6.10).
+// Original wording throughout; book problems are referenced by number only.
+// Every relationship (identical / enantiomers / diastereomers / constitutional), every meso verdict and every count of stereoisomers is computed by
+// relationship(), isMeso() and the enumeration in engine/stereoisomers.js, and checked against Python RDKit (tools/check_relationships.py);
+// the 3D meso models have an exact plane of symmetry (data/3d/meso.js); names with (2R,3S)-style prefixes are checked against OPSIN.
+
+export default {
+  id: '16', slug: 'diastereomers-meso', title: 'Diastereomers, meso compounds & racemates', minutes: 30,
+  chapter: 6, sections: ['6.6', '6.7', '6.8', '6.9', '6.10'],
+  drawing: 'skeletal',
+  goals: [
+    'Count the stereoisomers of a molecule with several chirality centers, and say whether two of them are identical, enantiomers or diastereomers',
+    'Recognise a meso compound (chirality centers plus a plane of symmetry) and know why it is optically inactive',
+    'Explain racemic mixtures and how a racemate is resolved, and sort any pair of isomers with the isomer decision tree'
+  ],
+  steps: [
+    {
+      id: 's01', type: 'predict', skill: 'stereo-relationships',
+      prompt: 'Until now each molecule had ONE chirality center, so it came in two forms (R and S). Threonine, an amino acid, has TWO chirality centers, C2 and C3. How many stereoisomers do you expect it to have?',
+      smiles: 'CC(O)C(N)C(=O)O',
+      options: [
+        { text: '4', correct: true, why: 'Yes. Each center can be R or S independently, so the combinations are R,R and R,S and S,R and S,S: 2 × 2 = 2² = 4.' },
+        { text: '2', why: 'Two would be one molecule and its mirror image, with both centers changing together. But each center can change on its own, which gives more combinations: 2 × 2.' },
+        { text: '3', why: 'Three would need two of the combinations to be the same compound. That does happen for some molecules (you will meet one in a few steps), but not here: threonine’s two centers carry different groups.' },
+        { text: '6', why: 'Choices multiply, they do not add up. Each of the 2 centers has 2 options, so the count is 2 × 2 = 4, not 6.' }
+      ],
+      reveal: 'A molecule with <b>n</b> chirality centers can have up to <b>2ⁿ</b> stereoisomers. Threonine has n = 2, so up to 4. “Up to”: some molecules have fewer, and you will see why.'
+    },
+    {
+      id: 's02', type: 'try', skill: 'stereo-relationships', widget: 'stereo-grid',
+      prompt: 'All four stereoisomers of threonine (<name new="2-amino-3-hydroxybutanoic acid" old="2-amino-3-hydroxybutanoic acid"></name>) are drawn below. First give each drawing its R or S at C2 and at C3. Then link the pairs: tap two drawings and say whether they are <b>enantiomers</b>, <b>diastereomers</b> or the same compound.',
+      config: { entry: 'threonine' },
+      confirm: 'Two pairs of mirror images: (2R,3R) with (2S,3S), and (2R,3S) with (2S,3R). Enantiomers are opposite at EVERY center. Any other pair is the same at one center and opposite at the other: not mirror images, so diastereomers. Four stereoisomers, none of them identical.',
+      hints: ['An enantiomer is the mirror image, so its label is reversed at both centers. Compare the labels of the two drawings: how many centers differ?', 'Opposite at both centers means enantiomers. Opposite at only one center means a stereoisomer that is not a mirror image: a diastereomer.'],
+      worked: 'The four drawings are (2R,3R), (2S,3S), (2R,3S) and (2S,3R). (2R,3R) and (2S,3S) differ at both centers: enantiomers. (2R,3S) and (2S,3R) also differ at both: enantiomers. Every other pair, for example (2R,3R) and (2R,3S), differs at only one center: diastereomers. That is 2 enantiomer pairs and 4 diastereomer pairs, all four compounds different.'
+    },
+    {
+      id: 's03', type: 'explain', skill: 'stereo-relationships',
+      html: '<p><b>Enantiomers</b> are opposite at <i>every</i> chirality center, like (2R,3R) and (2S,3S). <b>Diastereomers</b> are stereoisomers that are <i>not</i> mirror images: the same at some centers, opposite at others, like (2R,3R) and (2R,3S).</p><p>Enantiomers share all physical properties except the sign of rotation. Diastereomers are different compounds with different properties, such as melting point and solubility. Only (2S,3R) of the four is the amino acid found in nature.</p>'
+    },
+    {
+      id: 's04', type: 'choice', skill: 'stereo-relationships',
+      prompt: 'Natural threonine is (2S,3R), drawn on the left. Which of the other drawings is a <b>diastereomer</b> of it?',
+      figures: [{ smiles: 'C[C@@H](O)[C@H](N)C(=O)O', label: 'natural threonine (2S,3R)' }],
+      options: [
+        { smiles: 'C[C@H](O)[C@@H](N)C(=O)O', label: 'A', rel: 'enantiomers', why: 'A is the mirror image: it is opposite at both centers, (2R,3S). A mirror image is an enantiomer, not a diastereomer.' },
+        { smiles: 'C[C@H](O)[C@H](N)C(=O)O', label: 'B', rel: 'diastereomers', correct: true, why: 'B is (2S,3S): the same as natural threonine at C2 and opposite at C3. It is a stereoisomer that is not a mirror image: a diastereomer.' },
+        { smiles: 'OC(=O)[C@@H](N)[C@@H](C)O', label: 'C', rel: 'identical', why: 'C looks different because it is written from the other end, but both centers are unchanged: it is natural threonine again. Same compound.' },
+        { smiles: 'OCC[C@H](N)C(=O)O', label: 'D', rel: 'constitutional', why: 'In D the OH sits on a different carbon, so the atoms are connected differently. That makes it a constitutional isomer, not a stereoisomer.' }
+      ],
+      hints: ['A diastereomer has the same connectivity but is not a mirror image. Rule out the molecule with different connectivity first.', 'Compare the two centers of each drawing with (2S,3R). Opposite at both is the mirror image; the same at both is the same compound; opposite at just one is a diastereomer.'],
+      worked: 'D has a different connectivity (constitutional isomer). C is the same compound written backwards. A is (2R,3S), opposite at both centers: the enantiomer. B is (2S,3S), opposite at only one center: the diastereomer.',
+      confirm: 'A diastereomer keeps the same connectivity, is a different compound, and is not a mirror image: here, opposite at one center only.'
+    },
+    {
+      id: 's05', type: 'predict', skill: 'meso',
+      prompt: 'Tartaric acid, HO₂C–CH(OH)–CH(OH)–CO₂H, the compound Pasteur studied, also has two chirality centers (C2 and C3). Following the 2ⁿ rule, how many stereoisomers does it have?',
+      smiles: 'O=C(O)C(O)C(O)C(=O)O',
+      options: [
+        { text: 'Three', correct: true, why: 'Yes, the surprising answer. 2² = 4 is only the upper limit: two of the four combinations turn out to be the same compound. The next steps show why.' },
+        { text: 'Four, like threonine', why: 'A good first guess (2² = 4), but it is a maximum. In tartaric acid the two ends of the molecule are alike, which makes two of the four combinations the same compound.' },
+        { text: 'Two', why: 'Two would be a single pair of mirror images. There is also a third form that is not part of a mirror-image pair.' },
+        { text: 'One', why: 'There are at least the (+) and (−) tartaric acids that Pasteur separated, so there are more than one.' }
+      ],
+      reveal: 'Tartaric acid has <b>three</b> stereoisomers: (2R,3R), (2S,3S) and one more. Test them with 3D models: do they all have a mirror image that is a different molecule?'
+    },
+    {
+      id: 's06', type: 'try', skill: 'meso', widget: 'mirror-pair',
+      prompt: 'Two models of tartaric acid, each next to its true mirror image: (2R,3S) and (2R,3R). Press <b>Try to superimpose</b> for each, then decide: chiral or achiral? (The (2R,3S) model is shown with its two halves eclipsed, so its symmetry is easy to see. Turning about C2–C3 does not change which compound it is.)',
+      config: { models: ['meso-tartaric', 'rr-tartaric'], titles: { 'meso-tartaric': '(2R,3S)-tartaric acid', 'rr-tartaric': '(2R,3R)-tartaric acid' } },
+      confirm: '(2R,3R)-tartaric acid cannot be superimposed on its mirror image: it is chiral, and its mirror image is (2S,3S). The (2R,3S) model lands exactly on its mirror image: it is achiral even though it has two chirality centers.',
+      hints: ['Press “Try to superimpose” and read the report: do all atoms of the mirror image land on partner atoms?', 'For one of the two models every atom lands (the average distance is about 0). That molecule is its own mirror image, so it is achiral.'],
+      worked: 'The computer tries every allowed turn of the mirror image. For (2R,3R)-tartaric acid some atoms always stay off their partners, so it is chiral. For (2R,3S)-tartaric acid every atom lands on a partner, so the mirror image is the same molecule. That makes it achiral despite its two chirality centers.'
+    },
+    {
+      id: 's07', type: 'try', skill: 'meso', widget: 'symmetry-plane',
+      prompt: 'Why is (2R,3S) achiral? Because it has a <b>plane of symmetry</b>. Find it on each model: choose which way the plane faces, slide it, and press <b>Reflect</b>. Every atom must land on an identical atom.',
+      config: { rounds: [{ model: 'meso-dibromobutane', kind: 'find', titles: { 'meso-dibromobutane': '(2R,3S)-2,3-dibromobutane' } }, { model: 'meso-tartaric', kind: 'find', titles: { 'meso-tartaric': '(2R,3S)-tartaric acid' } }] },
+      confirm: 'In both molecules the plane cuts across the middle of the C2–C3 bond, at right angles to it. The two halves are mirror images, so the molecule is its own mirror image: achiral.',
+      hints: ['The two chirality centers have opposite configurations, so they are mirror partners. Where would a mirror have to stand to swap them?', 'Choose the plane that faces along the C2–C3 bond (“Across the C–C bond”) and slide it to the middle of that bond; press Reflect and check that every atom has a partner.'],
+      worked: 'A mirror plane has to swap the two halves of the molecule. The halves are linked by the C2–C3 bond, so the plane stands across that bond, perpendicular to it, halfway between C2 and C3. Reflecting through it sends every atom of one half onto the matching atom of the other.'
+    },
+    {
+      id: 's08', type: 'try', skill: 'meso', widget: 'symmetry-plane',
+      prompt: 'Now (2R,3R)-tartaric acid. Try planes the same way: does any plane map this molecule onto itself?',
+      config: { rounds: [{ model: 'rr-tartaric', kind: 'none', titles: { 'rr-tartaric': '(2R,3R)-tartaric acid' } }] },
+      confirm: 'No plane works: the two chirality centers have the SAME configuration, so no mirror can swap them. With no plane of symmetry the molecule is chiral.',
+      hints: ['Try the plane across the C2–C3 bond and slide it to the middle. What happens to the atoms?', 'Press “Try every possible plane”. If none maps the molecule onto itself, the molecule is chiral.'],
+      worked: 'Reflecting the molecule across the middle of C2–C3 would turn the R center into an S center, but the other center is also R, so the atoms do not land on matching atoms. The computer also tried the bisector plane of every pair of identical atoms: none works. No plane of symmetry means chiral.'
+    },
+    {
+      id: 's09', type: 'explain', skill: 'meso',
+      html: '<p>A <b>meso compound</b> has chirality centers <i>and</i> a plane of symmetry. It is identical to its own mirror image, so it is achiral and optically inactive. For tartaric acid, (2R,3S) and (2S,3R) are the <i>same</i> compound: <b>(+)</b>, <b>(−)</b> and <b>meso</b> make three stereoisomers.</p><p>A meso form needs two matching halves. 2,3-Dibromobutane has one; 2-bromo-3-chlorobutane does not, because the two ends differ.</p>'
+    },
+    {
+      id: 's10', type: 'choice', skill: 'meso',
+      prompt: 'Measured at 20 °C: (+)- and (−)-tartaric acid both melt at 168–170 °C and dissolve 139 g per 100 mL of water. Meso-tartaric acid melts at 146–148 °C and dissolves 125 g per 100 mL. Why does the meso form differ when (+) and (−) match?',
+      options: [
+        { text: '(+) and (−) are enantiomers, so they share every property except the sign of rotation. The meso form is a diastereomer of both: a different compound with its own properties', correct: true, why: 'Yes. Enantiomers behave identically in ordinary physical tests; diastereomers are different compounds, so their properties differ.' },
+        { text: 'The meso form has a different molecular formula', why: 'All three are C₄H₆O₆. Stereoisomers always share the molecular formula and the connectivity.' },
+        { text: 'Meso-tartaric acid is a 50:50 mixture of the (+) and (−) forms', why: 'A 50:50 mixture is a racemate, a different thing. The meso form is ONE pure compound whose own two halves cancel.' },
+        { text: 'The meso form is chiral, so it melts differently', why: 'The meso form is achiral. Its different melting point comes from being a different compound, a diastereomer of the (+) and (−) forms.' }
+      ],
+      hints: ['What is the relationship between (+)-tartaric acid and (−)-tartaric acid? And between either of them and the meso form?', 'Enantiomers: identical properties. Diastereomers: different properties.'],
+      worked: '(+) and (−) are a pair of mirror images, so their melting points and solubilities are equal. The meso form is not their mirror image; it is a diastereomer, a separate compound, so its melting point and solubility differ.',
+      confirm: 'Enantiomers match in everything except the sign of rotation; a diastereomer, meso forms included, is a different compound with different properties.'
+    },
+    {
+      id: 's11', type: 'worked', skill: 'meso',
+      problem: 'Worked example: how many stereoisomers does 2,3-dibromobutane, CH₃CHBrCHBrCH₃, have, and which one is meso? You choose each move.',
+      smiles: 'CC(Br)C(Br)C',
+      moves: [
+        {
+          ask: 'How many chirality centers does it have?',
+          options: [
+            { text: 'Two: C2 and C3 (each has H, Br, CH₃ and the rest of the chain)', correct: true, why: 'Yes. C2 carries H, Br, CH₃ and CHBrCH₃, four different groups; C3 is the same.' },
+            { text: 'Four: every carbon', why: 'CH₃ groups can never be chirality centers (three identical H). Only C2 and C3 have four different groups.' },
+            { text: 'One', why: 'C2 and C3 each have four different groups, so there are two.' }
+          ],
+          then: 'n = 2.'
+        },
+        {
+          ask: 'So how many combinations of R and S can be written?',
+          options: [
+            { text: '2² = 4: (2R,3R), (2S,3S), (2R,3S), (2S,3R)', correct: true, why: 'Yes: each of the 2 centers can be R or S.' },
+            { text: '2 × 2 × 2 = 8', why: 'Each CENTER gives a factor of 2, and there are two centers, so 2² = 4.' },
+            { text: '2 + 2 = 4, but the pairs matter less', why: 'The rule is multiplication (2 × 2); it gives 4, but for the right reason: each center is independent.' }
+          ],
+          visual: { widget: 'stereo-grid', config: { entry: 'dibromobutane', view: true } },
+          then: 'Here are all four drawings.'
+        },
+        {
+          ask: 'Compare (2R,3S) with (2S,3R). What is the relationship?',
+          options: [
+            { text: 'They are the SAME compound: turn one through 180° and it matches. The molecule has a plane of symmetry between C2 and C3', correct: true, why: 'Yes. The two ends of the molecule are alike, so reversing both centers just swaps the halves: the molecule is its own mirror image.' },
+            { text: 'Enantiomers: they are opposite at both centers', why: 'They are opposite at both centers, which makes them mirror images, but they are also identical because the molecule has a plane of symmetry. A mirror image that can be superimposed is not an enantiomer.' },
+            { text: 'Diastereomers', why: 'Diastereomers are different compounds. These two can be turned into one another by rotation, so they are one compound.' }
+          ],
+          then: 'That compound is meso.'
+        },
+        {
+          ask: 'So how many different stereoisomers are there?',
+          options: [
+            { text: 'Three: the enantiomers (2R,3R) and (2S,3S), and the meso compound (2R,3S)', correct: true, why: 'Yes: one pair of enantiomers plus one meso compound. The meso compound is a diastereomer of each of the other two.' },
+            { text: 'Four: the 2ⁿ rule always gives the exact number', why: '2ⁿ is the maximum. Two of the four combinations are the same meso compound, so it is three.' },
+            { text: 'Two: only one pair of enantiomers', why: 'The meso compound is a third, different stereoisomer: it is not a mirror image of either (2R,3R) or (2S,3S).' }
+          ]
+        }
+      ],
+      rule: 'n chirality centers give up to 2ⁿ stereoisomers. Write the combinations, then merge any that are the same compound. A meso form appears when the two halves of the molecule are alike, so a plane of symmetry exists.'
+    },
+    {
+      id: 's12', type: 'input', skill: 'meso',
+      prompt: 'How many stereoisomers does 2-bromo-3-chlorobutane have? (Two drawings of the same compound count once.)',
+      smiles: 'CC(Br)C(Cl)C',
+      answer: 4,
+      diagnose: [
+        { match: 3, why: 'Three would mean a meso form. A meso form needs matching halves, but here one end carries Br and the other Cl, so there is no plane of symmetry: all four combinations are different compounds.' },
+        { match: 2, why: 'Two is the number of enantiomer pairs. Count molecules: each pair has two, so 2 × 2 = 4.' },
+        { match: 8, why: '2ⁿ with n = 2 gives 4. Count centers, not carbons or bonds.' }
+      ],
+      confirm: 'Two centers give 2² = 4, and none is meso because Br and Cl make the two halves different: (2R,3R) and (2S,3S) are enantiomers, as are (2R,3S) and (2S,3R); each of the first pair is a diastereomer of each of the second.',
+      hints: ['It has two chirality centers, C2 and C3. How many combinations of R and S is that?', 'Is any combination the same compound as another? A meso form needs a plane of symmetry between C2 and C3: are the two sides alike?'],
+      worked: 'n = 2, so up to 2² = 4. A meso compound would need a plane of symmetry swapping C2 and C3, but C2 carries Br and C3 carries Cl, so the halves are different. All four are different compounds: 4 stereoisomers, in two enantiomer pairs.'
+    },
+    {
+      id: 's13', type: 'try', skill: 'stereo-relationships', widget: 'relationship-drill',
+      prompt: 'Six pairs of drawn molecules. For each pair choose: the same compound, enantiomers, diastereomers or constitutional isomers.',
+      config: {
+        pairs: [
+          { a: 'C[C@@H](O)[C@H](N)C(=O)O', b: 'C[C@@H](O)[C@H](N)C(=O)O', rotateB: 180, entry: 'threonine', title: 'threonine', expect: 'identical' },
+          { a: 'C[C@@H](O)[C@H](O)C', b: 'C[C@H](O)[C@@H](O)C', entry: 'butanediol', title: 'butane-2,3-diol', expect: 'enantiomers' },
+          { a: 'C[C@@H](Br)[C@@H](Cl)C', b: 'C[C@@H](Br)[C@H](Cl)C', entry: 'bromochlorobutane', title: '2-bromo-3-chlorobutane', expect: 'diastereomers' },
+          { a: 'C[C@@H](O)[C@H](O)C', b: 'OC[C@H](O)CC', title: 'two diols', expect: 'constitutional' },
+          { a: 'C[C@H](Br)[C@H](Br)C', b: 'C[C@@H](Br)[C@@H](Br)C', entry: 'dibromobutane', title: '2,3-dibromobutane', expect: 'identical', whys: { enantiomers: 'They look like a mirror pair, but this compound is meso: a plane of symmetry makes it identical to its own mirror image. They are the same meso compound drawn rotated, not two compounds.' } },
+          { a: 'Br[C@H]1CCC[C@H]1Br', b: 'Br[C@@H]1CCC[C@H]1Br', entry: 'dibromocyclopentane12', cistrans: true, title: 'cis and trans on a ring', expect: 'diastereomers' }
+        ]
+      },
+      confirm: 'Each answer came from comparing the connectivity first, then every center: the same compound (even drawn turned, or as a meso mirror image), enantiomers (opposite at every center), diastereomers (opposite at some centers only; cis and trans isomers belong here) and constitutional isomers (different connectivity).',
+      hints: ['Start with the connectivity: are the atoms bonded in the same order? If not, stop: constitutional isomers.', 'If the connectivity matches, compare each center. If a molecule has a plane of symmetry, it is its own mirror image, so a drawing and its “mirror image” are the same compound.'],
+      worked: 'Pair 1: the same atoms and centers, one drawing turned: identical. Pair 2: opposite at both centers: enantiomers. Pair 3: opposite at only one center: diastereomers. Pair 4: the OH groups sit on different carbons: constitutional isomers. Pair 5: a meso compound and its mirror image drawing: identical. Pair 6: cis and trans on a ring: diastereomers.'
+    },
+    {
+      id: 's14', type: 'input', skill: 'racemates',
+      prompt: 'Pasteur’s starting material was optically inactive. Suppose a solution holds 1.00 g of (+)-tartaric acid and 1.00 g of (−)-tartaric acid in 10.0 mL, in a 1.00 dm tube. The pure (+) form has [α]D = +12. What is the observed rotation of this 50:50 mixture, in degrees?',
+      answer: 0,
+      diagnose: [
+        { match: 1.2, why: '+1.2° is what the (+) enantiomer alone would give (12 × 1.00 dm × 0.100 g/mL). The (−) enantiomer is present in the same amount and gives −1.2°, so the two cancel.' },
+        { match: -1.2, why: '−1.2° is what the (−) enantiomer alone would give. The same amount of (+) gives +1.2°, so they cancel.' },
+        { match: 2.4, why: 'The two rotations point in opposite directions, so they subtract; they do not add.' }
+      ],
+      confirm: '(+) gives +1.2° and (−) gives −1.2°, so the net rotation is 0°. A 50:50 mixture of enantiomers is a <b>racemic mixture</b>, written (±): optically inactive because the rotations cancel.',
+      hints: ['Work out the rotation each enantiomer gives alone: [α]D × l × c, with c = 1.00 g ÷ 10.0 mL for each one.', 'The two enantiomers turn the light by the same amount in opposite directions. Add them with their signs.'],
+      worked: 'Each enantiomer: c = 1.00 g ÷ 10.0 mL = 0.100 g/mL. The (+) form gives +12 × 1.00 × 0.100 = +1.2°, the (−) form gives −1.2°. Total: +1.2 + (−1.2) = 0°.'
+    },
+    {
+      id: 's15', type: 'explain', skill: 'racemates',
+      html: '<p>A <b>racemic mixture</b> (racemate), (±), is a 50:50 mixture of two enantiomers: two compounds, each optically active, whose rotations cancel. A <b>meso compound</b> is one compound that is optically inactive because of its own plane of symmetry.</p><p>Both read 0°, but they are not the same thing. A racemate can be resolved into its two enantiomers; a meso compound cannot be split.</p>'
+    },
+    {
+      id: 's16', type: 'try', skill: 'racemates', widget: 'resolution-flow',
+      prompt: 'Enantiomers have identical properties, so how can a racemate be separated? Work through the standard trick for a racemic <b>acid</b>: choose the reagent, find the salts, separate them, and get the acids back.',
+      config: {},
+      confirm: 'A racemic acid plus ONE pure chiral amine gives diastereomeric salts, which differ in solubility and can be separated; acidifying each salt gives the pure acid enantiomers. An achiral reagent would give enantiomeric salts, which cannot be told apart.',
+      hints: ['You need a reagent that makes the two products NOT mirror images of each other. What kind of reagent can do that?', 'A hand in a glove: left and right hands fit a right-handed glove differently. A chiral, single-enantiomer amine plays the part of the glove.'],
+      worked: 'Racemic acid + pure (R)-amine gives the (R)-acid·(R)-amine salt and the (S)-acid·(R)-amine salt. They are the same at the amine center and opposite at the acid center: diastereomers, with different solubilities. Crystallize one out, then add HCl to each salt to free the pure (R)- and (S)-acids.'
+    },
+    {
+      id: 's17', type: 'try', skill: 'stereo-relationships', widget: 'isomer-tree',
+      prompt: 'Now put every kind of isomer on one chart. Walk the flowchart for each pair by answering its questions in order.',
+      config: {
+        pairs: [
+          { a: 'CCCCO', b: 'CCC(C)O', title: 'two alcohols, C₄H₁₀O', expect: 'Constitutional isomers', sub: 'positional', subWhy: { skeletal: 'Both have the same four-carbon chain, so the carbon skeletons are the same.', functional: 'Both are alcohols, with the same functional group.' }, note: 'The OH group sits on a different carbon of the same chain.' },
+          { a: 'C[C@@H](O)[C@H](N)C(=O)O', b: 'C[C@H](O)[C@@H](N)C(=O)O', title: 'threonine, (2S,3R) and (2R,3S)', expect: 'Enantiomers' },
+          { a: 'C[C@H]1CCCC[C@H]1C', b: 'C[C@H]1CCCC[C@@H]1C', title: 'cis- and trans-1,2-dimethylcyclohexane', expect: 'Diastereomers', note: 'The cis isomer is meso, the trans isomer is chiral; cis and trans isomers are diastereomers.' }
+        ]
+      },
+      confirm: 'Same formula? Same connectivity? If yes to both: the same compound, enantiomers (opposite at every center) or diastereomers (everything else, cis–trans isomers included). If the connectivity differs they are constitutional isomers: skeletal, functional or positional.',
+      hints: ['Always begin at the top: count the atoms, then trace the bonds. Stereoisomers share both the formula and the connectivity.', 'For stereoisomers, ask whether one can be laid on the other; if not, whether it is the mirror image (opposite at EVERY center).'],
+      worked: '<name new="butan-1-ol" old="1-butanol"></name> and <name new="butan-2-ol" old="2-butanol"></name>: same formula, different connectivity, and the same skeleton with the OH in a different place: positional isomers. The two threonines are opposite at both centers: enantiomers. cis- and trans-1,2-dimethylcyclohexane: same connectivity, different compounds, and the cis isomer is meso, so it is not the mirror image of trans: diastereomers.'
+    },
+    {
+      id: 's18', type: 'predict', skill: 'chirality',
+      prompt: 'Enantiomers have the same melting point, boiling point and solubility. Yet (S)-ibuprofen relieves pain while its mirror image, (R)-ibuprofen, does not. What is the most likely reason?',
+      smiles: 'CC(C)Cc1ccc(cc1)[C@H](C)C(=O)O',
+      options: [
+        { text: 'The body’s receptors and enzymes are themselves chiral, so only one enantiomer fits properly, like a hand in a glove', correct: true, why: 'Yes. A chiral receptor is a handed environment: one enantiomer fits it and its mirror image does not, just as a left hand does not fit a right-handed glove.' },
+        { text: 'The two enantiomers have different molecular formulas', why: 'Enantiomers have identical formulas and identical connectivity. Only the 3D arrangement differs.' },
+        { text: 'Only the (S) form can dissolve in water', why: 'Enantiomers dissolve equally well in an achiral solvent like water. The difference only shows up in a chiral environment.' },
+        { text: 'The (R) form is always much heavier', why: 'Enantiomers have exactly the same mass. What differs is how they interact with other chiral molecules.' }
+      ],
+      reveal: 'Biological receptors and enzymes are chiral, so they usually treat the two enantiomers of a molecule differently: (+)-limonene smells of oranges and (−)-limonene of pine trees, and only (S)-ibuprofen is the active pain reliever. Many drugs are now made as a single enantiomer.'
+    },
+    {
+      id: 's19', type: 'try', skill: 'stereo-relationships', widget: 'stereo-grid',
+      prompt: 'Midterm review, from Lesson 10: Br₂ adds to cyclopentene to give 1,2-dibromocyclopentane, which has two chirality centers. Label the four combinations and link the pairs. Some of them may turn out to be the same compound.',
+      config: { entry: 'dibromocyclopentane12', anchor: true },
+      confirm: '(1R,2R) and (1S,2S) are the trans isomers: mirror images, enantiomers. (1R,2S) and (1S,2R) are the cis isomer, which is ONE meso compound: a plane of symmetry runs through the ring between C1 and C2. Each trans isomer is a diastereomer of the cis one.',
+      hints: ['Label the centers, then for each pair of drawings ask: opposite at both centers (mirror images), the same at both (identical), or different at only one?', 'The cis isomer has Br on the same face at both centers. Its two halves are alike, so a plane of symmetry makes (1R,2S) and (1S,2R) the same compound.'],
+      worked: 'The four combinations are (1R,2R), (1S,2S), (1R,2S) and (1S,2R). (1R,2R) and (1S,2S) are opposite at both centers: enantiomers (trans). (1R,2S) and (1S,2R) are opposite at both centers too, but the ring has a plane of symmetry, so they are the same meso compound (cis). Every other pair is a diastereomer pair.'
+    },
+    {
+      id: 's20', type: 'worked', skill: 'meso',
+      problem: 'Midterm review: what do you get when Br₂ adds to cyclopentene? Use Lesson 10 (the anti addition through a bromonium ion) and this lesson. You choose each move.',
+          moves: [
+        {
+          ask: 'Br₂ adds ANTI. On a ring, is the product cis or trans?',
+          equation: { reactants: ['C1=CCCC1', 'BrBr'], products: [], cond: 'ordinary flask' },
+          options: [
+            { text: 'trans-1,2-dibromocyclopentane: the two Br atoms end up on opposite faces', correct: true, why: 'Yes. The bromonium ion blocks one face, so the bromide attacks from the opposite face.' },
+            { text: 'cis-1,2-dibromocyclopentane', why: 'Cis means both Br on the SAME face, which would be syn addition. Br₂ adds anti.' }
+          ]
+        },
+        {
+          ask: 'Is trans-1,2-dibromocyclopentane chiral?',
+          options: [
+            { text: 'Yes: two chirality centers and no plane of symmetry, so its mirror image is a different molecule (1R,2R and 1S,2S)', correct: true, why: 'Yes. The two C–Br bonds point to opposite faces, so no plane reflects one half into the other.' },
+            { text: 'No: the two halves of the ring are alike, so it is meso', why: 'It is cis-1,2-dibromocyclopentane that is meso. In the trans isomer a plane that swaps the halves would also swap the faces, so it is not a symmetry plane.' }
+          ]
+        },
+        {
+          ask: 'The bromonium ion can be opened from either face, equally easily, since nothing in the flask is chiral. What does the flask contain?',
+          options: [
+            { text: 'Equal amounts of (1R,2R) and (1S,2S): a racemic mixture, (±), with observed rotation 0°', correct: true, why: 'Yes. Each enantiomer is formed as often as the other, so the rotations cancel.' },
+            { text: 'Only the (1R,2R) enantiomer, optically active', why: 'Without a chiral reagent or catalyst there is no preference for one face, so both enantiomers form equally.' },
+            { text: 'The meso compound', why: 'The meso compound would be the cis isomer. Anti addition gives the trans isomer, which is chiral.' }
+          ]
+        },
+        {
+          ask: 'What would cis-1,2-dibromocyclopentane be?',
+          options: [
+            { text: 'A meso compound: (1R,2S) = (1S,2R). It has a plane of symmetry, so it is achiral and optically inactive', correct: true, why: 'Yes. A syn addition (both Br on the same face) would give this one achiral compound, not a racemate.' },
+            { text: 'Another racemic mixture', why: 'A racemic mixture needs two enantiomers. The cis isomer has only one form because it is its own mirror image.' }
+          ]
+        },
+        {
+          ask: 'So how are the cis and trans products related?',
+          options: [
+            { text: 'Diastereomers: cis–trans isomers are stereoisomers that are not mirror images', correct: true, why: 'Yes. The cis meso compound is a diastereomer of each trans enantiomer.' },
+            { text: 'Enantiomers', why: 'The cis isomer is meso: it is its own mirror image, so it cannot be the mirror image of the trans isomer.' },
+            { text: 'Constitutional isomers', why: 'Both have the same connectivity: each carbon bears Br in the same positions. They differ only in 3D arrangement.' }
+          ]
+        }
+      ],
+      rule: 'Anti addition of Br₂ to cyclopentene gives trans-1,2-dibromocyclopentane, a chiral compound made as a racemate (0° rotation). The cis isomer would be meso. Cis and trans are diastereomers.'
+    }
+  ],
+  mastery: { count: 3, generator: 'stereo-relationships' },
+  useIt: {
+    book: ['6.12', '6.13', '6.14', '6.15', '6.16', '6.17', '6.18', '6.19', '6.20', '6.21', '6.23', '6.43', '6.44', '6.45', '6.46', '6.47', '6.48', '6.49', '6.50', '6.51', '6.53', '6.54', '6.56', '6.57', '6.58', '6.59', '6.60'],
+    endFrom: 21,
+    note: 'In-chapter: 6.12 to 6.14 (R/S at several centers, then enantiomers and diastereomers), 6.15 and 6.16 (counting stereoisomers; isoleucine), 6.17 and 6.18 (meso compounds), 6.19 (stereochemistry of an ester-forming reaction), 6.20 (kinds of isomers). End of chapter: 6.21 and 6.23 (identical structures, meso structures), the STEREOCHEMICAL RELATIONSHIPS set 6.43 to 6.50 (including meso-tartaric acid), and the general problems 6.51, 6.53, 6.54, 6.56 and 6.57 to 6.60.'
+  }
+};

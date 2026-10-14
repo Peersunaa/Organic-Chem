@@ -45,12 +45,19 @@ function home() {
   const L = LESSONS.find((l) => !store.getProgress(l.id).complete) || LESSONS[LESSONS.length - 1];
   const s = stepLabel(L);
   const complete = store.getProgress(L.id).complete;
+  const courseDone = LESSONS.every((l) => store.getProgress(l.id).complete);
   const hero = h('section', { class: 'hero' },
     h('p', { class: 'eyebrow' }, 'McMurry, chapters 1–6'),
     h('h1', {}, 'Act first, then read.'),
     h('p', { class: 'lede' }, 'Every idea starts with a question or a structure to build. The explanation arrives after you have committed to an answer.'),
-    h('a', { class: 'btn primary big', href: '#lesson-' + L.id, id: 'continue-btn' }, complete ? `Review lesson ${L.id}` : s.started ? `Continue lesson ${L.id}` : `Start lesson ${L.id}`),
-    h('p', { class: 'muted small' }, complete ? 'Lesson complete.' : s.started ? `Step ${Math.min(s.p.idx + 1, s.total)} of ${s.total}: ${L.title}` : `${L.title} · ${L.minutes} min`));
+    courseDone
+      ? h('div', { class: 'done-note', id: 'course-complete' },
+        h('p', {}, h('b', {}, 'Course complete.'), ` All ${LESSONS.length} lessons are done.`),
+        h('div', { class: 'row' },
+          h('button', { type: 'button', class: 'btn primary', id: 'open-practice' }, 'Open Practice / weak spots'),
+          h('a', { class: 'btn ghost', href: '#lesson-' + LESSONS[LESSONS.length - 1].id, id: 'continue-btn' }, `Review lesson ${LESSONS[LESSONS.length - 1].id}`)))
+      : h('a', { class: 'btn primary big', href: '#lesson-' + L.id, id: 'continue-btn' }, complete ? `Review lesson ${L.id}` : s.started ? `Continue lesson ${L.id}` : `Start lesson ${L.id}`),
+    courseDone ? null : h('p', { class: 'muted small' }, complete ? 'Lesson complete.' : s.started ? `Step ${Math.min(s.p.idx + 1, s.total)} of ${s.total}: ${L.title}` : `${L.title} · ${L.minutes} min`));
 
   // weak spots
   const ws = store.weakSpots();
@@ -67,6 +74,15 @@ function home() {
     panel.append(list);
   }
 
+  if (courseDone) {
+    // one practice link per lesson: the first skill of that lesson that its own mastery generator serves
+    const seen = new Set(), items = [];
+    LESSONS.forEach((l) => {
+      const sk = l.steps.map((st) => st.skill).find((k) => k && generatorForSkill(k) === l.mastery.generator && !seen.has(k));
+      if (sk) { seen.add(sk); items.push(h('li', {}, h('a', { href: '#practise-' + sk }, skillLabel(sk)))); }
+    });
+    panel.append(h('details', { class: 'practice-all', open: 'open' }, h('summary', {}, 'Practise a skill'), h('ul', { class: 'practice-list' }, items)));
+  }
   const lessons = h('section', { class: 'lessons', 'aria-labelledby': 'ls-h' }, h('h2', { id: 'ls-h' }, 'Lessons'));
   const ul = h('ol', { class: 'lesson-list' });
   LESSONS.forEach((l) => {
@@ -87,6 +103,8 @@ function home() {
   });
   lessons.append(ul);
   mount(header(), hero, h('div', { class: 'cols' }, lessons, panel));
+  const op = document.getElementById('open-practice');
+  if (op) op.addEventListener('click', () => { const t = panel.querySelector('summary') || panel; panel.scrollIntoView?.({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); t.focus?.({ preventScroll: true }); });
 }
 
 // ---------------------------------------------------------------- Lesson player
@@ -151,7 +169,7 @@ function lessonView(L) {
 }
 
 function practice(skill) {
-  setDrawStyle(['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors'].includes(generatorForSkill(skill)) ? 'skeletal' : 'full');
+  setDrawStyle(['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships'].includes(generatorForSkill(skill)) ? 'skeletal' : 'full');
   const host = h('div', { class: 'step' });
   const card = h('article', { class: 'card' }, host);
   const ctx = {

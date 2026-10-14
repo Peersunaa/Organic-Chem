@@ -4,8 +4,8 @@
 //   - mirror images of 3D models are the same coordinates reflected through a plane; Kabsch (Horn quaternion) superposition over every atom pairing
 //     that respects elements and bonds decides "superimposable or not"
 //   - specific rotation [a]D = a / (l x c)
-import { rdkit } from './chem.js';
-import { tetraInfo, readGraph, compare, sphereSets, usesDuplicate, symOf, condensed } from './cip.js';
+import { rdkit, canon, analyze } from './chem.js';
+import { tetraInfo, chiralCenters, readGraph, compare, sphereSets, usesDuplicate, symOf, condensed } from './cip.js';
 import { parseMol } from './widgets/geom.js';
 
 // ------------------------------------------------------------------------------------------------ small vector helpers
@@ -420,3 +420,136 @@ export function centerReason(smiles, atom) {
   }
   return { center: false, why: 'This carbon does not have four different groups on it.' };
 }
+
+
+// ================================================================================================================================
+// Lesson 16: stereochemical RELATIONSHIPS (identical / enantiomers / diastereomers / constitutional isomers), meso compounds, mirror planes.
+// Everything is computed from canonical isomeric SMILES (RDKit): same constitution = equal canonical SMILES without stereo; identical = equal
+// isomeric canonical SMILES; enantiomers = B equals the mirror image of A (every @ swapped with @@) and A is chiral; otherwise diastereomers.
+// Python RDKit repeats all of it independently in tools/check_relationships.py (EnumerateStereoisomers + inverting every centre).
+// ================================================================================================================================
+/** The mirror image of a SMILES: every tetrahedral tag inverted (E/Z is unchanged: a mirror image does not turn cis into trans). */
+export const mirrorSmiles = (smiles) => flipStereo(smiles);
+/** Canonical isomeric SMILES (null if invalid). */
+export const isoCanon = (smiles) => canon(smiles);
+/** Canonical SMILES with ALL stereo removed (the constitution). */
+export function flatSmiles(smiles) {
+  const R = rdkit();
+  const m = R.get_mol(smiles);
+  if (!m) return null;
+  try { return m.get_smiles(JSON.stringify({ doIsomericSmiles: false })); } finally { m.delete(); }
+}
+/** Hill-order molecular formula string with a charge suffix, from RDKit atom data (hydrogens counted). */
+export function formulaKey(smiles) {
+  const info = analyze(smiles);
+  if (!info) return null;
+  const cnt = {};
+  info.atoms.forEach((a) => { cnt[a.sym] = (cnt[a.sym] || 0) + 1; if (a.impH) cnt.H = (cnt.H || 0) + a.impH; });
+  const rest = Object.keys(cnt).filter((k) => k !== 'C' && k !== 'H').sort();
+  const seq = (cnt.C ? ['C'] : []).concat(cnt.H ? ['H'] : []).concat(rest);
+  return seq.map((k) => k + (cnt[k] > 1 ? cnt[k] : '')).join('') + (info.netCharge ? `/${info.netCharge}` : '');
+}
+/** Chirality centres (book definition, cip.js rules 1-3) that the SMILES leaves unassigned. */
+export function unassignedCenters(smiles) {
+  const T = tetraInfo(smiles);
+  return T ? T.filter((t) => t.center && !t.label).map((t) => t.atom) : [];
+}
+/** Is the molecule its own mirror image? (equal isomeric canonical SMILES) */
+export function isAchiral(smiles) { const a = isoCanon(smiles); return a !== null && a === isoCanon(mirrorSmiles(smiles)); }
+/**
+ * Meso compound = has chirality centres, every one assigned, AND is identical to its own mirror image (so it is achiral and optically inactive).
+ * Centres use the book definition (cip.js), so cis/trans-1,4-dimethylcyclohexane (no centres) is not "meso".
+ */
+export function isMeso(smiles) {
+  const T = tetraInfo(smiles);
+  if (!T) return false;
+  const centers = T.filter((t) => t.center);
+  if (centers.length < 2 || centers.some((t) => !t.label)) return false;
+  return isAchiral(smiles);
+}
+/** Chiral = not identical to its mirror image. */
+export const isChiral = (smiles) => isoCanon(smiles) !== null && !isAchiral(smiles);
+/**
+ * How are two drawn molecules related? Returns { kind, ...facts } with kind one of
+ *   'identical'        same molecule (also: the same meso compound drawn two ways)
+ *   'enantiomers'      B is the mirror image of A and A is chiral
+ *   'diastereomers'    same constitution, stereoisomers, not mirror images (includes cis/trans)
+ *   'constitutional'   same molecular formula, different connectivity
+ *   'different'        different molecular formulas (not isomers)
+ *   'unspecified'      a chirality centre is left open in A or B (cannot be judged)
+ * facts: sameConstitution, mirrorOfA, chiralA, chiralB, mesoA, mesoB, nCenters.
+ */
+export function relationship(a, b) {
+  const A = isoCanon(a), B = isoCanon(b);
+  if (A === null || B === null) return { kind: 'invalid' };
+  const facts = { sameFormula: formulaKey(a) === formulaKey(b), sameConstitution: flatSmiles(a) === flatSmiles(b) };
+  if (!facts.sameFormula) return { kind: 'different', ...facts };
+  if (!facts.sameConstitution) return { kind: 'constitutional', ...facts };
+  if (unassignedCenters(a).length || unassignedCenters(b).length) return { kind: 'unspecified', ...facts };
+  const M = isoCanon(mirrorSmiles(a));
+  const out = { ...facts, mirrorOfA: M, chiralA: A !== M, chiralB: B !== isoCanon(mirrorSmiles(b)), mesoA: isMeso(a), mesoB: isMeso(b), nCenters: chiralCenters(a).length };
+  if (A === B) return { kind: 'identical', ...out };
+  if (M === B && out.chiralA) return { kind: 'enantiomers', ...out };
+  return { kind: 'diastereomers', ...out };
+}
+
+// ------------------------------------------------------------------------------------------------ planes of symmetry (3D)
+const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const unit3 = (v) => { const n = Math.hypot(...v) || 1; return v.map((x) => x / n); };
+/** Reflect points through the plane { x : n . x = d } (n need not be a unit vector). */
+export function reflectPoint(p, n, d) { const u = unit3(n), k = 2 * (dot3(u, p) - d / (Math.hypot(...n) || 1)); return [p[0] - k * u[0], p[1] - k * u[1], p[2] - k * u[2]]; }
+/**
+ * Does reflecting the molecule through the plane n . x = d map it onto itself? Every atom's image must lie within `tol` A of an atom of the same
+ * element that is not already taken. Returns { symmetric, map (atom -> partner), off:[atoms with no partner], reflected:[[x,y,z]], onPlane:[atoms within tol of the plane] }.
+ */
+export function planeMaps(atoms, n, d, tol = 0.3) {
+  const P = atoms.map((a) => [a.x, a.y, a.z]);
+  const u = unit3(n), dn = d / (Math.hypot(...n) || 1);
+  const reflected = P.map((p) => reflectPoint(p, u, dn));
+  const map = new Array(atoms.length).fill(-1), taken = new Set();
+  // closest pairs first, so two atoms never claim the same partner
+  const pairs = [];
+  reflected.forEach((r, i) => P.forEach((p, j) => { if (atoms[j].el === atoms[i].el) { const dist = Math.hypot(...sub3(p, r)); if (dist <= tol) pairs.push([dist, i, j]); } }));
+  pairs.sort((x, y) => x[0] - y[0]);
+  for (const [, i, j] of pairs) if (map[i] < 0 && !taken.has(j)) { map[i] = j; taken.add(j); }
+  const off = map.map((j, i) => (j < 0 ? i : -1)).filter((i) => i >= 0);
+  const onPlane = P.map((p, i) => (Math.abs(dot3(u, p) - dn) <= tol ? i : -1)).filter((i) => i >= 0);
+  return { symmetric: off.length === 0, map, off, reflected, onPlane };
+}
+/**
+ * EVERY mirror plane of a molecule. A mirror plane that has an atom off it is the perpendicular bisector of that atom and its image, so
+ * trying the bisector plane of each pair of same-element atoms finds all of them (a plane through all atoms would need a flat molecule).
+ * Returns [{ n (unit), d, onPlane:[atoms], pair:[i,j] }] without duplicates.
+ */
+export function symmetryPlanes(atoms, tol = 0.2) {
+  const out = [], seen = new Set();
+  for (let i = 0; i < atoms.length; i++) for (let j = i + 1; j < atoms.length; j++) {
+    if (atoms[i].el !== atoms[j].el) continue;
+    const a = [atoms[i].x, atoms[i].y, atoms[i].z], b = [atoms[j].x, atoms[j].y, atoms[j].z];
+    if (Math.hypot(...sub3(a, b)) < 0.3) continue;
+    let n = unit3(sub3(b, a)); let d = dot3(n, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2]);
+    if (n[0] < -1e-9 || (Math.abs(n[0]) <= 1e-9 && (n[1] < -1e-9 || (Math.abs(n[1]) <= 1e-9 && n[2] < 0)))) { n = n.map((x) => -x); d = -d; }
+    const r2 = (x) => String(Math.round(x * 100) / 100 + 0); // + 0 turns -0 into 0, so one plane never gets two keys
+    const key = n.map(r2).join(',') + '|' + r2(d);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const r = planeMaps(atoms, n, d, tol);
+    if (r.symmetric) out.push({ n, d, onPlane: r.onPlane, pair: [i, j] });
+  }
+  return out;
+}
+/**
+ * Three starting orientations for the symmetry-plane widget, from the bond between two atoms (the C2-C3 bond of the meso compounds):
+ *  0 perpendicular to the bond,  1 containing the bond and the atom `via`,  2 containing the bond, at right angles to plane 1.
+ * Each is { n (unit normal), label }. The learner chooses one and slides it along its normal (offset in A from the centre of the molecule).
+ */
+export function planeFrames(atoms, axis, via) {
+  const P = (i) => [atoms[i].x, atoms[i].y, atoms[i].z];
+  const u = unit3(sub3(P(axis[1]), P(axis[0])));
+  const n1 = unit3(cross3(u, sub3(P(via), P(axis[0]))));
+  const n2 = unit3(cross3(u, n1));
+  return [{ n: u, id: 'across' }, { n: n1, id: 'along-a' }, { n: n2, id: 'along-b' }];
+}
+/** Centre of the atoms (the plane offset is measured from here). */
+export function molCentre(atoms) { return centroid(atoms.map((a) => [a.x, a.y, a.z])); }

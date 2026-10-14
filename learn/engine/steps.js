@@ -60,7 +60,7 @@ export function nameSpan(n) { const s = h('span', { class: 'iupac', 'data-name-n
 export function enhance(root) {
   root.querySelectorAll('mol').forEach((m) => {
     const draw = m.getAttribute('draw');
-    m.replaceWith(molFigure(m.getAttribute('smiles'), m.getAttribute('label') || '', { ...(draw ? { style: draw } : {}), ...(m.hasAttribute('raw') ? { raw: true } : {}) }));
+    m.replaceWith(molFigure(m.getAttribute('smiles'), m.getAttribute('label') || '', { ...(draw ? { style: draw } : {}), ...(m.hasAttribute('raw') ? { raw: true } : {}), ...(m.getAttribute('rotate') ? { rotate: Number(m.getAttribute('rotate')) } : {}) }));
   });
   root.querySelectorAll('molpair').forEach((m) => {
     const hl = (m.getAttribute('hl') || '').split(',').filter(Boolean).map(Number);

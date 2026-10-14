@@ -147,6 +147,7 @@ export function svg(smiles, opts = {}) {
         details.atomLabels = labels;
       }
     }
+    if (opts.rotate) details.rotate = opts.rotate; // Lesson 16: draw the same molecule turned in the plane of the page
     if (highlight.length) { details.atoms = highlight; details.highlightColour = [1, 0.8, 0.2]; details.highlightRadius = 0.45; }
     let s = m.get_svg_with_highlights(JSON.stringify(details));
     // highlights as a soft translucent ring so the atom underneath stays readable

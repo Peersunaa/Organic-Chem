@@ -7,7 +7,7 @@
 //   Then the learner says whether the molecule is chiral; graded from the computed result.
 // config.mode 'plane': { model:'ch2clbr' }  one model with a plane drawn through three of its atoms: tap the atoms that lie IN the plane, then say whether
 //   the molecule is chiral. The plane is a real mirror plane found from the coordinates (`mirrorPlanes`).
-import CHIRAL from '../../data/3d/chiral.js';
+import CHIRAL from './chiral-models.js'; // Lesson 15 models + the Lesson 16 meso/chiral tartaric acid models
 import { createView } from './view3d.js';
 import { Pose, attachSpin, animate } from './spin3d.js';
 import { parseMolblock, superpose, mirrorPlanes, axisAngle, rotAxisAngle, matMul, rotX, rotY } from '../chirality.js';
