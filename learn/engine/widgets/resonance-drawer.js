@@ -7,13 +7,17 @@
 //           fold?: bool     (count the two Kekule drawings of a ring once: the benzyl cation has 4 forms, not 5),
 //           need?: n        (forms to find besides the start; default all. Mastery problems use 1: "draw the next form"),
 //           name?: string,  (label shown in the counter, e.g. "allyl cation"),
-//           hybrid?: bool   (show the hybrid when finished, default true) }
+//           hybrid?: bool   (show the hybrid when finished, default true),
+//           ringOnly?: bool (Lesson 14: for a carbocation of a ring, count only the forms that move RING electrons; the group's own resonance, such as the two drawings of NO2, is not asked for),
+//           find?: {ask, right}  (Lesson 14: when every form is found, the learner must pick the SPECIAL form: the one that puts the + on the ring carbon that carries a group,
+//                                 or press "None of these" when there is no such form (meta attack). The answer is computed from the forms.) }
 // The set of forms is computed by engine/resonance.js (enumerate), never typed in; tools/check_resonance.py proves it against RDKit.
 // Every wrong attempt: ctx.onResult({ok:false, diagnosis}) with a specific diagnosis from resonance.applyAndCheck (arrow from a σ bond, atom moved,
 // five bonds on carbon ...). Finishing: ctx.onResult({ok:true}). ctx.onProgress() after each new form so stale wrong-answer text is cleared.
 import { sceneFromSmiles } from './arrow-core.js';
 import arrowDraw from './arrow-draw.js';
 import { enumerate, applyAndCheck, stateFromScene, keyOfState, hybridOf, partialLabel } from '../resonance.js';
+import { sigmaRing } from '../reactions-aromatic.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -100,7 +104,21 @@ export default {
   id: 'resonance-drawer',
   mount(host, config, ctx) {
     const fold = !!config.fold;
-    const forms = enumerate(config.start, { fold });
+    let forms = enumerate(config.start, { fold });
+    let ringSet = null;
+    if (config.ringOnly || config.find) {
+      ringSet = new Set(sigmaRing(forms[0].state));
+      if (config.ringOnly) {
+        const s0 = forms[0].state;
+        forms = forms.filter((f) => f.state.charge.every((c, i) => ringSet.has(i) || c === s0.charge[i]) && f.state.bonds.every((b) => {
+          if (ringSet.has(b.a) && ringSet.has(b.b)) return true;
+          const o = s0.bonds.find((x) => (x.a === b.a && x.b === b.b) || (x.a === b.b && x.b === b.a));
+          return o && o.order === b.order;
+        }));
+      }
+    }
+    // the special form: the + sits on a ring carbon that has a bond to an atom outside the ring (the carbon that carries the group)
+    const isSpecial = (st) => { const p = [...(ringSet || [])].find((i) => st.charge[i] === 1); return p != null && st.bonds.some((b) => (b.a === p && !ringSet.has(b.b)) || (b.b === p && !ringSet.has(b.a))); };
     const allForms = fold ? enumerate(config.start, { fold: false }) : forms;
     const N = forms.length;
     const need = config.need ? Math.min(config.need + 1, N) : N;        // count includes the start
@@ -180,7 +198,39 @@ export default {
         fin.append(box);
       }
       if (config.need) fin.append(h('p', 'rd-ok', 'Nice. That form is valid: same atoms, same σ bonds, same charge, only electrons moved.'));
+      if (config.find) { startFind(); return; }
       ctx.onResult({ ok: true });
+    }
+    function startFind() {
+      const specials = found.filter((fi) => isSpecial(forms[fi].state));
+      const box = h('div', 'rd-find');
+      box.append(h('p', 'rd-find-h', config.find.ask || 'Which form puts the + on the ring carbon that carries the group? Tap it, or press “None of these”.'));
+      const grid = h('div', 'rd-find-row'); grid.setAttribute('role', 'group');
+      const msg = h('p', 'rd-find-msg'); msg.setAttribute('aria-live', 'polite');
+      let settled = false;
+      const settle = (right, text) => {
+        msg.className = 'rd-find-msg ' + (right ? 'ok' : 'bad'); msg.textContent = text;
+        if (right) { settled = true; [...grid.children, none].forEach((x) => { x.disabled = true; }); ctx.onResult({ ok: true }); }
+        else ctx.onResult({ ok: false, diagnosis: text });
+      };
+      found.forEach((fi, k) => {
+        const b = h('button', 'rd-thumb'); b.type = 'button'; b.setAttribute('aria-label', `Form ${k + 1}`);
+        b.append(formSvg(forms[fi].state, pos, { label: `Resonance form ${k + 1}` }));
+        b.addEventListener('click', () => {
+          if (settled) return;
+          if (specials.includes(fi)) { b.classList.add('on'); settle(true, config.find.right || 'Yes. In this form the + sits on the carbon that carries the group.'); }
+          else settle(false, specials.length ? 'In this form the + is on a carbon that has no group on it (only H and ring carbons next to it). Look for the form whose + sits on the carbon that carries the group.' : 'None of the forms puts the + on the carbon that carries the group. In this attack the + is always on carbons next to the attacked carbon or opposite it. Look at all three again, or press “None of these”.');
+        });
+        grid.append(b);
+      });
+      const none = h('button', 'btn'); none.type = 'button'; none.textContent = 'None of these';
+      none.addEventListener('click', () => {
+        if (settled) return;
+        if (!specials.length) settle(true, config.find.rightNone || 'Right: in this attack the + never lands on the carbon that carries the group.');
+        else settle(false, 'There is such a form. Look at the carbon that carries the group: one of the forms puts the + right on it.');
+      });
+      box.append(grid, none, msg);
+      fin.append(box);
     }
 
     paintRow();

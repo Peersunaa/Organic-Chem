@@ -105,8 +105,9 @@ export function movesFrom(st) {
  * Every resonance form reachable from `smiles`: [{state, key, via: arrows from the start's heavy atoms, smiles}] in discovery order (the start is first).
  * `fold` groups the forms by charge pattern only (the benzyl cation counts its two Kekule drawings of the ring once: 4 forms).
  */
-export function enumerate(smiles, opts = {}) {
-  const start = stateOf(smiles);
+export function enumerate(smiles, opts = {}) { return enumerateState(stateOf(smiles), opts); }
+/** The same search starting from an index-space state (Lesson 14 builds sigma complexes as states, so atom numbers stay the ones it knows). */
+export function enumerateState(start, opts = {}) {
   const fold = !!opts.fold;
   const forms = [{ state: start, key: keyOfState(start, fold), via: [], parent: -1, from: -1 }];
   const seen = new Map([[forms[0].key, 0]]);

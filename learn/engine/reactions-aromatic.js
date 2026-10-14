@@ -6,9 +6,9 @@
 //   Reduction of a nitro group to an amine (Fe, Sn or SnCl2 with H3O+, then HO-) gives aniline.
 // Not modelled (not in the book at this point): substituent effects on a ring that already has a group (Lesson 14), Hueckel's rule, carbocation rearrangements (alkyl halides
 // whose cation could rearrange are refused), polyalkylation.
-import { analyze, canon, coords2d } from './chem.js';
-import { stateOf, enumerate, toSmiles } from './resonance.js';
-import { nameBothArene, SUB, arene } from './naming-arene.js';
+import { analyze, canon, coords2d, rdkit } from './chem.js';
+import { stateOf, enumerate, enumerateState, toSmiles } from './resonance.js';
+import { nameBothArene, SUB, arene, findRing, relation } from './naming-arene.js';
 
 export const BENZENE = 'c1ccccc1';
 export const KEKULE = 'C1=CC=CC=C1';
@@ -441,3 +441,449 @@ export function easChoices(pred, rng = null) {
   return out;
 }
 export const EAS_HINTS = ['Name the electrophile first (the species written under the arrow of the reagent). The π electrons of the ring attack it and H⁺ leaves, so the ring keeps its aromatic stability.', 'Substitution, not addition: ONE H on the ring is replaced by the electrophile’s group, and everything else on the ring stays. Check that the answer is aromatic and has exactly one new group.'];
+
+// =====================================================================================================================================================================
+// Lesson 14 (McMurry 5.6 to 5.10): substituent effects, side chains, other aromatic compounds, synthesis order.
+// Additive: predictEAS above is unchanged (a ring with a group is still refused there with 'notBenzene'); predictSubst below handles rings with ONE or TWO groups.
+//   * DIRECTORS: the table of groups, classified by SMARTS (data, with the reason for each) into the three bins of the book's Figure 5.6
+//     (activator o/p, deactivator o/p = the halogens, deactivator m). There is no meta-directing activator in the table, and a test proves it.
+//   * ringGroups(smiles): finds the benzene ring and the group on each ring carbon by running those SMARTS.
+//   * predictSubst(arene, reagent, halide): one group -> ortho + para (o/p directors) or meta; two groups -> only the book's simple cases (the directors cooperate, or the
+//     stronger activator wins); everything else is refused with a reason. Friedel-Crafts is refused on strongly deactivated rings and on amines.
+//   * sigmaAttack(arene, position): the carbocation for attack at one ring position, its ring resonance forms, and whether one of them puts the + on the carbon that carries the
+//     group (possible only for ortho and para attack: tools/check_directors.py proves it with RDKit's ResonanceMolSupplier).
+//   * oxidizeSideChain (KMnO4: any alkyl group with a benzylic H -> CO2H; tert-butyl is untouched) and hydrogenate (alkene outside the ring only, or the ring too at high pressure).
+// Not modelled (not in the book): rings with three or more groups, steric effects beyond "no attack between two groups", the meta product that forms in small amounts, kinetic
+// versus thermodynamic control of sulfonation, polysubstitution, Friedel-Crafts on rings with O-H or N-H groups, nitration and sulfonation of free amines (the N is protonated).
+
+export const BINS = {
+  actOP: { id: 'actOP', label: 'Activator, ortho/para director', short: 'activating, ortho/para' },
+  deactOP: { id: 'deactOP', label: 'Deactivator, ortho/para director', short: 'deactivating, ortho/para' },
+  deactM: { id: 'deactM', label: 'Deactivator, meta director', short: 'deactivating, meta' }
+};
+const LP_WHY = (a, nm) => `The ${a} has a lone pair it can share with the ring (a resonance effect). That makes the ring richer in electrons, so it reacts faster than benzene. In ortho or para attack one form of the carbocation puts the + on the ${a} itself, where every atom keeps an octet: an extra, very stable form that meta attack cannot have.`;
+const DELTA_WHY = (atom, nm) => `The ${atom} of ${nm} carries a partial positive charge (δ+) and is bonded straight to the ring, so it pulls electrons out of the ring and deactivates it. In ortho or para attack one form of the carbocation puts the + on the ring carbon that holds this group, next to the δ+ atom: two positive charges side by side, very unfavourable. Meta attack never does that, so meta wins.`;
+/** key = group id; smarts: ring carbon first, then the atom bonded to it; els/pi: elements allowed in the group and the number of double/triple bonds inside it. */
+export const DIRECTORS = {
+  NH2: { id: 'NH2', label: '–NH₂', name: 'amino', cls: 'actOP', level: 3, smarts: 'c-[NX3;H2]', els: 'N', pi: 0, ex: 'Nc1ccccc1', donor: 'N', why: LP_WHY('N') },
+  NHR: { id: 'NHR', label: '–NHR', name: 'alkylamino', cls: 'actOP', level: 3, smarts: 'c-[NX3;H1;!$(N[C,S]=[O,S])]-[CX4]', els: 'NC', pi: 0, ex: 'CNc1ccccc1', donor: 'N', why: LP_WHY('N') },
+  NR2: { id: 'NR2', label: '–NR₂', name: 'dialkylamino', cls: 'actOP', level: 3, smarts: 'c-[NX3;H0;!$(N[C,S]=[O,S])](-[CX4])-[CX4]', els: 'NC', pi: 0, ex: 'CN(C)c1ccccc1', donor: 'N', why: LP_WHY('N') },
+  OH: { id: 'OH', label: '–OH', name: 'hydroxyl', cls: 'actOP', level: 3, smarts: 'c-[OX2;H1]', els: 'O', pi: 0, ex: 'Oc1ccccc1', donor: 'O', why: LP_WHY('O') },
+  OR: { id: 'OR', label: '–OR', name: 'alkoxy', cls: 'actOP', level: 3, smarts: 'c-[OX2;H0]-[CX4]', els: 'OC', pi: 0, ex: 'COc1ccccc1', donor: 'O', why: LP_WHY('O') },
+  NHCOR: { id: 'NHCOR', label: '–NHCOR', name: 'acylamino', cls: 'actOP', level: 2, smarts: 'c-[NX3;H1]-[CX3](=O)-[#6]', els: 'NCO', pi: 1, ex: 'CC(=O)Nc1ccccc1', donor: 'N', why: 'The N lone pair is shared with the ring, so the ring is activated and the attack is ortho/para (one form of the carbocation puts the + on N). The C=O next to the N also pulls on that lone pair, so this is a weaker activator than –NH₂.' },
+  alkyl: { id: 'alkyl', label: '–R (alkyl)', name: 'alkyl', cls: 'actOP', level: 1, smarts: 'c-[CX4;!$(C~[!#6;!#1])]', els: 'C', pi: 0, ex: 'Cc1ccccc1', donor: null, why: 'An alkyl group pushes electron density toward the ring through the σ bond (an inductive effect), so the ring reacts faster than benzene. In ortho or para attack the + ends up on the carbon that carries the alkyl group, and that donation stabilises it. Meta attack never puts the + there.' },
+  phenyl: { id: 'phenyl', label: '–C₆H₅', name: 'phenyl', cls: 'actOP', level: 1, smarts: 'c-!@c1ccccc1', els: 'C', pi: 3, ex: 'c1ccc(cc1)-c1ccccc1', donor: null, why: 'A phenyl group can share the + charge with its own ring. In ortho or para attack the + sits next to the phenyl ring and spreads onto it (extra resonance forms), which meta attack cannot do. It activates the ring and directs ortho/para.' },
+  F: { id: 'F', label: '–F', name: 'fluoro', cls: 'deactOP', level: 0, smarts: 'c-[F]', els: 'F', pi: 0, ex: 'Fc1ccccc1', donor: 'F', why: 'A halogen is more electronegative than carbon, so it withdraws electrons through the σ bond and deactivates the ring. Its lone pairs can still donate by resonance: in ortho or para attack one form puts the + on the halogen. The result is a slower reaction that is still ortho/para.' },
+  Cl: { id: 'Cl', label: '–Cl', name: 'chloro', cls: 'deactOP', level: 0, smarts: 'c-[Cl]', els: 'Cl', pi: 0, ex: 'Clc1ccccc1', donor: 'Cl', why: 'A halogen is more electronegative than carbon, so it withdraws electrons through the σ bond and deactivates the ring (chlorobenzene reacts about 30 times slower than benzene). Its lone pairs can still donate by resonance: in ortho or para attack one form puts the + on the halogen. A slower reaction that is still ortho/para.' },
+  Br: { id: 'Br', label: '–Br', name: 'bromo', cls: 'deactOP', level: 0, smarts: 'c-[Br]', els: 'Br', pi: 0, ex: 'Brc1ccccc1', donor: 'Br', why: 'A halogen is more electronegative than carbon, so it withdraws electrons through the σ bond and deactivates the ring. Its lone pairs can still donate by resonance: in ortho or para attack one form puts the + on the halogen. A slower reaction that is still ortho/para.' },
+  I: { id: 'I', label: '–I', name: 'iodo', cls: 'deactOP', level: 0, smarts: 'c-[I]', els: 'I', pi: 0, ex: 'Ic1ccccc1', donor: 'I', why: 'A halogen withdraws electrons through the σ bond and deactivates the ring, but its lone pairs can donate by resonance in ortho or para attack (one form puts the + on the halogen). A slower reaction that is still ortho/para.' },
+  NO2: { id: 'NO2', label: '–NO₂', name: 'nitro', cls: 'deactM', level: -1, smarts: 'c-[N+](=O)[O-]', els: 'NO', pi: 1, ex: 'O=[N+]([O-])c1ccccc1', donor: null, why: DELTA_WHY('N', 'the nitro group') },
+  CN: { id: 'CN', label: '–C≡N', name: 'cyano', cls: 'deactM', level: -1, smarts: 'c-C#N', els: 'CN', pi: 1, ex: 'N#Cc1ccccc1', donor: null, why: DELTA_WHY('C', 'the cyano group') },
+  SO3H: { id: 'SO3H', label: '–SO₃H', name: 'sulfonic acid', cls: 'deactM', level: -1, smarts: 'c-S(=O)(=O)[OX2;H1]', els: 'SO', pi: 2, ex: 'OS(=O)(=O)c1ccccc1', donor: null, why: DELTA_WHY('S', 'the sulfonic acid group') },
+  CHO: { id: 'CHO', label: '–CHO', name: 'aldehyde', cls: 'deactM', level: -1, smarts: 'c-[CX3;H1]=O', els: 'CO', pi: 1, ex: 'O=Cc1ccccc1', donor: null, why: DELTA_WHY('C', 'the carbonyl group') },
+  COR: { id: 'COR', label: '–COR', name: 'acyl (ketone)', cls: 'deactM', level: -1, smarts: 'c-[CX3;H0](=O)-[CX4]', els: 'CO', pi: 1, ex: 'CC(=O)c1ccccc1', donor: null, why: DELTA_WHY('C', 'the carbonyl group') },
+  COOH: { id: 'COOH', label: '–CO₂H', name: 'carboxylic acid', cls: 'deactM', level: -1, smarts: 'c-[CX3](=O)[OX2;H1]', els: 'CO', pi: 1, ex: 'OC(=O)c1ccccc1', donor: null, why: DELTA_WHY('C', 'the carbonyl group') },
+  COOR: { id: 'COOR', label: '–CO₂R', name: 'ester', cls: 'deactM', level: -1, smarts: 'c-[CX3](=O)-[OX2;H0]-[CX4]', els: 'CO', pi: 1, ex: 'COC(=O)c1ccccc1', donor: null, why: DELTA_WHY('C', 'the carbonyl group') },
+  NR3: { id: 'NR3', label: '–NR₃⁺', name: 'trialkylammonium', cls: 'deactM', level: -1, smarts: 'c-[NX4+]', els: 'NC', pi: 0, ex: 'C[N+](C)(C)c1ccccc1', donor: null, why: 'The N carries a full positive charge and is bonded straight to the ring, so it pulls electrons out very strongly (it deactivates). In ortho or para attack one form puts the + on the ring carbon next to that N+: two positive charges side by side. Meta attack avoids it.' }
+};
+export const DIRECTOR_IDS = Object.keys(DIRECTORS);
+export const STRONG_DEACT = ['NO2', 'CN', 'SO3H', 'CHO', 'COR', 'COOH', 'COOR', 'NR3'];
+export const AMINES = ['NH2', 'NHR', 'NR2'];
+export const dirClass = (id) => DIRECTORS[id].cls;
+export const dirDirects = (id) => (DIRECTORS[id].cls === 'deactM' ? 'm' : 'op');
+// ---------------------------------------------------------------- finding the groups on a ring (SMARTS)
+const qcache14 = {};
+const qm14 = (id) => { if (!qcache14[id]) { qcache14[id] = rdkit().get_qmol(DIRECTORS[id].smarts); if (!qcache14[id]) throw new Error('bad SMARTS for ' + id); } return qcache14[id]; };
+/** All (ring atom, attached atom) pairs matching each group SMARTS in a molecule: {id: [[c, x], ...]}. */
+function smartsHits(smiles) {
+  const m = rdkit().get_mol(smiles);
+  if (!m) return null;
+  try {
+    const out = {};
+    for (const id of DIRECTOR_IDS) { const j = JSON.parse(m.get_substruct_matches(qm14(id))); out[id] = (Array.isArray(j) ? j : []).map((r) => [r.atoms[0], r.atoms[1]]); }
+    return out;
+  } finally { m.delete(); }
+}
+const refuseRG = (code, why) => ({ ok: false, code, why });
+/**
+ * {ok:true, info, ring:[6 atom indices in ring order], subs:[{pos, atom, id, comp:[atoms of the group]}]} for ONE benzene ring plus recognised groups, or {ok:false, code, why}.
+ * Ring positions are the same numbers naming-arene.js uses for the same SMILES. A group is recognised only if a SMARTS of the table matches AND the group has exactly the
+ * elements and number of multiple bonds the table lists (so -OCH=CH2 is not "-OR", -CH2Cl is not "alkyl").
+ */
+export function ringGroups(smiles) {
+  let info = null;
+  try { info = analyze(smiles); } catch (e) { info = null; }
+  if (!info) return refuseRG('parse', 'That structure cannot be read.');
+  const ring = findRing(info);
+  if (!ring) return refuseRG('noRing', 'There is no benzene ring in this molecule.');
+  const ringSet = new Set(ring);
+  const hits = smartsHits(smiles);
+  const taken = new Set(ring);
+  const subs = [];
+  for (let p = 0; p < 6; p++) {
+    const extra = info.atoms[ring[p]].nbrs.filter((k) => !ringSet.has(k));
+    if (extra.length > 1) return refuseRG('fused', 'A ring carbon with two outside bonds (a fused or bridged ring) is outside this lesson.');
+    if (!extra.length) continue;
+    const att = extra[0];
+    const comp = new Set([att]); const q = [att];
+    while (q.length) { const v = q.pop(); for (const w of info.atoms[v].nbrs) if (!ringSet.has(w) && !comp.has(w)) { comp.add(w); q.push(w); } }
+    if ([...comp].some((v) => taken.has(v))) return refuseRG('fused', 'The groups are joined to each other (a fused ring): outside this lesson.');
+    comp.forEach((v) => taken.add(v));
+    const els = new Set([...comp].map((v) => info.atoms[v].sym));
+    let pi = 0;
+    info.bonds.forEach((b) => { if (comp.has(b.atoms[0]) && comp.has(b.atoms[1]) && (b.bo ?? 1) >= 2) pi++; });
+    const good = DIRECTOR_IDS.filter((id) => hits[id].some(([c, x]) => c === ring[p] && x === att) && DIRECTORS[id].pi === pi && [...els].every((e) => DIRECTORS[id].els.includes(e) || (id === 'alkyl' && e === 'C')));
+    // elements: the table writes them as letters of symbols, so check by symbol list
+    const exact = good.filter((id) => [...els].every((e) => elementsOf(DIRECTORS[id].els).includes(e)));
+    if (exact.length !== 1) return refuseRG('unknownGroup', 'This ring carries a group that is not in the substituent table of this lesson (the groups of Figure 5.6).');
+    subs.push({ pos: p, atom: att, id: exact[0], comp: [...comp], text: groupText(info, exact[0], att, comp.size) });
+  }
+  if (taken.size !== info.atoms.length) return refuseRG('fragments', 'Only one molecule at a time, please.');
+  return { ok: true, info, ring, subs };
+}
+/** How a group is written in a sentence: the table label, except alkyl groups, which are written out (–CH₃, –CH₂CH₃ ...). */
+function groupText(info, id, att, size) {
+  if (id !== 'alkyl') return DIRECTORS[id].label;
+  const cn = info.atoms[att].nbrs.filter((k) => info.atoms[k].sym === 'C').length;      // includes the ring carbon
+  if (size === 1) return '–CH₃';
+  if (size === 2) return '–CH₂CH₃';
+  if (size === 3) return cn === 2 ? '–CH₂CH₂CH₃' : '–CH(CH₃)₂';
+  if (size === 4 && cn === 4) return '–C(CH₃)₃';
+  return '–R (alkyl)';
+}
+function elementsOf(letters) { return letters.match(/Cl|Br|[A-Z][a-z]?/g) || []; }
+
+// ---------------------------------------------------------------- graph edits on a ring (states keep the atom numbers of the SMILES)
+/** Attach the group (SMILES, first atom bonds to the ring) to ring atom `at` of state `st`; `replaceH` removes the ring H (substitution); the sigma complex keeps it. */
+function addGroup(st, at, groupSmi, replaceH = true) {
+  const g = stateOf(groupSmi);
+  const gi = analyze(groupSmi);
+  const off = st.el.length;
+  const impG = g.impH.slice();
+  if (Number.isInteger(gi.atoms[0].lp) && impG[0] > 0) impG[0] -= 1;       // a full-valence first atom (HBr, NH3, CH4 ...) gives up one H to make the bond
+  const out = { el: st.el.concat(g.el), impH: st.impH.concat(impG), charge: st.charge.concat(g.charge), bonds: st.bonds.map((b) => ({ ...b })).concat(g.bonds.map((b) => ({ a: b.a + off, b: b.b + off, order: b.order }))) };
+  out.bonds.push({ a: at, b: off, order: 1 });
+  if (replaceH) out.impH[at] -= 1;
+  return out;
+}
+/** Remove atoms (a set of indices) from a state and renumber; returns {st, map(oldIndex) -> newIndex}. */
+function dropAtoms(st, drop) {
+  const keep = st.el.map((_, i) => i).filter((i) => !drop.has(i));
+  const idx = new Map(keep.map((o, k) => [o, k]));
+  return { st: { el: keep.map((o) => st.el[o]), impH: keep.map((o) => st.impH[o]), charge: keep.map((o) => st.charge[o]), bonds: st.bonds.filter((b) => !drop.has(b.a) && !drop.has(b.b)).map((b) => ({ a: idx.get(b.a), b: idx.get(b.b), order: b.order })) }, idx };
+}
+const smilesOfState = (st) => canon(toSmiles(st));
+
+// ---------------------------------------------------------------- prediction on a ring that already has a group
+const OPS = ['ortho', 'para'];
+function fcSetup(R, halide) {
+  if (!halide) return refuse('unknown', 'Give the alkyl or acyl chloride.');
+  if (R.fc === 'alkyl') {
+    const p = halideProblem(halide);
+    if (p) return refuse(p.code, p.why);
+    if (rearranges(halide)) return refuse('rearranges', 'This halide’s carbocation could rearrange to a more stable one, and rearrangements are not part of this course, so it is left out.');
+  } else {
+    const info = analyze(halide);
+    const cl = info && info.atoms.find((a) => a.sym === 'Cl');
+    const c = cl && info.atoms[cl.nbrs[0]];
+    const ok = c && c.sym === 'C' && info.bonds.some((b) => (b.bo ?? 1) === 2 && b.atoms.includes(c.idx) && b.atoms.some((k) => info.atoms[k].sym === 'O')) && info.atoms.every((a) => ['C', 'O', 'Cl'].includes(a.sym)) && !/c/.test(canon(halide));
+    if (!ok) return refuse('nohalide', 'Friedel–Crafts acylation needs an acid chloride, R–CO–Cl.');
+  }
+  return { ok: true, G: groupSmiles(halide), E: cationOf(halide, R.fc), halide };
+}
+/** Positions of the ring that group `s` points the new group to (open positions only). */
+function pointsTo(s, open) {
+  const want = dirDirects(s.id) === 'm' ? ['meta'] : OPS;
+  return open.filter((q) => want.includes(relation(s.pos, q)));
+}
+const subText = (s) => s.text || DIRECTORS[s.id].label;
+const joinLabels = (subs) => subs.map(subText).join(' and ');
+/**
+ * predictSubst(arene, reagent, halide): the product(s) of an electrophilic substitution on a ring with ONE or TWO groups.
+ * ok:true -> {products:[canonical smiles, sorted], product, positions:[ring positions attacked], rels (one group: ['ortho','para'] or ['meta']), outcome:
+ *   'op' | 'm' (one group), 'cooperate' | 'wins' (two groups), winner?, subs:[{pos,id}], names, why, E, Elabel, group, reagent, halide, mixture:bool}
+ * ok:false -> {code, why}: 'deactivated', 'amine', 'amineAcid', 'notModelled' (Friedel-Crafts on O-H / N-H), 'arylHalide', 'vinylicHalide', 'rearranges', 'nohalide',
+ *   'compete' (two groups of about equal strength that point to different places), 'crowded' (only a place between the two groups is left), 'tooMany', 'unknownGroup' ...
+ */
+export function predictSubst(areneSmiles, reagent, halide = null) {
+  const R = EAS[reagent];
+  if (!R) return refuse('unknown', 'Unknown reagent.');
+  const can = canon(areneSmiles);
+  if (!can) return refuse('unknown', 'That structure cannot be read.');
+  if (can === BENZENE) return { ...predictEAS(areneSmiles, reagent, halide), outcome: 'none' };
+  const P = ringGroups(areneSmiles);
+  if (!P.ok) return refuse(P.code, P.why);
+  const subs = P.subs;
+  if (subs.length > 2) return refuse('tooMany', 'This ring has three or more groups. The book’s examples stop at two, and with three the directing effects have to be weighed case by case, so it is not modelled.');
+  const ids = subs.map((s) => s.id);
+  const isFC = R.kind === 'FC';
+  let G = R.group, E = R.E, extra = {};
+  if (isFC) {
+    const bad = ids.find((id) => STRONG_DEACT.includes(id));
+    if (bad) return refuse('deactivated', `Friedel–Crafts reactions do not work on a ring that already carries a ${DIRECTORS[bad].name} group (${DIRECTORS[bad].label}): the ring is much less reactive than benzene, so AlCl₃ and the carbocation get nowhere. (The book lists –NO₂, –C≡N, –SO₃H and –COR; –CHO, –CO₂H and –CO₂R are the same kind of group.)`);
+    if (ids.some((id) => AMINES.includes(id))) return refuse('amine', 'Friedel–Crafts reactions fail on aromatic amines such as aniline: the lone pair on N bonds to AlCl₃, which puts a positive charge on N, and that makes the ring strongly deactivated.');
+    if (ids.some((id) => id === 'OH' || id === 'NHCOR')) return refuse('notModelled', 'An O–H or N–H group also binds the AlCl₃, which complicates Friedel–Crafts reactions. That case is not in the book at this point, so it is not modelled.');
+    const fc = fcSetup(R, halide);
+    if (!fc.ok) return fc;
+    G = fc.G; E = fc.E; extra = { halide };
+  }
+  if ((reagent === 'HNO3' || reagent === 'SO3') && ids.some((id) => AMINES.includes(id))) return refuse('amineAcid', 'In the strong acid (H₂SO₄) used for nitration and sulfonation the amine N is protonated to –NH₃⁺, a different group (a meta director). The book does not treat that, so this combination is not modelled.');
+  const open = [0, 1, 2, 3, 4, 5].filter((q) => !subs.some((s) => s.pos === q));
+  let cands, outcome, winner = null, why;
+  if (subs.length === 1) {
+    cands = pointsTo(subs[0], open);
+    outcome = dirDirects(subs[0].id) === 'm' ? 'm' : 'op';
+    why = DIRECTORS[subs[0].id].why;
+  } else {
+    const [a, b] = subs;
+    const A = pointsTo(a, open), B = pointsTo(b, open);
+    const sandwiched = (q) => relation(a.pos, q) === 'ortho' && relation(b.pos, q) === 'ortho';
+    const both = A.filter((q) => B.includes(q));
+    if (both.length) {
+      cands = both.filter((q) => !sandwiched(q));
+      if (!cands.length) return refuse('crowded', 'The only position both groups agree on lies between them, and a position squeezed between two groups is too crowded for the new group.');
+      outcome = 'cooperate';
+      why = `The two groups (${joinLabels(subs)}) point to the same position(s), so there is no conflict.`;
+    } else {
+      const la = DIRECTORS[a.id].level, lb = DIRECTORS[b.id].level;
+      const w = la > lb ? a : lb > la ? b : null;
+      if (!w && a.id === b.id && A.length && B.length) {
+        // two groups of the same kind pointing to different places: fine when every one of those places gives the same compound (p-xylene)
+        const union = [...new Set([...A, ...B])].filter((q) => !sandwiched(q));
+        const st1 = stateOf(areneSmiles);
+        const prods = [...new Set(union.map((q) => smilesOfState(addGroup(st1, P.ring[q], G, true))))];
+        if (prods.length === 1) { cands = union; outcome = 'equal'; why = `The two groups (${joinLabels(subs)}) are alike, and every place they point to gives the same compound.`; }
+      }
+      if (!outcome && (!w || DIRECTORS[w.id].level < 1)) return refuse('compete', `The two groups (${joinLabels(subs)}) point to different positions and neither is a clearly stronger activator, so the result would be a mixture that the book’s rules cannot sort out. Not modelled.`);
+      if (!outcome) {
+        winner = w;
+        cands = pointsTo(w, open).filter((q) => !sandwiched(q));
+        if (!cands.length) return refuse('crowded', 'The only position the stronger activator points to lies between the two groups, which is too crowded.');
+        outcome = 'wins';
+        why = `The two groups point to different positions. The more powerful activator decides: ${subText(w)} controls the orientation.`;
+      }
+    }
+  }
+  const st0 = stateOf(areneSmiles);
+  const byPos = {};
+  const products = [];
+  cands.forEach((q) => {
+    const p = smilesOfState(addGroup(st0, P.ring[q], G, true));
+    byPos[q] = p;
+    if (!products.includes(p)) products.push(p);
+  });
+  products.sort();
+  const rels = subs.length === 1 ? [...new Set(cands.map((q) => relation(subs[0].pos, q)))].sort((x, y) => (x === 'ortho' ? -1 : y === 'ortho' ? 1 : x < y ? -1 : 1)) : null;
+  return {
+    ok: true, reagent, halide: halide || null, R, arene: can, subs: subs.map((s) => ({ pos: s.pos, id: s.id, text: s.text })), ring: P.ring,
+    outcome, winner: winner ? { pos: winner.pos, id: winner.id } : null, positions: cands, rels, byPos,
+    products, product: products[0], mixture: products.length > 1, names: products.map((p) => nameBothArene(p)), why,
+    group: G, E, Elabel: R.Elabel, ...extra
+  };
+}
+
+// ---------------------------------------------------------------- the carbocation for attack at one ring position, and its ring resonance forms
+function sigmaRingOf(st) { return sigmaRing(st); }
+/**
+ * Attack of an electrophile (written Br, as a stand-in) at ring position q of a ring with one group (or two). Returns
+ *   {ok, q, rel (to the first group), sigma (SMILES), forms:[{smiles, plus (ring position of the +), special (the + sits on a ring carbon that carries a group)}],
+ *    hasSpecial, donor (SMILES of the form with the + on the group's own lone-pair atom, or null)}.
+ * The forms are the ones that move only ring electrons (the group's own resonance, e.g. the two drawings of NO2, is left out).
+ */
+export function sigmaAttack(areneSmiles, q, reagent = 'Br2') {
+  const P = ringGroups(areneSmiles);
+  if (!P.ok) return { ok: false, code: P.code, why: P.why };
+  if (P.subs.some((s) => s.pos === q)) return { ok: false, code: 'occupied', why: 'That ring carbon already carries a group.' };
+  const R = EAS[reagent];
+  const G = R && R.kind !== 'FC' ? R.group : 'Br';
+  const st = stateOf(areneSmiles);
+  const at = P.ring[q];
+  const nb = [P.ring[(q + 1) % 6], P.ring[(q + 5) % 6]];
+  const partner = nb.find((m) => st.bonds.some((b) => b.order === 2 && ((b.a === at && b.b === m) || (b.b === at && b.a === m))));
+  const bond = st.bonds.find((b) => (b.a === at && b.b === partner) || (b.b === at && b.a === partner));
+  const s2 = { el: st.el, impH: st.impH.slice(), charge: st.charge.slice(), bonds: st.bonds.map((b) => ({ ...b })) };
+  s2.bonds.find((b) => (b.a === at && b.b === partner) || (b.b === at && b.a === partner)).order = 1;
+  s2.charge[partner] = 1;
+  void bond;
+  const sig = addGroup(s2, at, G, false);
+  const all = enumerateState(sig);
+  const ring = new Set(sigmaRing(sig));
+  const q0 = sig.charge;
+  const ringOnly = all.filter((f) => f.state.charge.every((c, i) => ring.has(i) || c === q0[i]) && f.state.bonds.every((b) => {
+    if (ring.has(b.a) && ring.has(b.b)) return true;
+    const o = sig.bonds.find((x) => (x.a === b.a && x.b === b.b) || (x.a === b.b && x.b === b.a));
+    return o && o.order === b.order;
+  }));
+  const groupAtoms = new Set(P.subs.flatMap((s) => s.comp));
+  const forms = ringOnly.map((f) => {
+    const plusAt = [...ring].find((i) => f.state.charge[i] === 1);
+    const special = f.state.bonds.some((b) => (b.a === plusAt && !ring.has(b.b) && groupAtoms.has(b.b)) || (b.b === plusAt && !ring.has(b.a) && groupAtoms.has(b.a)));
+    return { smiles: toSmiles(f.state), plus: P.ring.indexOf(plusAt), special };
+  });
+  // the form with the + on the group's own lone-pair atom (N, O or a halogen): made from the form that has the + on the carbon bearing the group
+  let donor = null;
+  for (const f of ringOnly) {
+    const plusAt = [...ring].find((i) => f.state.charge[i] === 1);
+    const d = f.state.bonds.map((b) => (b.a === plusAt ? b.b : b.b === plusAt ? b.a : -1)).find((k) => k >= 0 && !ring.has(k) && groupAtoms.has(k) && ['N', 'O', 'F', 'Cl', 'Br', 'I'].includes(f.state.el[k]) && f.state.charge[k] === 0);
+    if (d == null) continue;
+    const nd = { el: f.state.el, impH: f.state.impH, charge: f.state.charge.slice(), bonds: f.state.bonds.map((b) => ({ ...b })) };
+    nd.bonds.find((b) => (b.a === plusAt && b.b === d) || (b.b === plusAt && b.a === d)).order = 2;
+    nd.charge[plusAt] = 0; nd.charge[d] = 1;
+    if (!canon(toSmiles(nd))) continue;
+    donor = toSmiles(nd);
+    break;
+  }
+  return {
+    ok: true, q, rel: P.subs.length ? relation(P.subs[0].pos, q) : null, sigma: toSmiles(sig), forms, hasSpecial: forms.some((f) => f.special),
+    donor, subs: P.subs.map((s) => ({ pos: s.pos, id: s.id }))
+  };
+}
+/** The three attacks (ortho, meta, para) on a ring with ONE group, as sigmaAttack results keyed by relation. */
+export function attackSet(areneSmiles, reagent = 'Br2') {
+  const P = ringGroups(areneSmiles);
+  if (!P.ok || P.subs.length !== 1) return null;
+  const out = {};
+  for (const rel of ['ortho', 'meta', 'para']) {
+    const q = [0, 1, 2, 3, 4, 5].find((x) => relation(P.subs[0].pos, x) === rel);
+    out[rel] = sigmaAttack(areneSmiles, q, reagent);
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- side chains: KMnO4 oxidation and hydrogenation (McMurry 5.8)
+export const KMNO4 = { id: 'KMnO4', label: 'KMnO₄, H₂O' };
+const OXIDISE_OK = ['alkyl', 'F', 'Cl', 'Br', 'I', 'NO2', 'COOH'];
+/**
+ * KMnO4 turns every alkyl group that has an H on the benzylic carbon into -CO2H, whatever the length of the chain; the ring itself is not attacked, and a group with no
+ * benzylic H (tert-butyl) is not changed. Returns {ok:true, reacts, product, groups:[{pos, id, oxidised, benzylicH}]} or a refusal.
+ */
+export function oxidizeSideChain(smiles) {
+  const can = canon(smiles);
+  if (!can) return refuse('parse', 'That structure cannot be read.');
+  const P = ringGroups(smiles);
+  if (!P.ok) return refuse(P.code, P.why);
+  const bad = P.subs.find((s) => !OXIDISE_OK.includes(s.id));
+  if (bad) return refuse('notModelled', `A ring that carries ${DIRECTORS[bad.id].label} is not modelled here: such groups can be attacked by KMnO₄ too, and the book’s examples have only alkyl groups, halogens and similar.`);
+  const info = P.info;
+  const groups = P.subs.map((s) => ({ pos: s.pos, id: s.id, atom: s.atom, comp: s.comp, benzylicH: s.id === 'alkyl' ? info.atoms[s.atom].impH : 0, oxidised: s.id === 'alkyl' && info.atoms[s.atom].impH > 0 }));
+  const ox = groups.filter((g) => g.oxidised);
+  if (!ox.length) return { ok: true, reacts: false, product: can, groups, why: groups.some((g) => g.id === 'alkyl') ? 'There is no H on the carbon next to the ring (the benzylic carbon), so KMnO₄ cannot start the oxidation and nothing happens.' : 'The ring itself is not attacked by KMnO₄ (benzene resists strong oxidants), and there is no alkyl group to oxidise.' };
+  const drop = new Set(ox.flatMap((g) => g.comp));
+  const st = stateOf(smiles);
+  const { st: s2, idx } = dropAtoms(st, drop);
+  let cur = s2;
+  ox.forEach((g) => { cur = addGroup(cur, idx.get(P.ring[g.pos]), 'C(=O)O', false); });
+  return { ok: true, reacts: true, product: smilesOfState(cur), groups, why: 'KMnO₄ attacks the C–H bonds on the benzylic carbon (the carbon bonded to the ring) and carries the oxidation to a carboxylic acid, however long the chain is; the rest of the chain is lost.' };
+}
+
+export const HYDROGENATION = {
+  H2_Pd: { id: 'H2_Pd', label: 'H₂, Pd/C (1 atm)', ring: false },
+  H2_Pt_high: { id: 'H2_Pt_high', label: 'H₂, Pt, high pressure', ring: true }
+};
+/**
+ * Hydrogenation of a hydrocarbon with a benzene ring. Pd/C at ordinary pressure adds H2 to C=C and C≡C bonds outside the ring and leaves the ring alone; the ring needs
+ * high pressure and temperature (Pt, or Rh). o-Xylene gives the cis product (book example); other rings with two or more groups are refused (cis/trans mixtures).
+ */
+export function hydrogenate(smiles, cond) {
+  const C = HYDROGENATION[cond];
+  if (!C) return refuse('unknown', 'Unknown conditions.');
+  const can = canon(smiles);
+  const info = can && analyze(smiles);
+  if (!info) return refuse('parse', 'That structure cannot be read.');
+  if (!info.atoms.every((a) => a.sym === 'C')) return refuse('notHydrocarbon', 'Only hydrocarbons are modelled: other groups (NO₂, C=O, halogens ...) have their own hydrogenation chemistry.');
+  const ring = findRing(info);
+  if (!ring) return refuse('noRing', 'There is no benzene ring here.');
+  if (info.bonds.length - info.atoms.length + 1 !== 1) return refuse('rings', 'Only one ring at a time.');
+  const ringSet = new Set(ring);
+  const inRing = (b) => ringSet.has(b.atoms[0]) && ringSet.has(b.atoms[1]);
+  const side = info.bonds.filter((b) => !inRing(b) && (b.bo ?? 1) >= 2);
+  const st = stateOf(smiles);
+  const nSub = ring.filter((r) => info.atoms[r].nbrs.some((k) => !ringSet.has(k))).length;
+  const out = { el: st.el, impH: st.impH.slice(), charge: st.charge.slice(), bonds: st.bonds.map((b) => ({ ...b })) };
+  const gone = [];
+  if (!side.length && !C.ring) return { ok: true, reacts: false, product: can, ringReduced: false, sideReduced: false, why: 'Under these mild conditions the benzene ring is not reduced (it is far less reactive than an ordinary C=C), and there is no other multiple bond.' };
+  side.forEach((b) => {
+    const k = out.bonds.find((x) => (x.a === b.atoms[0] && x.b === b.atoms[1]) || (x.a === b.atoms[1] && x.b === b.atoms[0]));
+    const add = k.order - 1; k.order = 1; out.impH[b.atoms[0]] += add; out.impH[b.atoms[1]] += add; gone.push(add);
+  });
+  if (C.ring) {
+    if (nSub >= 2) {
+      if (can === canon('Cc1ccccc1C')) return { ok: true, reacts: true, product: canon('C[C@H]1CCCC[C@H]1C'), ringReduced: true, sideReduced: false, stereo: 'cis', why: 'H₂ with a Pt catalyst at high pressure reduces the ring; both new H atoms on each face of the ring come from the catalyst surface, so o-xylene gives cis-1,2-dimethylcyclohexane.' };
+      return refuse('stereo', 'A ring with two or more groups can give cis and trans products, and the book shows only o-xylene. Not modelled.');
+    }
+    ring.forEach((r) => { out.impH[r] += 1; });
+    out.bonds.forEach((b) => { if (ringSet.has(b.a) && ringSet.has(b.b)) b.order = 1; });
+  }
+  const product = canon(toSmiles(out));
+  return { ok: true, reacts: true, product, ringReduced: !!C.ring, sideReduced: side.length > 0, why: C.ring ? 'The ring is reduced only with a Pt (or Rh) catalyst under high pressure and temperature; it takes far more forcing conditions than an alkene.' : 'The C=C outside the ring is hydrogenated by H₂ and Pd/C at ordinary pressure; the benzene ring is not touched under these mild conditions.' };
+}
+
+// ---------------------------------------------------------------- reaction-lab (substituted arenes) and the generator: answers, explanations
+/** The substituted rings of the Lesson 14 lab and generator (monosubstituted, every group has a name in naming-arene.js). */
+export const LAB_SUBST = {
+  arenes: [
+    { id: 'toluene', smiles: 'Cc1ccccc1' }, { id: 'phenol', smiles: 'Oc1ccccc1' }, { id: 'aniline', smiles: 'Nc1ccccc1' }, { id: 'chlorobenzene', smiles: 'Clc1ccccc1' },
+    { id: 'bromobenzene', smiles: 'Brc1ccccc1' }, { id: 'nitrobenzene', smiles: 'O=[N+]([O-])c1ccccc1' }, { id: 'benzoic-acid', smiles: 'OC(=O)c1ccccc1' },
+    { id: 'acetophenone', smiles: 'CC(=O)c1ccccc1' }, { id: 'benzonitrile', smiles: 'N#Cc1ccccc1' }, { id: 'benzaldehyde', smiles: 'O=Cc1ccccc1' }, { id: 'ethylbenzene', smiles: 'CCc1ccccc1' }
+  ],
+  reagents: ['bromination', 'chlorination', 'nitration', 'sulfonation', 'acetylation', 'methylation']
+};
+export const LAB_SUBST_BY_ID = Object.fromEntries(LAB_SUBST.arenes.map((a) => [a.id, a]));
+const nmOf = (s) => { const n = nameBothArene(s); return n ? n.new : s; };
+const joinNames = (list) => list.map(nmOf).join(' and ');
+/** The sentence that explains a correct answer for a substituted ring. */
+export function substRightWhy(pred) {
+  const E = pred.Elabel;
+  const names = joinNames(pred.products);
+  if (pred.outcome === 'op') return `Yes. ${subText(pred.subs[0])} is an ortho/para director, so ${E} replaces an H ortho or para to it: ${names}. Both form (the book treats this as a mixture).`;
+  if (pred.outcome === 'm') return `Yes. ${subText(pred.subs[0])} is a meta director, so ${E} replaces an H meta to it: ${names}.`;
+  if (pred.outcome === 'cooperate') return `Yes. The two groups send ${E} to the same position: ${names}.`;
+  return `Yes. ${pred.why} Product${pred.products.length > 1 ? 's' : ''}: ${names}.`;
+}
+/**
+ * Four drawn answers for a substituted ring: the right set, the set the OTHER kind of director would give (or another position), a partial answer (only one of the two
+ * isomers an o/p director gives), and a ring with two new groups. {kind, correct, smiles:[...], why}.
+ */
+export function substChoices(pred) {
+  const P = ringGroups(pred.arene);
+  const st0 = stateOf(pred.arene);
+  const open = [0, 1, 2, 3, 4, 5].filter((q) => !P.subs.some((s) => s.pos === q));
+  const at = (q) => smilesOfState(addGroup(st0, P.ring[q], pred.group, true));
+  const keyOf = (arr) => arr.slice().sort().join('|');
+  const right = pred.products;
+  const used = new Set([keyOf(right)]);
+  const out = [{ kind: 'major', correct: true, smiles: right, why: substRightWhy(pred) }];
+  const others = open.filter((q) => !pred.positions.includes(q));
+  const relText = (q) => P.subs.map((s) => `${relation(s.pos, q)} to ${subText(s)}`).join(' and ');
+  const push = (kind, qs, why) => {
+    const prods = [...new Set(qs.map(at))].sort();
+    if (!prods.length || used.has(keyOf(prods))) return false;
+    used.add(keyOf(prods)); out.push({ kind, correct: false, smiles: prods, why }); return true;
+  };
+  if (pred.subs.length === 1) {
+    const g = DIRECTORS[pred.subs[0].id], gt = subText(pred.subs[0]);
+    if (pred.outcome === 'op') {
+      push('opposite', others, `That puts the group meta to ${gt}. ${gt} is an ortho/para director: ${g.why}`);
+      const para = pred.positions.filter((q) => relation(pred.subs[0].pos, q) === 'para');
+      push('partial', para, 'Para forms, but so does ortho: the two ortho carbons are just as good electronically, so both the ortho and the para product are made (the book calls the result a mixture).');
+    } else {
+      push('opposite', pred.positions.length ? open.filter((q) => relation(pred.subs[0].pos, q) !== 'meta') : [], `That puts the group ortho and para to ${gt}. ${gt} is a meta director: ${g.why}`);
+      push('partial', open.filter((q) => relation(pred.subs[0].pos, q) === 'para'), `Para attack puts the + on the carbon next to the δ+ atom of ${gt} in one carbocation form, which is unfavourable, so para is not where it goes: ${gt} directs meta.`);
+    }
+  } else {
+    others.forEach((q) => { if (out.length < 3) push('otherPlace', [q], `That position is ${relText(q)}, but the groups on the ring do not send the new group there. ${pred.why}`); });
+  }
+  while (out.length < 3 && open.length) {   // pad with single other positions
+    const q = open.find((x) => !used.has(keyOf([at(x)])));
+    if (q == null) break;
+    push('otherPlace', [q], `That position is ${relText(q)}; the rules for this ring (${pred.why}) do not send the new group there.`);
+  }
+  // two new groups
+  const q1 = pred.positions[0], q2 = open.find((q) => q !== q1);
+  if (q2 != null) {
+    const s1 = addGroup(st0, P.ring[q1], pred.group, true);
+    const two = smilesOfState(addGroup(s1, P.ring[q2], pred.group, true));
+    out.push({ kind: 'twice', correct: false, smiles: [two], why: 'This ring has TWO new groups. One electrophile replaces just one H, and the question asks for the monosubstituted product (the new group on the ring that already has one).' });
+  }
+  return out;
+}

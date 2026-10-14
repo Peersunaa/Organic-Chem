@@ -6,8 +6,8 @@ import { analyze, canon } from './chem.js';
 import { ALKYNE_RXN, alkyneSites, predictAlkyne, acetylideOf, halideClass, alkylateAcetylide, ALKYNE_PKA, deprotonates, saturate } from './reactions-alkynes.js';
 import { nameBothAny } from './naming-chain.js';
 import { ACID } from './acidbase.js';
-import { predictEAS, reduceNitro, BENZENE, EAS } from './reactions-aromatic.js';
-import { arene } from './naming-arene.js';
+import { predictEAS, reduceNitro, BENZENE, EAS, predictSubst, oxidizeSideChain, ringGroups, DIRECTORS, dirDirects } from './reactions-aromatic.js';
+import { arene, relation } from './naming-arene.js';
 
 /** Reagent cards. kind: 'base' (NaNH₂, NaOH), 'rx' (an alkyl halide), 'rxn' (a reagent that reacts with the C≡C: key into ALKYNE_RXN). */
 export const CARDS = {
@@ -34,6 +34,8 @@ Object.assign(CARDS, {
   AcCl_AlCl3: { id: 'AcCl_AlCl3', kind: 'eas', label: 'CH₃COCl, AlCl₃', reagent: 'RCOCl', halide: 'CC(=O)Cl' },
   Fe_H3O: { id: 'Fe_H3O', kind: 'red', label: 'Fe (or Sn, SnCl₂), H₃O⁺; then HO⁻' }
 });
+// Lesson 14: the side-chain oxidation card. The Lesson 14 planner (config.directors) runs the substituted-ring engine; without it the old Lesson 13 rules apply unchanged.
+Object.assign(CARDS, { KMnO4_H2O: { id: 'KMnO4_H2O', kind: 'ox', label: 'KMnO₄, H₂O' } });
 
 /** A card on a molecule with a benzene ring (Lesson 13). Returns the same {ok, state, note} / {ok:false, code, diag} shape as applyCard. */
 function applyAreneCard(state, card) {
@@ -52,6 +54,88 @@ function applyAreneCard(state, card) {
   }
   return { ok: true, state: { kind: 'neutral', smiles: pred.product }, note: `${EAS[card.reagent].Elabel === 'R⁺' ? 'The carbocation' : 'The electrophile ' + EAS[card.reagent].Elabel} is attacked by the ring’s π electrons, then H⁺ leaves: one H on the ring is replaced.` };
 }
+
+// ---------------------------------------------------------------- Lesson 14: cards on rings with groups (planner option `directors`)
+// The state may carry `pool`: the isomers made so far (ortho + para are formed together; the book says to assume they can be separated). A card is applied to every member.
+const NOTE_REL = { ortho: 'ortho', para: 'para', meta: 'meta' };
+function oneDirectorCard(smiles, card) {
+  if (card.kind === 'red') {
+    const out = ringGroups(smiles).ok ? reduceNitro(smiles) : null;
+    return out ? { products: [out], note: 'Fe (or Sn, SnCl₂) with H₃O⁺ (then HO⁻) reduces –NO₂ to –NH₂. Nothing else on the ring changes.' } : { fail: { code: 'noNitro', diag: 'Fe with H₃O⁺ (then HO⁻) reduces a nitro group, –NO₂, to an amine, –NH₂. There is no nitro group on the ring at this point, so there is nothing to reduce: nitrate the ring first.' } };
+  }
+  if (card.kind === 'ox') {
+    const r = oxidizeSideChain(smiles);
+    if (!r.ok) return { fail: { code: r.code, diag: r.why } };
+    if (!r.reacts) return { fail: { code: 'nothing', diag: r.why } };
+    return { products: [r.product], note: 'KMnO₄ oxidises every alkyl group that has a benzylic H to –CO₂H (the ortho/para-directing CH₃ becomes the meta-directing CO₂H).' };
+  }
+  if (!ringGroups(smiles).ok) return { fail: { code: 'noRing', diag: 'This is an aromatic substitution reagent, and the molecule in hand is not a benzene ring it can work on.' } };
+  const pred = predictSubst(smiles, card.reagent, card.halide || null);
+  if (!pred.ok) return { fail: { code: pred.code, diag: pred.why } };
+  let note;
+  if (pred.outcome === 'none') note = `${EAS[card.reagent].Elabel === 'R⁺' ? 'The carbocation' : 'The electrophile ' + EAS[card.reagent].Elabel} is attacked by the ring’s π electrons, then H⁺ leaves: one H on the ring is replaced.`;
+  else if (pred.outcome === 'op') note = `${DIRECTORS[pred.subs[0].id].label} is an ortho/para director, so the new group goes ortho and para to it. Both isomers form; the book assumes they can be separated.`;
+  else if (pred.outcome === 'm') note = `${DIRECTORS[pred.subs[0].id].label} is a meta director, so the new group goes meta to it.`;
+  else note = pred.why;
+  return { products: pred.products, note };
+}
+function applyDirectorCard(state, card) {
+  if (state.kind === 'acetylide') return { ok: false, code: 'anion', diag: 'The acetylide anion is not a benzene ring: this card needs a ring to react with.' };
+  const members = state.pool && state.pool.length ? state.pool : [state.smiles];
+  const outs = []; let fail = null, note = '';
+  members.forEach((m) => {
+    const r = oneDirectorCard(m, card);
+    if (r.fail) { fail = fail || r.fail; return; }
+    r.products.forEach((p) => { if (!outs.includes(p)) outs.push(p); });
+    note = note || r.note;
+  });
+  if (!outs.length) return { ok: false, code: fail.code, diag: fail.diag };
+  outs.sort();
+  return { ok: true, state: { kind: 'neutral', smiles: outs[0], ...(outs.length > 1 ? { pool: outs } : {}) }, note };
+}
+const GROUP_REL_TEXT = { ortho: 'ortho (1,2)', meta: 'meta (1,3)', para: 'para (1,4)' };
+/** The slip in a plan whose steps all ran but whose product is not the target, for rings (Lesson 14): usually the ORDER of the two substitutions. */
+export function orderWhy(run, target, ids) {
+  const fin = run.final.pool || [run.final.smiles];
+  const head = `You made ${fin.map(say).join(' and ')}${fin.length > 1 ? ' (isomers, assumed separable)' : ''}, but the target is ${say(target)}.`;
+  const T = ringGroups(target), F = ringGroups(fin[0]);
+  const lab = (id) => DIRECTORS[id].label;
+  if (!T.ok || !F.ok) return head;
+  const tIds = T.subs.map((x) => x.id).sort(), fIds = F.subs.map((x) => x.id).sort();
+  if (JSON.stringify(tIds) !== JSON.stringify(fIds)) {
+    const missing = tIds.filter((x) => !fIds.includes(x)), extra = fIds.filter((x) => !tIds.includes(x));
+    const bits = [];
+    if (missing.length) bits.push(`The target has ${missing.map(lab).join(' and ')}, which your product does not.`);
+    if (extra.length) bits.push(`Your product has ${extra.map(lab).join(' and ')}, which the target does not have.`);
+    if (fIds.includes('alkyl') && tIds.includes('COOH')) bits.push('The alkyl group is still there: KMnO₄ turns it into –CO₂H.');
+    return [head, ...bits].join(' ');
+  }
+  if (T.subs.length !== 2) return head;
+  // two groups, same set: the positions are wrong, so the order of the steps is
+  const relT = relation(T.subs[0].pos, T.subs[1].pos);
+  let before = null;
+  run.steps.forEach((st, i) => {
+    if (!st.ok || CARDS[st.card].kind !== 'eas') return;
+    const prevSmiles = i === 0 ? run.start : (run.steps[i - 1].state.pool || [run.steps[i - 1].state.smiles])[0];
+    const g = prevSmiles ? ringGroups(prevSmiles) : null;
+    const g2 = ringGroups((st.state.pool || [st.state.smiles])[0]);
+    if (g && g.ok && g2.ok && g.subs.length === 1) {
+      const rest = g2.subs.slice(); const k = rest.findIndex((x) => x.id === g.subs[0].id); if (k >= 0) rest.splice(k, 1);
+      before = { first: g.subs[0].id, firstText: g.subs[0].text, added: rest[0] ? rest[0].id : null, addedText: rest[0] ? rest[0].text : '' };
+    }
+  });
+  if (!before || !before.added) return head;
+  const fd = dirDirects(before.first) === 'm' ? 'a meta director' : 'an ortho/para director';
+  const went = dirDirects(before.first) === 'm' ? 'meta' : 'ortho and para';
+  const out = [head, `${before.firstText} was already on the ring when ${before.addedText} went on. ${before.firstText} is ${fd}, so ${before.addedText} went ${went}; the target has the two groups ${GROUP_REL_TEXT[relT]} to each other.`];
+  const mDir = T.subs.find((x) => dirDirects(x.id) === 'm'), opDir = T.subs.find((x) => dirDirects(x.id) === 'op');
+  if (relT === 'meta') {
+    if (mDir) out.push(`For a meta relationship the meta director ${lab(mDir.id)} has to be on the ring first, and then the other group goes meta to it.${mDir.id === 'COOH' && ids.includes('KMnO4_H2O') ? ' KMnO₄ turns CH₃ into –CO₂H, so do that step first.' : ''}`);
+    else out.push('Two ortho/para directors cannot give a meta product this way.');
+  } else if (opDir) out.push(`For ${relT === 'ortho' ? 'an' : 'a'} ${NOTE_REL[relT]} relationship the ortho/para director ${lab(opDir.id)} has to be on the ring first; the new group then goes ortho and para to it, and the isomers can be separated.`);
+  return out.join(' ');
+}
+
 export const primaryHalideCards = () => CARD_IDS.filter((id) => CARDS[id].kind === 'rx' && ['methyl', 'primary'].includes(halideClass(CARDS[id].smiles)));
 
 const nameOf = (smi) => { const n = nameBothAny(smi); return n ? n.new : null; };
@@ -81,9 +165,10 @@ const protonated = (acetylide) => acetylide.replace('[C-]', 'C');
  * Apply one card to the species in hand. state = {kind: 'neutral' | 'acetylide', smiles}.
  * Returns {ok:true, state, note} or {ok:false, code, diag}. `reverted` marks an acid that just gives H⁺ back to an acetylide.
  */
-export function applyCard(state, cardId) {
+export function applyCard(state, cardId, opts = {}) {
   const card = CARDS[cardId];
   if (!card) throw new Error('unknown card ' + cardId);
+  if (card.kind === 'ox' || (opts.directors && (card.kind === 'eas' || card.kind === 'red'))) return applyDirectorCard(state, card);
   if (card.kind === 'eas' || card.kind === 'red') return applyAreneCard(state, card);
   if (state.kind === 'neutral' && arene(state.smiles)) return { ok: false, code: 'notAlkyne', diag: 'This card is one of the alkyne reactions of Lesson 12. It does nothing useful to a benzene ring here.' };
   const { kind, smiles } = state;
@@ -149,16 +234,16 @@ function stepNote(pred) {
 }
 
 /** Run a list of card ids from a start molecule. steps[i] = {card, ok, state?, diag?, note?, name?}; stops at the first card that cannot be applied. */
-export function runSequence(start, ids) {
+export function runSequence(start, ids, opts = {}) {
   let state = { kind: 'neutral', smiles: canon(start) };
   const steps = [];
   for (const id of ids) {
-    const r = applyCard(state, id);
-    if (!r.ok) { steps.push({ card: id, ok: false, code: r.code, diag: r.diag }); return { steps, ok: false, final: state, failedAt: steps.length - 1 }; }
+    const r = applyCard(state, id, opts);
+    if (!r.ok) { steps.push({ card: id, ok: false, code: r.code, diag: r.diag }); return { steps, ok: false, final: state, failedAt: steps.length - 1, start: canon(start) }; }
     state = r.state;
-    steps.push({ card: id, ok: true, state, note: r.note, reverted: !!r.reverted, name: state.kind === 'neutral' ? nameOf(state.smiles) : null });
+    steps.push({ card: id, ok: true, state, note: r.note, reverted: !!r.reverted, name: state.kind === 'neutral' ? nameOf(state.smiles) : null, names: state.pool ? state.pool.map(nameOf) : null });
   }
-  return { steps, ok: true, final: state, failedAt: -1 };
+  return { steps, ok: true, final: state, failedAt: -1, start: canon(start) };
 }
 
 /** Why the final product is not the target: one concrete sentence per kind of slip. */
@@ -208,12 +293,17 @@ export function mismatchWhy(finalSmiles, target, ids = []) {
  * Grade a learner's sequence. Returns {ok, code, diagnosis, run}: code 'empty' | 'step' | 'anion' | 'wrong' | 'ok'.
  * The sequence is RUN on the engine; only the final product (canonical isomeric SMILES) is compared with the target.
  */
-export function gradeSequence(start, target, ids) {
+export function gradeSequence(start, target, ids, opts = {}) {
   if (!ids.length) return { ok: false, code: 'empty', diagnosis: 'Choose at least one reagent card and put the cards in the order you would use them.', run: null };
-  const run = runSequence(start, ids);
+  const run = runSequence(start, ids, opts);
   if (!run.ok) {
     const st = run.steps[run.failedAt];
     return { ok: false, code: 'step', failedAt: run.failedAt, diagnosis: `Step ${run.failedAt + 1} (${CARDS[st.card].label}): ${st.diag}`, run };
+  }
+  if (opts.directors) {
+    const pool = run.final.pool || [run.final.smiles];
+    if (pool.includes(canon(target))) return { ok: true, code: 'ok', diagnosis: '', run, wasted: false, pool };
+    return { ok: false, code: 'wrong', diagnosis: orderWhy(run, target, ids), run };
   }
   if (run.final.kind === 'acetylide') return { ok: false, code: 'anion', diagnosis: `Your plan ends with the acetylide anion. It still has to react with an alkyl halide (a primary one) to make the new C–C bond and the target, ${say(target)}.`, run };
   if (canon(run.final.smiles) === canon(target)) {
@@ -225,14 +315,14 @@ export function gradeSequence(start, target, ids) {
 }
 
 /** Every sequence of at most maxLen cards from `deck` that runs without a failed step and ends at the target. */
-export function solveSequences(start, target, deck, maxLen = 4) {
+export function solveSequences(start, target, deck, maxLen = 4, opts = {}) {
   const out = [];
   const want = canon(target);
   const go = (state, seq) => {
-    if (seq.length && state.kind === 'neutral' && state.smiles === want) out.push(seq.slice());
+    if (seq.length && state.kind === 'neutral' && (opts.directors ? (state.pool || [state.smiles]).includes(want) : state.smiles === want)) out.push(seq.slice());
     if (seq.length >= maxLen) return;
     for (const id of deck) {
-      const r = applyCard(state, id);
+      const r = applyCard(state, id, opts);
       if (!r.ok || r.reverted) continue;
       seq.push(id); go(r.state, seq); seq.pop();
     }

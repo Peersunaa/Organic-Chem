@@ -4,7 +4,9 @@
 // and only the FINAL product is compared with the target by canonical isomeric SMILES. Every wrong card or wrong order gets its own diagnosis
 // ("a secondary halide won't work with an acetylide", "Lindlar gives the alkene, not a ketone", "make the acetylide first").
 //
-// config: { start: smiles, target: smiles, deck: [card ids of CARDS], intro?: html }
+// config: { start: smiles, target: smiles, deck: [card ids of CARDS], intro?: html, directors?: bool }
+// Lesson 14: `directors: true` runs the cards on rings that already carry groups (engine/synthesis.js applyDirectorCard): an ortho/para director gives an ortho + para PAIR (the
+// book assumes the isomers can be separated), a meta director gives the meta product, and the plan reaches the target when the target is among the final products.
 // ctx.onResult({ok:false, diagnosis}) after every wrong run, ctx.onResult({ok:true}) once the plan reaches the target.
 import { svg as rdSvg } from '../chem.js';
 import { CARDS, gradeSequence, solveSequences } from '../reactions.js';
@@ -20,7 +22,7 @@ function nameHtml(smi) {
 
 /** One correct plan for a puzzle (the shortest the solver finds), for tests and for the "show me" text. */
 export function solutionPlan(config, maxLen = 4) {
-  const all = solveSequences(config.start, config.target, config.deck, maxLen);
+  const all = solveSequences(config.start, config.target, config.deck, maxLen, { directors: !!config.directors });
   return all.length ? all.sort((a, b) => a.length - b.length)[0] : null;
 }
 
@@ -82,7 +84,10 @@ export default {
         const head = h('p', 'sp-sh', `<b>${i + 1}. ${CARDS[s.card].label}</b>`);
         li.append(head);
         if (s.ok) {
-          li.append(h('div', 'sp-res', `${fig(s.state.smiles, 140, 90)}<span class="sp-nm">${s.state.kind === 'acetylide' ? 'the acetylide anion' : nameHtml(s.state.smiles)}</span>`));
+          if (s.state.pool && s.state.pool.length > 1) {
+            li.append(h('div', 'sp-res sp-pool', s.state.pool.map((sm) => `<span class="sp-pm">${fig(sm, 130, 84)}<span class="sp-nm">${nameHtml(sm)}</span></span>`).join('<span class="sp-and">and</span>')));
+            li.append(h('p', 'muted small', 'Two isomers form together. The book assumes they can be separated, so the next step can use either one.'));
+          } else li.append(h('div', 'sp-res', `${fig(s.state.smiles, 140, 90)}<span class="sp-nm">${s.state.kind === 'acetylide' ? 'the acetylide anion' : nameHtml(s.state.smiles)}</span>`));
           li.append(h('p', 'muted small sp-note', s.note));
         } else li.append(h('p', 'sp-diag', s.diag));
         ol.append(li);
@@ -95,7 +100,7 @@ export default {
 
     runB.addEventListener('click', () => {
       if (finished) return;
-      const g = gradeSequence(config.start, config.target, plan);
+      const g = gradeSequence(config.start, config.target, plan, { directors: !!config.directors });
       if (g.run) show(g.run, g); else { out.innerHTML = ''; out.append(h('p', 'sp-verdict bad', g.diagnosis)); }
       if (g.ok) { finished = true; paint(); ctx.onResult({ ok: true }); } else ctx.onResult({ ok: false, diagnosis: g.diagnosis });
     });

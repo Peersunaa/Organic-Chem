@@ -36,8 +36,9 @@ import { lesson10 } from './lesson10.mjs';
 import { lesson11 } from './lesson11.mjs';
 import { lesson12 } from './lesson12.mjs';
 import { lesson13 } from './lesson13.mjs';
+import { lesson14 } from './lesson14.mjs';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -129,8 +130,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 3 && PLANNED[0].id === '14' && PLANNED[2].id === '16', 'placeholders 14-16 (Lesson 13 is unlocked)');
-ok(LESSONS.length === 13 && LESSONS[12].id === '13' && LESSONS[11].id === '12' && LESSONS[10].id === '11' && LESSONS[9].id === '10' && LESSONS[8].id === '09' && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-13 registered and unlocked');
+ok(PLANNED.length === 2 && PLANNED[0].id === '15' && PLANNED[1].id === '16', 'placeholders 15-16 (Lesson 14 is unlocked)');
+ok(LESSONS.length === 14 && LESSONS[13].id === '14' && LESSONS[12].id === '13' && LESSONS[11].id === '12' && LESSONS[10].id === '11' && LESSONS[9].id === '10' && LESSONS[8].id === '09' && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-14 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -264,7 +265,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'alkynes', 'eas-basics'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'alkynes', 'eas-basics', 'directors'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -1155,6 +1156,9 @@ await lesson12({ ok, eq });
 
 // ---- Lesson 13: benzene and electrophilic aromatic substitution (EAS products and resonance forms vs Python RDKit, balanced steps with the catalyst regenerated, hand-checked fixture with OPSIN, names, ring-position, planner, lab, `eas-basics` generator, lesson steps (tests/lesson13.mjs)
 await lesson13({ ok, eq });
+
+// ---- Lesson 14: substituent effects (directing groups vs Python RDKit with an independent table and SMARTS; the sigma-complex resonance argument vs ResonanceMolSupplier; side chains; hand-checked fixture with OPSIN), director-sort, ring-position attack mode, substituted-arene lab, planner order puzzles, `directors` generator, lesson steps (tests/lesson14.mjs)
+await lesson14({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

@@ -14,12 +14,15 @@
 // Lesson 13: config.eas = ids of LAB_EAS (aromatic substitution on benzene: Br2/FeBr3, Cl2/FeCl3, I2, HNO3/H2SO4, SO3/H2SO4, Friedel-Crafts alkylation and acylation). The learner predicts the
 // monosubstituted product (substitution, not addition), then the lab shows the electrophile and how it forms, the sigma complex with its three resonance forms, the product, the overall equation
 // and the mechanism. Directing effects are Lesson 14, so the ring is always benzene.
+// Lesson 14: config.subst = {arenes: [ids of LAB_SUBST.arenes], reagents: [ids of LAB_EAS]} (or true for the default sets): substituted benzenes. The learner predicts the product(s)
+// (ortho + para for an o/p director, meta for a meta director, or a refusal when the combination does not work), then the lab shows the carbocation for ortho, meta and para
+// attack with its ring resonance forms, marks the SPECIAL form (the + on the carbon that carries the group), and gives the verdict from the substituent table.
 // config: { alkenes?: [ids of LAB_ALKENES or LAB_ALKENES2], reagents?: [ids of REAGENT_IDS or REAGENT_IDS2], need?: n (correct predictions before ctx.onResult({ok:true}), default 1),
 //           start?: {alkene, reagent}, seed?: number }
 // ctx.onResult({ok:false, diagnosis}) on every wrong prediction; ctx.onResult({ok:true}) once `need` predictions were right.
 import { svg as rdSvg } from '../chem.js';
 import { LAB_ALKENES, REAGENT_IDS, REAGENTS, ALKENE_BY_ID, predict, productChoices, CLASS_NAME, CLASS_SHORT, stabilityFraction, alkeneName, REAGENTS2, ALKENE2_BY_ID, predictAdd, productChoices2, rightWhy, DIENE_BY_ID, HX, HX_DIENE_IDS, predictDiene, dieneChoices, dieneName, ALKYNE_BY_ID, ALKYNE_RXN, ALKYNE_LAB_KEYS, predictAlkyne, alkyneChoices, alkyneRightWhy, alkyneHXMechanism } from '../reactions.js';
-import { LAB_EAS, LAB_EAS_BY_ID, EAS, predictEAS, easChoices, generationOf, netOf, easMechanism, labLabel, BENZENE } from '../reactions.js';
+import { LAB_EAS, LAB_EAS_BY_ID, EAS, predictEAS, easChoices, generationOf, netOf, easMechanism, labLabel, BENZENE, LAB_SUBST, LAB_SUBST_BY_ID, predictSubst, substChoices, attackSet, DIRECTORS, BINS } from '../reactions.js';
 import { nameBothAny } from '../naming-chain.js';
 import mechanismPlayer from './mechanism-player.js';
 import { getIupac } from '../store.js';
@@ -52,9 +55,11 @@ export default {
     const dieneMode = !!config.dienes && !config.alkenes;
     const alkyneMode = !!config.alkynes && !config.alkenes && !config.dienes;       // Lesson 12
     const easMode = !!config.eas && !config.alkenes && !config.dienes && !config.alkynes;   // Lesson 13
+    const substMode = !!config.subst && !easMode && !config.alkenes && !config.dienes && !config.alkynes;   // Lesson 14
+    const SUB_CFG = substMode ? (config.subst === true ? LAB_SUBST : { arenes: config.subst.arenes || LAB_SUBST.arenes.map((a) => a.id), reagents: config.subst.reagents || LAB_SUBST.reagents }) : null;
     const BENZ = { id: 'benzene', smiles: BENZENE };
-    const alkenes = easMode ? [BENZ] : (alkyneMode ? config.alkynes : dieneMode ? config.dienes : (config.alkenes || LAB_ALKENES.map((a) => a.id))).map((id) => ALK[id]);
-    const reagents = easMode ? config.eas : config.reagents || (alkyneMode ? ALKYNE_LAB_KEYS : dieneMode ? HX_DIENE_IDS : REAGENT_IDS);
+    const alkenes = substMode ? SUB_CFG.arenes.map((id) => LAB_SUBST_BY_ID[id]) : easMode ? [BENZ] : (alkyneMode ? config.alkynes : dieneMode ? config.dienes : (config.alkenes || LAB_ALKENES.map((a) => a.id))).map((id) => ALK[id]);
+    const reagents = substMode ? SUB_CFG.reagents : easMode ? config.eas : config.reagents || (alkyneMode ? ALKYNE_LAB_KEYS : dieneMode ? HX_DIENE_IDS : REAGENT_IDS);
     const need = config.need || 1;
     const rng = config.seed != null ? rng32(config.seed) : Math.random;
     let alkene = easMode ? BENZ : config.start ? ALK[config.start.alkene] : null;
@@ -67,7 +72,7 @@ export default {
 
     function pickers() {
       const box = h('div', 'rl-pick');
-      box.append(h('p', 'rl-h', easMode ? '<b>1. The substrate is benzene</b>' : alkyneMode ? '<b>1. Pick an alkyne</b>' : dieneMode ? '<b>1. Pick a diene</b>' : '<b>1. Pick an alkene</b>'));
+      box.append(h('p', 'rl-h', substMode ? '<b>1. Pick a substituted benzene</b>' : easMode ? '<b>1. The substrate is benzene</b>' : alkyneMode ? '<b>1. Pick an alkyne</b>' : dieneMode ? '<b>1. Pick a diene</b>' : '<b>1. Pick an alkene</b>'));
       const g1 = h('div', 'rl-alk');
       alkenes.forEach((a) => {
         const b = h('button', 'rl-btn'); b.type = 'button';
@@ -82,7 +87,7 @@ export default {
       reagents.forEach((id) => {
         const b = h('button', 'btn rl-rbtn'); b.type = 'button';
         b.setAttribute('aria-pressed', String(reagent === id));
-        b.textContent = easMode ? labLabel(LAB_EAS_BY_ID[id]) : RCFG(id).label;
+        b.textContent = easMode || substMode ? labLabel(LAB_EAS_BY_ID[id]) : RCFG(id).label;
         b.addEventListener('click', () => { reagent = id; render(); });
         g2.append(b);
       });
@@ -301,6 +306,55 @@ export default {
       box.append(act);
     }
 
+    /** Reveal for Lesson 14: the carbocation for ortho, meta and para attack (ring resonance forms, the special form marked), the verdict, the product(s). */
+    function reveal6(pred, box) {
+      const entry = LAB_EAS_BY_ID[reagent];
+      const set = pred.subs.length === 1 ? attackSet(pred.arene, pred.reagent) : null;
+      if (set) {
+        const g = DIRECTORS[pred.subs[0].id], gt = pred.subs[0].text || g.label;
+        box.append(h('p', 'rl-h', `<b>Why: the carbocation for attack at each position</b> (${gt} is in the bin “${BINS[g.cls].label}”)`));
+        const cols = h('div', 'rl-att');
+        ['ortho', 'meta', 'para'].forEach((rel) => {
+          const a = set[rel];
+          const good = g.cls === 'deactM' ? !a.hasSpecial : a.hasSpecial;
+          const col = h('div', 'rl-attc' + (pred.rels.includes(rel) ? ' fav' : ''));
+          col.append(h('p', 'rl-atth', `<b>${rel[0].toUpperCase() + rel.slice(1)} attack</b>`));
+          const row = h('div', 'rl-attf');
+          a.forms.forEach((f, i) => {
+            if (i) row.append(h('span', 'rl-arrow rl-double', '↔'));
+            row.append(h('span', 'rl-attfig' + (f.special ? ' special' : ''), fig(f.smiles, 104, 84)));
+          });
+          col.append(row);
+          let verdict;
+          if (!a.hasSpecial) verdict = 'Three forms. The + never sits on the carbon that carries the group.';
+          else if (g.cls === 'deactM') verdict = 'One of the forms (outlined) puts the + on the carbon that carries the group, right next to the δ+ atom: very unfavourable.';
+          else if (g.donor) verdict = `The outlined form puts the + on the carbon that carries ${gt}, and a fourth form puts it on the ${g.donor} itself, where its lone pair can share it.`;
+          else verdict = 'The outlined form puts the + on the carbon that carries the group, where its electron donation helps most.';
+          col.append(h('p', 'muted small', verdict));
+          col.append(h('p', 'rl-attv ' + (good ? 'ok' : 'bad'), good ? (g.cls === 'deactM' ? 'Favoured: no bad form.' : 'Favoured: extra stabilised form.') : g.cls === 'deactM' ? 'Disfavoured: has the bad form.' : 'Not favoured: no extra form.'));
+          cols.append(col);
+        });
+        box.append(cols);
+        if (g.cls === 'deactOP') box.append(h('p', 'rl-why', 'A halogen pulls electrons through the σ bond, so every attack is slower than on benzene (the ring is deactivated). But in ortho and para attack its lone pair can share the + charge, which meta attack cannot do, so the product is still ortho and para.'));
+        else box.append(h('p', 'rl-why', g.why));
+      } else {
+        box.append(h('p', 'rl-h', '<b>Why</b>'));
+        box.append(h('p', 'rl-why', pred.why));
+      }
+      const prod = h('div', 'rl-prod');
+      prod.append(h('p', 'rl-h', `<b>Major product${pred.products.length > 1 ? 's' : ''}</b>${pred.products.length > 1 ? ' (a mixture, assumed separable)' : ''}`));
+      const prow = h('div', 'rl-prow');
+      pred.products.forEach((sm, i) => { if (i) prow.append(h('span', 'rl-plus', 'and')); prow.append(h('figure', 'mol', `<div class="mol-svg">${fig(sm, 160, 116)}</div><figcaption>${nameHtml(sm)}</figcaption>`)); });
+      prod.append(prow);
+      box.append(prod);
+      void entry;
+      const again = h('button', 'btn ' + (right >= need ? 'primary' : '')); again.type = 'button';
+      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} predicted)`;
+      again.addEventListener('click', () => { alkene = null; reagent = null; render(); root.scrollIntoView?.({ block: 'nearest' }); });
+      const act = h('div', 'lb-actions'); act.append(again);
+      box.append(act);
+    }
+
     function render() {
       root.innerHTML = '';
       mp?.destroy?.(); mp = null;
@@ -314,14 +368,21 @@ export default {
       const fam3 = !!DIENE_BY_ID[alkene.id];
       const fam4 = !!ALKYNE_BY_ID[alkene.id];
       const entry = easMode ? LAB_EAS_BY_ID[reagent] : null;
-      try { pred = easMode ? predictEAS(BENZENE, entry.reagent, entry.halide || null) : fam4 ? predictAlkyne(alkene.smiles, reagent) : fam3 ? predictDiene(alkene.smiles, reagent) : fam2 ? predictAdd(alkene.smiles, reagent) : predict(alkene.smiles, reagent); } catch (e) { root.append(h('p', 'fb bad', 'This combination is outside the lesson.')); return; }
+      const sEntry = substMode ? LAB_EAS_BY_ID[reagent] : null;
+      try { pred = substMode ? predictSubst(alkene.smiles, sEntry.reagent, sEntry.halide || null) : easMode ? predictEAS(BENZENE, entry.reagent, entry.halide || null) : fam4 ? predictAlkyne(alkene.smiles, reagent) : fam3 ? predictDiene(alkene.smiles, reagent) : fam2 ? predictAdd(alkene.smiles, reagent) : predict(alkene.smiles, reagent); } catch (e) { root.append(h('p', 'fb bad', 'This combination is outside the lesson.')); return; }
       const box = h('div', 'rl-run');
-      const R = easMode ? { label: labLabel(entry) } : RCFG(reagent);
+      if (substMode && !pred.ok) {
+        box.append(h('p', 'rl-h', `<b>This combination does not work:</b> ${nameHtml(alkene.smiles)} + ${labLabel(sEntry)}`));
+        box.append(h('p', 'rl-why', pred.why));
+        root.append(box);
+        return;
+      }
+      const R = substMode ? { label: labLabel(sEntry) } : easMode ? { label: labLabel(entry) } : RCFG(reagent);
       box.append(h('p', 'rl-h', `<b>3. Predict</b>: the major product of ${nameHtml(alkene.smiles)} + ${R.label}`));
       const eq = h('div', 'rl-eq');
       eq.innerHTML = `${fig(alkene.smiles, 130, 96)}<span class="rl-plus">+</span><span class="rl-reag">${R.label}</span><span class="rl-arrow">→ ?</span>`;
       box.append(eq);
-      const choices = shuffle(rng, easMode ? easChoices(pred) : fam4 ? alkyneChoices(pred) : fam3 ? dieneChoices(pred) : fam2 ? productChoices2(pred) : productChoices(pred));
+      const choices = shuffle(rng, substMode ? substChoices(pred) : easMode ? easChoices(pred) : fam4 ? alkyneChoices(pred) : fam3 ? dieneChoices(pred) : fam2 ? productChoices2(pred) : productChoices(pred));
       const list = h('div', 'rl-opts', null);
       const fb = h('div', 'fb'); fb.setAttribute('aria-live', 'polite');
       choices.forEach((o) => list.append(optionCard(o, (btn) => {
@@ -331,7 +392,7 @@ export default {
           fb.className = 'fb ok'; fb.textContent = o.why;
           list.after(fb);
           right++;
-          if (easMode) reveal5(pred, box); else if (fam4) reveal4(pred, box); else if (fam3) reveal3(pred, box); else if (fam2) reveal2(pred, box); else reveal(pred, box);
+          if (substMode) reveal6(pred, box); else if (easMode) reveal5(pred, box); else if (fam4) reveal4(pred, box); else if (fam3) reveal3(pred, box); else if (fam2) reveal2(pred, box); else reveal(pred, box);
           if (right >= need && !doneSent) { doneSent = true; ctx.onResult({ ok: true }); }
           else if (ctx.onProgress) ctx.onProgress();
         } else {

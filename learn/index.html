@@ -409,6 +409,25 @@ h3 { font: 600 .8rem/1 var(--mono); letter-spacing: .08em; text-transform: upper
 .rp-c.done { cursor: default; } .rp-c.done.ortho .rp-dot { fill: var(--ok-soft); fill-opacity: 1; stroke: var(--ok); } .rp-c.done.meta .rp-dot { fill: var(--accent-soft); fill-opacity: 1; stroke: var(--accent); } .rp-c.done.para .rp-dot { fill: var(--hint-soft); fill-opacity: 1; stroke: var(--electron); }
 .rp-tag { font: 700 14px var(--mono); fill: var(--ink); pointer-events: none; }
 .rl-n { font: 700 1rem var(--mono); color: var(--accent); margin-right: 2px; }
+/* Lesson 14: director-sort, attack mode, substituted-arene lab, special-form finder */
+.ds { display: grid; gap: 10px; min-width: 0; } .ds-intro, .ds-hint, .ds-msg { margin: 0; } .ds-msg:empty { display: none; }
+.ds-msg.bad { color: var(--bad); background: var(--bad-soft); font-weight: 500; padding: 10px 14px; border-radius: 12px; } .ds-msg.ok { color: var(--ok); background: var(--ok-soft); font-weight: 500; padding: 10px 14px; border-radius: 12px; }
+.ds-tray { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px; min-height: 64px; border-radius: 14px; background: var(--surface-2); }
+.ds-chip { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-height: 48px; min-width: 64px; padding: 6px 12px; border-radius: 12px; border: 2px solid var(--line-strong); background: var(--surface); color: var(--ink); font: inherit; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.ds-chip:hover:not(:disabled) { border-color: var(--accent); } .ds-chip.sel { border-color: var(--accent); background: var(--accent-soft); } .ds-chip.lock { border-color: var(--ok); background: var(--ok-soft); cursor: default; opacity: 1; color: var(--ink); }
+.ds-lab { font: 700 1.05rem var(--mono); } .ds-nm { font-size: .72rem; color: var(--muted); }
+.ds-lifted { opacity: .35; } .ds-ghost { position: fixed; z-index: 1000; transform: translate(-50%, -50%); pointer-events: none; box-shadow: var(--shadow); }
+.ds-bins { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.ds-bin { border: 2px dashed var(--line-strong); border-radius: 14px; padding: 8px 10px; min-height: 110px; display: grid; align-content: start; gap: 6px; cursor: pointer; background: var(--surface); min-width: 0; }
+.ds-bin:hover, .ds-bin.ds-over { border-color: var(--accent); background: var(--accent-soft); } .ds-bin-h { margin: 0; font-size: .9rem; } .ds-slot { display: flex; flex-wrap: wrap; gap: 6px; }
+.ds-why { background: var(--surface-2); border-radius: 12px; padding: 8px 12px; } .ds-why summary { cursor: pointer; font-weight: 600; } .ds-why ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 6px; }
+.rl-att { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.rl-attc { padding: 8px 10px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface-2); display: grid; gap: 6px; align-content: start; min-width: 0; } .rl-attc.fav { border-color: var(--ok); }
+.rl-attf { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 2px; } .rl-attfig { display: block; border-radius: 10px; padding: 2px; } .rl-attfig.special { outline: 3px solid var(--electron); }
+.rl-attfig .rl-svg { max-width: 104px; } .rl-atth, .rl-attv { margin: 0; } .rl-attv.ok { color: var(--ok); font-weight: 600; } .rl-attv.bad { color: var(--bad); font-weight: 600; }
+.rd-find { display: grid; gap: 8px; padding: 12px; border-radius: 14px; border: 2px solid var(--electron); background: var(--surface-2); } .rd-find-h, .rd-find-msg { margin: 0; } .rd-find-msg:empty { display: none; }
+.rd-find-row { display: flex; flex-wrap: wrap; gap: 8px; } .rd-find-msg.ok { color: var(--ok); font-weight: 600; } .rd-find-msg.bad { color: var(--bad); font-weight: 500; }
+.sp-pool { gap: 6px 10px; } .sp-pm { display: grid; gap: 2px; justify-items: center; text-align: center; max-width: 150px; } .sp-and { font-weight: 700; color: var(--accent); }
 </style>
 
 <div id="app" aria-live="off"><p class="muted" style="padding:24px 16px">Loading Orgo Learn…</p></div>

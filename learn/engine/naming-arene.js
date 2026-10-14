@@ -29,7 +29,7 @@ export const SUB = {
   COOH: { prefix: 'carboxy', mono: 'benzoic acid', parent: 'benzoic acid', prio: 10, label: 'CO₂H', smi: 'C(=O)O' },
   CN: { prefix: 'cyano', mono: 'benzonitrile', parent: 'benzonitrile', prio: 8, label: 'C≡N', smi: 'C#N' },
   SO3H: { prefix: 'sulfo', mono: 'benzenesulfonic acid', parent: 'benzenesulfonic acid', prio: 9, label: 'SO₃H', smi: 'S(=O)(=O)O' },
-  Ac: { solo: true, mono: 'acetophenone', label: 'COCH₃', smi: 'C(C)=O' },
+  Ac: { prefix: 'acetyl', mono: 'acetophenone', parent: 'acetophenone', prio: 6, label: 'COCH₃', smi: 'C(C)=O' },     // Lesson 14: acetophenone is a parent (3-nitroacetophenone), ranking between phenol and benzaldehyde
   Pro: { solo: true, mono: '1-phenylpropan-1-one', oldMono: '1-phenyl-1-propanone', label: 'COCH₂CH₃', smi: 'C(=O)CC' },
   OMe: { solo: true, mono: 'methoxybenzene', oldMono: 'anisole', label: 'OCH₃', smi: 'OC' }
 };
@@ -223,6 +223,7 @@ export function nameArene(smiles, mode = 'new') {
   }
   const items = best.filter((x) => !(parent && x.atom === parent.atom));
   const block = prefixBlock(items, mode);
+  if (parent && parent.key === 'Ac' && (mode === 'new' || n >= 3)) return block ? `1-(${block}phenyl)ethan-1-one` : parentName;   // Lesson 14: numbers in the new style belong to the phenyl ring
   return block ? `${block}${parentName}` : parentName;
 }
 export function nameBothArene(smiles) {
