@@ -68,6 +68,14 @@ Molecules in text: `<mol smiles="CO" label="methanol">` renders an RDKit SVG inl
 - Valence electrons table: H1 C4 N5 O6 F7 Cl7 Br7 I7 S6 P5 B3.
 - Never show a chemically wrong statement. If unsure, leave it out and flag in the report.
 
+## 4b. Solid 3D models (preferred over drawn 3D)
+Whenever 3D helps understanding (geometry, hybridization, conformations, chairs, chirality, mirror images), use a real solid 3D model, not a hand-drawn projection.
+- Renderer: 3Dmol.js `https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js` (WebGL; ball-and-stick default, toggle to space-filling; drag to rotate, pinch/scroll zoom; must work on iPad touch).
+- Coordinates are **computed, never hand-typed**: generate with Python RDKit (`AddHs → EmbedMolecule(randomSeed) → MMFFOptimizeMolecule`) via `learn/tools/gen3d.py`, saved as molblocks in `learn/data/3d/<id>.mol` (or a JS map). Conformers that must be specific (chair with axial vs equatorial substituent, staggered vs eclipsed, R vs S) are built and then checked in the test (e.g. dihedral angles, CIP label from RDKit) before use.
+- Atom colours: CPK (C dark grey, H white, O red, N blue, halogens green/brown), legible on both themes; optional labels and lone-pair hints are overlays.
+- Widget `model3d` config: `{mol:"<id>", style:"stick"|"sphere", spin?:bool, highlight?:[atomIdx], labels?:{idx:text}, compare?:"<id2>"}` (`compare` shows two models side by side with linked rotation, e.g. enantiomers).
+- Fallback: if WebGL is unavailable, show the RDKit 2D depiction with a note.
+
 ## 5. Skill tags (weak-spot taxonomy)
 `valence-electrons`, `bond-count` (HONC), `lone-pairs`, `octet`, `multiple-bonds`, `formal-charge`, `electron-count-total`, `hybridization`, `polarity`, `pka-direction`, `curved-arrows`, `skeletal`, `functional-groups`, `naming`, `conformations`, `chairs`, `ez`, `mechanism`, `markovnikov`, `stereo-addition`, `resonance`, `eas`, `directors`, `synthesis`, `chirality`, `rs`, `stereo-relationships`. Add new tags here when a lesson needs one.
 
