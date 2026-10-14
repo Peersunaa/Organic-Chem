@@ -3,6 +3,7 @@ import { analyze, coords2d, VALENCE, NAME, GROUP } from './chem.js';
 import { hydrogenPositions } from './widgets/lewis-core.js';
 import { generateShape, SHAPE_SKILLS } from './generators-shape.js';
 import { generateAcid, ACID_SKILLS } from './generators-acid.js';
+import { generateFg, FG_SKILLS } from './generators-fg.js';
 
 export const POOL = ['CN', 'CC#N', 'OC=O', 'C[O-]', '[NH4+]', 'CCl', 'C=C', 'CC=O', 'CC(=O)O', 'COC', '[OH3+]', '[CH3+]', '[CH3-]', 'O=C=O'];
 const MINUS = '−';
@@ -158,6 +159,7 @@ const BY_SKILL = { 'lone-pairs': ['lp'], 'formal-charge': ['fc'], 'electron-coun
 export function generate(generatorId, count, { skill = null, rng = Math.random } = {}) {
   if (generatorId === 'shape-basic') return generateShape(count, { skill, rng });
   if (generatorId === 'acid-base') return generateAcid(count, { skill, rng });
+  if (generatorId === 'skeletal-fg') return generateFg(count, { skill, rng });
   const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : BASIC_TASKS;
   const out = [];
   let last = null;
@@ -169,9 +171,9 @@ export function generate(generatorId, count, { skill = null, rng = Math.random }
   }
   return out;
 }
-export const GENERATORS = { 'lewis-basic': true, 'shape-basic': true, 'acid-base': true };
+export const GENERATORS = { 'lewis-basic': true, 'shape-basic': true, 'acid-base': true, 'skeletal-fg': true };
 /** Which generator serves "Practise this" for a weak-spot skill. */
-export function generatorForSkill(skill) { return ACID_SKILLS.includes(skill) ? 'acid-base' : SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
+export function generatorForSkill(skill) { return FG_SKILLS.includes(skill) ? 'skeletal-fg' : ACID_SKILLS.includes(skill) ? 'acid-base' : SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
 
 const SUBS = '₀₁₂₃₄₅₆₇₈₉';
 const subNum = (n) => (n === 1 ? '' : String(n).split('').map((d) => SUBS[d]).join(''));

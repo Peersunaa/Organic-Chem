@@ -13,6 +13,8 @@ export const SKILLS = {
   'pka-direction': { label: 'pKa & equilibrium direction', rule: 'A smaller pKa means a stronger acid and a weaker conjugate base. An equilibrium favours the side with the weaker acid (the higher pKa).' },
   'curved-arrows': { label: 'Curved arrows', rule: 'A curved arrow starts at electrons (a lone pair or a bond) and points to the atom that receives them. It never starts at an atom without electrons, such as H⁺.' },
   'lewis-acid-base': { label: 'Lewis acids & bases', rule: 'A Lewis base donates an electron pair (it has a lone pair). A Lewis acid accepts one (an atom short of an octet, or a positive ion).' },
+  'skeletal': { label: 'Skeletal structures', rule: 'In a skeletal drawing there is a C at every corner and line end. Hydrogens on carbon are not drawn: each carbon has 4 minus (lines into it) H, and a double bond counts as 2 lines. Atoms other than C and H are always written.' },
+  'functional-groups': { label: 'Functional groups', rule: 'A functional group is a small unit of atoms with its own chemistry. Look at what is on the C=O carbon (H, C, O or N) and what the O or N is bonded to.' },
   'electron-count-total': { label: 'Total valence electrons', rule: 'Add each atom’s valence electrons (H 1, C 4, N 5, O 6, halogens 7). Subtract 1 for each + charge, add 1 for each − charge.' }
 };
 export function skillLabel(s) { return (SKILLS[s] && SKILLS[s].label) || s; }

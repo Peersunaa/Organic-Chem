@@ -156,3 +156,24 @@ export function svg(smiles, opts = {}) {
     return s;
   } finally { m.delete(); }
 }
+
+/**
+ * Skeletal depiction for tapping atoms. Every heavy atom is "highlighted" while RDKit lays the molecule out so the
+ * positions we read back (from the highlight ellipses) match the final drawing exactly; the ellipses are then removed.
+ * Returns { svg, pts:[{x,y}] in percent of the drawing, w, h }.
+ */
+export function svgPick(smiles, opts = {}) {
+  const { width = 300, height = 200 } = opts;
+  const m = rdkit().get_mol(smiles);
+  if (!m) return null;
+  try {
+    const n = m.get_num_atoms();
+    const details = { width, height, bondLineWidth: 2, padding: 0.12, addAtomIndices: false, atoms: [...Array(n).keys()], highlightRadius: 0.2 };
+    let s = m.get_svg_with_highlights(JSON.stringify(details));
+    const pts = [];
+    s = s.replace(/<ellipse cx='([\d.]+)' cy='([\d.]+)'[^>]*class='atom-(\d+)'[^>]*\/>/g, (all, x, y, i) => { pts[Number(i)] = { x: (Number(x) / width) * 100, y: (Number(y) / height) * 100 }; return ''; });
+    s = s.replace(/<\?xml[^>]*\?>/, '').replace(/<rect [^>]*fill:#FFFFFF[^>]*>\s*<\/rect>/, '').replace(/width='\d+(\.\d+)?px' height='\d+(\.\d+)?px'/, '').replace(/#000000/g, 'currentColor');
+    for (const k of Object.keys(COLORS)) s = s.split(k).join(COLORS[k]);
+    return { svg: s, pts, w: width, h: height };
+  } finally { m.delete(); }
+}

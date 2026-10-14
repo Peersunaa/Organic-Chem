@@ -137,6 +137,23 @@ h3 { font: 600 .8rem/1 var(--mono); letter-spacing: .08em; text-transform: upper
 .widget, .visual { display: grid; gap: 12px; min-width: 0; }
 .iupac { font-weight: 600; }
 
+/* lesson 04: full <-> skeletal pair, group-finder, skeletal-builder */
+.pair { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.pair .mol { flex: 1 1 140px; max-width: 230px; } .pair-arrow { font: 700 1.4rem var(--display); color: var(--accent); }
+.gf-stage { position: relative; width: 100%; max-width: 320px; margin: 0 auto; color: var(--ink); }
+.gf-stage.big { max-width: 380px; } .gf-stage svg { width: 100%; height: auto; display: block; }
+.gf-atom { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; padding: 0; border-radius: 50%; border: 2px solid transparent; background: transparent; cursor: pointer; touch-action: manipulation; }
+.gf-stage.big .gf-atom { width: 30px; height: 30px; margin: -15px 0 0 -15px; }
+.gf-atom:hover:not(:disabled) { border-color: var(--line-strong); }
+.gf-atom[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.gf-atom.bad { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 20%, transparent); }
+.gf-atom.lock[aria-pressed="true"] { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 22%, transparent); }
+.gf-atom:disabled { cursor: default; }
+.gf-atom:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.gf-row { display: flex; gap: 10px; flex-wrap: wrap; } .gf-msg:empty { display: none; }
+.sb-formula { font: 700 clamp(1.2rem, 5vw, 1.6rem) var(--mono); text-align: center; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); overflow-wrap: anywhere; }
+
+
 /* widgets */
 .lb { display: grid; gap: 10px; min-width: 0; }
 .lb-svg { width: 100%; max-width: 460px; height: auto; margin: 0 auto; display: block; background: var(--surface-2); border-radius: 14px; touch-action: manipulation; user-select: none; -webkit-user-select: none; }

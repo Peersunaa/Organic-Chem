@@ -151,6 +151,7 @@ function lessonView(L) {
 }
 
 function practice(skill) {
+  setDrawStyle(generatorForSkill(skill) === 'skeletal-fg' ? 'skeletal' : 'full');
   const host = h('div', { class: 'step' });
   const card = h('article', { class: 'card' }, host);
   const ctx = {

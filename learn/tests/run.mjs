@@ -14,6 +14,10 @@ import * as store from '../engine/store.js';
 import { ACIDS, ACID, reaction, deprotonate, protonate, conjugateBase, labelCounts, lewisRole, strongerAcid, weakerAcid } from '../engine/acidbase.js';
 import * as arrow from '../engine/widgets/arrow-core.js';
 import * as eqw from '../engine/widgets/equilibrium-arrow.js';
+import * as gf from '../engine/widgets/group-finder.js';
+import * as sb from '../engine/widgets/skeletal-builder.js';
+import { FG, FG_POOL, QUIZ_GROUPS, GROUP_IDS, classify, matchGroup, allMatches, singleGroups } from '../engine/functional-groups.js';
+import { hCount, lineCount, formulaCounts, hill, formulaOf, parseFormula, gradeFormula, condensedToSmiles, sameCounts } from '../engine/skeletal.js';
 import { ARROW_BASES, ARROW_ACIDS, arrowScene, LEWIS_POOL } from '../engine/generators-acid.js';
 
 const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships']);
@@ -56,6 +60,23 @@ function sigmaPiIndependent(smi) {
   return { sigma: j.bonds.length, pi: j.bonds.reduce((t, b) => t + ((b.bo ?? 1) - 1), 0) };
 }
 
+/** Independent route for H counts and formulas: add explicit H atoms and count them (not RDKit's implicit-H numbers). */
+function atomsIndependent(smi) {
+  const R = rdkit();
+  const m0 = R.get_mol(smi);
+  const mb = m0.add_hs(); m0.delete();
+  const m = R.get_mol(mb, JSON.stringify({ removeHs: false }));
+  const j = JSON.parse(m.get_json()).molecules[0]; m.delete();
+  const SYM = { 1: 'H', 6: 'C', 7: 'N', 8: 'O', 9: 'F', 16: 'S', 17: 'Cl', 35: 'Br', 53: 'I' };
+  return j.atoms.map((a, i) => ({ i, sym: SYM[a.z ?? 6], bonds: j.bonds.filter((b) => b.atoms.includes(i)).map((b) => b.atoms[0] === i ? b.atoms[1] : b.atoms[0]) })).map((a) => ({ ...a, bondsTo: a.bonds }));
+}
+function hNeighboursIndependent(smi, idx) { const at = atomsIndependent(smi); return at[idx].bondsTo.filter((k) => at[k].sym === 'H').length; }
+function hillIndependent(smi) {
+  const c = {}; atomsIndependent(smi).forEach((a) => { c[a.sym] = (c[a.sym] || 0) + 1; });
+  const rest = Object.keys(c).filter((k) => k !== 'C' && k !== 'H').sort();
+  return ['C', 'H', ...rest].filter((k) => c[k]).map((k) => k + (c[k] > 1 ? c[k] : '')).join('');
+}
+
 function recompute(d) {
   if (d.quantity === 'strongerAcid') return d.ids.reduce((b, i) => (ACID[i].pka < ACID[b].pka ? i : b));
   if (d.quantity === 'weakestAcid') return d.ids.reduce((b, i) => (ACID[i].pka > ACID[b].pka ? i : b));
@@ -65,6 +86,9 @@ function recompute(d) {
   if (d.quantity === 'deprotonates') { const ok1 = d.ids.filter((i) => ACID[i].pka < ACID[d.base].pka); if (ok1.length !== 1) throw new Error('deprotonates needs exactly one'); return ok1[0]; }
   if (d.quantity === 'lewis') { const r = lewisRole(analyze(d.smiles)); return r; }
   if (d.quantity === 'moreEN') return ENEG[d.a] > ENEG[d.b] ? d.a : d.b;
+  if (d.quantity === 'ccount') return atomsIndependent(d.smiles).filter((a) => a.sym === 'C').length;
+  if (d.quantity === 'hcount') return hNeighboursIndependent(d.smiles, d.atom);
+  if (d.quantity === 'formula') return hillIndependent(d.smiles);
   if (d.quantity === 'valence') return VALENCE[d.element];
   if (d.quantity === 'bonds') return d.element === 'H' ? 1 : 8 - VALENCE[d.element];
   const info = analyze(d.smiles);
@@ -88,8 +112,8 @@ function htmlStrings(o, out = []) {
 }
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
-ok(PLANNED.length === 13 && PLANNED[0].id === '04' && PLANNED[12].id === '16', 'placeholders 04-16');
-ok(LESSONS.length === 3 && LESSONS[1].id === '02' && LESSONS[2].id === '03', 'lessons 01-03 registered and unlocked');
+ok(PLANNED.length === 12 && PLANNED[0].id === '05' && PLANNED[11].id === '16', 'placeholders 05-16');
+ok(LESSONS.length === 4 && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04', 'lessons 01-04 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -191,8 +215,39 @@ for (const L of LESSONS) {
       ok(c.solution.bonds.length === c.bonds.length && c.solution.lp.length === c.atoms.length, `${t} solution arrays sized`);
     }
   }
+  for (const s of L.steps) {
+    const t = `${tag}/${s.id}`;
+    if (s.type === 'try' && s.widget === 'group-finder') {
+      const c = s.config;
+      ok(FG[c.group] && !FG[c.group].none, `${t} group-finder group known`);
+      const want = gf.solution(c);
+      ok(want.length > 0 && gf.isUnique(c), `${t} group-finder has exactly one instance of ${c.group}`);
+      eq(want, matchGroup(c.smiles, c.group), `${t} group-finder solution = SMARTS match`);
+      ok(gf.grade(c, want).ok, `${t} group-finder accepts the SMARTS atoms`);
+      ok(!gf.grade(c, []).ok && gf.grade(c, []).empty, `${t} group-finder empty not ok`);
+      ok(!gf.grade(c, want.slice(1)).ok && /includes/.test(gf.grade(c, want.slice(1)).diagnosis), `${t} group-finder subset rejected with message`);
+      const nInfo = analyze(c.smiles).atoms.length;
+      const other = [...Array(nInfo).keys()].find((i) => !want.includes(i));
+      ok(!gf.grade(c, [...want, other]).ok && /not part/.test(gf.grade(c, [...want, other]).diagnosis), `${t} group-finder superset rejected with message`);
+      ok(want.every((i) => i >= 0 && i < nInfo), `${t} group-finder indices in range`);
+    }
+    if (s.type === 'try' && s.widget === 'skeletal-builder') {
+      const c = s.config;
+      const t0 = sb.target(c);
+      ok(t0 !== null, `${t} builder condensed parses to a valid structure`);
+      ok(c.options.length === 4 && c.options.every((o) => canon(o.smiles) !== null), `${t} builder has 4 valid options`);
+      ok(new Set(c.options.map((o) => canon(o.smiles))).size === 4, `${t} builder options are distinct`);
+      ok(c.options.filter((o) => canon(o.smiles) === t0).length === 1, `${t} builder exactly one option matches the formula`);
+      const k = sb.solution(c);
+      ok(sb.grade(c, k).ok, `${t} builder correct option accepted`);
+      c.options.forEach((o, i) => { if (i !== k) { ok(!sb.grade(c, i).ok && sb.grade(c, i).diagnosis.length > 15, `${t} builder option ${i} rejected with a diagnosis`); } });
+      // near misses: the distractors have the same element set or differ by one carbon, never wildly different
+      const fT = formulaOf(t0);
+      c.options.forEach((o, i) => { if (i !== k) { const f = formulaCounts(o.smiles); const w = formulaCounts(t0); ok(f.O === w.O && Math.abs((f.C || 0) - (w.C || 0)) <= 1, `${t} builder distractor ${i} is a near miss (${hill(f)} vs ${fT})`); } });
+    }
+  }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -378,6 +433,171 @@ function checkArrowConfig(t, c, reactants, products) {
   const text = htmlStrings(l.steps).join(' ');
   const quoted = [...text.matchAll(/pKa (?:≈ )?(?:−)?(\d+(?:\.\d+)?)/g)].map((m) => m[1]);
   ok(quoted.length > 8 && quoted.every((q) => allowed.has(q)), `L03 only quotes allowed pKa values (${[...new Set(quoted)].join(', ')})`);
+}
+
+// ---- Lesson 04 specifics
+{
+  const l = LESSONS.find((x) => x.id === '04');
+  ok(l.steps.length >= 15 && l.steps.length <= 18, `L04 has 15-18 steps (${l.steps.length})`);
+  ok(l.drawing === 'skeletal' && l.minutes === 25 && l.chapter === 2, 'L04 drawing skeletal, 25 min, chapter 2');
+  eq(l.sections, ['2.1', '2.6'], 'L04 sections');
+  eq(l.mastery, { count: 3, generator: 'skeletal-fg' }, 'L04 mastery uses skeletal-fg');
+  ok(l.steps[0].type === 'predict' && l.steps.findIndex((s) => s.type === 'explain') > 0, 'L04 predicts before it explains');
+  ok(l.steps.every((s) => TYPES.has(s.type)), 'L04 step types');
+  ok(l.steps.some((s) => s.skill === 'skeletal') && l.steps.some((s) => s.skill === 'functional-groups'), 'L04 trains skeletal and functional-groups');
+  // (a) H count, (b) formula, (c) group-finder, (d) skeletal-builder, (e) worked conversion, (f) 3D zig-zag
+  ok(l.steps.filter((s) => s.derive && s.derive.quantity === 'hcount').length >= 2, 'L04 (a) H-count steps, answers recomputed');
+  ok(l.steps.some((s) => s.formula === true && s.derive && s.derive.quantity === 'formula'), 'L04 (b) typed-formula step, answer recomputed');
+  ok(l.steps.filter((s) => s.widget === 'group-finder').length >= 3, 'L04 (c) group-finder used');
+  ok(l.steps.some((s) => s.widget === 'skeletal-builder' && s.config.condensed === 'CH3CH2CH(OH)CH3'), 'L04 (d) skeletal-builder with CH3CH2CH(OH)CH3');
+  ok(l.steps.some((s) => s.type === 'worked' && /CH₃CH₂CH\(OH\)CH₂CH₃/.test(s.problem)), 'L04 (e) condensed-to-skeletal worked example');
+  const w = l.steps.find((s) => s.type === 'worked');
+  eq(w.moves.map((m) => m.figure ? canon(m.figure.smiles) : null).filter(Boolean), [canon('CCCCC'), canon('CCC(O)CC')], 'L04 worked figures build up to 3-pentanol');
+  eq(canon(condensedToSmiles('CH3CH2CH(OH)CH2CH3')), canon('CCC(O)CC'), 'L04 worked condensed formula = final figure');
+  const td = l.steps.find((s) => s.visual && s.visual.config.mol === 'butane');
+  ok(!!td && td.type === 'choice', 'L04 (f) 3D butane step');
+  eq(l.steps.find((x) => x.id === 's10').both, true, 'L04 uses the side-by-side full/skeletal pair');
+  eq(l.useIt.book, ['2.1', '2.2', '2.3', '2.15', '2.16', '2.17', '2.29', '2.30', '2.34', '2.35', '2.36', '2.37', '2.40', '2.51'], 'L04 book problems');
+  ok(l.useIt.endFrom === 29, 'L04 end-of-chapter exercises start at 2.29');
+  // every group named in the lesson prose maps to a group in the table
+  const prose = htmlStrings(l.steps).join(' ');
+  ok(/aldehyde/.test(prose) && /ketone/.test(prose) && /ester/.test(prose) && /ether/.test(prose) && /amine/.test(prose) && /amide/.test(prose), 'L04 covers the look-alike pairs');
+}
+
+// ---- 3D butane (zig-zag)
+{
+  ok(models.butane && canon(models.butane.molblock) === canon('CCCC'), '3D butane matches its SMILES');
+  const mb = models.butane.molblock.split('\n');
+  const P = (i) => [0, 10, 20].map((o) => parseFloat(mb[4 + i].slice(o, o + 10)));
+  const sub = (a, b) => a.map((v, k) => v - b[k]);
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const dot = (a, b) => a.reduce((t, v, k) => t + v * b[k], 0);
+  const b1 = sub(P(1), P(0)), b2 = sub(P(2), P(1)), b3 = sub(P(3), P(2));
+  const n1 = cross(b1, b2), n2 = cross(b2, b3);
+  const dih = Math.abs(Math.atan2(dot(cross(n1, n2), b2) / Math.hypot(...b2), dot(n1, n2)) * 180 / Math.PI);
+  ok(dih > 170, `butane C1-C2-C3-C4 dihedral ${dih.toFixed(1)} is anti (zig-zag, all four carbons coplanar)`);
+  const a1 = modelAngle(models.butane.molblock, 1, 0, 2), a2 = modelAngle(models.butane.molblock, 2, 1, 3);
+  ok(a1 > 108 && a1 < 114 && a2 > 108 && a2 < 114, `butane C-C-C angles near tetrahedral (${a1.toFixed(1)}, ${a2.toFixed(1)})`);
+  eq(['C', 'C', 'C', 'C'], mb.slice(4, 8).map((l) => l.slice(31, 33).trim()), 'butane atoms 0-3 are the carbons');
+  ok(mb.length > 20 && mb.slice(8, 18).every((l) => /\sH\s/.test(l)), 'butane has explicit H');
+}
+
+// ---- functional-group SMARTS classifier vs hand-checked expected groups
+{
+  ok(FG_POOL.length >= 25, `pool has at least 25 molecules (${FG_POOL.length})`);
+  ok(QUIZ_GROUPS.length === 16, 'sixteen quiz groups: alkane alkene alkyne arene halide alcohol ether amine thiol sulfide aldehyde ketone acid ester amide nitrile');
+  for (const g of GROUP_IDS) ok(rdkit().get_qmol(FG[g].smarts) !== null, `SMARTS parses for ${g}`);
+  const order = (arr) => GROUP_IDS.filter((g) => arr.includes(g));
+  const covered = new Set();
+  for (const e of FG_POOL) {
+    ok(canon(e.smiles) !== null, `pool ${e.name} parses`);
+    eq(classify(e.smiles), order(e.groups), `classifier on ${e.name} (${e.smiles})`);
+    e.groups.forEach((g) => covered.add(g));
+  }
+  ok(QUIZ_GROUPS.every((g) => covered.has(g)), `pool covers all quiz groups (missing ${QUIZ_GROUPS.filter((g) => !covered.has(g))})`);
+  // traps: each look-alike must be separated
+  const has = (smi, g) => classify(smi).includes(g);
+  ok(has('CC(C)=O', 'ketone') && !has('CC(C)=O', 'aldehyde'), 'acetone is a ketone, not an aldehyde');
+  ok(has('CCC=O', 'aldehyde') && !has('CCC=O', 'ketone'), 'propanal is an aldehyde, not a ketone');
+  ok(has('CC(=O)OC', 'ester') && !has('CC(=O)OC', 'ether') && !has('CC(=O)OC', 'ketone') && !has('CC(=O)OC', 'acid'), 'methyl acetate is an ester only');
+  ok(has('COC', 'ether') && !has('COC', 'ester'), 'dimethyl ether is an ether, not an ester');
+  ok(has('CC(=O)O', 'acid') && !has('CC(=O)O', 'alcohol') && !has('CC(=O)O', 'ester'), 'acetic acid is an acid, not an alcohol or ester');
+  ok(has('CCO', 'alcohol') && !has('CCO', 'acid') && !has('CCO', 'ether'), 'ethanol is an alcohol');
+  ok(has('CN', 'amine') && !has('CN', 'amide'), 'methylamine is an amine');
+  ok(has('CC(N)=O', 'amide') && !has('CC(N)=O', 'amine'), 'acetamide is an amide, not an amine');
+  ok(has('CC#N', 'nitrile') && !has('CC#N', 'amine') && !has('CC#N', 'alkyne'), 'acetonitrile is a nitrile only');
+  ok(has('CC#C', 'alkyne') && !has('CC#C', 'nitrile'), 'propyne is an alkyne');
+  ok(!has('c1ccccc1', 'alkene') && has('c1ccccc1', 'arene'), 'benzene is an arene, not an alkene');
+  ok(has('Oc1ccccc1', 'phenol') && !has('Oc1ccccc1', 'alcohol'), 'phenol OH is not labelled alcohol');
+  ok(has('CCSCC', 'sulfide') && !has('CCSCC', 'thiol') && has('CCS', 'thiol') && !has('CCS', 'sulfide'), 'thiol vs sulfide');
+  ok(!has('CCCC', 'alcohol') && classify('CCCC').join() === 'alkane' && classify('C1CCCCC1').join() === 'alkane', 'alkanes (chain and ring) have no functional group');
+  ok(classify('CCO').indexOf('alkane') === -1 && classify('C=C').indexOf('alkane') === -1, 'heteroatoms and pi bonds are never alkane');
+  // group atoms: exact atom sets
+  eq(matchGroup('CCC(C)=O', 'ketone'), [2, 4], 'butanone ketone atoms C2, O4');
+  eq(matchGroup('CC(=O)OCC', 'ester'), [1, 2, 3], 'ethyl acetate ester atoms C1, =O2, O3');
+  eq(matchGroup('CC(=O)Nc1ccc(O)cc1', 'amide'), [1, 2, 3], 'paracetamol amide atoms');
+  eq(matchGroup('CC=CC(C)O', 'alkene'), [1, 2], 'pentenol alkene atoms');
+  eq(matchGroup('CC=CC(C)O', 'alcohol'), [3, 5], 'pentenol alcohol atoms');
+  eq(allMatches('CCOCC', 'ether').length, 1, 'diethyl ether: one ether instance');
+  eq(allMatches('OCCO', 'alcohol').length, 2, 'ethylene glycol: two alcohol instances (not usable for tapping)');
+}
+
+// ---- formula and H-count helpers
+{
+  eq(formulaOf('CC(C)CCO'), 'C5H12O', 'formula of isoamyl alcohol'); eq(formulaOf('CCC(=O)CC'), 'C5H10O', 'formula pentan-3-one');
+  eq(hill(formulaCounts('Cc1ccccc1')), 'C7H8', 'toluene C7H8'); eq(formulaOf('CC(=O)Oc1ccccc1C(=O)O'), 'C9H8O4', 'aspirin C9H8O4');
+  eq(formulaOf('CCCl'), 'C2H5Cl', 'chloroethane'); eq(formulaOf('CC#N'), 'C2H3N', 'acetonitrile');
+  for (const e of FG_POOL) { eq(formulaOf(e.smiles), hillIndependent(e.smiles), `formula ${e.name} agrees with the add-Hs route`); }
+  eq([hCount('CC(Cl)CCC', 1), hCount('O=C1CCCCC1', 1), lineCount('O=C1CCCCC1', 1), hCount('C1=CCCCC1', 0)], [1, 0, 4, 1], 'known H counts');
+  ok(['C4H8O', 'C₄H₈O', 'OC4H8', 'H8C4O', 'C4 H8 O'].every((x) => gradeFormula('C4H8O', x).ok), 'typed formula: subscripts, plain digits, any element order, spaces');
+  ok(!gradeFormula('C4H8O', 'C4H10O').ok && /you wrote 10 H but the structure has 8/.test(gradeFormula('C4H8O', 'C4H10O').diagnosis), 'typed formula: wrong H count diagnosed');
+  ok(!gradeFormula('C4H8O', 'C4H8').ok && /O is missing/.test(gradeFormula('C4H8O', 'C4H8').diagnosis), 'typed formula: missing O diagnosed');
+  ok(gradeFormula('C4H8O', 'C4H8').ok === false && gradeFormula('C4H8O', 'banana').malformed === true && gradeFormula('C4H8O', '4C').malformed === true, 'typed formula: malformed input flagged');
+  ok(gradeFormula('C5H12O', 'C5H12O1').ok && gradeFormula('C2H5Cl', 'C2H5Cl').ok && !gradeFormula('C2H5Cl', 'C2H5CL').ok, 'typed formula: explicit 1 ok, Cl case-sensitive');
+  ok(parseFormula('C2H6O') && sameCounts(parseFormula('C2H6O'), { C: 2, H: 6, O: 1 }), 'parseFormula counts');
+  // condensed formulas
+  const C = [['CH3CH2CH(OH)CH3', 'CCC(C)O'], ['(CH3)2CHOH', 'CC(C)O'], ['CH3CH=CHCH2CH3', 'CC=CCC'], ['CH3C(=O)CH3', 'CC(C)=O'], ['CH3CH2C(=O)OCH3', 'CCC(=O)OC'], ['CH3C(CH3)2CH3', 'CC(C)(C)C'], ['CH3CH2NH2', 'CCN'], ['CH3CH2CH2Cl', 'CCCCl'], ['CH3C#N', 'CC#N']];
+  C.forEach(([a, b]) => eq(canon(condensedToSmiles(a)), canon(b), `condensed ${a}`));
+  ['CHO', 'CH3CH2CH3(OH)', 'CH3CH2(', 'CH4CH3'].forEach((bad) => { let threw = false; try { condensedToSmiles(bad); } catch (e) { threw = true; } ok(threw, `condensed parser rejects ${bad}`); });
+}
+
+// ---- skeletal-fg generator
+{
+  const kinds = new Set();
+  for (const skill of [null, 'skeletal', 'functional-groups']) {
+    const probs = generate('skeletal-fg', 50, { skill });
+    ok(probs.length === 50, `skeletal-fg ${skill} count`);
+    for (const p of probs) {
+      kinds.add(p.kind + ':' + p.skill + (p.formula ? ':formula' : ''));
+      const t = `skeletal-fg ${skill}/${p.kind}:${p.smiles}`;
+      ok(p.prompt && p.derive && p.hints.length === 2 && p.hints.every((x) => x.length > 5), `${t} fields`);
+      ok(TAXONOMY.has(p.skill), `${t} skill tag`);
+      ok(p.skill === (skill || p.skill) && (skill === null || p.skill === skill), `${t} respects requested skill`);
+      const entry = FG_POOL.find((e) => e.smiles === p.smiles);
+      ok(!!entry, `${t} molecule from the pool`);
+      if (p.kind === 'input' && !p.formula) {
+        const a = analyze(p.smiles).atoms[p.highlight[0]];
+        ok(a.sym === 'C', `${t} H-count asks about carbon`);
+        ok(p.answer === hNeighboursIndependent(p.smiles, p.highlight[0]), `${t} H count ${p.answer} == add-Hs recompute`);
+        ok(p.answer === 4 - lineCount(p.smiles, p.highlight[0]), `${t} H = 4 - lines`);
+        ok(checkInput({ answer: p.answer, diagnose: p.wrong }, String(p.answer)).ok, `${t} answer accepted`);
+        (p.wrong || []).forEach((w) => ok(w.match !== p.answer && checkInput({ answer: p.answer, diagnose: p.wrong }, String(w.match)).diagnosis === w.why, `${t} wrong routes`));
+      } else if (p.kind === 'input') {
+        ok(p.answer === hillIndependent(p.smiles), `${t} formula ${p.answer} == add-Hs recompute`);
+        const st = { answer: p.answer, formula: true, diagnose: p.wrong, skill: p.skill };
+        ok(checkInput(st, p.answer).ok && checkInput(st, p.answer.replace(/\d+/g, (d) => d.split('').map((x) => '₀₁₂₃₄₅₆₇₈₉'[x]).join(''))).ok, `${t} formula accepted with plain digits and subscripts`);
+        ok(!checkInput(st, p.answer + 'H').ok && checkInput(st, p.answer + 'H').diagnosis.length > 10, `${t} wrong formula gets a diagnosis`);
+      } else if (p.kind === 'choice') {
+        ok(p.options.length === 4 && p.options.filter((o) => o.correct).length === 1 && p.options.every((o) => o.why.length > 10), `${t} one correct of 4, all with why`);
+        const right = p.options.find((o) => o.correct);
+        const present = classify(p.smiles);
+        const gid = GROUP_IDS.find((g) => (g === 'alkane' ? 'alkane (no functional group)' : FG[g].name) === right.text);
+        ok(!!gid && present.includes(gid), `${t} correct option is a group the classifier finds (${right.text})`);
+        if (gid !== 'alkane') eq(p.highlight, matchGroup(p.smiles, gid), `${t} highlight = SMARTS atoms of the answer`);
+        const names = p.options.map((o) => o.text);
+        ok(new Set(names).size === 4, `${t} distinct options`);
+        p.options.filter((o) => !o.correct).forEach((o) => {
+          const g = GROUP_IDS.find((x) => (x === 'alkane' ? 'alkane (no functional group)' : FG[x].name) === o.text);
+          ok(g && !present.includes(g) && !(entry.avoid || []).includes(g), `${t} distractor ${o.text} is truly absent`);
+        });
+      } else if (p.kind === 'groupfind') {
+        ok(singleGroups(p.smiles).includes(p.config.group), `${t} group has a unique instance`);
+        ok(gf.isUnique(p.config) && gf.grade(p.config, gf.solution(p.config)).ok, `${t} group-finder solution accepted`);
+        eq(gf.solution(p.config), matchGroup(p.smiles, p.config.group), `${t} solution = SMARTS match`);
+        ok(p.answer === gf.solution(p.config).join(','), `${t} answer string`);
+        ok(!gf.grade(p.config, [gf.solution(p.config)[0]]).ok || gf.solution(p.config).length === 1, `${t} partial rejected`);
+      } else ok(false, 'unknown skeletal-fg kind ' + p.kind);
+    }
+  }
+  ok(['input:skeletal', 'input:skeletal:formula', 'choice:functional-groups', 'groupfind:functional-groups'].every((k) => kinds.has(k)), 'skeletal-fg covers all four task types');
+  const f1 = generate('skeletal-fg', 6).map((p) => p.smiles).join('|'), f2 = generate('skeletal-fg', 6).map((p) => p.smiles).join('|');
+  ok(f1.length > 0 && f2.length > 0, 'skeletal-fg fresh runs');
+  const seen = new Set(); for (let i = 0; i < 20; i++) generate('skeletal-fg', 3).forEach((p) => seen.add(p.smiles));
+  ok(seen.size > 8, `skeletal-fg varies molecules (${seen.size})`);
+  ok(generatorForSkill('skeletal') === 'skeletal-fg' && generatorForSkill('functional-groups') === 'skeletal-fg' && generatorForSkill('hybridization') === 'shape-basic' && generatorForSkill('pka-direction') === 'acid-base', 'generatorForSkill routes skeletal and functional-groups');
+  // the highlighted-atom count in name problems: every quiz group can be asked
+  const asked = new Set(); for (let i = 0; i < 400; i++) generate('skeletal-fg', 1, { skill: 'functional-groups' }).forEach((p) => { if (p.kind === 'choice') asked.add(p.options.find((o) => o.correct).text); });
+  ok(QUIZ_GROUPS.filter((g) => g !== 'alkane').every((g) => asked.has(FG[g].name)), `name task reaches every group (${[...asked].length})`);
 }
 
 // ---- acid-base generator

@@ -1,5 +1,6 @@
 // Step renderers. Each renderer fills `host` and reports through ctx.
 import { svg as rdSvg } from './chem.js';
+import { gradeFormula } from './skeletal.js';
 import { WIDGETS } from './widgets/index.js';
 import { skillRule } from './skills.js';
 import { generate } from './generators.js';
@@ -14,6 +15,14 @@ export function h(tag, props, ...kids) {
   }
   for (const c of kids.flat()) if (c != null) e.append(c);
   return e;
+}
+
+/** Same molecule in both styles, side by side (full drawing on the left, skeletal on the right). */
+export function molPair(smiles, label, opts = {}) {
+  const wrap = h('div', { class: 'pair' });
+  wrap.append(molFigure(smiles, 'Full drawing', { ...opts, style: 'full' }), h('span', { class: 'pair-arrow', 'aria-hidden': 'true' }, '↔'), molFigure(smiles, 'Skeletal', { ...opts, style: 'skeletal' }));
+  if (label) wrap.setAttribute('aria-label', label);
+  return wrap;
 }
 
 export function molFigure(smiles, label, opts = {}) {
@@ -31,7 +40,12 @@ export function nameSpan(n) { const s = h('span', { class: 'iupac', 'data-name-n
 /** Turn <mol> and <name> tags inside trusted lesson HTML into rendered chemistry. */
 export function enhance(root) {
   root.querySelectorAll('mol').forEach((m) => {
-    m.replaceWith(molFigure(m.getAttribute('smiles'), m.getAttribute('label') || ''));
+    const draw = m.getAttribute('draw');
+    m.replaceWith(molFigure(m.getAttribute('smiles'), m.getAttribute('label') || '', draw ? { style: draw } : {}));
+  });
+  root.querySelectorAll('molpair').forEach((m) => {
+    const hl = (m.getAttribute('hl') || '').split(',').filter(Boolean).map(Number);
+    m.replaceWith(molPair(m.getAttribute('smiles'), m.getAttribute('label') || '', { highlight: hl }));
   });
   root.querySelectorAll('name').forEach((n) => n.replaceWith(nameSpan({ new: n.getAttribute('new'), old: n.getAttribute('old') })));
   return root;
@@ -73,6 +87,12 @@ const norm = (s) => String(s).trim().replace(/[−–‒]/g, '-').replace(/\s+/g
 /** Pure grading of a typed answer; used by the input step, mastery and tests. */
 export function checkInput(step, raw) {
   if (String(raw).trim() === '') return { ok: false, diagnosis: 'Type your answer first.', empty: true };
+  if (step.formula) {
+    const r = gradeFormula(step.answer, raw);
+    if (r.ok) return { ok: true };
+    const d = (step.diagnose || []).find((x) => gradeFormula(x.match, raw).ok);
+    return { ok: false, malformed: r.malformed, diagnosis: d ? d.why : r.diagnosis };
+  }
   const n = parseNum(raw);
   const accept = [String(step.answer)].concat((step.accept || []).map(String)).map(norm);
   if (accept.includes(norm(raw)) || (n !== null && typeof step.answer === 'number' && n === step.answer)) return { ok: true };
@@ -91,7 +111,8 @@ function inputRow(onSubmit, placeholder = 'Your answer') {
 
 function addPrompt(host, step) {
   host.append(rich(step.prompt, 'h2', 'prompt'));
-  if (step.smiles) host.append(molFigure(step.smiles, '', { highlight: step.highlight || [] }));
+  if (step.smiles && step.both) host.append(molPair(step.smiles, '', { highlight: step.highlight || [] }));
+  else if (step.smiles) host.append(molFigure(step.smiles, '', { highlight: step.highlight || [], style: step.drawing }));
   if (step.visual) mountVisual(host, step.visual);
 }
 
@@ -190,6 +211,7 @@ const RENDER = {
             b.classList.add('good');
             fb.className = 'fb ok'; fb.innerHTML = '';
             fb.append(rich(o.why + (mv.then ? ' ' + mv.then : ''), 'p'));
+            if (mv.figure) fb.append(molFigure(mv.figure.smiles, mv.figure.label || '', { style: mv.figure.drawing }));
             next();
           } else {
             b.classList.add('bad'); b.disabled = true;
@@ -212,8 +234,9 @@ const RENDER = {
     const u = step.useIt;
     host.append(h('p', { class: 'eyebrow' }, 'Use it'));
     host.append(h('h2', { class: 'prompt' }, 'Now do these from the book'));
-    const inCh = u.book.filter((p) => parseFloat(p.split('.')[1]) < 30);
-    const end = u.book.filter((p) => parseFloat(p.split('.')[1]) >= 30);
+    const endFrom = u.endFrom || 30; // first end-of-chapter problem number (chapter 2 starts its exercises at 2.29)
+    const inCh = u.book.filter((p) => parseFloat(p.split('.')[1]) < endFrom);
+    const end = u.book.filter((p) => parseFloat(p.split('.')[1]) >= endFrom);
     const chips = (arr) => h('div', { class: 'chips' }, arr.map((p) => h('span', { class: 'chip' }, p)));
     host.append(h('div', { class: 'useit' },
       inCh.length ? h('div', {}, h('h3', {}, 'In-chapter problems'), chips(inCh)) : null,
@@ -243,7 +266,7 @@ export function renderProblems(cfg, ctx, host) {
     const card = h('div', { class: 'problem' });
     stage.append(card);
     card.append(h('h2', { class: 'prompt' }, p.prompt));
-    if (p.kind !== 'builder' && p.kind !== 'polarity' && p.kind !== 'arrows' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
+    if (p.kind !== 'builder' && p.kind !== 'polarity' && p.kind !== 'arrows' && p.kind !== 'groupfind' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
     const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
     const hints = h('div', { class: 'hints' });
     let wrong = 0, settled = false;
@@ -261,7 +284,7 @@ export function renderProblems(cfg, ctx, host) {
       if (wrong >= 1) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 1 '), p.hints[0]));
       if (wrong >= 2) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 2 '), p.hints[1]));
       if (wrong >= 3 && !settled) {
-        const ans = p.kind === 'input' ? `The answer is ${p.answer}. ` : p.kind === 'choice' ? `The answer is ${p.answer || p.options.find((o) => o.correct).text}. ` : '';
+        const ans = p.kind === 'groupfind' ? '' : p.kind === 'input' ? `The answer is ${p.answer}. ` : p.kind === 'choice' ? `The answer is ${p.answer || p.options.find((o) => o.correct).text}. ` : '';
         hints.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), ans + p.derive));
         advance(false);
       }
@@ -275,7 +298,7 @@ export function renderProblems(cfg, ctx, host) {
     if (p.kind === 'input') {
       const { form, inp } = inputRow((val, input, btn) => {
         if (settled) return;
-        const r = checkInput({ answer: p.answer, diagnose: p.wrong, fallback: p.derive, skill: p.skill }, val);
+        const r = checkInput({ answer: p.answer, diagnose: p.wrong, fallback: p.derive, skill: p.skill, formula: p.formula }, val);
         if (r.ok) { input.disabled = true; btn.disabled = true; onRight(); }
         else if (r.empty || r.malformed) { fb.className = 'fb bad'; fb.textContent = r.diagnosis; input.focus(); }
         else { onWrong(r.diagnosis); if (!settled) input.select(); else { input.disabled = true; btn.disabled = true; } }
@@ -297,6 +320,10 @@ export function renderProblems(cfg, ctx, host) {
       const box = h('div', { class: 'widget' });
       card.append(box);
       WIDGETS['arrow-draw'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
+    } else if (p.kind === 'groupfind') {
+      const box = h('div', { class: 'widget' });
+      card.append(box);
+      WIDGETS['group-finder'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
     } else if (p.kind === 'polarity') {
       const box = h('div', { class: 'widget' });
       card.append(box);

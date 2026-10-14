@@ -1,22 +1,45 @@
 #!/usr/bin/env python3
 """Generate 3D molblocks: AddHs -> EmbedMolecule(randomSeed=7) -> MMFFOptimizeMolecule.
 Writes learn/data/3d/<id>.mol and learn/data/3d/models.js (id -> molblock map)."""
-import json, os
+import json, os, re
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, rdMolTransforms
 
 MOLS = {
     "water": "O", "ammonia": "N", "methane": "C",
     "formaldehyde": "C=O", "hcn": "C#N",
     "ethylene": "C=C", "acetylene": "C#C", "co2": "O=C=O",
+    "butane": "CCCC",
 }
+# Conformers that must be a specific shape: id -> (check on the embedded molecule).
+# butane must be the anti (zig-zag) conformer: lowest-energy of many embeds, C1-C2-C3-C4 dihedral ~180.
+MANY_CONFS = {"butane"}
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "3d")
 os.makedirs(out, exist_ok=True)
+# Existing models are kept byte-for-byte; only ids missing from models.js are generated (add --all to redo everything).
+import sys
+models_js = os.path.join(out, "models.js")
 blocks = {}
+if os.path.exists(models_js) and "--all" not in sys.argv:
+    txt = open(models_js).read()
+    blocks = json.loads(txt[txt.index("export default ") + len("export default "):].rstrip().rstrip(";"))
 for name, smi in MOLS.items():
+    if name in blocks:
+        continue
     m = Chem.AddHs(Chem.MolFromSmiles(smi))
-    assert AllChem.EmbedMolecule(m, randomSeed=7) == 0, name
-    AllChem.MMFFOptimizeMolecule(m)
+    if name in MANY_CONFS:
+        ids = list(AllChem.EmbedMultipleConfs(m, 30, randomSeed=7))
+        res = AllChem.MMFFOptimizeMoleculeConfs(m)
+        best = min(range(len(ids)), key=lambda i: res[i][1])
+        m = Chem.Mol(m, confId=ids[best])
+        conf = m.GetConformer(ids[best])
+        m2 = Chem.Mol(m); m2.RemoveAllConformers(); m2.AddConformer(Chem.Conformer(conf), assignId=True)
+        m = m2
+        d = abs(rdMolTransforms.GetDihedralDeg(m.GetConformer(), 0, 1, 2, 3))
+        assert d > 170, (name, d)
+    else:
+        assert AllChem.EmbedMolecule(m, randomSeed=7) == 0, name
+        AllChem.MMFFOptimizeMolecule(m)
     mb = Chem.MolToMolBlock(m)
     blocks[name] = {"smiles": smi, "molblock": mb}
     with open(os.path.join(out, name + ".mol"), "w") as f:
