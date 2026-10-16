@@ -47,7 +47,7 @@ export default {
     },
     {
       id: 's04', type: 'explain', skill: 'bond-count',
-      html: '<p>Atoms are happiest with 8 electrons around them (an octet). Hydrogen only wants 2.</p><p>One bond is one shared pair, so bonds needed = 8 − valence electrons (H: 2 − 1). That gives <b>HONC</b>: H 1, O 2, N 3, C 4.</p><p>Electrons left over sit as <b>lone pairs</b>: N has 1, O has 2, halogens have 3.</p>'
+      html: '<p>Atoms are happiest with 8 electrons around them (an octet). Hydrogen only wants 2.</p><p>One bond is one shared pair, so bonds needed = 8 − valence electrons (H: 2 − 1). That gives <b>HONC</b>: H 1, O 2, N 3, C 4.</p><p>Electrons left over sit as <b>lone pairs</b>: N has 1, O has 2, halogens (F, Cl, Br, I) have 3.</p>'
     },
     {
       id: 's05', type: 'predict', skill: 'lone-pairs',
@@ -95,7 +95,7 @@ export default {
         { text: 'Straight, 180°', why: 'Oxygen’s 2 lone pairs also take up space and push the two O–H bonds together.' },
         { text: 'Bent, about 104.5°', correct: true, why: 'Yes, water is bent.' }
       ],
-      reveal: '4 electron groups around O (2 bonds + 2 lone pairs) point to the corners of a tetrahedron; you only see the atoms, so the shape looks bent.'
+      reveal: '4 electron groups around O (2 bonds + 2 lone pairs) point to the corners of a tetrahedron (a triangular pyramid); you only see the atoms, so the shape looks bent.'
     },
     {
       id: 's09', type: 'try', skill: 'multiple-bonds', widget: 'lewis-builder',
@@ -141,7 +141,7 @@ export default {
     },
     {
       id: 's12', type: 'worked', skill: 'formal-charge',
-      problem: 'Find the formal charge on oxygen in hydronium, <mol smiles="[OH3+]" label="H₃O⁺"></mol>.',
+      problem: 'Find the formal charge on oxygen in hydronium: <mol smiles="[OH3+]" label="H₃O⁺"></mol>',
       moves: [
         {
           ask: 'How many valence electrons does a neutral O atom normally own?',
@@ -205,9 +205,9 @@ export default {
       id: 's15', type: 'choice', skill: 'formal-charge',
       prompt: 'Which one is a carbocation (a carbon with a + formal charge)?',
       options: [
-        { smiles: '[CH3+]', correct: true, why: '3 bonds, no lone pair: 4 − 0 − 3 = +1.' },
-        { smiles: '[CH3-]', why: 'That carbon has a lone pair: 4 − 2 − 3 = −1. It’s a carbanion.' },
-        { smiles: 'C', why: '4 bonds, no lone pairs: 4 − 0 − 4 = 0.' }
+        { smiles: '[CH3+]', label: 'C: 3 bonds, no lone pair', correct: true, why: '3 bonds, no lone pair: 4 − 0 − 3 = +1.' },
+        { smiles: '[CH3-]', label: 'C: 3 bonds, 1 lone pair', why: 'That carbon has a lone pair: 4 − 2 − 3 = −1. It’s a carbanion.' },
+        { smiles: 'C', label: 'C: 4 bonds, no lone pair', why: '4 bonds, no lone pairs: 4 − 0 − 4 = 0.' }
       ],
       hints: ['Work out the formal charge for each carbon: 4 − lone-pair electrons − bonds.', 'A + charge means the carbon owns fewer than 4 electrons.'],
       worked: '[CH₃]⁺: 4 − 0 − 3 = +1. The others give −1 and 0.'

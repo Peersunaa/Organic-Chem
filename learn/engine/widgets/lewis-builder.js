@@ -23,7 +23,7 @@ export default {
           <span class="lb-sel" id="lb-sel"></span>
           <button type="button" class="btn small" data-act="lp+">+ lone pair</button>
           <button type="button" class="btn small" data-act="lp-">− lone pair</button>
-          <span class="lb-charge" role="group" aria-label="Formal charge">
+          <span class="lb-charge" role="group" aria-label="Formal charge"><span class="lb-charge-label" aria-hidden="true">Charge</span>
             <button type="button" class="btn small" data-act="ch-1" aria-label="Charge minus">−</button>
             <button type="button" class="btn small" data-act="ch0" aria-label="Charge zero">0</button>
             <button type="button" class="btn small" data-act="ch1" aria-label="Charge plus">+</button>
@@ -140,8 +140,8 @@ export default {
     function act(what) {
       if (sel == null || finished) return;
       const a = state.atoms[sel];
-      if (what === 'lp+') { if (a.lp < maxLp(a)) { a.lp++; anim = { atom: sel, k: a.lp - 1 }; announce(`${a.el} now has ${a.lp} lone pairs.`); } }
-      else if (what === 'lp-') { if (a.lp > 0) { a.lp--; anim = null; announce(`${a.el} now has ${a.lp} lone pairs.`); } }
+      if (what === 'lp+') { if (a.lp < maxLp(a)) { a.lp++; anim = { atom: sel, k: a.lp - 1 }; announce(`${a.el} now has ${a.lp} lone pair${a.lp === 1 ? '' : 's'}.`); } }
+      else if (what === 'lp-') { if (a.lp > 0) { a.lp--; anim = null; announce(`${a.el} now has ${a.lp} lone pair${a.lp === 1 ? '' : 's'}.`); } }
       else if (what.startsWith('ch')) { a.charge = parseInt(what.slice(2), 10); anim = null; announce(`${a.el} charge is ${fmtCharge(a.charge)}.`); }
       update('a' + sel);
     }
