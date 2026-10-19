@@ -37,9 +37,9 @@ export default {
       visual: { widget: 'model3d', config: { mol: 'cis-but-2-ene', compare: 'trans-but-2-ene', highlight: [1, 2] } },
       options: [
         { text: 'No: twisting would have to break the π bond, so they are two different compounds', correct: true, why: 'Yes. Both have the same atoms and the same bonds, but in space the two CH₃ groups are on the same side in one and on opposite sides in the other. The only way across is through a twisted C=C, which pulls the π bond apart.' },
-        { text: 'Yes: it is just another conformation, like rotating ethane', why: 'Rotation about a single (σ) bond keeps the head-on overlap, so it costs only about 12 kJ/mol. A double bond has a π bond made by sideways overlap of two p orbitals, and a twist ruins that overlap.' },
-        { text: 'Yes, if you warm it up a little', why: 'The π bond is worth roughly 350 kJ/mol, and nothing like that energy is available at ordinary temperatures. Each isomer stays as it is: they are separate compounds that can be bottled apart.' },
-        { text: 'No: the CH₃ groups are too big to slide past each other', why: 'Size has nothing to do with it. Even if the groups were tiny, twisting a C=C would still have to break the π bond.' }
+        { text: 'Yes: it is only another conformation, as when ethane rotates', why: 'Rotation about a single (σ) bond keeps the head-on overlap, so it costs only about 12 kJ/mol. A double bond has a π bond made by sideways overlap of two p orbitals, and a twist ruins that overlap.' },
+        { text: 'Yes, if you warm it up a little, the CH₃ groups swap sides', why: 'The π bond is worth roughly 350 kJ/mol, and nothing like that energy is available at ordinary temperatures. Each isomer stays as it is: they are separate compounds that can be bottled apart.' },
+        { text: 'No: the CH₃ groups are too big to slide past each other, so no twist works', why: 'Size has nothing to do with it. Even if the groups were tiny, twisting a C=C would still have to break the π bond.' }
       ],
       hints: ['Compare the two models: the same four heavy atoms in the same order, but different positions in space.', 'A double bond is a σ bond plus a π bond. What would twisting by 90° do to the sideways overlap of the p orbitals that make the π bond?'],
       worked: 'The two models differ only in where the CH₃ groups sit relative to the double bond. To swap them you would rotate half the molecule about the C=C axis, which takes the p orbitals out of alignment and breaks the π bond (about 350 kJ/mol). That does not happen at room temperature, so they are different compounds.',
@@ -91,9 +91,9 @@ export default {
       smiles: 'CC=C(CO)C(C)C',
       options: [
         { text: '–CH(CH₃)₂: it has more carbons attached, so it adds up to more', why: 'Adding up is the trap. Rank by comparing the attached atoms one position at a time, highest first, and stop at the first difference. The totals never matter.' },
-        { text: '–CH₂OH: its set (O, H, H) beats (C, C, H) because O beats C at the first position', correct: true, why: 'Yes. Line the sets up from the highest down: O against C, and O wins straight away. The second and third positions are not even looked at.' },
-        { text: 'They tie, so the alkene has no E or Z', why: 'They do not tie. The attached atoms are (O,H,H) against (C,C,H), which differ at the first position.' },
-        { text: 'Whichever group is longer', why: 'Length is not part of the rules. It is the atoms attached, compared in order.' }
+        { text: '–CH₂OH: (O, H, H) beats (C, C, H) because O beats C at the first position', correct: true, why: 'Yes. Line the sets up from the highest down: O against C, and O wins straight away. The second and third positions are not even looked at.' },
+        { text: 'They tie at every position, so the alkene has no E or Z', why: 'They do not tie. The attached atoms are (O,H,H) against (C,C,H), which differ at the first position.' },
+        { text: 'Whichever group is longer, since it has more atoms in its chain', why: 'Length is not part of the rules. It is the atoms attached, compared in order.' }
       ],
       reveal: '<b>Rule 2:</b> when the first atoms tie, compare the <b>sets</b> of atoms attached to them, highest first, and stop at the first difference. It is not a sum: –CH₂OH (O,H,H) beats –CH(CH₃)₂ (C,C,H), and –CH₂Br beats –C(CH₃)₃. If the sets tie too, go one atom further out.'
     },
@@ -110,10 +110,10 @@ export default {
       prompt: 'On one carbon the choice is between –CH=CH₂ (vinyl) and –CH₂CH₃ (ethyl). Both start with a carbon. Which group ranks higher?',
       figures: [{ smiles: 'C=CC(CC)=CC', label: 'the groups sit on C3' }],
       options: [
-        { text: '–CH=CH₂: a double bond counts its far atom twice, so it is (C, C, H) against (C, H, H)', correct: true, why: 'Yes. For ranking, the double bond is treated as two single bonds, so the first carbon of the vinyl group holds the far carbon twice.' },
-        { text: '–CH₂CH₃: it has more hydrogens', why: 'Hydrogens are the lowest-ranked atoms, so more of them never helps. Ethyl is (C,H,H); vinyl, with the duplicate, is (C,C,H).' },
-        { text: 'They tie', why: 'They do not tie once the double bond is counted properly: (C,C,H) and (C,H,H) differ at the second position.' },
-        { text: '–CH=CH₂, because double bonds are stronger', why: 'Bond strength is not a ranking rule. The rule is to duplicate the atom at the far end of a multiple bond and compare the sets.' }
+        { text: '–CH=CH₂: the double bond counts its far C twice, so (C, C, H)', correct: true, why: 'Yes. For ranking, the double bond is treated as two single bonds, so the first carbon of the vinyl group holds the far carbon twice.' },
+        { text: '–CH₂CH₃: it has more hydrogens, and its chain is saturated', why: 'Hydrogens are the lowest-ranked atoms, so more of them never helps. Ethyl is (C,H,H); vinyl, with the duplicate, is (C,C,H).' },
+        { text: 'They tie, since both groups start with a carbon', why: 'They do not tie once the double bond is counted properly: (C,C,H) and (C,H,H) differ at the second position.' },
+        { text: '–CH=CH₂, because double bonds are shorter and stronger than single bonds', why: 'Bond strength is not a ranking rule. The rule is to duplicate the atom at the far end of a multiple bond and compare the sets.' }
       ],
       reveal: '<b>Rule 3:</b> a multiple bond counts as extra single bonds to duplicate atoms. –CH=CH₂ counts as (C, C, H); C=O counts as (O, O) on the carbon; C≡C gives (C, C, C). Then compare the sets as in rule 2.'
     },
@@ -130,9 +130,9 @@ export default {
       prompt: 'Now names. This alkene has a 7-carbon chain, but the double bond is not in it. Which carbon count belongs to the parent of its name?',
       smiles: 'C=C(CCC)CCC',
       options: [
-        { text: '7: the longest chain wins, as with alkanes', why: 'For alkenes the parent has to contain the C=C. The 7-carbon chain runs through the middle carbon but misses the =CH₂, so it cannot be the parent.' },
+        { text: '7: the longest chain always wins, as it does with alkanes', why: 'For alkenes the parent has to contain the C=C. The 7-carbon chain runs through the middle carbon but misses the =CH₂, so it cannot be the parent.' },
         { text: '5: the longest chain that contains the double bond', correct: true, why: 'Yes. =CH₂, the middle carbon and one propyl arm make 5 carbons. The other propyl group is a branch.' },
-        { text: '3: just the propyl arm', why: 'The parent runs through the double bond, so it must take in both =CH₂ and the carbon next to it, and then continue as far as it can.' },
+        { text: '3: just the propyl arm next to the double bond', why: 'The parent runs through the double bond, so it must take in both =CH₂ and the carbon next to it, and then continue as far as it can.' },
         { text: '6', why: 'There is no 6-carbon chain that contains the double bond here: from =CH₂ you can reach 5 carbons at most.' }
       ],
       reveal: 'The parent is the <b>longest chain that contains the multiple bond</b>, even when a longer chain exists elsewhere. This one is a pentene with a propyl group on C2.'
@@ -178,7 +178,7 @@ export default {
           ask: 'Assemble the name: (E or Z), then the branch, then the parent with its locant.',
           options: [
             { text: '<name new="(E)-3-methylhex-3-ene" old="(E)-3-methyl-3-hexene"></name>', correct: true, why: 'Yes. The stereo label goes first in brackets, then the branch with its number, then the parent. In the new style the locant sits before -ene; in the old style it goes in front of the parent.' },
-            { text: '<name new="(Z)-3-methylhex-3-ene" old="(Z)-3-methyl-3-hexene"></name>', why: 'The geometry is E, not Z.' },
+            { text: '<name new="(Z)-3-methylhex-3-ene" old="(Z)-3-methyl-3-hexene"></name>', why: 'The geometry is E, not Z: the two higher-ranked groups (ethyl on C3 and ethyl on C4) sit on opposite sides, and Z needs them on the same side.' },
             { text: '<name new="3-methylhex-3-ene" old="3-methyl-3-hexene"></name>', why: 'Right parent, but this alkene fixes its geometry (two different groups on each carbon), so it needs (E) in front.' },
             { text: '<name new="(E)-4-methylhex-3-ene" old="(E)-4-methyl-3-hexene" wrong="1"></name>', why: 'The methyl must get the lower number: 3, counting from the end nearer the branch.' }
           ],

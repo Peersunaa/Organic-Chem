@@ -59,7 +59,7 @@ export const PASTPAPER = [
           'Look for stereocentres (a carbon with four different groups). Rank the groups, find R or S, and put (R) or (S) with its number at the front.',
           'Write it all as one name: stereo prefixes, branches in alphabetical order, parent.'
         ],
-        links: [lesson('07', 's14'), lesson('15', 's20'), lesson('15', 's16')],
+        links: [lesson('05', 's13'), lesson('07', 's13'), lesson('07', 's14'), lesson('15', 's20'), lesson('15', 's16')],
         trap: 'Naming the skeleton right and forgetting the (R) or (E) prefix.'
       },
       {
@@ -433,7 +433,7 @@ export const PASTPAPER = [
           'Close a six-membered ring. The new C=C sits between the old C2 and C3.',
           'Place the groups. Groups that were cis on the dienophile stay cis in the ring.'
         ],
-        links: [card('diels-alder', 'Diels–Alder'), lesson('11', 's10')],
+        links: [card('diels-alder', 'Diels–Alder')],
         trap: 'Moving the double bonds the wrong way. The new C=C is between old C2 and C3.'
       },
       {
@@ -539,12 +539,12 @@ export const PASTPAPER = [
         ask: 'From toluene, make 2-bromo-6-chloro-4-deuteriobenzaldehyde: CHO at C1, Cl and Br on the two ortho carbons, D on the para carbon.',
         steps: [
           'Number the target from CHO. Cl and Br are both ortho to it, and D is para. The CH₃ of toluene becomes the CHO, so Cl and Br must go ortho to CH₃ while it still directs ortho/para.',
-          'Step 1: SO₃, H₂SO₄. CH₃ directs ortho/para and the big SO₃H goes para. Now para is blocked, and the D will go there at the end.',
+          'Step 1: SO₃, H₂SO₄. CH₃ directs ortho/para, and the bulky SO₃H goes para because the ortho spots are more crowded. Now para is blocked, and the D will go there at the end.',
           'Steps 2 and 3: Cl₂ with FeCl₃, then Br₂ with FeBr₃. Each goes ortho to CH₃ (the only open ortho/para spots; SO₃H directs meta to the same carbons, so everything agrees).',
-          'Step 4: turn CH₃ into CHO (for example NBS twice, then water; KMnO₄ would overshoot to CO₂H). Do this AFTER the halogens are on, because CHO is a meta director.',
+          'Step 4: turn CH₃ into CHO (NBS twice puts two Br on the CH₃ carbon, then water turns the CHBr₂ into CHO; KMnO₄ would overshoot to CO₂H). Do this AFTER the halogens are on, because CHO is a meta director.',
           'Step 5: D₂SO₄ in D₂O, heat. Desulfonation swaps the SO₃H for D on the para carbon. Write every step with its reagent and the product after it.'
         ],
-        links: [lesson('14', 's19'), lesson('14', 's20'), card('desulfonation', 'desulfonation'), card('eas-sulfonation', 'SO₃, H₂SO₄')],
+        links: [lesson('14', 's19'), lesson('14', 's20'), card('desulfonation', 'desulfonation'), card('eas-sulfonation', 'SO₃, H₂SO₄'), card('benzylic-bromination', 'NBS or Br₂, light')],
         trap: 'Putting groups on in the wrong order, so a meta director sends the next group to the wrong place.'
       }
     ]

@@ -7,11 +7,46 @@ import { generate } from './generators.js';
 import { normName } from './naming.js';
 import { tAuto } from './voice.js';
 
+/** An unclosed <mol ...> (or <molpair ...>) swallows the text after it when parsed as HTML; close any that are left open. Pure. */
+export function closeMolTags(html) {
+  return String(html).replace(/<(mol|molpair)(\s[^>]*?)?\/?>(?!\s*<\/(?:mol|molpair)>)/g, (m, tag, attrs) => `<${tag}${attrs || ''}></${tag}>`);
+}
+
+// ---- option order: shuffled when a choice/predict step is RENDERED (the lesson data keeps its order, so tests and recaps stay stable)
+function hash32(str) { let hh = 2166136261; for (let i = 0; i < str.length; i++) { hh ^= str.charCodeAt(i); hh = Math.imul(hh, 16777619); } return hh >>> 0; }
+function mulberry(a) { return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+/** Seeded Fisher-Yates over a COPY: the same seed always gives the same order; the option objects themselves are kept (correctness is read from the object, never from a position). */
+export function shuffleOptions(options, seed) {
+  const out = options.slice(); const rnd = mulberry(hash32(String(seed)));
+  for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
+  return out;
+}
+/** Ladders keep their order: a step can say `ordered: true`, and options labelled "Option A..D" (text refers to them) or pure number lists are never shuffled. */
+const plain = (t) => String(t || '').replace(/<[^>]+>/g, '').trim();
+export function shufflable(step) {
+  const o = step.options || [];
+  if (step.ordered === true || step.shuffle === false || o.length < 2) return false;
+  if (o.some((x) => /^Option [A-H]$/.test(x.label || ''))) return false;
+  if (o.every((x) => x.text != null && /^[+\-−–]?\d[\d.,]*\s*(°|%|pm|kJ\/mol)?$/.test(plain(x.text)))) return false;
+  return true;
+}
+let SALT = null;
+/** One random number per browser session, so a reload keeps the same order but a new visit changes it. */
+export function sessionSalt() {
+  if (SALT !== null) return SALT;
+  try { const k = 'orgo.shuffle'; let v = sessionStorage.getItem(k); if (!v) { v = String(Math.floor(Math.random() * 1e9)); sessionStorage.setItem(k, v); } SALT = v; } catch (e) { SALT = String(Math.floor(Math.random() * 1e9)); }
+  return SALT;
+}
+export function orderedOptions(step, lessonId, attempt) {
+  if (!shufflable(step)) return step.options.slice();
+  return shuffleOptions(step.options, `${lessonId}|${step.id}|${attempt != null ? attempt : sessionSalt()}`);
+}
+
 export function h(tag, props, ...kids) {
   const e = document.createElement(tag);
   for (const k in props || {}) {
     if (k === 'class') e.className = props[k];
-    else if (k === 'html') e.innerHTML = props[k];
+    else if (k === 'html') e.innerHTML = closeMolTags(props[k]);
     else if (k.startsWith('on')) e.addEventListener(k.slice(2), props[k]);
     else if (props[k] !== false && props[k] != null) e.setAttribute(k, props[k]);
   }
@@ -70,7 +105,7 @@ export function enhance(root) {
   root.querySelectorAll('name').forEach((n) => n.replaceWith(nameSpan({ new: n.getAttribute('new'), old: n.getAttribute('old') })));
   return root;
 }
-export function rich(html, tag = 'div', cls = '') { return enhance(h(tag, { class: cls, html })); }
+export function rich(html, tag = 'div', cls = '') { return enhance(h(tag, { class: cls, html: closeMolTags(html) })); }
 
 function grader(step, ctx, host) {
   let wrong = 0;
@@ -143,6 +178,7 @@ function inputRow(onSubmit, placeholder = 'Your answer') {
 
 function addPrompt(host, step) {
   host.append(rich(step.prompt, 'h2', 'prompt'));
+  if (step.aside) host.append(rich(step.aside, 'div', 'gl-aside'));   // a legend, table or reminder the question needs (lesson data field `aside`)
   if (step.figures) host.append(h('div', { class: 'pair figs' }, step.figures.map((f) => molFigure(f.smiles, f.label || '', { highlight: f.highlight || [] }))));
   else if (step.smiles && step.both) host.append(molPair(step.smiles, '', { highlight: step.highlight || [] }));
   else if (step.smiles) host.append(molFigure(step.smiles, '', { highlight: step.highlight || [], style: step.drawing }));
@@ -183,10 +219,11 @@ const RENDER = {
     addPrompt(host, step);
     const list = h('div', { class: 'opts', role: 'group' });
     const out = h('div', { class: 'after' });
-    step.options.forEach((o) => {
+    const shown = orderedOptions(step, ctx.lessonId, ctx.attempt);
+    shown.forEach((o) => {
       const b = h('button', { type: 'button', class: 'opt' }, rich(o.text, 'span'));
       b.addEventListener('click', () => {
-        [...list.children].forEach((x, i) => { x.disabled = true; if (step.options[i].correct) x.classList.add('good'); });
+        [...list.children].forEach((x, i) => { x.disabled = true; if (shown[i].correct) x.classList.add('good'); });
         if (!o.correct) { b.classList.add('bad'); ctx.mistake(step.skill, step.id, o.why); }
         const fb = h('div', { class: 'fb ' + (o.correct ? 'ok' : 'bad'), 'aria-live': 'polite' }, rich(o.why, 'p'));
         out.append(fb, h('div', { class: 'reveal' }, h('b', {}, 'So here is the idea. '), rich(step.reveal, 'span')));
@@ -201,7 +238,7 @@ const RENDER = {
     addPrompt(host, step);
     const g = grader(step, ctx, host);
     const list = h('div', { class: 'opts' + (step.options.some((o) => o.smiles) ? ' mols' : ''), role: 'group' });
-    step.options.forEach((o) => {
+    orderedOptions(step, ctx.lessonId, ctx.attempt).forEach((o) => {
       const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.label || '', o.raw ? { raw: true, showCharge: true } : {}) : rich(o.text, 'span'));
       b.addEventListener('click', () => {
         if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); g.right(o.why); }

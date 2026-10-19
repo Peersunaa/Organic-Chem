@@ -8,7 +8,7 @@ import { easMechanism, mechanismPart, predictEAS, BENZENE } from '../engine/reac
 
 const opt = (text, correct, why, extra = {}) => ({ text, ...(correct ? { correct: true } : {}), why, ...extra });
 const mo = (smiles, label, correct, why, extra = {}) => ({ smiles, label, ...(correct ? { correct: true } : {}), why, ...extra });
-const mol = (s, l) => `<mol smiles="${s}" label="${l}">`;
+const mol = (s, l) => `<mol smiles="${s}" label="${l}"></mol>`;
 
 /** Move the correct option to a different place in each question (deterministic), so the right answer is not always first. */
 function arrange(lesson) {
@@ -55,10 +55,10 @@ export default arrange({
       prompt: 'Here is a solid model of <b>benzene</b>. Turn it, and press <b>Show the π cloud</b>. Which statement matches what you see?',
       visual: { widget: 'model3d', config: { mol: 'benzene', pi: true, highlight: [0, 1, 2, 3, 4, 5] } },
       options: [
-        opt('A flat regular hexagon: all six C–C bonds are the same length (139 pm, between a single bond at 154 pm and a double bond at 134 pm), and the π electrons form a cloud above and below the ring', true, 'Yes. All six carbons are sp² (120° angles) and each has a p orbital pointing up and down, so the π electrons are shared by the whole ring.'),
+        opt('A flat regular hexagon: all six C–C bonds are equal (139 pm, between single and double), with a π cloud above and below the ring', true, 'Yes. All six carbons are sp² (120° angles) and each has a p orbital pointing up and down, so the π electrons are shared by the whole ring.'),
         opt('A puckered ring like the cyclohexane chair, with three short and three long bonds', false, 'Cyclohexane puckers because its carbons are sp³. Benzene’s carbons are sp², so the ring is flat, and the six bonds are equal.'),
         opt('A flat ring with three short C=C bonds (134 pm) alternating with three long C–C bonds (154 pm)', false, 'That is how one line drawing looks, but the measured bonds are all 139 pm. No bond is a plain single or a plain double bond.'),
-        opt('A flat ring in which each carbon is sp³ with four single bonds', false, 'Each carbon has only three bonded atoms (two ring carbons and one H), so it is sp², and the fourth p orbital forms the π cloud.')
+        opt('A flat ring in which each carbon is sp³ with four single bonds, so there is no π cloud', false, 'Each carbon has only three bonded atoms (two ring carbons and one H), so it is sp², and the fourth p orbital forms the π cloud.')
       ],
       hints: ['Rotate the model so you look along the ring edge-on. Do all twelve atoms lie in one plane? Then compare the six C–C bonds with each other.', 'Count the atoms around one carbon: two carbons and one H, so three groups, which means sp² (Lesson 02). The leftover p orbital points up and down.'],
       worked: 'Each ring carbon has three neighbours, so it is sp² and flat (120°). The remaining p orbital on each carbon overlaps equally with both neighbours, so the six π electrons are shared round the ring. Every C–C is 139 pm, between a single (154 pm) and a double (134 pm) bond.'
@@ -73,27 +73,27 @@ export default arrange({
     },
     {
       id: 's04', type: 'explain', skill: 'eas',
-      html: '<p><b>Benzene is aromatic.</b> Its six π electrons are spread over the whole ring: benzene is the hybrid of the two Kekulé drawings, flat and with six equal C–C bonds. That resonance makes it far more stable than an alkene, so it does not add Br₂. Instead FeBr₃ makes it <b>substitute</b>: the ring survives and one H is replaced. The ring as a group is <b>aryl</b>, Ar–.</p>'
+      html: '<div style="text-align:center"><svg viewBox="0 0 150 130" role="img" aria-label="A hexagon with a circle inside it: the symbol for the six pi electrons shared round the benzene ring" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" style="width:150px;height:auto"><polygon points="75,12 125,40 125,96 75,124 25,96 25,40"/><circle cx="75" cy="68" r="27" stroke-dasharray="6 4"/></svg><div style="font-size:.8125rem">circle = six π electrons shared by the whole ring</div></div><p><b>Benzene is aromatic.</b> Its six π electrons are spread over the whole ring, the hybrid of the two Kekulé drawings: flat, with six equal C–C bonds. That resonance makes it far more stable than an alkene, so it does not add Br₂. FeBr₃ makes it <b>substitute</b> instead: one H is replaced. The ring as a group is <b>aryl</b>, Ar–.</p>'
     },
     {
       id: 's05', type: 'choice', skill: 'energy-diagram',
       prompt: 'The diagram follows benzene + Br₂ through the same slow first step. Then it forks: the solid curve loses H⁺ (<b>substitution</b>), the dashed curve would add Br⁻ (<b>addition</b>). Which statement is right?',
       visual: { widget: 'energy-diagram', config: { levels: SUBST, label: 'substitution (the ring is restored)', overlay: { levels: ADD, label: 'addition (the ring is lost)' }, mode: 'view', caption: 'Illustrative energies, not measured values.' } },
       options: [
-        opt('Substitution ends lower: the product regains the aromatic ring, while the addition product has lost it and sits higher than the starting materials', true, 'Yes. Addition would give up the ring’s resonance stability, so it would be energetically unfavourable. Substitution keeps it, so the reaction goes downhill.'),
-        opt('Addition ends lower, because it makes two new C–Br bonds and uses up a whole C=C', false, 'New bonds form, but losing the aromatic stabilisation costs more. That is why the dashed curve ends above the starting level.'),
-        opt('Both end at the same energy, because both start from the same carbocation', false, 'The same intermediate does not force the same product energy. What each pathway does with the intermediate (lose H⁺ or add Br⁻) decides whether the ring is restored.'),
-        opt('Substitution ends higher, because it releases HBr, which carries energy away', false, 'Releasing HBr does not make the product energy go up here. The deciding factor is that the product of substitution is aromatic again.')
+        opt('Substitution ends lower: the product regains the aromatic ring, while the addition product has lost it and sits higher', true, 'Yes. Addition would give up the ring’s resonance stability, so it would be energetically unfavourable. Substitution keeps it, so the reaction goes downhill.'),
+        opt('Addition ends lower, because it makes two new C–Br bonds and uses up a whole C=C bond', false, 'New bonds form, but losing the aromatic stabilisation costs more. That is why the dashed curve ends above the starting level.'),
+        opt('Both end at the same energy, because both start from the same carbocation intermediate', false, 'The same intermediate does not force the same product energy. What each pathway does with the intermediate (lose H⁺ or add Br⁻) decides whether the ring is restored.'),
+        opt('Substitution ends higher, because it releases HBr, which carries energy away from the system', false, 'Releasing HBr does not make the product energy go up here. The deciding factor is that the product of substitution is aromatic again.')
       ],
       hints: ['Look at where each curve finishes compared with the starting level at the left. Which pathway is downhill overall?', 'Ask which product still contains the benzene ring. The ring’s extra stability (resonance) is only kept by the pathway that loses H⁺.'],
       worked: 'Both curves share the slow first step, which makes a resonance-stabilised carbocation that is much less stable than benzene itself. Then H⁺ can leave (the ring returns, energy falls below the start) or Br⁻ can add (the ring is lost, the product stays above the start). Only substitution is favourable.'
     },
     {
       id: 's06', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
-      prompt: 'Now draw the first two steps of the bromination yourself. <b>Step 1:</b> FeBr₃ activates Br₂. A lone pair on one Br of Br₂ goes to Fe (a new Br–Fe bond), and the Br–Br bond pair goes back onto that Br, leaving Br⁺ (an <b>electrophile</b>: electron-poor) and FeBr₄⁻. <b>Step 2:</b> a π bond of benzene attacks the Br⁺ (tap the double bond, then the Br⁺).',
+      prompt: 'Now draw the first two steps of the bromination yourself. <b>Step 1:</b> FeBr₃ is a Lewis acid, so it accepts an electron pair from Br₂ and leaves one Br as Br⁺ (an <b>electrophile</b>: electron-poor) and FeBr₄⁻. Decide which electrons move where. <b>Step 2:</b> the ring attacks the Br⁺ to make a C–Br bond.',
       config: { get mech() { return mechanismPart(easMechanism('Br2'), 0, 2); }, modes: ['draw', 'draw'], drawing: 'skeletal' },
       confirm: 'In step 1 the Br–Br bond pair stays on the Br that bonded to Fe, so the other Br is left without its pair: an electrophile, Br⁺. In step 2 the ring’s π electrons become a C–Br bond, and the ring carries a + charge: the carbocation intermediate.',
-      hints: ['Step 1 has two arrows: a lone pair on Br (of Br₂) to the Fe atom, and the Br–Br bond to that same Br atom. Step 2 has one arrow: from a C=C π bond of the ring to the Br⁺.', 'Arrows start at electrons and end where they go. In step 2 the arrow starts on a double bond (any of the three, they are equivalent) and ends on the Br⁺ atom: those π electrons make the new C–Br bond.'],
+      hints: ['Step 1 has two arrows and step 2 has one. A Lewis acid accepts a pair: which atom of Br₂ has a lone pair to give to Fe, and where must the Br–Br bond pair go afterwards? In step 2 the ring is the nucleophile.', 'Step 1 has two arrows: a lone pair on Br (of Br₂) to the Fe atom, and the Br–Br bond to that same Br atom. Step 2 has one arrow: from a C=C π bond of the ring to the Br⁺. Arrows start at electrons and end where they go. In step 2 the arrow starts on a double bond (any of the three, they are equivalent) and ends on the Br⁺ atom: those π electrons make the new C–Br bond.'],
       worked: 'Step 1: lone pair on one Br of Br₂ → Fe; Br–Br bond → onto that Br. Result: Br⁺ and FeBr₄⁻. Step 2: one ring C=C π bond → the Br⁺, making a new C–Br bond. The carbon that lost its π partner is the one that now carries the + charge.'
     },
     {
@@ -106,10 +106,10 @@ export default arrange({
     },
     {
       id: 's08', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
-      prompt: 'Last step: FeBr₄⁻ is the base. Draw three arrows. (1) A lone pair on one Br of FeBr₄⁻ goes to the H on the sp³ carbon. (2) The electrons of that C–H bond go into the ring (point at the bond to the C⁺ neighbour, making a new π bond). (3) The Fe–Br bond pair goes back onto that Br, so FeBr₃ is given back.',
+      prompt: 'Last step: FeBr₄⁻ acts as the base. Draw three arrows that take the H⁺ off the sp³ carbon, restore the aromatic ring, and hand FeBr₃ back (it is a catalyst). Work out where each pair of electrons starts and ends.',
       config: { get mech() { return mechanismPart(easMechanism('Br2'), 2, 3); }, modes: ['draw'], drawing: 'skeletal' },
       confirm: 'The C–H electrons became a π bond again, so the ring is aromatic once more, and the product is bromobenzene. The base left as HBr and FeBr₃ was regenerated: it is a catalyst.',
-      hints: ['Three arrows: (a) lone pair on a Br of FeBr₄⁻ → the H on the sp³ carbon; (b) the C–H bond → the single bond between the sp³ carbon and the C⁺ carbon; (c) the Fe–Br bond → the Br.', 'The ring is restored when the C–H electrons make a double bond to the C⁺ carbon. Arrow (c) is bookkeeping: the Br that took H⁺ leaves as HBr, so the Fe–Br pair must go onto that Br.'],
+      hints: ['Three arrows. The base needs a pair to bond to H: which electrons of FeBr₄⁻ can do that? Then ask where the C–H electrons must go to give the ring its π bonds back, and where the Fe–Br pair ends up.', 'Three arrows: (a) lone pair on a Br of FeBr₄⁻ → the H on the sp³ carbon; (b) the C–H bond → the single bond between the sp³ carbon and the C⁺ carbon; (c) the Fe–Br bond → the Br. The ring is restored when the C–H electrons make a double bond to the C⁺ carbon. Arrow (c) is bookkeeping: the Br that took H⁺ leaves as HBr, so the Fe–Br pair must go onto that Br.'],
       worked: 'Arrow 1: lone pair on Br (of FeBr₄⁻) → H. Arrow 2: C–H bond → into the neighbouring C–C bond (it becomes C=C and the + disappears). Arrow 3: Fe–Br bond → onto Br. Products: bromobenzene, HBr and FeBr₃.'
     },
     {

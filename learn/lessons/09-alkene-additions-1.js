@@ -41,11 +41,11 @@ export default arrange({
   steps: [
     {
       id: 's01', type: 'predict', skill: 'markovnikov',
-      prompt: 'HBr in ether adds to 2-methylpropene. H could attach to either carbon of the C=C, so two products are conceivable. Which do you expect?',
+      prompt: 'HBr in ether adds to 2-methylpropene, (CH₃)₂C=CH₂. H could attach to either carbon of the C=C, so two products are conceivable. A clue from experiment: HBr adds to propene, CH₃CH=CH₂, to give almost only 2-bromopropane (Br on the middle carbon), and hardly any 1-bromopropane. By analogy, which product do you expect here?',
       equation: { reactants: ['CC(C)=C', 'Br'], products: [], cond: 'ether' },
       options: [
-        opt('<mol smiles="CC(C)(C)Br" label="2-bromo-2-methylpropane">', true, 'Yes. H went to the CH₂ carbon and Br ended up on the carbon that carries two CH₃ groups. Only this product forms.'),
-        opt('<mol smiles="CC(C)CBr" label="1-bromo-2-methylpropane">', false, 'This is the other orientation (H on the carbon with the CH₃ groups, Br on CH₂). It is conceivable, but it is not what is found: this reaction gives only one of the two.'),
+        opt('<mol smiles="CC(C)(C)Br" label="2-bromo-2-methylpropane"></mol>', true, 'Yes. H went to the CH₂ carbon and Br ended up on the carbon that carries two CH₃ groups. Only this product forms.'),
+        opt('<mol smiles="CC(C)CBr" label="1-bromo-2-methylpropane"></mol>', false, 'This is the other orientation (H on the carbon with the CH₃ groups, Br on CH₂). It is conceivable, but it is not what is found: this reaction gives only one of the two.'),
         opt('Both products, in about equal amounts', false, 'You would get a mixture if the two C=C carbons were alike. Here one carbon has two CH₃ groups and the other has none, and the reaction chooses between them.'),
         opt('Nothing happens: alkenes do not react with acids', false, 'The C=C π bond is electron-rich (Lesson 08) and attacks the δ+ hydrogen of HBr, so a reaction does occur.')
       ],
@@ -57,15 +57,15 @@ export default arrange({
       smiles: 'CC1=CCCCC1', highlight: [1, 2],
       options: [
         opt('The CH carbon (one H, one ring neighbour)', true, 'Yes. That carbon has an H already. H goes where there are more H, which leaves the + charge on the carbon with the CH₃ and two ring bonds.'),
-        opt('The carbon that holds the CH₃', false, 'That carbon has no H and three alkyl groups. The H goes to the OTHER carbon, the one with more H and fewer alkyl groups.'),
+        opt('The carbon that holds the CH₃, since it is more substituted', false, 'That carbon has no H and three alkyl groups. The H goes to the OTHER carbon, the one with more H and fewer alkyl groups.'),
         opt('Either one, equally', false, 'The two carbons are not alike: one carries a CH₃ and no H, the other carries an H. The reaction picks one.'),
-        opt('Neither: the CH₃ blocks the attack', false, 'The π bond lies above and below the ring plane, where the CH₃ does not block it. HBr adds readily.')
+        opt('Neither: the CH₃ blocks the attack on the π bond', false, 'The π bond lies above and below the ring plane, where the CH₃ does not block it. HBr adds readily.')
       ],
       reveal: 'H goes to the CH carbon, and Br ends up on the carbon with the CH₃, giving <b>1-bromo-1-methylcyclohexane</b>. The pattern is the same as in 2-methylpropene: H to the carbon that already has more H.'
     },
     {
       id: 's03', type: 'try', skill: 'carbocations', widget: 'cation-rank',
-      prompt: 'Why this orientation? Step 1 of the mechanism makes a carbocation. Before we explain anything, trust your instincts: rank these four from MOST stable to LEAST stable.',
+      prompt: 'Why this orientation? Step 1 of the mechanism makes a carbocation. Think of a carbocation as a carbon short of electrons: every carbon group attached to the C⁺ can lend it a little electron density. Using that idea, rank these four from MOST stable to LEAST stable.',
       config: { items: [{ smiles: 'C[CH+]C', label: '(CH₃)₂CH⁺' }, { smiles: '[CH3+]', label: 'CH₃⁺' }, { smiles: 'C[C+](C)C', label: '(CH₃)₃C⁺' }, { smiles: 'CC[CH2+]', label: 'CH₃CH₂CH₂⁺' }] },
       confirm: 'Tertiary (3°) > secondary (2°) > primary (1°) > methyl. The more carbon groups on the positive carbon, the more stable the cation.',
       hints: ['Count the carbon groups attached to the positive carbon in each drawing. The structures differ in exactly that.', 'Alkyl groups donate electron density to the electron-poor C⁺, so more alkyl groups mean a more stable cation. Start with the one that has three.'],
@@ -73,32 +73,32 @@ export default arrange({
     },
     {
       id: 's04', type: 'explain', skill: 'markovnikov',
-      html: '<p><b>Why Markovnikov?</b> H⁺ can add to either carbon, which makes two different carbocations. The <b>more stable</b> cation forms faster, so its path wins. H goes to the carbon with more H, leaving the + charge on the more substituted carbon (more alkyl groups): the 3° or 2° cation instead of the 1°. X⁻ then bonds where the charge is.</p><p>If both carbons are equally substituted, both cations are equally stable and you get a <b>mixture</b>.</p>'
+      html: '<p><b>Why Markovnikov?</b> H⁺ can add to either carbon, making two different carbocations. The <b>more stable</b> one sits lower in energy and forms faster, so its path wins. A cation is <b>3°</b> if its C⁺ is bonded to three carbons, <b>2°</b> if two, <b>1°</b> if one. H goes to the carbon with more H, so the + lands on the more substituted carbon (3° or 2° beats 1°). X⁻ then bonds there.</p><p>Equally substituted carbons give a <b>mixture</b>.</p>'
     },
     {
       id: 's05', type: 'choice', skill: 'carbocations',
       prompt: 'Rotate the models. Left: the <i>tert</i>-butyl cation, (CH₃)₃C⁺. Right: isobutane, (CH₃)₃CH, the same skeleton with an H on the central carbon. What shape do the groups around the highlighted central carbon of the CATION take?',
       visual: { widget: 'model3d', config: { mol: 'tert-butyl-cation', compare: 'isobutane', highlight: [1], labels: { 1: 'C⁺' } } },
       options: [
-        opt('Flat (trigonal planar): three groups in one plane, 120° apart', true, 'Yes. C⁺ has three bonds and no lone pair, so three electron groups: sp² (Lesson 02). Its angles add up to 360°, unlike the tetrahedral carbon of isobutane.'),
-        opt('Tetrahedral, like the alkane', false, 'Tetrahedral needs four groups. The cation has only three, so its carbon is sp², not sp³. Compare the two models.'),
-        opt('Pyramidal, with a lone pair on top', false, 'A lone pair would give eight electrons and a negative carbon (a carbanion). C⁺ has only six electrons and no lone pair.'),
-        opt('Linear', false, 'Linear (sp) needs only two groups. The cation has three bonded groups.')
+        opt('Flat (trigonal planar): three groups in one plane', true, 'Yes. C⁺ has three bonds and no lone pair, so three electron groups: sp² (Lesson 02). Its angles add up to 360°, unlike the tetrahedral carbon of isobutane.'),
+        opt('Tetrahedral, with the empty orbital pointing at one corner', false, 'Tetrahedral needs four groups. The cation has only three, so its carbon is sp², not sp³. Compare the two models.'),
+        opt('Pyramidal, like ammonia, with a lone pair on top', false, 'A lone pair would give eight electrons and a negative carbon (a carbanion). C⁺ has only six electrons and no lone pair.'),
+        opt('Linear, like the carbons in an alkyne', false, 'Linear (sp) needs only two groups. The cation has three bonded groups.')
       ],
       hints: ['Count the electron groups on the central carbon: atoms bonded to it plus lone pairs (Lesson 02).', 'Three groups and no lone pair means sp², 120°, flat. Four groups would be sp³ and tetrahedral.'],
       worked: 'The cation carbon has three bonds and no lone pair, so three electron groups: sp² and trigonal planar (bond angles near 120°, sum 360°). Isobutane’s central carbon has four groups, so it is tetrahedral (about 109.5°).'
     },
     {
       id: 's06', type: 'explain', skill: 'carbocations',
-      html: `<div style="text-align:center">${CATION_SVG}</div><p>The C⁺ (R = an alkyl group) is sp² and planar. Its <b>p orbital is empty</b>, above and below the plane: that hole is what attracts a pair of electrons. Alkyl groups push electron density toward C⁺ (the <b>inductive effect</b>), so stability runs <b>3° > 2° > 1° > methyl</b>.</p>`
+      html: `<div style="text-align:center">${CATION_SVG}</div><p>The C⁺ (R = an alkyl group) is sp² and planar. Its <b>p orbital is empty</b>, above and below the plane: that hole attracts a pair of electrons. C⁺ is short of electrons, so alkyl groups that lend it density spread the charge (the <b>inductive effect</b>) and steady it: <b>3° > 2° > 1° > methyl</b>.</p>`
     },
     {
       id: 's07', type: 'choice', skill: 'energy-diagram',
       prompt: 'The diagram compares two pathways for HBr adding to 2-methylpropene: through the tertiary cation (solid) and through the primary cation (dashed). Which statement is right?',
       visual: { widget: 'energy-diagram', config: { levels: pw3, label: 'via the 3° carbocation (Markovnikov)', overlay: { levels: pw1, label: 'via the 1° carbocation' }, mode: 'view', caption: 'Illustrative energies, not measured values.' } },
       options: [
-        opt('The 3° pathway has the lower transition state for step 1, so it is the faster path and the one that wins', true, 'Yes. A more stable cation sits lower, and the transition state leading to it is lower too. A smaller Eact means more molecules get over the barrier per second.'),
-        opt('The 1° pathway is faster, because a less stable cation is more reactive', false, 'A less stable cation sits HIGHER in energy, and so does the transition state that leads to it. A higher barrier means a slower step.'),
+        opt('The 3° pathway has the lower transition state, so it is faster and wins', true, 'Yes. A more stable cation sits lower, and the transition state leading to it is lower too. A smaller Eact means more molecules get over the barrier per second.'),
+        opt('The 1° pathway is faster, because a less stable cation is more reactive and reacts sooner', false, 'A less stable cation sits HIGHER in energy, and so does the transition state that leads to it. A higher barrier means a slower step.'),
         opt('Both paths are equally fast, since both lead to an alkyl bromide', false, 'Same type of product does not mean the same speed. The barriers have different heights, so the rates differ.'),
         opt('The 3° pathway is slower, because its intermediate is lower in energy', false, 'The reverse holds for step 1: the lower the intermediate (and the transition state before it), the smaller the barrier and the faster the step.')
       ],
@@ -118,10 +118,10 @@ export default arrange({
       id: 's09', type: 'choice', skill: 'markovnikov',
       prompt: 'A classmate draws step 1 of that mechanism with H bonding to the carbon that holds the two CH₃ groups, and finishes with 1-bromo-2-methylpropane. What went wrong?',
       options: [
-        opt('H went to the wrong carbon: that gives the less stable (primary) carbocation, so this path loses to the tertiary one', true, 'Yes. H on the carbon with the CH₃ groups leaves the + on CH₂, a primary cation. The H should go to the CH₂ carbon, which makes the tertiary cation.'),
-        opt('Br⁻ cannot attack a carbocation', false, 'Br⁻ attacks it readily: that is step 2 of the correct mechanism. The error is earlier, in where H went.'),
-        opt('The product has the wrong molecular formula', false, 'Both bromides are C₄H₉Br, isomers. The trouble is which isomer forms, not the formula.'),
-        opt('Nothing is wrong: both products form in equal amounts', false, 'The two cations are not equally stable (3° against 1°), so one path is much faster. The reaction is regiospecific.')
+        opt('H went to the wrong carbon: that gives a primary cation, the less stable one', true, 'Yes. H on the carbon with the CH₃ groups leaves the + on CH₂, a primary cation. The H should go to the CH₂ carbon, which makes the tertiary cation.'),
+        opt('Br⁻ cannot attack a carbocation, because step 2 needs a neutral molecule', false, 'Br⁻ attacks it readily: that is step 2 of the correct mechanism. The error is earlier, in where H went.'),
+        opt('The product has the wrong molecular formula: one H too many', false, 'Both bromides are C₄H₉Br, isomers. The trouble is which isomer forms, not the formula.'),
+        opt('Nothing is wrong: both products form in about equal amounts, as with any alkene', false, 'The two cations are not equally stable (3° against 1°), so one path is much faster. The reaction is regiospecific.')
       ],
       hints: ['Compare the two carbocations: where does the + charge end up if H goes to the carbon with the CH₃ groups?', 'That charge would sit on the CH₂ carbon, which has only one carbon group: a primary cation, much less stable than the tertiary one.'],
       worked: 'H adding to the (CH₃)₂C carbon leaves C⁺ on CH₂, a primary cation. H adding to the CH₂ carbon leaves C⁺ on the (CH₃)₂C carbon, a tertiary cation. The tertiary cation is far more stable and forms faster, so H must go to CH₂.'
@@ -131,8 +131,8 @@ export default arrange({
       prompt: '1-Methylcyclohexene is shaken with water containing a little sulfuric acid. A new compound forms by addition of H and OH across the C=C. Which is it?',
       equation: { reactants: ['CC1=CCCCC1', 'O'], products: [], cond: 'H₂SO₄ (cat.)' },
       options: [
-        opt('<mol smiles="CC1(O)CCCCC1" label="1-methylcyclohexan-1-ol">', true, 'Yes. H went to the CH carbon and OH to the carbon that carries the CH₃: the tertiary alcohol, through the tertiary carbocation.'),
-        opt('<mol smiles="CC1CCCCC1O" label="2-methylcyclohexan-1-ol">', false, 'This puts OH on the less substituted carbon. That needs H on the carbon with the CH₃, which would make the less stable secondary cation.'),
+        opt('<mol smiles="CC1(O)CCCCC1" label="1-methylcyclohexan-1-ol"></mol>', true, 'Yes. H went to the CH carbon and OH to the carbon that carries the CH₃: the tertiary alcohol, through the tertiary carbocation.'),
+        opt('<mol smiles="CC1CCCCC1O" label="2-methylcyclohexan-1-ol"></mol>', false, 'This puts OH on the less substituted carbon. That needs H on the carbon with the CH₃, which would make the less stable secondary cation.'),
         opt('An equal mixture of both alcohols', false, 'The two carbons differ (no H and three alkyl groups, against one H), so the cations differ in stability and one path wins.'),
         opt('Nothing: water alone cannot add to a C=C', false, 'Water alone is too weak an acid to protonate the alkene, but the acid catalyst supplies H₃O⁺, and then the reaction goes.')
       ],
@@ -152,9 +152,9 @@ export default arrange({
       prompt: 'Look at H₃O⁺ in your mechanism. It is used in step 1 and a new H₃O⁺ appears in step 3. What does that tell you about the acid?',
       options: [
         opt('It is a catalyst: used in step 1 and regenerated in step 3, so a small amount is enough', true, 'Yes. The H⁺ that leaves is replaced by another H⁺, so the acid is not consumed. That is why the reaction needs only “cat.” sulfuric acid.'),
-        opt('It is a reactant: one H₃O⁺ is used up for every alkene', false, 'It is not used up: step 3 makes H₃O⁺ again. Overall only the alkene and H₂O are consumed.'),
+        opt('It is a reactant: one H₃O⁺ is used up for every alkene that reacts', false, 'It is not used up: step 3 makes H₃O⁺ again. Overall only the alkene and H₂O are consumed.'),
         opt('It becomes the OH hydrogen of the product and is gone', false, 'The oxonium ion loses its extra H⁺ in step 3 to water. The acid ends up as H₃O⁺ again.'),
-        opt('It is just the solvent', false, 'The solvent is mostly water. The acid is a small amount of added H⁺ source with a specific job in step 1 and step 3.')
+        opt('It is just the solvent, so it plays no part in the steps', false, 'The solvent is mostly water. The acid is a small amount of added H⁺ source with a specific job in step 1 and step 3.')
       ],
       hints: ['Compare what is present at the very start and the very end: is any H₃O⁺ lost overall?', 'A species that is consumed in one step and regenerated in a later step is a catalyst.'],
       worked: 'Overall: alkene + H₂O → alcohol, with H₃O⁺ on both sides. The acid donates H⁺ in step 1 and gets one back in step 3, so it speeds up the reaction without being used up: a catalyst.'
@@ -169,9 +169,9 @@ export default arrange({
       equation: { reactants: ['CCC=CC', 'Br'], products: [], cond: 'ether' },
       options: [
         opt('Two: 2-bromopentane and 3-bromopentane', true, 'Yes. Each C=C carbon has one H and one alkyl group, so H can go to either with equal justification. Both cations are secondary, equally stable, and both bromides form.'),
-        opt('One: only 2-bromopentane', false, 'That would need the cation at C2 to be better than the one at C3. Both are secondary (each C⁺ has two carbon groups), so neither is favoured.'),
-        opt('One: only 3-bromopentane', false, 'That would need the cation at C3 to be better. Both carbocations are secondary, so neither is favoured.'),
-        opt('Three, including 1-bromopentane', false, 'H adds to a C=C carbon and Br to the other, so Br can only end up on C2 or C3. C1 is not part of the double bond.')
+        opt('One: only 2-bromopentane, the carbon nearest the end', false, 'That would need the cation at C2 to be better than the one at C3. Both are secondary (each C⁺ has two carbon groups), so neither is favoured.'),
+        opt('One: only 3-bromopentane, the carbon in the middle', false, 'That would need the cation at C3 to be better. Both carbocations are secondary, so neither is favoured.'),
+        opt('Three, including 1-bromopentane at the chain end', false, 'H adds to a C=C carbon and Br to the other, so Br can only end up on C2 or C3. C1 is not part of the double bond.')
       ],
       reveal: 'Both C=C carbons carry the same number of alkyl groups, so both carbocations are secondary and equally stable. Neither orientation is favoured, and you get a <b>mixture</b> of 2-bromopentane and 3-bromopentane. The rule only decides when the two carbons differ.'
     },
@@ -207,9 +207,9 @@ export default arrange({
         {
           ask: 'Cl⁻ then bonds to the positive carbon. What is the product?',
           options: [
-            opt('<mol smiles="CCC(C)(C)Cl" label="2-chloro-2-methylbutane">', true, 'Yes. Cl sits on the carbon that carried the + charge: the tertiary chloride.'),
-            opt('<mol smiles="CC(Cl)C(C)C" label="2-chloro-3-methylbutane">', false, 'This is the anti-Markovnikov orientation: Cl on the carbon that had more H. It would come from the secondary cation.'),
-            opt('<mol smiles="CC(C)(Cl)C(C)Cl" label="2,3-dichloro-2-methylbutane">', false, 'Only one HCl adds, so only one Cl is in the product.')
+            opt('<mol smiles="CCC(C)(C)Cl" label="2-chloro-2-methylbutane"></mol>', true, 'Yes. Cl sits on the carbon that carried the + charge: the tertiary chloride.'),
+            opt('<mol smiles="CC(Cl)C(C)C" label="2-chloro-3-methylbutane"></mol>', false, 'This is the anti-Markovnikov orientation: Cl on the carbon that had more H. It would come from the secondary cation.'),
+            opt('<mol smiles="CC(C)(Cl)C(C)Cl" label="2,3-dichloro-2-methylbutane"></mol>', false, 'Only one HCl adds, so only one Cl is in the product.')
           ]
         }
       ],
@@ -220,10 +220,10 @@ export default arrange({
       prompt: 'Work backwards. The compound above is the major product when an alkene reacts with HCl in ether. Which alkene was it?',
       smiles: 'CC1(Cl)CCCCC1',
       options: [
-        opt('<mol smiles="CC1=CCCCC1">', true, 'Yes. HCl adds H to the CH carbon and Cl to the carbon with the CH₃, which is the compound shown.'),
-        opt('<mol smiles="C1=CCCCC1">', false, 'Cyclohexene has no CH₃. Its product, chlorocyclohexane, has no CH₃ either.'),
-        opt('<mol smiles="CCC(C)=C">', false, 'This is a chain, not a ring. Its product would be 2-chloro-2-methylbutane, not a ring.'),
-        opt('<mol smiles="CCCC=C">', false, 'Pent-1-ene has five carbons in a chain and gives 2-chloropentane. The target has a ring.')
+        opt('<mol smiles="CC1=CCCCC1"></mol>', true, 'Yes. HCl adds H to the CH carbon and Cl to the carbon with the CH₃, which is the compound shown.'),
+        opt('<mol smiles="C1=CCCCC1"></mol>', false, 'Cyclohexene has no CH₃. Its product, chlorocyclohexane, has no CH₃ either.'),
+        opt('<mol smiles="CCC(C)=C"></mol>', false, 'This is a chain, not a ring. Its product would be 2-chloro-2-methylbutane, not a ring.'),
+        opt('<mol smiles="CCCC=C"></mol>', false, 'Pent-1-ene has five carbons in a chain and gives 2-chloropentane. The target has a ring.')
       ],
       hints: ['Find the carbon that holds the Cl. The C=C must have been between that carbon and a neighbour.', 'Take away Cl and one H from a neighbouring carbon and restore the double bond. Then check that Markovnikov addition puts Cl back on the same carbon.'],
       worked: 'Remove Cl and an H from the adjacent ring carbon to get 1-methylcyclohexene. Check forwards: H goes to the CH carbon, Cl to the carbon with the CH₃, which gives the compound shown.'
@@ -233,10 +233,10 @@ export default arrange({
       prompt: 'One more. This alcohol is the product of acid-catalysed hydration (H₂O, H₂SO₄ catalyst) of an alkene. Pick the alkene that gives mainly THIS alcohol and nothing else.',
       smiles: 'CCCC(C)O',
       options: [
-        opt('<mol smiles="CCCC=C">', true, 'Yes. Pent-1-ene: H goes to the CH₂ end and OH to C2, the carbon with more alkyl groups. Only pentan-2-ol forms.'),
-        opt('<mol smiles="CCC=CC">', false, 'Pent-2-ene gives pentan-2-ol AND pentan-3-ol, because both C=C carbons are alike (both cations secondary). It does not give this alcohol alone.'),
-        opt('<mol smiles="CC=C">', false, 'Propene has only three carbons. It gives propan-2-ol.'),
-        opt('<mol smiles="C1=CCCCC1">', false, 'Cyclohexene has a ring and gives cyclohexanol. The target is a chain of five carbons.')
+        opt('<mol smiles="CCCC=C"></mol>', true, 'Yes. Pent-1-ene: H goes to the CH₂ end and OH to C2, the carbon with more alkyl groups. Only pentan-2-ol forms.'),
+        opt('<mol smiles="CCC=CC"></mol>', false, 'Pent-2-ene gives pentan-2-ol AND pentan-3-ol, because both C=C carbons are alike (both cations secondary). It does not give this alcohol alone.'),
+        opt('<mol smiles="CC=C"></mol>', false, 'Propene has only three carbons. It gives propan-2-ol.'),
+        opt('<mol smiles="C1=CCCCC1"></mol>', false, 'Cyclohexene has a ring and gives cyclohexanol. The target is a chain of five carbons.')
       ],
       hints: ['Locate the carbon that carries the OH. The C=C was between it and a neighbouring carbon, and there are two neighbours to consider.', 'Try each neighbour: one choice puts the OH where Markovnikov addition would put it and gives only this alcohol; the other choice gives a mixture.'],
       worked: 'The OH is on C2. The C=C could have been C1=C2 or C2=C3. Pent-1-ene (C1=C2) gives only the C2 alcohol by Markovnikov’s rule; pent-2-ene (C2=C3) gives a mixture of the C2 and C3 alcohols.'

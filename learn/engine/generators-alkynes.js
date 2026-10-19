@@ -27,7 +27,7 @@ const HINTS = {
 };
 const hintKey = (rx) => (rx.kind === 'HX' ? 'HX' + rx.equiv : rx.kind === 'X2' ? 'X2_' + rx.equiv : rx.kind);
 
-const optText = (list) => list.map((s) => `<mol smiles="${s}" label="${nm(s)}">`).join(' + ');
+const optText = (list) => list.map((s) => `<mol smiles="${s}" label="${nm(s)}"></mol>`).join(' + ');
 
 // ---------------------------------------------------------------- 1. the product
 function productProblem(rng) {

@@ -99,10 +99,10 @@ export default {
       id: 's10', type: 'choice', skill: 'meso',
       prompt: 'Measured at 20 °C: (+)- and (−)-tartaric acid both melt at 168–170 °C and dissolve 139 g per 100 mL of water. Meso-tartaric acid melts at 146–148 °C and dissolves 125 g per 100 mL. Why does the meso form differ when (+) and (−) match?',
       options: [
-        { text: '(+) and (−) are enantiomers, so they share every property except the sign of rotation. The meso form is a diastereomer of both: a different compound with its own properties', correct: true, why: 'Yes. Enantiomers behave identically in ordinary physical tests; diastereomers are different compounds, so their properties differ.' },
-        { text: 'The meso form has a different molecular formula', why: 'All three are C₄H₆O₆. Stereoisomers always share the molecular formula and the connectivity.' },
-        { text: 'Meso-tartaric acid is a 50:50 mixture of the (+) and (−) forms', why: 'A 50:50 mixture is a racemate, a different thing. The meso form is ONE pure compound whose own two halves cancel.' },
-        { text: 'The meso form is chiral, so it melts differently', why: 'The meso form is achiral. Its different melting point comes from being a different compound, a diastereomer of the (+) and (−) forms.' }
+        { text: '(+) and (−) are enantiomers, so their properties match; the meso form is a diastereomer, a different compound with its own properties', correct: true, why: 'Yes. Enantiomers behave identically in ordinary physical tests; diastereomers are different compounds, so their properties differ.' },
+        { text: 'The meso form has a different molecular formula, since its atoms are arranged differently', why: 'All three are C₄H₆O₆. Stereoisomers always share the molecular formula and the connectivity.' },
+        { text: 'Meso-tartaric acid is a 50:50 mixture of the (+) and (−) forms, so it melts over a range', why: 'A 50:50 mixture is a racemate, a different thing. The meso form is ONE pure compound whose own two halves cancel.' },
+        { text: 'The meso form is chiral, so it differs from both of the others in melting point', why: 'The meso form is achiral. Its different melting point comes from being a different compound, a diastereomer of the (+) and (−) forms.' }
       ],
       hints: ['What is the relationship between (+)-tartaric acid and (−)-tartaric acid? And between either of them and the meso form?', 'Enantiomers: identical properties. Diastereomers: different properties.'],
       worked: '(+) and (−) are a pair of mirror images, so their melting points and solubilities are equal. The meso form is not their mirror image; it is a diastereomer, a separate compound, so its melting point and solubility differ.',
@@ -227,10 +227,10 @@ export default {
       prompt: 'Enantiomers have the same melting point, boiling point and solubility. Yet (S)-ibuprofen relieves pain while its mirror image, (R)-ibuprofen, does not. What is the most likely reason?',
       smiles: 'CC(C)Cc1ccc(cc1)[C@H](C)C(=O)O',
       options: [
-        { text: 'The body’s receptors and enzymes are themselves chiral, so only one enantiomer fits properly, like a hand in a glove', correct: true, why: 'Yes. A chiral receptor is a handed environment: one enantiomer fits it and its mirror image does not, just as a left hand does not fit a right-handed glove.' },
-        { text: 'The two enantiomers have different molecular formulas', why: 'Enantiomers have identical formulas and identical connectivity. Only the 3D arrangement differs.' },
-        { text: 'Only the (S) form can dissolve in water', why: 'Enantiomers dissolve equally well in an achiral solvent like water. The difference only shows up in a chiral environment.' },
-        { text: 'The (R) form is always much heavier', why: 'Enantiomers have exactly the same mass. What differs is how they interact with other chiral molecules.' }
+        { text: 'The body’s receptors and enzymes are chiral, so only one enantiomer fits properly, like a hand in a glove', correct: true, why: 'Yes. A chiral receptor is a handed environment: one enantiomer fits it and its mirror image does not, just as a left hand does not fit a right-handed glove.' },
+        { text: 'The two enantiomers have different molecular formulas, so the body treats them differently', why: 'Enantiomers have identical formulas and identical connectivity. Only the 3D arrangement differs.' },
+        { text: 'Only the (S) form can dissolve in water, so only it reaches the blood', why: 'Enantiomers dissolve equally well in an achiral solvent like water. The difference only shows up in a chiral environment.' },
+        { text: 'The (R) form is always much heavier, so the body cannot absorb it', why: 'Enantiomers have exactly the same mass. What differs is how they interact with other chiral molecules.' }
       ],
       reveal: 'Biological receptors and enzymes are chiral, so they usually treat the two enantiomers of a molecule differently: (+)-limonene smells of oranges and (−)-limonene of pine trees, and only (S)-ibuprofen is the active pain reliever. Many drugs are now made as a single enantiomer.'
     },
@@ -363,8 +363,8 @@ export default {
       visual: { widget: 'fischer-quiz', config: { mode: 'view', figures: [{ entry: 'lactic acid', xSide: 'right', caption: 'A' }, { entry: 'lactic acid', xSide: 'left', caption: 'B' }] } },
       options: [
         { text: 'No: B is the mirror image of A, an enantiomer', correct: true, why: 'Yes. Swapping two groups at a stereocenter reverses its configuration, which is the same idea as the swap trick you used in Lesson 15.' },
-        { text: 'Yes: it is only drawn differently', why: 'Swapping two groups moves them to different places in space. At a stereocenter that makes a different arrangement: the mirror image, not the same molecule.' },
-        { text: 'No: B has different atoms bonded together', why: 'The same groups are still bonded to the same carbon, so the connectivity has not changed. Only the 3D arrangement has.' }
+        { text: 'Yes: it is only drawn differently, so it is the same molecule', why: 'Swapping two groups moves them to different places in space. At a stereocenter that makes a different arrangement: the mirror image, not the same molecule.' },
+        { text: 'No: B has different atoms bonded together, a constitutional isomer', why: 'The same groups are still bonded to the same carbon, so the connectivity has not changed. Only the 3D arrangement has.' }
       ],
       reveal: 'One swap of two groups gives the <b>enantiomer</b>. A second swap of another pair gives back the original molecule.'
     },

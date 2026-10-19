@@ -19,9 +19,9 @@ export default {
       derive: { smiles: 'CC(Cl)CCC', quantity: 'ccount' },
       options: [
         { text: 'None: no C is written, so there are none', val: 0, why: 'This is a drawing shorthand, not a missing atom. Organic molecules are built on carbon, and the drawing leaves the C labels off on purpose.' },
-        { text: '3: only the corners where two lines meet', val: 3, why: 'Corners count, but so does the free end of every line. Those ends are CH₃ groups, and you miss two of them.' },
-        { text: '5: a carbon at every corner and at every line end', val: 5, correct: true, why: 'Yes. Two line ends and three corners make five carbons. The Cl is the only atom that gets a label, and it sits at the end of its own short line.' },
-        { text: '6: the Cl counts as well', val: 6, why: 'Cl is chlorine, not carbon, so it is counted separately. The drawing has five carbons plus one Cl.' }
+        { text: '3: only the corners where two lines meet, not the ends', val: 3, why: 'Corners count, but so does the free end of every line. Those ends are CH₃ groups, and you miss two of them.' },
+        { text: '5: a carbon at each corner and each line end', val: 5, correct: true, why: 'Yes. Two line ends and three corners make five carbons. The Cl is the only atom that gets a label, and it sits at the end of its own short line.' },
+        { text: '6: the Cl counts as a carbon as well', val: 6, why: 'Cl is chlorine, not carbon, so it is counted separately. The drawing has five carbons plus one Cl.' }
       ],
       reveal: 'In a <b>skeletal structure</b> each corner and each line end is a carbon atom. The Cl is written because every atom other than C and H is always shown.'
     },

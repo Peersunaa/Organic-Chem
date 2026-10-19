@@ -35,9 +35,9 @@ export default arrange({
       prompt: 'Br₂ is added to cyclopentene in CH₂Cl₂ (dichloromethane, a solvent). The red-brown colour of Br₂ disappears at once, and a dibromide forms by addition across the C=C. The two new Br atoms could land on the same face of the ring (cis) or on opposite faces (trans). Which do you expect?',
       equation: { reactants: ['C1=CCCC1'], products: [], cond: 'Br₂, CH₂Cl₂' },
       options: [
-        opt('<mol smiles="Br[C@H]1CCC[C@@H]1Br" label="trans-1,2-dibromocyclopentane">', true, 'Yes. Only the trans dibromide is found: the two Br atoms end up on opposite faces of the ring. Wedge and dash show the two faces.', { chk: ['C1=CCCC1', 'Br2', 'right'] }),
-        opt('<mol smiles="Br[C@@H]1CCC[C@@H]1Br" label="cis-1,2-dibromocyclopentane">', false, 'This is the cis isomer, both Br on the same face. It is not formed. A flat carbocation would let Br⁻ attack from either face and give a mixture, but only the trans product is found.', { chk: ['C1=CCCC1', 'Br2', 'opposite'] }),
-        opt('<mol smiles="BrC1(Br)CCCC1" label="1,1-dibromocyclopentane">', false, 'Br₂ adds ACROSS the double bond: one Br goes to each of the two C=C carbons. Both Br on one carbon would mean a Br had moved.'),
+        opt('<mol smiles="Br[C@H]1CCC[C@@H]1Br" label="trans-1,2-dibromocyclopentane"></mol>', true, 'Yes. Only the trans dibromide is found: the two Br atoms end up on opposite faces of the ring. Wedge and dash show the two faces.', { chk: ['C1=CCCC1', 'Br2', 'right'] }),
+        opt('<mol smiles="Br[C@@H]1CCC[C@@H]1Br" label="cis-1,2-dibromocyclopentane"></mol>', false, 'This is the cis isomer, both Br on the same face. It is not formed. A flat carbocation would let Br⁻ attack from either face and give a mixture, but only the trans product is found.', { chk: ['C1=CCCC1', 'Br2', 'opposite'] }),
+        opt('<mol smiles="BrC1(Br)CCCC1" label="1,1-dibromocyclopentane"></mol>', false, 'Br₂ adds ACROSS the double bond: one Br goes to each of the two C=C carbons. Both Br on one carbon would mean a Br had moved.'),
         opt('No reaction: alkenes do not react with Br₂', false, 'They do. The red colour of Br₂ disappears immediately because Br₂ is used up in an addition. That is the standard quick test for a C=C.')
       ],
       reveal: 'Only <b>trans-1,2-dibromocyclopentane</b> forms: the Br atoms add from opposite faces, called <b>anti addition</b>. It is made as a racemate (equal amounts of the drawn molecule and its mirror image). The fading of Br₂’s red colour also makes this a quick lab test for a C=C.'
@@ -81,9 +81,9 @@ export default arrange({
       prompt: '1,2-Dimethylcyclohexene is stirred with H₂ and a Pd/C catalyst. Two H atoms add across the C=C. The new C–H bonds could form on the same face of the ring or on opposite faces. Which product do you expect?',
       equation: { reactants: ['CC1=C(C)CCCC1'], products: [], cond: 'H₂, Pd/C' },
       options: [
-        opt('<mol smiles="C[C@@H]1CCCC[C@@H]1C" label="cis-1,2-dimethylcyclohexane">', true, 'Yes. Both H atoms add to the same face of the ring. The two CH₃ groups are pushed to the other face together, so they are cis.', { chk: ['CC1=C(C)CCCC1', 'H2', 'right'] }),
-        opt('<mol smiles="C[C@H]1CCCC[C@@H]1C" label="trans-1,2-dimethylcyclohexane">', false, 'trans would need the two H atoms to add to opposite faces. Catalytic hydrogenation does not do that: both H atoms come from the same catalyst surface.', { chk: ['CC1=C(C)CCCC1', 'H2', 'opposite'] }),
-        opt('<mol smiles="CC1(C)CCCCC1" label="1,1-dimethylcyclohexane">', false, 'H₂ only adds two H atoms. A CH₃ group would have to move to give this, and nothing moves.'),
+        opt('<mol smiles="C[C@@H]1CCCC[C@@H]1C" label="cis-1,2-dimethylcyclohexane"></mol>', true, 'Yes. Both H atoms add to the same face of the ring. The two CH₃ groups are pushed to the other face together, so they are cis.', { chk: ['CC1=C(C)CCCC1', 'H2', 'right'] }),
+        opt('<mol smiles="C[C@H]1CCCC[C@@H]1C" label="trans-1,2-dimethylcyclohexane"></mol>', false, 'trans would need the two H atoms to add to opposite faces. Catalytic hydrogenation does not do that: both H atoms come from the same catalyst surface.', { chk: ['CC1=C(C)CCCC1', 'H2', 'opposite'] }),
+        opt('<mol smiles="CC1(C)CCCCC1" label="1,1-dimethylcyclohexane"></mol>', false, 'H₂ only adds two H atoms. A CH₃ group would have to move to give this, and nothing moves.'),
         opt('No reaction: the C=C is too crowded', false, 'It is a tetrasubstituted alkene (four carbon groups on the C=C), and hydrogenation is slower for crowded alkenes, but it does work and gives this product in good yield.')
       ],
       reveal: 'The product is <b>cis-1,2-dimethylcyclohexane</b>. Hydrogenation is <b>syn addition</b>: both H atoms are delivered to the same face of the C=C.'
@@ -109,10 +109,10 @@ export default arrange({
       prompt: 'A peroxyacid, RCO₃H (for example meta-chloroperoxybenzoic acid, mCPBA), reacts with cyclohexene in CH₂Cl₂. The peracid gives one O atom to the C=C. What forms?',
       equation: { reactants: ['C1=CCCCC1'], products: [], cond: 'RCO₃H' },
       options: [
-        opt('<mol smiles="C1CC[C@H]2O[C@H]2C1" label="cyclohexene oxide (7-oxabicyclo[4.1.0]heptane)">', true, 'Yes. The O atom bonds to both carbons of the old C=C, making a three-membered ring with oxygen: an epoxide.', { chk: ['C1=CCCCC1', 'RCO3H', 'right'] }),
-        opt('<mol smiles="OC1CCCCC1O" label="cyclohexane-1,2-diol">', false, 'A peroxyacid transfers just ONE O atom, so there is one O in the product, in a ring. A diol has two O atoms and needs another step (H₃O⁺) or another reagent.'),
-        opt('<mol smiles="O=C(O)CCCCC(=O)O" label="hexanedioic acid">', false, 'That would need the C=C to be cut. A peroxyacid does not cut the C=C; KMnO₄ in acid does.'),
-        opt('<mol smiles="C1CCCCC1" label="cyclohexane">', false, 'Cyclohexane is what H₂ over Pd gives. A peroxyacid adds oxygen, it does not add hydrogen.')
+        opt('<mol smiles="C1CC[C@H]2O[C@H]2C1" label="cyclohexene oxide (7-oxabicyclo[4.1.0]heptane)"></mol>', true, 'Yes. The O atom bonds to both carbons of the old C=C, making a three-membered ring with oxygen: an epoxide.', { chk: ['C1=CCCCC1', 'RCO3H', 'right'] }),
+        opt('<mol smiles="OC1CCCCC1O" label="cyclohexane-1,2-diol"></mol>', false, 'A peroxyacid transfers just ONE O atom, so there is one O in the product, in a ring. A diol has two O atoms and needs another step (H₃O⁺) or another reagent.'),
+        opt('<mol smiles="O=C(O)CCCCC(=O)O" label="hexanedioic acid"></mol>', false, 'That would need the C=C to be cut. A peroxyacid does not cut the C=C; KMnO₄ in acid does.'),
+        opt('<mol smiles="C1CCCCC1" label="cyclohexane"></mol>', false, 'Cyclohexane is what H₂ over Pd gives. A peroxyacid adds oxygen, it does not add hydrogen.')
       ],
       reveal: 'The product is an <b>epoxide</b> (an oxirane): a cyclic ether with the O in a three-membered ring. The O is delivered to both carbons from the same face, so the geometry of the alkene is kept.'
     },
@@ -147,10 +147,10 @@ export default arrange({
       prompt: 'Now a one-step route to a diol. Cyclohexene is treated with KMnO₄ in basic solution (OH⁻, H₂O). The purple colour fades and a brown solid forms. Which product do you expect?',
       equation: { reactants: ['C1=CCCCC1'], products: [], cond: 'KMnO₄, OH⁻, H₂O' },
       options: [
-        opt('<mol smiles="O[C@@H]1CCCC[C@@H]1O" label="cis-cyclohexane-1,2-diol">', true, 'Yes. In base, KMnO₄ puts an OH on each carbon of the C=C, both on the same face (syn): a cis diol.', { chk: ['C1=CCCCC1', 'KMnO4_OH', 'right'] }),
-        opt('<mol smiles="O[C@H]1CCCC[C@@H]1O" label="trans-cyclohexane-1,2-diol">', false, 'This trans diol is the product of the two-step route (peroxyacid, then H₃O⁺). KMnO₄ in base adds both OH from the same face, giving the cis diol.', { chk: ['C1=CCCCC1', 'KMnO4_OH', 'opposite'] }),
-        opt('<mol smiles="C1CC[C@H]2O[C@H]2C1" label="cyclohexene oxide">', false, 'KMnO₄ adds an OH to each carbon. An epoxide is the peroxyacid product, with one O shared by both carbons.', { chk: ['C1=CCCCC1', 'RCO3H', 'right'] }),
-        opt('<mol smiles="O=C(O)CCCCC(=O)O" label="hexanedioic acid">', false, 'The C=C is cut in ACID, not in base. In basic solution the oxidation stops at the diol.')
+        opt('<mol smiles="O[C@@H]1CCCC[C@@H]1O" label="cis-cyclohexane-1,2-diol"></mol>', true, 'Yes. In base, KMnO₄ puts an OH on each carbon of the C=C, both on the same face (syn): a cis diol.', { chk: ['C1=CCCCC1', 'KMnO4_OH', 'right'] }),
+        opt('<mol smiles="O[C@H]1CCCC[C@@H]1O" label="trans-cyclohexane-1,2-diol"></mol>', false, 'This trans diol is the product of the two-step route (peroxyacid, then H₃O⁺). KMnO₄ in base adds both OH from the same face, giving the cis diol.', { chk: ['C1=CCCCC1', 'KMnO4_OH', 'opposite'] }),
+        opt('<mol smiles="C1CC[C@H]2O[C@H]2C1" label="cyclohexene oxide"></mol>', false, 'KMnO₄ adds an OH to each carbon. An epoxide is the peroxyacid product, with one O shared by both carbons.', { chk: ['C1=CCCCC1', 'RCO3H', 'right'] }),
+        opt('<mol smiles="O=C(O)CCCCC(=O)O" label="hexanedioic acid"></mol>', false, 'The C=C is cut in ACID, not in base. In basic solution the oxidation stops at the diol.')
       ],
       reveal: 'KMnO₄ in base gives the <b>cis-diol</b>: <b>syn hydroxylation</b>, in one step. With an acyclic alkene the same rule gives cis alkene → a meso diol (a diol that is its own mirror image) and trans alkene → a racemic diol (equal amounts of two mirror-image diols).'
     },
@@ -207,9 +207,9 @@ export default arrange({
         {
           ask: 'So the products are…',
           options: [
-            opt('<mol smiles="CCCCC(=O)O" label="pentanoic acid"> + <mol smiles="O=C=O" label="CO₂">', true, 'Yes. The five carbons of the chain keep their place in pentanoic acid, and the old CH₂= carbon leaves as CO₂.'),
-            opt('<mol smiles="CCCCCC(=O)O" label="hexanoic acid">', false, 'That would have all six carbons in one acid. The C=C is cut, so the CH₂= carbon is lost as CO₂.'),
-            opt('<mol smiles="CCCCC=O" label="pentanal"> + <mol smiles="O=C=O" label="CO₂">', false, 'Pentanal (an aldehyde) is the intermediate stage, but it is oxidised on to pentanoic acid.')
+            opt('<mol smiles="CCCCC(=O)O" label="pentanoic acid"></mol> + <mol smiles="O=C=O" label="CO₂"></mol>', true, 'Yes. The five carbons of the chain keep their place in pentanoic acid, and the old CH₂= carbon leaves as CO₂.'),
+            opt('<mol smiles="CCCCCC(=O)O" label="hexanoic acid"></mol>', false, 'That would have all six carbons in one acid. The C=C is cut, so the CH₂= carbon is lost as CO₂.'),
+            opt('<mol smiles="CCCCC=O" label="pentanal"></mol> + <mol smiles="O=C=O" label="CO₂"></mol>', false, 'Pentanal (an aldehyde) is the intermediate stage, but it is oxidised on to pentanoic acid.')
           ]
         }
       ],
@@ -221,9 +221,9 @@ export default arrange({
       equation: { reactants: ['C1=CCCCC1'], products: ['O[C@H]1CCCC[C@@H]1O'], cond: '?' },
       options: [
         opt('1. RCO₃H (a peroxyacid); 2. H₃O⁺', true, 'Yes. The peroxyacid makes the epoxide; water then opens it from the back, so the two OH groups are trans.'),
-        opt('KMnO₄, OH⁻, H₂O', false, 'That makes a diol in one step, but both OH on the same face: the cis diol, not the trans diol.'),
-        opt('1. H₃O⁺; 2. RCO₃H', false, 'The order matters. H₃O⁺ first would hydrate the alkene (Lesson 09) and give cyclohexanol, and a peroxyacid then has no C=C to react with.'),
-        opt('KMnO₄, H₃O⁺', false, 'In acid, KMnO₄ cuts the C=C and gives hexanedioic acid, not a diol.')
+        opt('KMnO₄, OH⁻, H₂O in the cold', false, 'That makes a diol in one step, but both OH on the same face: the cis diol, not the trans diol.'),
+        opt('1. H₃O⁺, to hydrate; 2. RCO₃H (a peroxyacid)', false, 'The order matters. H₃O⁺ first would hydrate the alkene (Lesson 09) and give cyclohexanol, and a peroxyacid then has no C=C to react with.'),
+        opt('KMnO₄, H₃O⁺, heated gently', false, 'In acid, KMnO₄ cuts the C=C and gives hexanedioic acid, not a diol.')
       ],
       hints: ['You need two OH groups on opposite faces. Which route adds oxygen to both carbons by an attack from the back?', 'Epoxide first (RCO₃H), then open it with water and acid (H₃O⁺). Check the order: acid first would hydrate the alkene instead.'],
       worked: 'Step 1: RCO₃H converts cyclohexene into cyclohexene oxide. Step 2: H₃O⁺ and water open the ring by attack from the back, giving trans-cyclohexane-1,2-diol. KMnO₄/OH⁻ would give the cis diol, and acidic KMnO₄ would cut the ring.'

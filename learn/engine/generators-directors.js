@@ -19,7 +19,7 @@ const nmOpt = (s) => { const n = nameBothAny(s) || nameBothArene(s); return n ? 
 const nm = (s) => nmOpt(s) || s;
 /** Subject of a sentence: the name when the naming engine has one, else a pointer to the drawing (never a raw SMILES string). */
 const who = (s) => nmOpt(s) || (s === 'C=Cc1ccccc1' ? 'styrene' : 'The compound shown below');
-const shown = (s) => { const n = nmOpt(s); return n || `<mol smiles="${s}">`; };
+const shown = (s) => { const n = nmOpt(s); return n || `<mol smiles="${s}"></mol>`; };
 
 // ---------------------------------------------------------------- 1. classify a group
 function classifyProblem(rng) {

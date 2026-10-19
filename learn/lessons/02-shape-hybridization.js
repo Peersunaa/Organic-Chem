@@ -28,7 +28,7 @@ export default {
     },
     {
       id: 's02', type: 'explain', skill: 'sigma-pi',
-      html: '<p>Each sp³ orbital overlaps <b>head-on</b> with a hydrogen 1s orbital. The shared electrons sit right on the line between the two nuclei. That is a <b>σ (sigma) bond</b>.</p><p>Every single bond is one σ bond. Rotating around it does not break the overlap.</p>'
+      html: '<div style="text-align:center"><svg viewBox="0 0 300 130" role="img" aria-label="A hydrogen 1s orbital and a carbon sp³ orbital overlapping head-on, on the line between the two nuclei" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:300px;max-width:100%;height:auto"><defs><clipPath id="l2-sig"><circle cx="92" cy="66" r="26"/></clipPath></defs><ellipse cx="172" cy="66" rx="76" ry="27" clip-path="url(#l2-sig)" fill="currentColor" fill-opacity=".3" stroke="none"/><circle cx="92" cy="66" r="26"/><ellipse cx="172" cy="66" rx="76" ry="27"/><line x1="50" y1="66" x2="282" y2="66" stroke-width="1" stroke-dasharray="2 5" opacity=".6"/><circle cx="92" cy="66" r="3" fill="currentColor" stroke="none"/><circle cx="244" cy="66" r="3" fill="currentColor" stroke="none"/><g font-family="sans-serif" font-size="12" fill="currentColor" stroke="none"><text x="70" y="112">H (1s)</text><text x="208" y="112">C (sp³)</text><text x="84" y="24">head-on overlap on the line</text></g></svg></div><p>Each sp³ orbital overlaps <b>head-on</b> with a hydrogen 1s orbital. The shared electrons sit right on the line between the two nuclei. That is a <b>σ (sigma) bond</b>.</p><p>Every single bond is one σ bond. Rotating around it does not break the overlap.</p>'
     },
     {
       id: 's03', type: 'predict', skill: 'hybridization',
@@ -57,7 +57,7 @@ export default {
     },
     {
       id: 's05', type: 'explain', skill: 'sigma-pi',
-      html: '<p>Each sp² carbon has one p orbital left over, standing up above and below the plane. Two such p orbitals overlap <b>sideways</b> and form a <b>π (pi) bond</b>.</p><p>So <b>C=C is 1 σ + 1 π</b>. A triple bond is <b>1 σ + 2 π</b>: the carbon is sp, with two p orbitals left over.</p>'
+      html: '<div style="text-align:center"><svg viewBox="0 0 380 200" role="img" aria-label="Two parallel p orbitals on neighbouring carbons overlapping sideways above and below the C to C line, which is the sigma bond" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:380px;max-width:100%;height:auto"><defs><clipPath id="l2-pu"><ellipse cx="120" cy="52" rx="40" ry="38"/></clipPath><clipPath id="l2-pl"><ellipse cx="120" cy="148" rx="40" ry="38"/></clipPath></defs><ellipse cx="180" cy="52" rx="40" ry="38" clip-path="url(#l2-pu)" fill="currentColor" fill-opacity=".3" stroke="none"/><ellipse cx="180" cy="148" rx="40" ry="38" clip-path="url(#l2-pl)" fill="currentColor" fill-opacity=".3" stroke="none"/><ellipse cx="120" cy="52" rx="40" ry="38"/><ellipse cx="180" cy="52" rx="40" ry="38"/><ellipse cx="120" cy="148" rx="40" ry="38"/><ellipse cx="180" cy="148" rx="40" ry="38"/><line x1="120" y1="100" x2="180" y2="100" stroke-width="3"/><circle cx="120" cy="100" r="4" fill="currentColor" stroke="none"/><circle cx="180" cy="100" r="4" fill="currentColor" stroke="none"/><g font-family="sans-serif" font-size="12" fill="currentColor" stroke="none"><text x="4" y="56">p orbital</text><text x="4" y="152">p orbital</text><text x="232" y="86">σ bond on the line</text><text x="232" y="106">π bond: sideways</text><text x="232" y="122">overlap above and below</text></g></svg></div><p>Each sp² carbon has one p orbital left over, standing up above and below the plane. Two such p orbitals overlap <b>sideways</b> and form a <b>π (pi) bond</b>.</p><p>So <b>C=C is 1 σ + 1 π</b>. A triple bond is <b>1 σ + 2 π</b>: the carbon is sp, with two p orbitals left over.</p>'
     },
     {
       id: 's06', type: 'input', skill: 'sigma-pi',
@@ -165,7 +165,7 @@ export default {
           options: [
             { text: 'sp³', val: 'sp3', why: 'sp³ needs 4 groups, but this carbon has 3 neighbours.' },
             { text: 'sp²', val: 'sp2', correct: true, why: '3 groups: sp².' },
-            { text: 'sp', val: 'sp', why: 'sp needs only 2 groups.' }
+            { text: 'sp', val: 'sp', why: 'sp needs only 2 groups around the atom, and this carbon has 3 neighbours, so it is not sp.' }
           ],
           then: 'The CH₂ carbon is sp².'
         },
@@ -221,7 +221,7 @@ export default {
         { text: 'C=C, the double bond', why: 'In the middle on both counts. There is one more shared pair to go.' },
         { text: 'C≡C, the triple bond', correct: true, why: 'Yes. Three shared pairs pull the nuclei closest together and hold them hardest.' }
       ],
-      reveal: 'Measured values: C–C 154 pm, 376 kJ/mol; C=C 134 pm, 728 kJ/mol; C≡C 120 pm, 965 kJ/mol. A π bond is weaker than a σ bond, so each extra bond adds less than the first.'
+      reveal: 'Measured values: C–C 154 pm, 376 kJ/mol; C=C 134 pm, 728 kJ/mol; C≡C 120 pm, 965 kJ/mol (pm = picometre, a trillionth of a metre, for bond length; kJ/mol = energy to break the bond in one mole of molecules). A π bond is weaker than a σ bond, so each extra bond adds less than the first.'
     },
     {
       id: 's14', type: 'predict', skill: 'polarity',
@@ -236,7 +236,7 @@ export default {
     },
     {
       id: 's15', type: 'explain', skill: 'polarity',
-      html: '<p>EN values to know: <b>H 2.1, C 2.5, N 3.0, O 3.5, F 4.0, Cl 3.0, Br 2.8, I 2.5</b>.</p><p>The gap (ΔEN) sets the bond type: under 0.5 is nonpolar, 0.5 to 2 is polar covalent, above 2 is largely ionic. In a polar bond the more electronegative atom gets a partial charge, <b>δ' + M + '</b>, and its partner is <b>δ+</b>.</p>'
+      html: '<p>EN values to know: <b>H 2.1, C 2.5, N 3.0, O 3.5, F 4.0, Cl 3.0, Br 2.8, I 2.5</b>, and the metals <b>Li 1.0, Mg 1.2</b>.</p><p>The gap (ΔEN) sets the bond type: under 0.5 is nonpolar, 0.5 to 2 is polar covalent, above 2 is largely ionic. In a polar bond the more electronegative atom gets a partial charge, <b>δ' + M + '</b>, and its partner is <b>δ+</b>.</p>'
     },
     {
       id: 's16', type: 'try', skill: 'polarity', widget: 'polarity-mark',
@@ -248,7 +248,7 @@ export default {
     },
     {
       id: 's17', type: 'predict', skill: 'polarity',
-      prompt: 'Methyllithium, CH₃–Li. Which atom of the C–Li bond carries δ' + M + '?',
+      prompt: 'Methyllithium, CH₃–Li (electronegativity: C 2.5, Li 1.0). Which atom of the C–Li bond carries δ' + M + '?',
       derive: { a: 'C', b: 'Li', quantity: 'moreEN' },
       options: [
         { text: 'Li', val: 'Li', why: 'Metals usually end up as positive ions, so Li is δ+ here. The more electronegative atom is the δ' + M + ' one, and Li is the less electronegative atom (1.0).' },

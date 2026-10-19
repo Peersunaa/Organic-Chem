@@ -17,10 +17,10 @@ export default {
       id: 's01', type: 'predict', skill: 'chirality',
       prompt: 'Look at your two hands. Hold your right hand up to a mirror: the reflection looks like one of your hands. Which one? And could you lay a copy of that reflected hand exactly on top of your real right hand, palms facing the same way?',
       options: [
-        { text: 'It looks like a left hand, and no way of turning it makes it sit exactly on the right hand', correct: true, why: 'Yes. A mirror swaps left and right, so a right hand becomes a left hand. Try a left glove on your right hand: however you turn it, it does not fit.' },
-        { text: 'It looks like a right hand, so it lies exactly on top', why: 'A mirror reverses handedness: the thumb ends up on the other side. The reflection of a right hand looks like a left hand, not like a second right hand.' },
-        { text: 'It looks like a left hand, but turning it over makes it fit exactly', why: 'Turning a left hand over puts the thumb back on the right side, but now the palm faces the wrong way. No single turn fixes both at once.' },
-        { text: 'A mirror does not change a shape, so it is the same hand', why: 'A mirror image keeps every distance, but it flips the handedness: it is the same shape built the other way round, and that is not the same object.' }
+        { text: 'It looks like a left hand, and no turn makes it fit exactly on the right hand', correct: true, why: 'Yes. A mirror swaps left and right, so a right hand becomes a left hand. Try a left glove on your right hand: however you turn it, it does not fit.' },
+        { text: 'It looks like a right hand, so it lies exactly on top of the original', why: 'A mirror reverses handedness: the thumb ends up on the other side. The reflection of a right hand looks like a left hand, not like a second right hand.' },
+        { text: 'It looks like a left hand, but turning it over makes it fit exactly on the right hand', why: 'Turning a left hand over puts the thumb back on the right side, but now the palm faces the wrong way. No single turn fixes both at once.' },
+        { text: 'A mirror does not change a shape, so the reflection is the same hand as before', why: 'A mirror image keeps every distance, but it flips the handedness: it is the same shape built the other way round, and that is not the same object.' }
       ],
       reveal: 'An object that cannot be superimposed on its own mirror image is <b>chiral</b> (from the Greek word for hand). A pair of hands is a pair of mirror images that cannot be superimposed. A plain ball or an ordinary mug is its own mirror image. Molecules can have a handedness too.'
     },
@@ -107,7 +107,7 @@ export default {
       figures: [{ smiles: 'CC1=CC[C@@H](CC1)C(C)=C', label: '(R)-limonene (+)' }, { smiles: 'CC1=CC[C@H](CC1=O)C(C)=C', label: '(R)-carvone (−)' }],
       options: [
         { text: 'The sign of the rotation is measured; it cannot be worked out from R or S', correct: true, why: 'Yes. R and S come from the CIP rules applied to the structure; (+) and (−) come from an experiment. Two compounds can both be R and still turn light in opposite directions.' },
-        { text: 'R means (+), so the carvone measurement must be wrong', why: 'There is no such rule. Both measurements are correct, and (R)-carvone really is (−).' },
+        { text: 'R means (+), so the carvone measurement must be a mistake in the lab', why: 'There is no such rule. Both measurements are correct, and (R)-carvone really is (−).' },
         { text: 'R means (−) whenever the molecule contains a C=O', why: 'No rule like that exists. Limonene is R and (+), carvone is R and (−): the sign cannot be predicted from the label or from the functional groups.' },
         { text: 'One of the two must really be S', why: 'Both are R. The configuration label and the direction of rotation are two unrelated pieces of information.' }
       ],

@@ -136,7 +136,7 @@ function cleaveProblem(rng) {
     prompt: 'KMnO₄ in acid: cut the C=C and say what each end becomes.',
     config: { alkene }, alkene, products: pred.products,
     derive: `Count the H on each C=C carbon: none gives a ketone, one gives a carboxylic acid, two gives CO₂. Products: ${pred.products.join(' and ')}.`,
-    deriveHtml: `Count the H on each C=C carbon: none gives a ketone, one gives a carboxylic acid, two gives CO₂. Products: ${pred.products.map((s) => `<mol smiles="${s}">`).join(' and ')}`,
+    deriveHtml: `Count the H on each C=C carbon: none gives a ketone, one gives a carboxylic acid, two gives CO₂. Products: ${pred.products.map((s) => `<mol smiles="${s}"></mol>`).join(' and ')}`,
     hints: ['Tap the double bond. Then look at each end of it: how many H are on that carbon?', 'No H on the carbon: ketone. One H: carboxylic acid. Two H (=CH₂): CO₂.']
   };
 }
@@ -185,7 +185,7 @@ function polymerProblem(rng) {
       prompt: `${mono.name[0].toUpperCase() + mono.name.slice(1)} (shown) is polymerised by a radical initiator. Which drawing is the REPEAT UNIT of ${mono.polymer}? (The * marks show where the unit continues in the chain.)`,
       options: opts, answer: opts.find((o) => o.correct).text, monomer: mono.id, unit: repeatUnit(mono.smiles),
       derive: `Open the C=C: each carbon forms a single bond to the next unit. Repeat unit: ${repeatUnit(mono.smiles)}.`,
-      deriveHtml: `Open the C=C: each carbon forms a single bond to the next unit. Repeat unit: <mol smiles="${repeatUnit(mono.smiles)}">`,
+      deriveHtml: `Open the C=C: each carbon forms a single bond to the next unit. Repeat unit: <mol smiles="${repeatUnit(mono.smiles)}"></mol>`,
       hints: ['In addition polymerisation nothing is lost: the repeat unit has exactly the atoms of the monomer.', 'The C=C becomes a C–C single bond, and each of its two carbons also bonds to a neighbouring unit in the chain (the * marks).']
     };
   }
@@ -200,7 +200,7 @@ function polymerProblem(rng) {
     prompt: 'The drawing above is the repeat unit of a polymer (the * marks show where it continues). Which monomer was it made from?',
     options: opts, answer: opts.find((o) => o.correct).text, monomer: mono.id, unit,
     derive: `Put the C=C back between the two chain carbons and remove the * bonds: ${mono.smiles} (${mono.name}).`,
-    deriveHtml: `Put the C=C back between the two chain carbons and remove the * bonds: <mol smiles="${mono.smiles}" label="${mono.name}">`,
+    deriveHtml: `Put the C=C back between the two chain carbons and remove the * bonds: <mol smiles="${mono.smiles}" label="${mono.name}"></mol>`,
     hints: ['Find the two carbons that carry the * marks: they were the two carbons of the C=C.', 'Remove the * bonds and turn the C–C bond between those carbons back into C=C; what is left on the carbons stays.']
   };
 }

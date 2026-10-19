@@ -45,6 +45,7 @@ import { pastpaper } from './pastpaper.mjs';
 import { stereoMoments } from './stereo-moments.mjs';
 import { player } from './player.mjs';
 import { voice } from './voice.mjs';
+import { text } from './text.mjs';
 import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
 const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product']);
@@ -1190,6 +1191,9 @@ await player({ ok, eq });
 
 // ---- Caveman voice: the helper, the compressor on every why and card text, the header switch and the views that use it (tests/voice.mjs)
 await voice({ ok, eq });
+
+// ---- Teaching wave T1: no open <mol> tag swallows text, option order is shuffled and unbiased, glossary and prerequisite recap cards, content fixes (tests/text.mjs)
+await text({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

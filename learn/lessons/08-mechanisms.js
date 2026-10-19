@@ -59,9 +59,9 @@ export default arrange({
       equation: { reactants: ['C=C', 'Cl'], products: ['CCCl'] },
       reaction: { reactants: ['C=C', 'Cl'], products: ['CCCl'] },
       options: [
-        { text: 'Two molecules joined into one, and no atoms were left over', correct: true, why: 'Yes. C₂H₄ + HCl → C₂H₅Cl: every atom of both reactants ends up in the single product.' },
-        { text: 'One molecule split into two', why: 'That would put one molecule on the left and two on the right. Here it is the other way round: two molecules become one.' },
-        { text: 'Two molecules swapped parts and gave two new molecules', why: 'A swap needs two products. Here there is only one product, chloroethane.' },
+        { text: 'Two molecules joined into one, with no atoms left over', correct: true, why: 'Yes. C₂H₄ + HCl → C₂H₅Cl: every atom of both reactants ends up in the single product.' },
+        { text: 'One molecule split into two smaller molecules', why: 'That would put one molecule on the left and two on the right. Here it is the other way round: two molecules become one.' },
+        { text: 'Two molecules swapped parts and gave two different molecules', why: 'A swap needs two products. Here there is only one product, chloroethane.' },
         { text: 'One molecule reorganized into an isomer', why: 'A rearrangement starts from ONE molecule. Here two molecules (ethylene and HCl) go in.' }
       ],
       reveal: 'This is an <b>addition</b>. There are four broad kinds of reaction: <b>addition</b> (2 reactants → 1 product), <b>elimination</b> (1 reactant → 2 products), <b>substitution</b> (2 reactants swap parts → 2 products) and <b>rearrangement</b> (1 reactant → 1 isomer).'
@@ -80,6 +80,7 @@ export default arrange({
     {
       id: 's03', type: 'predict', skill: 'mechanism',
       prompt: 'In a <b>mechanism</b> we follow the electrons. A covalent bond A–B holds two electrons. Light breaks it so that each atom keeps ONE of them. Which arrows show that?',
+      aside: '<p><b>Arrow legend.</b> A full-headed arrow moves a <b>pair</b> of electrons (two electrons). A half-headed “fishhook” arrow moves <b>one</b> electron.</p>',
       options: [
         { text: opt('fishhooks', 'Two half-headed arrows, one to each atom'), correct: true, why: 'Yes. A half-headed (“fishhook”) arrow moves ONE electron. Two of them send one electron to A and one to B.' },
         { text: opt('full', 'One full-headed arrow to B'), why: 'A full-headed arrow moves a PAIR of electrons. Here both bonding electrons would land on B, leaving A with none.' },
@@ -101,6 +102,7 @@ export default arrange({
     },
     {
       id: 's05', type: 'try', skill: 'nuc-elec', widget: 'site-picker',
+      aside: '<p>From Lesson 01: oxygen in water has <b>two</b> lone pairs, nitrogen in ammonia has <b>one</b>, and the Br⁻ ion has <b>four</b>. A C=C bond also holds electrons that can be donated.</p>',
       prompt: 'Polar reactions pair an electron-rich site with an electron-poor one. Nucleophiles donate a pair of electrons. For each molecule, tap the atom that would donate it.',
       config: { items: [{ id: 'water', role: 'nuc' }, { id: 'ammonia', role: 'nuc' }, { id: 'bromide', role: 'nuc' }, { id: 'ethylene', role: 'nuc' }] },
       confirm: 'Nucleophiles are electron-rich: a lone pair (H₂O, NH₃), a negative charge (Br⁻), or a π bond (C=C).',
@@ -166,8 +168,8 @@ export default arrange({
       equation: { reactants: ['C=C', 'Cl'], products: [] },
       options: [
         { text: 'On the C=C π bond, pointing at the H of HCl', correct: true, why: 'Yes. The alkene is the nucleophile and H is the electrophilic end of HCl, so the arrow runs from the π bond to H.' },
-        { text: 'On the H–Cl bond, pointing at a carbon', why: 'The H–Cl pair does move, but it goes to Cl, the more electronegative atom. Sending it to a carbon would also give that carbon five bonds.' },
-        { text: 'On a lone pair of Cl, pointing at a carbon', why: 'Cl in H–Cl is the electron-rich end, but its lone pairs are not what makes the new bond. In this reaction the alkene is the nucleophile.' }
+        { text: 'On the H–Cl bond, pointing at one of the carbons', why: 'The H–Cl pair does move, but it goes to Cl, the more electronegative atom. Sending it to a carbon would also give that carbon five bonds.' },
+        { text: 'On a lone pair of Cl, pointing at one of the carbons', why: 'Cl in H–Cl is the electron-rich end, but its lone pairs are not what makes the new bond. In this reaction the alkene is the nucleophile.' }
       ],
       reveal: 'Nucleophile (the π bond) to electrophile (H). But H can hold only two electrons, so as the new C–H bond forms, the H–Cl bond must break: a <b>second arrow</b> sends its pair onto Cl. The result is a carbocation and Cl⁻.'
     },

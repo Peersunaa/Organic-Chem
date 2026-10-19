@@ -1069,6 +1069,15 @@ export const HUB_CARDS = [
         'Place the groups. A 1-substituted diene gives the "1,2" product, a 2-substituted diene the "1,4" product. Groups that were cis on the dienophile stay cis.'
       ]
     },
+    draw: [
+      'Words first. The diene is the molecule with C=C–C=C. The dienophile is the C=C that joins it, and here it carries an electron-withdrawing group (C=O), a group that pulls electron density off the C=C.',
+      'Diene: write CH₃–CH=CH–CH=CH₂ and number the four C=C carbons from the CH₃ end: C1 (has the CH₃), C2, C3, C4 (the =CH₂). So C1=C2–C3=C4.',
+      'Dienophile, acrolein CH₂=CH–CHO: call its carbon with the CHO “a” and the CH₂ carbon “b”. So a=b.',
+      'Draw an empty hexagon and write the six carbons round it in this order: C1, C2, C3, C4, b, a. Join C4 to b and join a back to C1: these two single bonds are the new σ bonds.',
+      'Redraw the double bonds: erase C1=C2 and C3=C4, draw ONE new C=C between C2 and C3, and make a=b a single bond.',
+      'Hang the groups on: CH₃ on C1, CHO on a. C1 and a are neighbours, so the groups sit on neighbouring ring carbons (the “1,2”, ortho-like, product): 2-methylcyclohex-3-ene-1-carbaldehyde.',
+      'Check: 6 ring carbons, one C=C, and C₅H₈ + C₃H₄O = C₈H₁₂O, so no atom was lost.'
+    ],
     caveman: {
       what: 'Diene + dienophile: new six-membered ring. Two new C–C σ bonds. Two C=C become one, old C2–C3.',
       facts: { adds: 'New six-membered ring: two C–C σ, one C=C (C2–C3)', where: 'C1, C4 bond dienophile carbons. 1-substituted: "1,2" (ortho-like). 2-substituted: "1,4" (para-like).', space: 'syn' },

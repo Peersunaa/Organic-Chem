@@ -32,6 +32,7 @@ export default {
     },
     {
       id: 's03', type: 'choice', skill: 'conjugate-pairs',
+      aside: '<p>The double arrow <b>⇌</b> means the reaction runs both ways and settles into a balance, an <b>equilibrium</b>, with both sides present. Here we read it left to right.</p>',
       prompt: 'NH₃ + H₂O ⇌ NH₄⁺ + HO⁻. Going left to right, ammonia takes an H⁺ from water. Which species is the conjugate acid?',
       reaction: { reactants: ['N', 'O'], products: ['[NH4+]', '[OH-]'] },
       options: [
@@ -45,7 +46,7 @@ export default {
     },
     {
       id: 's04', type: 'choice', skill: 'conjugate-pairs',
-      prompt: 'Methanol gives its O–H proton to amide ion: CH₃OH + NH₂⁻ → CH₃O⁻ + NH₃ (NH₂⁻ is amide ion). Which structure is the conjugate base of methanol?',
+      prompt: 'Methanol gives its O–H proton to amide ion: CH₃OH + NH₂⁻ → CH₃O⁻ + NH₃ (NH₂⁻ is the amide ion, a base; do not confuse it with the amide group you meet later). Which structure is the conjugate base of methanol?',
       reaction: { reactants: ['CO', '[NH2-]'], products: ['C[O-]', 'N'] },
       options: [
         { smiles: 'C[O-]', label: 'A: CH₃O⁻, negative charge on O', correct: true, why: 'Yes. Methanol minus H⁺ from its O–H gives methoxide, CH₃O⁻.' },
@@ -64,7 +65,7 @@ export default {
         { text: 'Acetic acid: 4.76 is the bigger number', val: 'acetic', why: 'A bigger pKa means a weaker acid. Acetic acid holds on to its H⁺ much more firmly than HCl does.' },
         { text: 'HCl: ' + M + '7.0 is the smaller number', val: 'hcl', correct: true, why: 'Yes. HCl hands over its H⁺ almost completely, and its pKa is the lower number.' }
       ],
-      reveal: 'The acid strength constant is Ka, and <b>pKa = ' + M + 'log Ka</b>. Strong acids have large Ka, so a <b>small or negative pKa</b>. Rule: smaller pKa = stronger acid = weaker conjugate base.'
+      reveal: 'The acid strength constant is Ka, and <b>pKa = ' + M + 'log Ka</b>. Strong acids have large Ka, so a <b>small or negative pKa</b>. (To take the log of a power of ten, read off the exponent: log 10⁻⁹ is −9, so Ka = 10⁻⁹ gives a pKa of 9.) Rule: smaller pKa = stronger acid = weaker conjugate base.'
     },
     {
       id: 's06', type: 'input', skill: 'pka-direction',
@@ -120,7 +121,7 @@ export default {
           ask: 'Now the acid on the right: what is the pKa of water?',
           check: { quantity: 'pka', id: 'water' },
           options: [
-            { text: '4.76', val: 4.76, why: 'That is acetic acid, on the left.' },
+            { text: '4.76', val: 4.76, why: 'That is the pKa of acetic acid, the acid on the left. The question asks about water, the acid on the right.' },
             { text: '15.74', val: 15.74, correct: true, why: 'Yes, 15.74.' },
             { text: '16.00', val: 16, why: 'That is ethanol. Water is just a touch stronger, at 15.74.' }
           ]
@@ -150,7 +151,7 @@ export default {
           ]
         }
       ],
-      rule: 'Equilibrium favours the side with the <b>weaker acid</b> (higher pKa). So a base removes H⁺ from any acid whose pKa is <b>lower</b> than the pKa of the base’s own conjugate acid.'
+      rule: 'Equilibrium favours the side with the <b>weaker acid</b> (higher pKa), because the stronger acid gives up its H⁺ more readily, so the mixture ends up mostly as the weaker acid. So a base removes H⁺ from any acid whose pKa is <b>lower</b> than the pKa of the base’s own conjugate acid.'
     },
     {
       id: 's09', type: 'try', skill: 'pka-direction', widget: 'equilibrium-arrow',
@@ -178,9 +179,9 @@ export default {
       id: 's11', type: 'predict', skill: 'pka-direction',
       prompt: 'Acetic acid (pKa 4.76) and ethanol (16.00) both lose an H from an O–H group. Why is acetic acid so much stronger?',
       options: [
-        { text: 'Its anion shares the negative charge between two oxygens', correct: true, why: 'Yes. In acetate, CO₂⁻, both oxygens carry the charge together. That makes the anion more stable, so the acid gives up H⁺ more easily.' },
-        { text: 'Acetic acid has more hydrogens', why: 'The number of H atoms does not decide acidity. What matters is how stable the anion is once H⁺ has gone.' },
-        { text: 'Its O–H oxygen is a different element', why: 'Both acids lose H from an oxygen. The difference is in what surrounds that oxygen.' }
+        { text: 'Its anion shares the negative charge equally between its two oxygens', correct: true, why: 'Yes. In acetate, CO₂⁻, both oxygens carry the charge together. That makes the anion more stable, so the acid gives up H⁺ more easily.' },
+        { text: 'Acetic acid has more hydrogens, so it has more H⁺ to give away', why: 'The number of H atoms does not decide acidity. What matters is how stable the anion is once H⁺ has gone.' },
+        { text: 'Its O–H oxygen is a different element from the one in ethanol', why: 'Both acids lose H from an oxygen. The difference is in what surrounds that oxygen.' }
       ],
       reveal: 'The more stable the anion A⁻, the stronger the acid HA. Acetate spreads its charge over <b>two O atoms</b>; ethoxide has just one. C–H bonds next to a C=O are acidic too (acetone, pKa 19.3), because the C=O helps carry the charge.'
     },
@@ -191,8 +192,8 @@ export default {
       reaction: { reactants: ['CN', '[H+]'], products: ['C[NH3+]'] },
       options: [
         { text: 'Nitrogen: it has a lone pair that can bond to H⁺', correct: true, why: 'Yes. N has 5 valence electrons, 3 in bonds, so one lone pair is left over to bond to H⁺.' },
-        { text: 'Carbon: it is the central atom', why: 'Carbon has four bonds and no lone pair, so it has no electrons to offer H⁺.' },
-        { text: 'A hydrogen atom', why: 'Hydrogens only have their bonding pair. They can leave as H⁺, but cannot accept one.' }
+        { text: 'Carbon: it is the central atom, so everything bonds to it', why: 'Carbon has four bonds and no lone pair, so it has no electrons to offer H⁺.' },
+        { text: 'A hydrogen atom, since it already holds a bonding pair', why: 'Hydrogens only have their bonding pair. They can leave as H⁺, but cannot accept one.' }
       ],
       hints: ['A base needs a lone pair to bond to H⁺. Count them: (valence electrons − bonds) ÷ 2.', 'N: (5 − 3) ÷ 2 = 1 lone pair. C: (4 − 4) ÷ 2 = 0.'],
       worked: 'Only nitrogen has a lone pair. It uses it to bond to H⁺, giving CH₃NH₃⁺. This is why amines (compounds with N bonded to carbon, like methylamine) are the typical organic bases.'
@@ -205,9 +206,9 @@ export default {
       id: 's14', type: 'predict', skill: 'curved-arrows',
       prompt: 'Water meets HCl. A curved arrow will show the electrons that build the new O–H bond. Where does that arrow START?',
       options: [
-        { text: 'On the H of HCl, the H⁺ that moves', why: 'Arrows start at electrons, not at H⁺. A proton has no electrons to push; it is the thing that receives the new bond.' },
+        { text: 'On the H of HCl, because that is the H⁺ that moves', why: 'Arrows start at electrons, not at H⁺. A proton has no electrons to push; it is the thing that receives the new bond.' },
         { text: 'On a lone pair on the oxygen of H₂O', correct: true, why: 'Yes. The new O–H bond is made of an oxygen lone pair, so the arrow starts on that lone pair.' },
-        { text: 'On the Cl atom', why: 'Cl has lone pairs, but they do not make the new O–H bond. The Cl matters later, when the H–Cl bond breaks.' }
+        { text: 'On the Cl atom, since it ends up as Cl⁻', why: 'Cl has lone pairs, but they do not make the new O–H bond. The Cl matters later, when the H–Cl bond breaks.' }
       ],
       reveal: 'A <b>curved arrow</b> shows electrons moving. It starts at the electrons (a <b>lone pair</b> or a <b>bond</b>) and its head points at the atom that receives them. Here the pair moves to H, so the H⁺ moves with it.'
     },

@@ -21,10 +21,10 @@ export default {
       prompt: 'This is a real 3D model of ethane: two CH₃ groups joined by a single C–C bond. Suppose you hold one CH₃ still and twist the other about that bond. What happens?',
       visual: { widget: 'model3d', config: { mol: 'ethane' } },
       options: [
-        { text: 'The C–C bond breaks, so twisting makes a different molecule', why: 'The single bond is head-on overlap along the line between the two carbons. Turning one end about that line does not pull the overlap apart, so nothing breaks.' },
-        { text: 'Nothing can happen: the atoms are locked in place', why: 'Head-on overlap looks the same from every side of the bond, so the two ends are free to turn. Only the hydrogens’ positions relative to each other change.' },
-        { text: 'It is still ethane, but the hydrogens now sit in different places relative to each other', correct: true, why: 'Yes. The overlap, and so the bond, is the same at every twist angle. The molecule is unchanged; only the arrangement in space changes.' },
-        { text: 'The C–C bond turns into a double bond', why: 'A double bond needs a second, sideways (π) overlap and two fewer hydrogens. Twisting never changes how many bonds there are.' }
+        { text: 'The C–C bond breaks as you twist, so you make a different molecule', why: 'The single bond is head-on overlap along the line between the two carbons. Turning one end about that line does not pull the overlap apart, so nothing breaks.' },
+        { text: 'Nothing can happen: the atoms are locked in place by the bond', why: 'Head-on overlap looks the same from every side of the bond, so the two ends are free to turn. Only the hydrogens’ positions relative to each other change.' },
+        { text: 'Still ethane, but the hydrogens end up in new relative positions', correct: true, why: 'Yes. The overlap, and so the bond, is the same at every twist angle. The molecule is unchanged; only the arrangement in space changes.' },
+        { text: 'The C–C bond turns into a double bond as the groups twist', why: 'A double bond needs a second, sideways (π) overlap and two fewer hydrogens. Twisting never changes how many bonds there are.' }
       ],
       reveal: 'The different arrangements you get by turning about a single bond are called <b>conformations</b>, and the molecules are <b>conformers</b>. Unlike constitutional isomers, conformers usually cannot be isolated, because they swap places too quickly.'
     },
@@ -119,10 +119,10 @@ export default {
       prompt: 'Three carbons always form a flat triangle. Here is cyclopropane as a 3D model. Carbon likes bond angles near 109.5°. What do you expect the ring to do to the molecule’s energy and reactivity?',
       visual: { widget: 'model3d', config: { mol: 'cyclopropane' } },
       options: [
-        { text: 'Nothing: bond angles can be squeezed for free', why: 'Bending a bond angle away from its comfortable value costs energy, and here the C–C–C angle is 60°, only about half of 109.5°.' },
-        { text: 'It raises the energy and makes the molecule more reactive than an unstrained alkane', correct: true, why: 'Yes. The 60° angles are far from 109.5°. That is angle strain, and the strained ring is more reactive.' },
+        { text: 'Nothing: bond angles can be squeezed for free, at no energy cost', why: 'Bending a bond angle away from its comfortable value costs energy, and here the C–C–C angle is 60°, only about half of 109.5°.' },
+        { text: 'It raises the energy, making the molecule more reactive than an unstrained alkane', correct: true, why: 'Yes. The 60° angles are far from 109.5°. That is angle strain, and the strained ring is more reactive.' },
         { text: 'It makes cyclopropane extra stable, because rings are rigid', why: 'Rigid does not mean stable. The forced 60° angles are the source of strain, not stability.' },
-        { text: 'The ring puckers so every angle becomes 109.5°', why: 'Three points always lie in a plane, so cyclopropane cannot pucker, and its C–C–C angles are all 60°.' }
+        { text: 'The ring puckers like cyclohexane so every angle becomes 109.5°', why: 'Three points always lie in a plane, so cyclopropane cannot pucker, and its C–C–C angles are all 60°.' }
       ],
       reveal: 'Cyclopropane is flat with 60° C–C–C angles, so its energy is raised by <b>angle strain</b>. Its six C–H bonds are also all eclipsed with their neighbours, as in eclipsed ethane. Cyclobutane and cyclopentane pucker a little to ease that eclipsing.'
     },

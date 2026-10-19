@@ -8,7 +8,7 @@ import { dieneMechanism } from '../engine/reactions.js';
 
 const opt = (text, correct, why, extra = {}) => ({ text, ...(correct ? { correct: true } : {}), why, ...extra });
 const mo = (smiles, label, correct, why, extra = {}) => ({ smiles, label, ...(correct ? { correct: true } : {}), why, ...extra });
-const mols = (list) => list.map(([s, l]) => `<mol smiles="${s}" label="${l}">`).join(' + ');
+const mols = (list) => list.map(([s, l]) => `<mol smiles="${s}" label="${l}"></mol>`).join(' + ');
 
 /** Move the correct option to a different place in each question (deterministic), so the right answer is not always first. */
 function arrange(lesson) {
@@ -33,11 +33,11 @@ export default arrange({
   steps: [
     {
       id: 's01', type: 'predict', skill: 'resonance',
-      prompt: 'Two carbocations are both <b>primary</b>: the C⁺ has just one carbon neighbour. One is the <b>allyl cation</b> <mol smiles="[CH2+]C=C" label="allyl cation, CH₂=CH–CH₂⁺">, the other the <b>propyl cation</b> <mol smiles="[CH2+]CC" label="propyl cation, CH₃CH₂CH₂⁺">. From Lesson 09, which do you expect to be more stable, and why?',
+      prompt: 'Two carbocations are both <b>primary</b>: the C⁺ has just one carbon neighbour. One is the <b>allyl cation</b> <mol smiles="[CH2+]C=C" label="allyl cation, CH₂=CH–CH₂⁺"></mol>, the other the <b>propyl cation</b> <mol smiles="[CH2+]CC" label="propyl cation, CH₃CH₂CH₂⁺"></mol>. From Lesson 09, which do you expect to be more stable, and why?',
       options: [
-        opt('The allyl cation: its C⁺ sits next to a C=C, so the empty p orbital can overlap the π bond and the + charge is spread over two carbons', true, 'Yes. A charge shared by two atoms is steadier than a charge stuck on one. Chemists call this sharing resonance.'),
+        opt('The allyl cation: its C⁺ sits next to a C=C, so the + charge is spread over two carbons', true, 'Yes. A charge shared by two atoms is steadier than a charge stuck on one. Chemists call this sharing resonance.'),
         opt('The propyl cation: it has an extra CH₂ group, and more alkyl groups make a cation more stable', false, 'Lesson 09 compared cations with different numbers of alkyl groups on C⁺. Here both C⁺ carbons have one carbon neighbour, so they are both primary. The C=C beside the C⁺ in the allyl cation does something far stronger than an alkyl group does.'),
-        opt('They are equally stable, because both are primary carbocations', false, 'Counting carbon neighbours is only part of the story. The allyl cation has a π bond right next to the C⁺, and the π electrons can reach the empty orbital. That makes it much more stable than the propyl cation.'),
+        opt('They are equally stable, because both are primary carbocations with one carbon neighbour', false, 'Counting carbon neighbours is only part of the story. The allyl cation has a π bond right next to the C⁺, and the π electrons can reach the empty orbital. That makes it much more stable than the propyl cation.'),
         opt('The allyl cation, because sp² carbons are more electronegative and pull electron density toward the + charge', false, 'Pulling electron density AWAY from a positive carbon would make a cation less stable, not more. The real reason is that the π electrons are shared with the empty orbital.')
       ],
       reveal: 'The <b>allyl cation</b> is much more stable. Its empty p orbital overlaps the π bond next to it, so the + charge is not stuck on one carbon: it is shared by the two end carbons. Next you will draw exactly how.'
@@ -85,7 +85,7 @@ export default arrange({
     },
     {
       id: 's07', type: 'input', skill: 'resonance',
-      prompt: 'Count the forms. The <b>pentadienyl cation</b> <mol smiles="[CH2+]C=CC=C" label="CH₂⁺–CH=CH–CH=CH₂"> has a C⁺ at the end of two conjugated C=C bonds. How many resonance forms does it have, counting the one shown?',
+      prompt: 'Count the forms. The <b>pentadienyl cation</b> <mol smiles="[CH2+]C=CC=C" label="CH₂⁺–CH=CH–CH=CH₂"></mol> has a C⁺ at the end of two conjugated C=C bonds. How many resonance forms does it have, counting the one shown?',
       answer: 3, resonanceCount: { start: '[CH2+]C=CC=C' },
       diagnose: [
         { match: 2, why: 'Two forms move the + charge only one step. Slide the second π bond too: from the form with + on C3 you can draw another arrow and the + reaches C5.' },
@@ -111,10 +111,10 @@ export default arrange({
       prompt: 'This is a solid 3D model of <b>buta-1,3-diene</b>, the simplest <b>conjugated diene</b>: double bonds alternating with a single bond (C=C–C=C). Turn it around. What do you notice about the four highlighted carbons, and why does it matter?',
       visual: { widget: 'model3d', config: { mol: 'buta-1-3-diene', highlight: [0, 1, 2, 3], labels: { 0: 'C1', 1: 'C2', 2: 'C3', 3: 'C4' } } },
       options: [
-        opt('All four carbons lie in one flat plane, so their four p orbitals are parallel and can overlap along the whole chain, even across the C2–C3 single bond', true, 'Yes. Each carbon is sp² with a p orbital, and in a flat molecule all four p orbitals point the same way. They overlap, so the π electrons are not stuck in two separate double bonds. The C2–C3 bond stays a single bond, but with some double-bond character.'),
-        opt('The two C=C bonds are twisted at 90° to each other, so the double bonds work separately', false, 'In the model they are not twisted: all four carbons are in one plane. Twisted p orbitals could not overlap, but these can.'),
-        opt('The C2–C3 bond is a full double bond, because the π bonds overlap across it', false, 'C2–C3 is still a single bond: one σ bond. The overlapping p orbitals give it only some double-bond character. The four carbons have two π bonds in total.'),
-        opt('C2 and C3 are sp³ carbons because each carries an H, so only C1 and C4 have p orbitals', false, 'Every carbon of C=C–C=C is sp²: three groups around it (the carbons or H atoms) and one p orbital. C2 and C3 have p orbitals just as C1 and C4 do.')
+        opt('All four carbons lie in one plane, so their p orbitals are parallel and overlap along the whole chain', true, 'Yes. Each carbon is sp² with a p orbital, and in a flat molecule all four p orbitals point the same way. They overlap, so the π electrons are not stuck in two separate double bonds. The C2–C3 bond stays a single bond, but with some double-bond character.'),
+        opt('The two C=C bonds are twisted at 90° to each other, so the double bonds work separately and do not overlap', false, 'In the model they are not twisted: all four carbons are in one plane. Twisted p orbitals could not overlap, but these can.'),
+        opt('The C2–C3 bond is a full double bond, because the two π bonds overlap across it and merge', false, 'C2–C3 is still a single bond: one σ bond. The overlapping p orbitals give it only some double-bond character. The four carbons have two π bonds in total.'),
+        opt('C2 and C3 are sp³ carbons because each carries an H, so only C1 and C4 have p orbitals to overlap', false, 'Every carbon of C=C–C=C is sp²: three groups around it (the carbons or H atoms) and one p orbital. C2 and C3 have p orbitals just as C1 and C4 do.')
       ],
       hints: ['Rotate the model so you look along the chain from the side. Do all four highlighted carbons sit in one sheet?', 'Count the p orbitals: each sp² carbon has one, perpendicular to the plane. If they are all parallel, they can all overlap in a row.'],
       worked: 'The model is the s-trans conformer (the two C=C bonds point in opposite directions across C2–C3, a twist of about 180°) and all four carbons lie in one plane. Each is sp², so each has one p orbital perpendicular to that plane, and the four parallel p orbitals overlap in a row: the π electrons are shared over all four carbons.'
@@ -230,9 +230,9 @@ export default arrange({
         {
           ask: 'So the product is…',
           options: [
-            opt('<mol smiles="CC=CC(C)Cl" label="4-chloropent-2-ene">', true, 'Yes. Cl on a carbon next to the C=C: 4-chloropent-2-ene (also called pent-3-en-2-yl chloride).'),
-            opt('<mol smiles="C=CCC(C)Cl" label="4-chloropent-1-ene">', false, 'This has no C=C next to the Cl-bearing carbon. It would come from a non-allylic cation, which does not form.'),
-            opt('<mol smiles="C=CC(Cl)CC" label="3-chloropent-1-ene">', false, 'That is the 1,2-product from the less stable allylic cation (H on C4, + shared by C3 and C1, one end primary). The cation with H on C1 is better, so this is not the major product.')
+            opt('<mol smiles="CC=CC(C)Cl" label="4-chloropent-2-ene"></mol>', true, 'Yes. Cl on a carbon next to the C=C: 4-chloropent-2-ene (also called pent-3-en-2-yl chloride).'),
+            opt('<mol smiles="C=CCC(C)Cl" label="4-chloropent-1-ene"></mol>', false, 'This has no C=C next to the Cl-bearing carbon. It would come from a non-allylic cation, which does not form.'),
+            opt('<mol smiles="C=CC(Cl)CC" label="3-chloropent-1-ene"></mol>', false, 'That is the 1,2-product from the less stable allylic cation (H on C4, + shared by C3 and C1, one end primary). The cation with H on C1 is better, so this is not the major product.')
           ]
         }
       ],

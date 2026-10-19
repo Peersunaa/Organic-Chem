@@ -10,8 +10,13 @@ import { buildPastpaper } from './pastpaper-view.js';
 import { momentFor } from './engine/stereo-moments.js';
 import { stereoBlock } from './stereo-view.js';
 import * as voice from './engine/voice.js';
+import { attachGlossary, glossaryView, GLOSSARY } from './engine/glossary.js';
+import { recapCard as prereqCard } from './engine/recap.js';
 
 const app = document.getElementById('app');
+// A press of Check with nothing entered is not a slip: it must not count as a weak spot.
+const EMPTY_CHECK = /^(Draw at least|Tap (the|each|one|at least)|Mark every|Fill in every|Type your answer|Choose at least|Your two picks are right|Enter a number)/;
+const logSlip = (e) => { if (!EMPTY_CHECK.test(String(e.diagnosis || '').trim())) store.logMistake(e); };
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 let chemReady = false;
 const chemP = ready().then(() => { chemReady = true; });
@@ -52,6 +57,13 @@ function stepLabel(L) {
   return { p, total, started: p.done.length > 0 || p.idx > 0 };
 }
 
+/** "Last slip" link back to the lesson step where the mistake happened (a loose explanation without its question would only confuse). */
+function whereLink(w) {
+  const l = w.last && LESSONS.find((x) => x.id === w.last.lessonId);
+  const st = l && l.steps.find((x) => x.id === w.last.stepId);
+  return st ? h('a', { class: 'ws-last small', href: `#lesson-${l.id}/${st.id}` }, `Last slip: Lesson ${Number(l.id)}, step ${Number(st.id.slice(1))}`) : null;
+}
+
 function home() {
   const L = LESSONS.find((l) => !store.getProgress(l.id).complete) || LESSONS[LESSONS.length - 1];
   const s = stepLabel(L);
@@ -78,7 +90,7 @@ function home() {
     const list = h('ul', { class: 'ws-list' });
     ws.forEach((w) => {
       const li = h('li', { class: 'ws' },
-        h('div', { class: 'ws-main' }, h('b', {}, skillLabel(w.skill)), h('span', { class: 'muted small' }, `${w.count} recent slip${w.count === 1 ? '' : 's'}`), w.last && w.last.diagnosis ? h('span', { class: 'ws-last small' }, w.last.diagnosis) : null),
+        h('div', { class: 'ws-main' }, h('b', {}, skillLabel(w.skill)), h('span', { class: 'muted small' }, `${w.count} recent slip${w.count === 1 ? '' : 's'}`), whereLink(w)),
         h('a', { class: 'btn small', href: '#practise-' + w.skill }, 'Practise this'));
       list.append(li);
     });
@@ -121,7 +133,10 @@ function home() {
   const pp = h('section', { class: 'panel', 'aria-labelledby': 'pp-h' }, h('h2', { id: 'pp-h' }, 'Past papers'),
     h('p', { class: 'muted' }, 'The midterm questions by topic: what each one asks, the steps to answer it, and where to learn it.'),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#pastpaper', id: 'open-pastpaper' }, 'Open past papers')));
-  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, rx, pp, panel)));
+  const gl = h('section', { class: 'panel', 'aria-labelledby': 'gl-h' }, h('h2', { id: 'gl-h' }, 'Glossary'),
+    h('p', { class: 'muted' }, `${GLOSSARY.length} short definitions: nucleophile, sp³, resonance, R/S and more. In a lesson, tap any dotted word to see its meaning.`),
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#glossary', id: 'open-glossary' }, 'Open the glossary')));
+  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, rx, pp, gl, panel)));
   const op = document.getElementById('open-practice');
   if (op) op.addEventListener('click', () => { const t = panel.querySelector('summary') || panel; panel.scrollIntoView?.({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); t.focus?.({ preventScroll: true }); });
 }
@@ -202,9 +217,11 @@ function lessonView(L, startId) {
   const save = () => store.setProgress(L.id, { idx: deep ? resumeIdx : idx, done: [...done] });
 
   let stereoNode = null;   // the "See it in 3D" block of the current step (Piece 4), if it has one
+  let glossaryStop = null; // stops the term-button observer of the step on screen
+  let prereq; // the "what you need from earlier lessons" card (built once per visit, so a toggle survives Back / Continue)
   const ctxFor = (step) => ({
     lessonId: L.id,
-    mistake: (skill, stepId, diagnosis) => store.logMistake({ skill, stepId, lessonId: L.id, diagnosis }),
+    mistake: (skill, stepId, diagnosis) => logSlip({ skill, stepId, lessonId: L.id, diagnosis }),
     win: (skill) => store.logWin(skill),
     done: () => {
       done.add(step.id); save(); paint();
@@ -219,10 +236,13 @@ function lessonView(L, startId) {
     save(); paint();
     if (!chemReady) { host.innerHTML = '<p class="muted">Loading chemistry engine…</p>'; try { await chemP; } catch (e) { host.innerHTML = '<p class="fb bad">The chemistry engine could not load. Reload the page to try again.</p>'; return; } }
     recapSlot.innerHTML = '';
+    if (glossaryStop) { glossaryStop(); glossaryStop = null; }
+    if (idx === 0) { if (prereq === undefined) prereq = prereqCard(L.id); if (prereq) recapSlot.append(prereq); }
     const prev = steps[idx - 1];
     if (prev && done.has(prev.id) && step.type !== 'useit') { const rc = recapCard(prev); if (rc) recapSlot.append(rc); }
     stereoNode = null;
     renderStep(step, ctxFor(step), host);
+    glossaryStop = attachGlossary(host);   // first use of each glossary term in the step becomes a tap-for-meaning button
     // Piece 4: where the 3D shape decides the answer, a "See it in 3D" button under the step. A question that asks for the answer stays unspoiled until it is answered.
     const moment = momentFor(L.id, step.id);
     if (moment) { stereoNode = stereoBlock(moment); stereoNode.hidden = !(step.type === 'try' || done.has(step.id)); host.append(stereoNode); }
@@ -243,7 +263,7 @@ function practice(skill) {
   const card = h('article', { class: 'card' }, host);
   const ctx = {
     lessonId: 'practice',
-    mistake: (sk, stepId, diagnosis) => store.logMistake({ skill: sk, stepId, lessonId: 'practice', diagnosis }),
+    mistake: (sk, stepId, diagnosis) => logSlip({ skill: sk, stepId, lessonId: 'practice', diagnosis }),
     win: (sk) => store.logWin(sk),
     done: () => host.append(h('a', { class: 'btn primary', href: '#home' }, 'Back to home'))
   };
@@ -267,6 +287,12 @@ function pastpaper() {
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'pp-reactions' }, 'Reactions'), h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'pp-drill' }, 'Drill'))), buildPastpaper());
 }
 
+// ---------------------------------------------------------------- Glossary
+function glossary() {
+  mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Glossary'),
+    h('p', { class: 'lede' }, 'Every term the lessons use, in one plain sentence. Inside a lesson, tap a dotted word to see the same definition without leaving the step.')), glossaryView());
+}
+
 // ---------------------------------------------------------------- Router
 function route() {
   const hash = location.hash.replace(/^#/, '');
@@ -278,6 +304,7 @@ function route() {
   if (hash === 'reactions') return hub();
   if ((m = /^reactions\/([a-z0-9-]+)$/.exec(hash))) return hub(m[1]);
   if (hash === 'pastpaper') return pastpaper();
+  if (hash === 'glossary') return glossary();
   if ((m = /^practise-([a-z0-9-]+)$/.exec(hash))) return practice(m[1]);
   home();
 }

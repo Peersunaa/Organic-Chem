@@ -16,8 +16,8 @@ export default {
       prompt: 'In a stable neutral molecule, how many bonds does carbon usually make?',
       derive: { element: 'C', quantity: 'bonds', value: 4 },
       options: [
-        { text: '2', why: 'That’s oxygen’s usual number.' },
-        { text: '3', why: 'That’s nitrogen’s usual number.' },
+        { text: '2', why: 'That’s oxygen’s usual number (8 − 6 = 2). Carbon has 4 valence electrons, so it needs 4 bonds to reach 8.' },
+        { text: '3', why: 'That’s nitrogen’s usual number (8 − 5 = 3). Carbon has 4 valence electrons, so it needs 4 bonds to reach 8.' },
         { text: '4', correct: true, why: 'Yes, carbon makes four bonds.' },
         { text: '6', why: 'Carbon only has 4 outer electrons to share; 6 bonds would put 12 electrons around it.' }
       ],
@@ -25,7 +25,7 @@ export default {
     },
     {
       id: 's02', type: 'input', skill: 'valence-electrons',
-      prompt: 'Carbon has 6 electrons: 1s² 2s² 2p². How many are valence (outer-shell) electrons?',
+      prompt: 'Carbon has 6 electrons, written 1s² 2s² 2p²: the first number is the shell (1 is closest to the nucleus, 2 is the outer shell here). How many are valence (outer-shell) electrons?',
       answer: 4,
       derive: { element: 'C', quantity: 'valence' },
       diagnose: [
@@ -40,6 +40,7 @@ export default {
     {
       id: 's03', type: 'try', skill: 'valence-electrons', widget: 'valence-strip',
       prompt: 'Type the number of valence electrons for each atom.',
+      aside: '<table class="gl-vt"><caption>A mini periodic table: the group number is on top</caption><thead><tr><th scope="col">1</th><th scope="col">14</th><th scope="col">15</th><th scope="col">16</th><th scope="col">17</th></tr></thead><tbody><tr><td>H</td><td>C</td><td>N</td><td>O</td><td>F</td></tr><tr><td class="gl-gap"></td><td class="gl-gap"></td><td class="gl-gap"></td><td class="gl-gap"></td><td>Cl</td></tr></tbody></table><p><b>Rule:</b> for these atoms, valence electrons = the last digit of the group number (group 14 gives 4). The small number printed on each box below is the atom’s atomic number, a different count: ignore it.</p>',
       config: { elements: ['H', 'C', 'N', 'O', 'F', 'Cl'], wrongWhy: 'For main-group atoms, valence electrons = the last digit of the group number: H group 1, C 14, N 15, O 16, F/Cl 17.' },
       confirm: 'That pattern (1, 4, 5, 6, 7, 7) is worth memorising.',
       hints: ['Use the group number of each element in the periodic table.', 'Drop the leading 1 of two-digit groups: group 14 gives 4, group 17 gives 7.'],
@@ -127,6 +128,7 @@ export default {
     {
       id: 's11', type: 'input', skill: 'electron-count-total',
       prompt: 'How many valence electrons in total does formaldehyde, CH₂O, have?',
+      aside: '<p>Add up every atom’s valence electrons. For an <b>ion</b>, a + charge means one electron was lost, so subtract 1 per + charge; a − charge means one extra, so add 1. Example: H₃O⁺ = 6 + 3 − 1 = 8.</p>',
       answer: 12,
       derive: { smiles: 'C=O', quantity: 'total' },
       diagnose: [
@@ -141,13 +143,13 @@ export default {
     },
     {
       id: 's12', type: 'worked', skill: 'formal-charge',
-      problem: 'Find the formal charge on oxygen in hydronium: <mol smiles="[OH3+]" label="H₃O⁺"></mol>',
+      problem: 'Find the formal charge on oxygen in hydronium (a water molecule that has picked up an H⁺). Formal charge = the electrons the atom normally owns (its valence electrons) minus the electrons it owns here (its lone-pair electrons plus half of its bonding electrons): <mol smiles="[OH3+]" label="H₃O⁺"></mol>',
       moves: [
         {
           ask: 'How many valence electrons does a neutral O atom normally own?',
           options: [
             { text: '6', correct: true, why: 'Yes, oxygen is in group 16.' },
-            { text: '8', why: '8 is the octet it wants, not what it brings.' },
+            { text: '8', why: '8 is the octet oxygen wants to end up with, not the number of valence electrons it brings.' },
             { text: '2', why: 'That is only the inner 1s² pair. Oxygen’s outer shell holds 6.' }
           ],
           then: 'A neutral O brings 6 electrons.'
@@ -157,7 +159,7 @@ export default {
           options: [
             { text: 'Both lone-pair electrons + 1 from each bond = 2 + 3 = 5', correct: true, why: 'Yes: a shared pair is split evenly, so O owns one electron from each bond.' },
             { text: 'All 8 around it', why: 'Bond electrons are shared, so O owns only half of each bond.' },
-            { text: 'Only the 2 lone-pair electrons', why: 'O also owns half of each bond.' }
+            { text: 'Only the 2 lone-pair electrons', why: 'You forgot the bonds: oxygen also owns half of each shared pair, not just its lone-pair electrons.' }
           ],
           then: 'O owns 5 electrons.'
         },
@@ -207,7 +209,7 @@ export default {
       options: [
         { smiles: '[CH3+]', label: 'C: 3 bonds, no lone pair', correct: true, why: '3 bonds, no lone pair: 4 − 0 − 3 = +1.' },
         { smiles: '[CH3-]', label: 'C: 3 bonds, 1 lone pair', why: 'That carbon has a lone pair: 4 − 2 − 3 = −1. It’s a carbanion.' },
-        { smiles: 'C', label: 'C: 4 bonds, no lone pair', why: '4 bonds, no lone pairs: 4 − 0 − 4 = 0.' }
+        { smiles: 'C', label: 'C: 4 bonds, no lone pair', why: 'That carbon has a formal charge of 4 − 0 − 4 = 0, so it is neutral. A carbocation has only 3 bonds and no lone pair.' }
       ],
       hints: ['Work out the formal charge for each carbon: 4 − lone-pair electrons − bonds.', 'A + charge means the carbon owns fewer than 4 electrons.'],
       worked: '[CH₃]⁺: 4 − 0 − 3 = +1. The others give −1 and 0.'
@@ -232,8 +234,8 @@ export default {
       prompt: 'Which formula can’t exist as a stable neutral molecule?',
       options: [
         { text: 'CH₅', correct: true, why: 'Right: carbon can’t make five bonds.' },
-        { text: 'CH₄', why: 'C with 4 bonds is fine.' },
-        { text: 'NH₃', why: 'N with 3 bonds and 1 lone pair is fine.' },
+        { text: 'CH₄', why: 'Carbon makes 4 bonds and CH₄ has exactly four C–H bonds, so every atom has its usual number of bonds.' },
+        { text: 'NH₃', why: 'Nitrogen makes 3 bonds and keeps one lone pair, so NH₃ is a normal, stable neutral molecule.' },
         { text: 'CH₃OH', why: 'C makes 4 bonds and O makes 2, so every atom is fine.' }
       ],
       reveal: 'CH₅ would need carbon to make 5 bonds: 10 electrons around it, breaking the octet.'

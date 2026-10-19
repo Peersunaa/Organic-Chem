@@ -10,7 +10,7 @@ import { alkyneHXMechanism, acetylideAlkylationMechanism } from '../engine/react
 
 const opt = (text, correct, why, extra = {}) => ({ text, ...(correct ? { correct: true } : {}), why, ...extra });
 const mo = (smiles, label, correct, why, extra = {}) => ({ smiles, label, ...(correct ? { correct: true } : {}), why, ...extra });
-const mol = (s, l) => `<mol smiles="${s}" label="${l}">`;
+const mol = (s, l) => `<mol smiles="${s}" label="${l}"></mol>`;
 
 /** Move the correct option to a different place in each question (deterministic), so the right answer is not always first. */
 function arrange(lesson) {
@@ -35,7 +35,7 @@ export default arrange({
   steps: [
     {
       id: 's01', type: 'predict', skill: 'hybridization',
-      prompt: 'Lesson 02 told you that a carbon with two groups around it is sp-hybridized. Here is <b>but-2-yne</b>, CH₃–C≡C–CH₃ <mol smiles="CC#CC" label="but-2-yne">. What shape do you expect the four carbons to make?',
+      prompt: 'Lesson 02 told you that a carbon with two groups around it is sp-hybridized. Here is <b>but-2-yne</b>, CH₃–C≡C–CH₃ <mol smiles="CC#CC" label="but-2-yne"></mol>. What shape do you expect the four carbons to make?',
       options: [
         opt('A straight line: every C–C≡C angle is 180°', true, 'Yes. Each triple-bond carbon has just two groups (the other triple-bond carbon and one CH₃), and two groups on an sp carbon sit 180° apart.'),
         opt('A zig-zag with C–C≡C angles of about 120°', false, '120° belongs to sp² carbons, which have three groups. Each triple-bond carbon has only two, so it is sp, not sp².'),
@@ -49,9 +49,9 @@ export default arrange({
       prompt: 'On the left is a solid model of <b>but-2-yne</b>; on the right is <b>(Z)-but-2-ene</b>, the alkene you will make from it later. Turn them and look at the four carbons of each. Which statement matches what you see?',
       visual: { widget: 'model3d', config: { mol: 'but-2-yne', compare: 'cis-but-2-ene', highlight: [0, 1, 2, 3] } },
       options: [
-        opt('In but-2-yne the four carbons lie on one straight line; in (Z)-but-2-ene the C–C=C angles are near 120° and both CH₃ groups are on the same side', true, 'Yes. The sp carbons of the alkyne put the chain in a line; the sp² carbons of the alkene bend it, and cis means the two CH₃ groups share a side.'),
-        opt('Both molecules have a straight carbon chain; only the number of hydrogens differs', false, 'Only the alkyne is straight. The alkene’s C–C=C angles are near 120°, so its chain is bent.'),
-        opt('The C≡C bond of the alkyne is longer than the C=C bond of the alkene', false, 'It is the other way round: three shared electron pairs pull the two nuclei closer than two pairs do, so the triple bond is the shorter one.'),
+        opt('In but-2-yne the four carbons lie on a straight line; in (Z)-but-2-ene the chain is bent, with both CH₃ groups on the same side', true, 'Yes. The sp carbons of the alkyne put the chain in a line; the sp² carbons of the alkene bend it, and cis means the two CH₃ groups share a side.'),
+        opt('Both molecules have a straight carbon chain; only the number of hydrogens differs, by two', false, 'Only the alkyne is straight. The alkene’s C–C=C angles are near 120°, so its chain is bent.'),
+        opt('The C≡C bond of the alkyne is longer than the C=C bond of the alkene, since it has more bonds', false, 'It is the other way round: three shared electron pairs pull the two nuclei closer than two pairs do, so the triple bond is the shorter one.'),
         opt('But-2-yne also has a cis and a trans form, because it has two CH₃ groups on the multiple bond', false, 'The linear C–C≡C–C unit has no sides, so there is only one but-2-yne. Cis and trans exist only for the bent C=C.')
       ],
       hints: ['Rotate the left model so you look along the chain from the side. Do the four highlighted carbons stay in one straight line?', 'Look at the right model: are its four carbons in a line, and are the two CH₃ groups on the same side of the C=C or on opposite sides?'],
@@ -188,7 +188,7 @@ export default arrange({
     },
     {
       id: 's16', type: 'choice', skill: 'acetylides',
-      prompt: '<b>4-Methylpent-2-yne</b>, CH₃–C≡C–CH(CH₃)₂ <mol smiles="CC#CC(C)C" label="4-methylpent-2-yne">, can be built in two ways on paper, depending on which side of the C≡C the new bond is made (next to CH₃, or next to the isopropyl group). Only one route works. Which one?',
+      prompt: '<b>4-Methylpent-2-yne</b>, CH₃–C≡C–CH(CH₃)₂ <mol smiles="CC#CC(C)C" label="4-methylpent-2-yne"></mol>, can be built in two ways on paper, depending on which side of the C≡C the new bond is made (next to CH₃, or next to the isopropyl group). Only one route works. Which one?',
       options: [
         opt('3-Methylbut-1-yne, NaNH₂, then CH₃Br', true, 'Yes. The acetylide of 3-methylbut-1-yne attacks CH₃Br, a methyl halide, which works. The branched piece is built into the alkyne, not into the halide.', { chk: { start: 'CC(C)C#C', target: 'CC#CC(C)C', cards: ['NaNH2', 'CH3Br'], ok: true } }),
         opt('Propyne, NaNH₂, then (CH₃)₂CHBr', false, '(CH₃)₂CHBr is a SECONDARY alkyl halide. Only primary (RCH₂X) and methyl halides work with an acetylide; the book explains why in Chapter 7.', { chk: { start: 'CC#C', target: 'CC#CC(C)C', cards: ['NaNH2', 'iPrBr'], ok: false, code: 'notPrimary' } }),
@@ -201,7 +201,7 @@ export default arrange({
     },
     {
       id: 's17', type: 'worked', skill: 'synthesis',
-      problem: 'Plan a synthesis of <b>hexan-2-one</b> <mol smiles="CCCCC(C)=O" label="hexan-2-one"> from <b>acetylene</b> and any alkyl halide. Work backwards, one decision at a time.',
+      problem: 'Plan a synthesis of <b>hexan-2-one</b> <mol smiles="CCCCC(C)=O" label="hexan-2-one"></mol> from <b>acetylene</b> and any alkyl halide. Work backwards, one decision at a time.',
       moves: [
         {
           ask: 'The target is a ketone with the C=O on C2 (a methyl ketone). Which alkyne would hydration (H₂O, H₂SO₄, HgSO₄) turn into exactly this ketone?',

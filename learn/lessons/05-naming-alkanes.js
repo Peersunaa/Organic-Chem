@@ -21,10 +21,10 @@ export default {
       prompt: 'Both drawings are four carbons and ten hydrogens joined by single bonds. Are A and B the same molecule?',
       figures: [{ smiles: 'CCCC', label: 'A' }, { smiles: 'CC(C)C', label: 'B' }],
       options: [
-        { text: 'Yes: B is just A with its chain bent', why: 'Bending or twisting never changes which atom is bonded to which. In A every carbon has at most two carbon neighbours. In B the middle carbon has three. The connections differ, so these are two molecules.' },
-        { text: 'No: they are different molecules with the same formula', correct: true, why: 'Yes. Both are C₄H₁₀, but A is an unbranched chain and B has a carbon bonded to three other carbons. Different connections make different compounds.' },
-        { text: 'No: B has fewer hydrogens', why: 'Count them: each carbon needs four bonds, and both drawings work out to ten hydrogens. The formula is the same, which is what makes this interesting.' },
-        { text: 'Yes, because they have the same formula', why: 'A formula only counts atoms; it says nothing about how they are connected. Same formula and different connections means different molecules.' }
+        { text: 'Yes: B is just A with its chain bent into a new shape', why: 'Bending or twisting never changes which atom is bonded to which. In A every carbon has at most two carbon neighbours. In B the middle carbon has three. The connections differ, so these are two molecules.' },
+        { text: 'No: different molecules with the same formula', correct: true, why: 'Yes. Both are C₄H₁₀, but A is an unbranched chain and B has a carbon bonded to three other carbons. Different connections make different compounds.' },
+        { text: 'No: B has fewer hydrogens because of the branch', why: 'Count them: each carbon needs four bonds, and both drawings work out to ten hydrogens. The formula is the same, which is what makes this interesting.' },
+        { text: 'Yes, because molecules with the same formula are identical', why: 'A formula only counts atoms; it says nothing about how they are connected. Same formula and different connections means different molecules.' }
       ],
       reveal: 'Molecules with the same formula but a different order of connection are <b>constitutional isomers</b>. A is butane; B is isobutane (2-methylpropane). The number of alkane isomers climbs with size: three for C₅H₁₂, five for C₆H₁₄.'
     },
@@ -33,10 +33,10 @@ export default {
       prompt: 'Here are real 3D models of butane and isobutane. Rotate them. What is the structural difference?',
       visual: { widget: 'model3d', config: { mol: 'butane', compare: 'isobutane' } },
       options: [
-        { text: 'Isobutane has a carbon bonded to three other carbons, a branch; butane has none', correct: true, why: 'Yes. In isobutane the central carbon holds three CH₃ groups and one H. Butane is an unbranched chain, so no carbon has more than two carbon neighbours.' },
-        { text: 'Isobutane has one more hydrogen', why: 'Both are C₄H₁₀: ten hydrogens each. Count them in the models.' },
-        { text: 'Butane has a double bond', why: 'Every bond in an alkane is a single bond, in butane and in isobutane alike.' },
-        { text: 'Isobutane is flat and butane is tetrahedral', why: 'Each carbon in both molecules has four single bonds pointing to the corners of a tetrahedron. Neither molecule is flat.' }
+        { text: 'Isobutane has a branch (a carbon bonded to three carbons); butane is an unbranched chain', correct: true, why: 'Yes. In isobutane the central carbon holds three CH₃ groups and one H. Butane is an unbranched chain, so no carbon has more than two carbon neighbours.' },
+        { text: 'Isobutane has one more hydrogen than butane has', why: 'Both are C₄H₁₀: ten hydrogens each. Count them in the models.' },
+        { text: 'Butane has a double bond that isobutane lacks', why: 'Every bond in an alkane is a single bond, in butane and in isobutane alike.' },
+        { text: 'Isobutane is flat, while butane has tetrahedral carbons', why: 'Each carbon in both molecules has four single bonds pointing to the corners of a tetrahedron. Neither molecule is flat.' }
       ],
       hints: ['Look at the central carbons of each model and count their carbon neighbours.', 'Find the one carbon in isobutane that touches three other carbons.'],
       worked: 'Butane: C–C–C–C, so no carbon has more than two carbon neighbours. Isobutane: one carbon touches three others (a branch point). The formulas match but the connections differ, so they are constitutional isomers.',
@@ -96,10 +96,10 @@ export default {
       prompt: 'Flip the <b>New / Old IUPAC</b> switch at the top of the page and watch the name: <name new="2-methyl-4-(propan-2-yl)heptane" old="4-isopropyl-2-methylheptane"></name>. What changes between the two styles?',
       smiles: S15,
       options: [
-        { text: 'The wording of some branches changes, and that can reorder the prefixes', correct: true, why: 'Yes. Isopropyl is filed under i, but propan-2-yl is filed under p, so the methyl moves ahead of it. The molecule is the same; only the name is written differently.' },
-        { text: 'The old name describes a different molecule', why: 'Both names point to the very same structure. Only the wording differs, and this course accepts either style when you type a name.' },
-        { text: 'The parent chain changes from heptane to something else', why: 'The parent is heptane in both styles. Only the names of branches differ.' },
-        { text: 'Nothing changes: the two styles are always identical', why: 'Flip the switch again and compare. Branch names such as isopropyl, sec-butyl and isobutyl have new-style forms, and methyl, ethyl, propyl, butyl and tert-butyl do not change.' }
+        { text: 'Some branches are worded differently, so prefixes can reorder', correct: true, why: 'Yes. Isopropyl is filed under i, but propan-2-yl is filed under p, so the methyl moves ahead of it. The molecule is the same; only the name is written differently.' },
+        { text: 'The old name describes a different molecule from the new name', why: 'Both names point to the very same structure. Only the wording differs, and this course accepts either style when you type a name.' },
+        { text: 'The parent chain changes from heptane to a different alkane', why: 'The parent is heptane in both styles. Only the names of branches differ.' },
+        { text: 'Nothing changes: the two styles are always identical for every name', why: 'Flip the switch again and compare. Branch names such as isopropyl, sec-butyl and isobutyl have new-style forms, and methyl, ethyl, propyl, butyl and tert-butyl do not change.' }
       ],
       hints: ['Flip the switch in the header and compare the two names word by word.', 'Which word changes, and what happens to where the methyl sits in the name?'],
       worked: 'Old: 4-isopropyl-2-methylheptane. New: 2-methyl-4-(propan-2-yl)heptane. The branch isopropyl is written propan-2-yl in the new style, so it is alphabetized under p instead of i and the methyl now comes first.',
