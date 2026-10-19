@@ -74,6 +74,7 @@ function home() {
     });
     panel.append(list);
   }
+  panel.append(h('p', { class: 'small ws-drill' }, h('a', { class: 'btn small ghost', href: '#practise-predict-product', id: 'ws-drill-predict' }, 'Drill: predict the product'), h('span', { class: 'muted' }, ' Mixed reactions, all from the reaction cards.')));
 
   if (courseDone) {
     // one practice link per lesson: the first skill of that lesson that its own mastery generator serves
@@ -105,7 +106,8 @@ function home() {
   lessons.append(ul);
   const rx = h('section', { class: 'panel', 'aria-labelledby': 'rx-h' }, h('h2', { id: 'rx-h' }, 'Reactions'),
     h('p', { class: 'muted' }, 'Every reagent on one card: what it does, a worked example, three facts and how to answer the exam question.'),
-    h('a', { class: 'btn primary', href: '#reactions', id: 'open-reactions' }, 'Open the reaction cards'));
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'open-reactions' }, 'Open the reaction cards'),
+      h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'open-drill' }, 'Drill: predict the product')));
   mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, rx, panel)));
   const op = document.getElementById('open-practice');
   if (op) op.addEventListener('click', () => { const t = panel.querySelector('summary') || panel; panel.scrollIntoView?.({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); t.focus?.({ preventScroll: true }); });
@@ -217,7 +219,7 @@ function lessonView(L, startId) {
 }
 
 function practice(skill) {
-  setDrawStyle(['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships'].includes(generatorForSkill(skill)) ? 'skeletal' : 'full');
+  setDrawStyle(['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships', 'predict-product'].includes(generatorForSkill(skill)) ? 'skeletal' : 'full');
   const host = h('div', { class: 'step' });
   const card = h('article', { class: 'card' }, host);
   const ctx = {
@@ -234,7 +236,8 @@ function practice(skill) {
 function hub() {
   setDrawStyle('skeletal');
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Reactions'),
-    h('p', { class: 'lede' }, 'One card for each reagent. Read the three facts, look at the example, then use the steps on a question.')), buildHub(chemP));
+    h('p', { class: 'lede' }, 'One card for each reagent. Read the three facts, look at the example, then use the steps on a question.'),
+    h('a', { class: 'btn primary', href: '#practise-predict-product', id: 'drill-predict' }, 'Drill: predict the product')), buildHub(chemP));
 }
 
 // ---------------------------------------------------------------- Router

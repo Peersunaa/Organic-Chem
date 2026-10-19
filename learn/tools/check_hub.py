@@ -71,7 +71,7 @@ def read(smi):
     un = sum(1 for s in pot if s.type == Chem.StereoType.Atom_Tetrahedral and s.specified == Chem.StereoSpecified.Unspecified)
     unb = sum(1 for s in pot if s.type == Chem.StereoType.Bond_Double and s.specified == Chem.StereoSpecified.Unspecified)
     achiral = Chem.MolToSmiles(m) == mirror_smiles(m)
-    return {"smiles": smi, "ok": True, "centres": centres, "unassigned": un, "ez": ez, "unassignedBonds": unb,
+    return {"smiles": smi, "ok": True, "flat": Chem.MolToSmiles(m, isomericSmiles=False), "centres": centres, "unassigned": un, "ez": ez, "unassignedBonds": unb,
             "achiral": achiral, "cistrans": ring_cistrans(m, centre_idx)}
 
 
