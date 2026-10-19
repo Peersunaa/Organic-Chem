@@ -41,6 +41,7 @@ import { lesson15 } from './lesson15.mjs';
 import { lesson16 } from './lesson16.mjs';
 import { hub } from './hub.mjs';
 import { predict } from './predict.mjs';
+import { pastpaper } from './pastpaper.mjs';
 import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
 const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product']);
@@ -1174,6 +1175,9 @@ await lesson16({ ok, eq });
 // ---- Reaction hub: every card has all its fields, every lesson/mechanism link resolves to a real step, every drawn molecule parses in RDKit (JS and Python), stereo read back in Python (stereocentres, meso/racemic, cis/trans on rings in 3D, E/Z), the card's product equals the engine's wherever an engine models the reagent, router and home-screen promises (tests/hub.mjs)
 await hub({ ok, eq });
 await predict({ ok, eq });
+
+// ---- Past-paper walkthrough: every item has its fields, every lesson/hub link resolves, scope and section order, router, home panel, CSS block (tests/pastpaper.mjs)
+await pastpaper({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

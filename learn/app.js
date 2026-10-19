@@ -6,6 +6,7 @@ import { renderStep, renderProblems, h, rich, setIupacMode } from './engine/step
 import { skillLabel } from './engine/skills.js';
 import { LESSONS, PLANNED } from './lessons/index.js';
 import { buildHub } from './hub-view.js';
+import { buildPastpaper } from './pastpaper-view.js';
 
 const app = document.getElementById('app');
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -108,7 +109,10 @@ function home() {
     h('p', { class: 'muted' }, 'Every reagent on one card: what it does, a worked example, three facts and how to answer the exam question.'),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'open-reactions' }, 'Open the reaction cards'),
       h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'open-drill' }, 'Drill: predict the product')));
-  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, rx, panel)));
+  const pp = h('section', { class: 'panel', 'aria-labelledby': 'pp-h' }, h('h2', { id: 'pp-h' }, 'Past papers'),
+    h('p', { class: 'muted' }, 'The midterm questions by topic: what each one asks, the steps to answer it, and where to learn it.'),
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#pastpaper', id: 'open-pastpaper' }, 'Open past papers')));
+  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, rx, pp, panel)));
   const op = document.getElementById('open-practice');
   if (op) op.addEventListener('click', () => { const t = panel.querySelector('summary') || panel; panel.scrollIntoView?.({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); t.focus?.({ preventScroll: true }); });
 }
@@ -233,11 +237,19 @@ function practice(skill) {
 }
 
 // ---------------------------------------------------------------- Reaction hub
-function hub() {
+function hub(anchor) {
   setDrawStyle('skeletal');
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Reactions'),
     h('p', { class: 'lede' }, 'One card for each reagent. Read the three facts, look at the example, then use the steps on a question.'),
-    h('a', { class: 'btn primary', href: '#practise-predict-product', id: 'drill-predict' }, 'Drill: predict the product')), buildHub(chemP));
+    h('a', { class: 'btn primary', href: '#practise-predict-product', id: 'drill-predict' }, 'Drill: predict the product')), buildHub(chemP, anchor));
+}
+
+// ---------------------------------------------------------------- Past papers
+function pastpaper() {
+  mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Past papers, by topic'),
+    h('p', { class: 'lede' }, 'Each midterm question from the workbook, in plain words, with the steps to answer it and a link to where you learn it.'),
+    h('p', { class: 'muted small' }, 'This page covers only the sections on this midterm (A1, A2, A3, A5 HBr, B1, B2, B3, B4, B6).'),
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'pp-reactions' }, 'Reactions'), h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'pp-drill' }, 'Drill'))), buildPastpaper());
 }
 
 // ---------------------------------------------------------------- Router
@@ -249,6 +261,8 @@ function route() {
     if (L) return lessonView(L, m[2]);
   }
   if (hash === 'reactions') return hub();
+  if ((m = /^reactions\/([a-z0-9-]+)$/.exec(hash))) return hub(m[1]);
+  if (hash === 'pastpaper') return pastpaper();
   if ((m = /^practise-([a-z0-9-]+)$/.exec(hash))) return practice(m[1]);
   home();
 }

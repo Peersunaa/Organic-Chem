@@ -50,8 +50,9 @@ function cardNode(c) {
     h('div', { class: 'hub-links' }, ...links, h('span', { class: 'chip' }, grp ? grp.label : c.group)));
 }
 
-/** Build the hub. Returns a node; the cards are drawn as soon as `ready` (the RDKit promise) resolves. */
-export function buildHub(ready) {
+/** Build the hub. Returns a node; the cards are drawn as soon as `ready` (the RDKit promise) resolves.
+ *  `anchor` (a card id, from #reactions/<card-id>): once the cards are drawn, scroll to that card. */
+export function buildHub(ready, anchor) {
   const root = h('div', { class: 'hub' });
   const state = { group: 'all', space: 'all', adds: 'all' };
   const count = h('p', { class: 'muted small', 'aria-live': 'polite', id: 'hub-count' });
@@ -111,6 +112,16 @@ export function buildHub(ready) {
       list.append(sec);
     });
     apply();
+    if (anchor) {
+      const target = list.querySelector('#rx-' + anchor);
+      if (target) {
+        // an instant jump (a smooth scroll over 38 cards can end in the wrong place while the molecule drawings settle)
+        target.querySelector('.hub-steps-box')?.setAttribute('open', '');
+        target.classList.add('hub-target');
+        const jump = () => target.scrollIntoView?.({ block: 'start', behavior: 'auto' });
+        jump(); requestAnimationFrame(jump);
+      }
+    }
   }).catch(() => { list.innerHTML = '<p class="fb bad">The chemistry engine could not load. Reload the page to try again.</p>'; });
   return root;
 }
