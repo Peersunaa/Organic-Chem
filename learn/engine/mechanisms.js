@@ -1,7 +1,7 @@
 // Data for Lesson 08 (McMurry 3.5 to 3.9): mechanisms stored as data, the reaction-type pool, the nucleophile / electrophile site table.
 // Everything that can be derived is derived (classification from formulas, arrows from the scene); the tests re-derive it independently.
 import { analyze, canon, rdkit, ENEG } from './chem.js';
-import { buildScene, stepResult, tallyOf } from './widgets/mechanism-core.js';
+import { buildScene, stepResult, tallyOf, WHY } from './widgets/mechanism-core.js';
 import { buildMolblock } from './widgets/lewis-core.js';
 
 
@@ -11,13 +11,13 @@ export const HCL_ETHYLENE = {
   steps: [
     {
       before: ['C=C', 'Cl'], layout: [{}, { hAngles: { 0: 180 } }],
-      arrows: [{ from: { bond: [0, 1] }, to: { bond: [0, 7] } }, { from: { bond: [7, 6] }, to: { atom: 6 } }],
+      arrows: [{ from: { bond: [0, 1] }, to: { bond: [0, 7] }, why: WHY.piToH('H–Cl') }, { from: { bond: [7, 6] }, to: { atom: 6 }, why: WHY.XLeaves('Cl') }],
       after: ['C[CH2+]', '[Cl-]'],
       label: 'The π bond of ethylene attacks the H of HCl. The H–Cl bond pair leaves with Cl. Result: a carbocation and Cl⁻.'
     },
     {
       before: ['C[CH2+]', '[Cl-]'],
-      arrows: [{ from: { lp: 7 }, to: { atom: 1 } }],
+      arrows: [{ from: { lp: 7 }, to: { atom: 1 }, why: WHY.halideAttacks('Cl') }],
       after: ['CCCl'],
       label: 'A lone pair on Cl⁻ attacks the positive carbon and becomes the new C–Cl bond.'
     }
@@ -29,13 +29,13 @@ export const HBR_ETHYLENE = {
   steps: [
     {
       before: ['C=C', 'Br'], layout: [{}, { hAngles: { 0: 180 } }],
-      arrows: [{ from: { bond: [0, 1] }, to: { bond: [0, 7] } }, { from: { bond: [7, 6] }, to: { atom: 6 } }],
+      arrows: [{ from: { bond: [0, 1] }, to: { bond: [0, 7] }, why: WHY.piToH('H–Br') }, { from: { bond: [7, 6] }, to: { atom: 6 }, why: WHY.XLeaves('Br') }],
       after: ['C[CH2+]', '[Br-]'],
       label: 'The π bond attacks the H of HBr. The H–Br pair leaves with Br. Result: a carbocation and Br⁻.'
     },
     {
       before: ['C[CH2+]', '[Br-]'],
-      arrows: [{ from: { lp: 7 }, to: { atom: 1 } }],
+      arrows: [{ from: { lp: 7 }, to: { atom: 1 }, why: WHY.halideAttacks('Br') }],
       after: ['CCBr'],
       label: 'A lone pair on Br⁻ attacks the positive carbon and becomes the new C–Br bond.'
     }
@@ -47,13 +47,13 @@ export const HBR_BUTENE = {
   steps: [
     {
       before: ['C/C=C/C', 'Br'], layout: [{}, { hAngles: { 0: 180 } }],
-      arrows: [{ from: { bond: [1, 2] }, to: { bond: [1, 13] } }, { from: { bond: [13, 12] }, to: { atom: 12 } }],
+      arrows: [{ from: { bond: [1, 2] }, to: { bond: [1, 13] }, why: WHY.piToH('H–Br') }, { from: { bond: [13, 12] }, to: { atom: 12 }, why: WHY.XLeaves('Br') }],
       after: ['CC[CH+]C', '[Br-]'],
       label: 'The π bond attacks the H of HBr. The H–Br pair leaves with Br. Result: a carbocation and Br⁻.'
     },
     {
       before: ['CC[CH+]C', '[Br-]'],
-      arrows: [{ from: { lp: 13 }, to: { atom: 2 } }],
+      arrows: [{ from: { lp: 13 }, to: { atom: 2 }, why: WHY.halideAttacks('Br') }],
       after: ['CCC(C)Br'],
       label: 'A lone pair on Br⁻ attacks the positive carbon and becomes the new C–Br bond.'
     }
@@ -78,7 +78,7 @@ export function hxStep(alkene, X, which) {
     const sc = buildScene(st);
     const bond = sc.bonds.find((b) => b.order === 2 && sc.atoms[b.a].el === 'C' && sc.atoms[b.b].el === 'C');
     const H = sc.maps[1].h[0][0], Xi = sc.maps[1].heavy[0];
-    st.arrows = [{ from: { bond: [bond.a, bond.b] }, to: { bond: [bond.a, H] } }, { from: { bond: [H, Xi] }, to: { atom: Xi } }];
+    st.arrows = [{ from: { bond: [bond.a, bond.b] }, to: { bond: [bond.a, H] }, why: WHY.piToH(`H–${X}`) }, { from: { bond: [H, Xi] }, to: { atom: Xi }, why: WHY.XLeaves(X) }];
     st.after = canon(buildMolblock(stepResult(st))).split('.').sort((p, q) => (q.includes('+') ? 1 : 0) - (p.includes('+') ? 1 : 0));
     st.label = `The π bond attacks the H of ${HX[X].label}; the H–${X} pair leaves with ${X}. Result: a carbocation and ${X}⁻.`;
     return st;
@@ -88,7 +88,7 @@ export function hxStep(alkene, X, which) {
   const sc = buildScene(st);
   const Ci = sc.atoms.findIndex((a) => a.el === 'C' && a.charge === 1);
   const Xi = sc.atoms.findIndex((a) => a.el === X);
-  st.arrows = [{ from: { lp: Xi }, to: { atom: Ci } }];
+  st.arrows = [{ from: { lp: Xi }, to: { atom: Ci }, why: WHY.halideAttacks(X) }];
   st.after = [canon(buildMolblock(stepResult(st)))];
   return st;
 }

@@ -253,6 +253,7 @@ export function netOf(reagent, halide = null) {
 }
 
 // ---------------------------------------------------------------- the mechanism (mechanism-player data)
+const WHY_RING = 'The C–H bond pair slides into the ring and makes a new C=C π bond. The ring is aromatic again and the + is gone.';
 const isHal = (e) => ['F', 'Cl', 'Br', 'I'].includes(e);
 /**
  * Atom numbers for arrows. Scenes are built by mechanism-core.buildScene: each part's heavy atoms in SMILES order, then its H atoms heavy atom by heavy atom.
@@ -303,16 +304,24 @@ export function easMechanism(reagent, halide = null) {
     let arrows, equiv = [];
     if (R.kind === 'halogen') {
       const a = M[1].heavy[0], b = M[1].heavy[1];
-      arrows = [{ from: { lp: a }, to: { atom: M[2].heavy[metal] } }, { from: { bond: [a, b] }, to: { atom: a } }];
+      const ms = cI.atoms[metal].sym;
+      arrows = [
+        { from: { lp: a }, to: { atom: M[2].heavy[metal] }, why: `A lone pair on a ${R.X} of ${R.X}₂ donates to the empty orbital on ${ms}, forming a new ${ms}–${R.X} bond (a Lewis acid at work).` },
+        { from: { bond: [a, b] }, to: { atom: a }, why: `The ${R.X}–${R.X} bond pair moves onto the ${R.X} bonded to ${ms}, so the other ${R.X} leaves as ${R.X}⁺: the electrophile.` }
+      ];
       equiv = [{ [a]: b, [b]: a }];
     } else {
       const clI = rI.atoms.findIndex((x) => x.sym === 'Cl');
       const cI2 = rI.atoms[clI].nbrs[0];
       const cl = M[1].heavy[clI], c = M[1].heavy[cI2];
-      arrows = [{ from: { lp: cl }, to: { atom: M[2].heavy[metal] } }, { from: { bond: [c, cl] }, to: { atom: cl } }];
+      const ms = cI.atoms[metal].sym;
+      arrows = [
+        { from: { lp: cl }, to: { atom: M[2].heavy[metal] }, why: `A lone pair on Cl donates to the empty orbital on ${ms}, forming a new ${ms}–Cl bond (${R.catalystLabel} is a Lewis acid).` },
+        { from: { bond: [c, cl] }, to: { atom: cl }, why: `The C–Cl bond pair goes onto Cl. Carbon is left with the + charge, and the Cl ends up in ${R.anionLabel}.` }
+      ];
       if (R.fc === 'acyl') {
         const o = rI.atoms.findIndex((x, i) => x.sym === 'O' && x.nbrs.includes(cI2));
-        arrows.push({ from: { lp: M[1].heavy[o] }, to: { bond: [c, M[1].heavy[o]] } });
+        arrows.push({ from: { lp: M[1].heavy[o] }, to: { bond: [c, M[1].heavy[o]] }, why: 'A lone pair on O slides into the C–O bond and makes it a triple bond. This gives the acylium ion, a stable electrophile.' });
       }
     }
     // the three halogens of the Lewis acid are interchangeable too (any of them can end up bonded to the electrophile's partner): not needed, the metal is the target
@@ -329,15 +338,16 @@ export function easMechanism(reagent, halide = null) {
     if (R.kind === 'FC' && R.fc === 'acyl') eAtom = eI.atoms.findIndex((a) => a.sym === 'C' && a.nbrs.some((k) => eI.atoms[k].sym === 'O' && (bondBetween(eI, a.idx, k).bo ?? 1) === 3));
     const ring = M[0].heavy;
     const eS = M[1].heavy[eAtom];
-    const arrows = [{ from: { bond: [ring[0], ring[1]] }, to: { bond: [ring[0], eS] } }];
+    const eSym = eI.atoms[eAtom].sym;
+    const arrows = [{ from: { bond: [ring[0], ring[1]] }, to: { bond: [ring[0], eS] }, why: `A π pair of the ring attacks the electrophile ${R.Elabel} and forms a new C–${eSym} bond. The ring now carries a + charge.` }];
     const extraSwap = [];
     if (reagent === 'HNO3') {
       const os = eI.atoms.filter((a) => a.sym === 'O').map((a) => M[1].heavy[a.idx]);
-      arrows.push({ from: { bond: [eS, os[0]] }, to: { atom: os[0] } });
+      arrows.push({ from: { bond: [eS, os[0]] }, to: { atom: os[0] }, why: 'One N=O π pair moves onto O, so N keeps only four bonds (an octet) and that oxygen becomes O⁻.' });
       extraSwap.push({ [os[0]]: os[1], [os[1]]: os[0] });
     } else if (R.kind === 'FC' && R.fc === 'acyl') {
       const o = eI.atoms.find((a) => a.sym === 'O');
-      arrows.push({ from: { bond: [eS, M[1].heavy[o.idx]] }, to: { atom: M[1].heavy[o.idx] } });
+      arrows.push({ from: { bond: [eS, M[1].heavy[o.idx]] }, to: { atom: M[1].heavy[o.idx] }, why: 'One C≡O π pair moves onto O, so carbon keeps only four bonds. The C≡O becomes C=O and O loses its +.' });
     }
     // every Kekule double bond and either end of it is an equally good place to start (the six symmetry operations of the ring, times the swap of the two O of NO2+)
     const rot = (k, flip) => { const m = {}; for (let i = 0; i < 6; i++) m[ring[i]] = ring[flip ? (((k - i) % 6) + 6) % 6 : (i + k) % 6]; return m; };
@@ -364,15 +374,26 @@ export function easMechanism(reagent, halide = null) {
       const metal = bI.atoms.findIndex((a) => a.sym === 'Fe' || a.sym === 'Al');
       const hal = bI.atoms.map((a, i) => i).filter((i) => isHal(bI.atoms[i].sym));
       const x = M[1].heavy[hal[0]], m = M[1].heavy[metal];
-      arrows.push({ from: { lp: x }, to: { atom: Hs } }, { from: { bond: [M[0].heavy[ipsoIdx], Hs] }, to: { bond: [M[0].heavy[ipsoIdx], M[0].heavy[plus]] } }, { from: { bond: [m, x] }, to: { atom: x } });
+      const hs = bI.atoms[hal[0]].sym, ms = bI.atoms[metal].sym;
+      arrows.push(
+        { from: { lp: x }, to: { atom: Hs }, why: `A lone pair on a ${hs} of ${R.anionLabel} takes the H⁺ from the sp³ carbon and forms a new H–${hs} bond.` },
+        { from: { bond: [M[0].heavy[ipsoIdx], Hs] }, to: { bond: [M[0].heavy[ipsoIdx], M[0].heavy[plus]] }, why: WHY_RING },
+        { from: { bond: [m, x] }, to: { atom: x }, why: `The ${ms}–${hs} bond pair goes back onto ${hs}. That frees ${R.catalystLabel} (the catalyst returns) and H–${hs} leaves.` }
+      );
       equiv = hal.slice(1).map((j) => ({ [x]: M[1].heavy[j], [M[1].heavy[j]]: x }));
     } else if (reagent === 'I2') {
       const o = M[1].heavy[0];
-      arrows.push({ from: { lp: o }, to: { atom: Hs } }, { from: { bond: [M[0].heavy[ipsoIdx], Hs] }, to: { bond: [M[0].heavy[ipsoIdx], M[0].heavy[plus]] } });
+      arrows.push(
+        { from: { lp: o }, to: { atom: Hs }, why: "A lone pair on water's oxygen takes the H⁺ from the sp³ carbon and forms a new O–H bond." },
+        { from: { bond: [M[0].heavy[ipsoIdx], Hs] }, to: { bond: [M[0].heavy[ipsoIdx], M[0].heavy[plus]] }, why: WHY_RING }
+      );
     } else {
       // HSO4-: the O- takes H+
       const oNeg = bI.atoms.findIndex((a) => a.sym === 'O' && a.fc === -1);
-      arrows.push({ from: { lp: M[1].heavy[oNeg] }, to: { atom: Hs } }, { from: { bond: [M[0].heavy[ipsoIdx], Hs] }, to: { bond: [M[0].heavy[ipsoIdx], M[0].heavy[plus]] } });
+      arrows.push(
+        { from: { lp: M[1].heavy[oNeg] }, to: { atom: Hs }, why: `A lone pair on the negative oxygen of ${R.anionLabel} takes the H⁺ from the sp³ carbon and forms a new O–H bond.` },
+        { from: { bond: [M[0].heavy[ipsoIdx], Hs] }, to: { bond: [M[0].heavy[ipsoIdx], M[0].heavy[plus]] }, why: WHY_RING }
+      );
     }
     steps.push({ before, arrows, after, label: `A base (${R.anionLabel}) removes H⁺ from the sp³ carbon; its two C–H electrons go back into the ring and the aromatic ring is restored`, equiv });
   }

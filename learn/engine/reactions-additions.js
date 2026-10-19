@@ -406,9 +406,9 @@ export function halogenMechanism(alkene, X) {
   const sc1 = buildScene(st1);
   const XA = sc1.maps[1].heavy[0], XB = sc1.maps[1].heavy[1];
   st1.arrows = [
-    { from: { bond: [c1, c2] }, to: { bond: [c1, XA] }, note: `The π electrons form a bond to the ${X} nearer the alkene. Point at that ${X}; the other ${X} leaves as ${X}⁻.` },
-    { from: { bond: [XA, XB] }, to: { atom: XB } },
-    { from: { lp: XA }, to: { atom: c2 }, note: `A lone pair on that ${X} bonds to the OTHER carbon of the former C=C. That closes the three-membered ring.` }
+    { from: { bond: [c1, c2] }, to: { bond: [c1, XA] }, note: `The π electrons form a bond to the ${X} nearer the alkene. Point at that ${X}; the other ${X} leaves as ${X}⁻.`, why: `The π pair attacks the nearer ${X} of ${X}₂ and forms a new C–${X} bond. This starts the bridge across the C=C.` },
+    { from: { bond: [XA, XB] }, to: { atom: XB }, why: `The ${X}–${X} bond pair leaves with the far ${X}, which departs as ${X}⁻ (a good leaving group).` },
+    { from: { lp: XA }, to: { atom: c2 }, note: `A lone pair on that ${X} bonds to the OTHER carbon of the former C=C. That closes the three-membered ring.`, why: `A lone pair on the bonded ${X} reaches the other carbon, closing a three-membered ring: the ${onium(X)} ion with ${X}⁺.` }
   ];
   st1.equiv = [{ [c1]: c2, [c2]: c1 }, { [XA]: XB, [XB]: XA }, { [c1]: c2, [c2]: c1, [XA]: XB, [XB]: XA }];
   st1.label = `The π bond attacks one ${X} of ${X2}; its ${X}–${X} pair leaves as ${X}⁻, and a lone pair on the attacked ${X} bonds to the second carbon. The ${X} now bridges both carbons on ONE face: a cyclic ${onium(X)} ion (a ring with a positive ${X}).`;
@@ -432,8 +432,8 @@ export function halogenMechanism(alkene, X) {
   const sc2 = buildScene(st2);
   const Xm = sc2.maps[1].heavy[0];
   st2.arrows = [
-    { from: { lp: Xm }, to: { atom: iA }, note: `${X}⁻ attacks a ring carbon from the face OPPOSITE the bridging ${X} (the back).` },
-    { from: { bond: [iA, iX] }, to: { atom: iX } }
+    { from: { lp: Xm }, to: { atom: iA }, note: `${X}⁻ attacks a ring carbon from the face OPPOSITE the bridging ${X} (the back).`, why: `A lone pair on ${X}⁻ attacks a ring carbon from the back, opposite the bridge, and forms a new C–${X} bond.` },
+    { from: { bond: [iA, iX] }, to: { atom: iX }, why: `The C–${X}⁺ bond pair leaves with the bridging ${X}, which becomes neutral. The ring opens and the two ${X} atoms end up anti.` }
   ];
   st2.equiv = [{ [iA]: iB, [iB]: iA }];
   st2.label = `${X}⁻ cannot reach the front face, which the bridging ${X} blocks, so it attacks a ring carbon from the BACK. The C–${X}⁺ bond to that carbon breaks and the ring opens. The two ${X} atoms are on opposite faces: anti addition.`;

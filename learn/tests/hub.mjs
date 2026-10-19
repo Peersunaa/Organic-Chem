@@ -98,6 +98,17 @@ const ENGINE = {
 function add(c, reagent) { const p = R.predictAdd(c.example.substrate, reagent); return { products: p.products, racemic: p.racemic, rel: p.rel }; }
 function alk(c, key, rel) { const p = R.predictAlkyne(c.example.substrate, key); return { products: p.products, rel: rel ? (p.stereo === 'E' ? 'anti' : p.stereo === 'Z' ? 'syn' : null) : undefined }; }
 
+
+// ---- caveman voice (Piece 3): every card carries a terse rewrite of its own text
+// Tokens that must survive the rewrite: anything with a subscript or charge (Br₂, H₃O⁺, NO₂⁺) and the exam words.
+const CAVE_TOKEN = /[\p{L}\p{N}²³¹⁰-₟]+/gu;
+const CAVE_WORDS = ['markovnikov', 'syn', 'anti', 'meta', 'ortho', 'para', 'racemate'];
+const mustKeep = (t) => /[₂₃₄⁺⁻]/.test(t) || CAVE_WORDS.includes(t.toLowerCase()) || t === 'R' || t === 'S';
+const reEsc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const hasToken = (hay, t) => /[₂₃₄⁺⁻]/.test(t)
+  ? hay.includes(t)
+  : new RegExp('(?<![\\p{L}\\p{N}])' + reEsc(t) + '(?![\\p{L}\\p{N}])', CAVE_WORDS.includes(t.toLowerCase()) ? 'iu' : 'u').test(hay);
+
 /** Canonical isomeric SMILES of every molecule in a dotted SMILES, sorted. */
 const parts = (smiles) => smiles.split('.').map((s) => canon(s)).sort();
 
@@ -140,6 +151,26 @@ export async function hub({ ok, eq }) {
     ok(c.apply && nonEmpty(c.apply.pattern) && Array.isArray(c.apply.steps) && c.apply.steps.length >= 3 && c.apply.steps.length <= 6 && c.apply.steps.every(nonEmpty), `${id}: pattern and 3 to 6 steps`);
     ok(!c.apply.steps.some((s) => /^\s*\d+[.)]/.test(s)), `${id}: steps are not numbered by hand (the list numbers them)`);
     if (c.example2 !== undefined) ok(c.example2 && nonEmpty(c.example2.substrate) && nonEmpty(c.example2.product) && nonEmpty(c.example2.note), `${id}: second example has substrate, product and note`);
+    // caveman voice: same shape as the card, shorter, never empty, and every reagent / exam word kept
+    {
+      const cv = c.caveman;
+      ok(!!cv && nonEmpty(cv.what) && cv.facts && nonEmpty(cv.facts.adds) && nonEmpty(cv.facts.where) && nonEmpty(cv.facts.space) && Array.isArray(cv.steps), `${id}: caveman has what, facts.adds/where/space and steps`);
+      if (cv && cv.facts && Array.isArray(cv.steps)) {
+        eq(cv.steps.length, c.apply.steps.length, `${id}: caveman has as many steps as apply.steps`);
+        eq(cv.facts.space, c.facts.space, `${id}: caveman space is the card's space (an enum, kept as is)`);
+        ok((cv.note !== undefined) === (c.example.note !== undefined), `${id}: caveman note is present exactly when example.note is`);
+        const pairs = [['what', c.what, cv.what], ['facts.adds', c.facts.adds, cv.facts.adds], ['facts.where', c.facts.where, cv.facts.where]];
+        c.apply.steps.forEach((o, i) => pairs.push([`steps[${i}]`, o, cv.steps[i]]));
+        if (c.example.note !== undefined) pairs.push(['note', c.example.note, cv.note]);
+        for (const [label, orig, cave] of pairs) {
+          if (!nonEmpty(cave)) { ok(false, `${id}: caveman ${label} is empty`); continue; }
+          const lim = orig.length < 40 ? 0.8 : 0.6;
+          ok(cave.length <= orig.length * lim, `${id}: caveman ${label} is at most ${lim * 100}% of the original (${cave.length} of ${orig.length})`);
+          const miss = [...new Set((orig.match(CAVE_TOKEN) || []).filter(mustKeep).filter((t) => !hasToken(cave, t)))];
+          ok(miss.length === 0, `${id}: caveman ${label} keeps every reagent token (missing: ${miss.join(' ')})`);
+        }
+      }
+    }
     // lesson and mechanism steps resolve (a card with no lesson has none and no mechanism step)
     if (c.lesson === null) { ok(c.mech === undefined, `${id}: a card with no lesson has no mechanism step`); continue; }
     ok(c.lesson && /^\d\d$/.test(c.lesson.id) && /^s\d\d$/.test(c.lesson.step), `${id}: lesson ref shape`);

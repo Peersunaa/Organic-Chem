@@ -115,8 +115,8 @@ export async function lesson08({ ok, eq }) {
   eq(HCL.steps.map((s) => s.arrows.length), [2, 1], 'HCl + ethylene: two arrows then one');
   eq(HCL.steps[0].after.map((s) => canon(s)).sort(), [canon('C[CH2+]'), canon('[Cl-]')].sort(), 'HCl + ethylene step 1 gives CH3CH2+ and Cl-');
   eq(canon(HCL.products[0]), canon('CCCl'), 'HCl + ethylene gives chloroethane');
-  eq(HCL.steps[0].arrows[0], { from: { bond: [0, 1] }, to: { bond: [0, 7] } }, 'step 1 arrow 1: pi bond to a new C-H bond');
-  eq(HCL.steps[0].arrows[1], { from: { bond: [7, 6] }, to: { atom: 6 } }, 'step 1 arrow 2: H-Cl bond onto Cl');
+  eq({ from: HCL.steps[0].arrows[0].from, to: HCL.steps[0].arrows[0].to }, { from: { bond: [0, 1] }, to: { bond: [0, 7] } }, 'step 1 arrow 1: pi bond to a new C-H bond');
+  eq({ from: HCL.steps[0].arrows[1].from, to: HCL.steps[0].arrows[1].to }, { from: { bond: [7, 6] }, to: { atom: 6 } }, 'step 1 arrow 2: H-Cl bond onto Cl');
   {
     const cfg = MC.stepConfig(HCL.steps[0]);
     ok(cfg.atoms[7].el === 'H' && cfg.atoms[6].el === 'Cl' && cfg.atoms[0].el === 'C' && cfg.atoms[1].el === 'C', 'HCl scene atom numbers (C0 C1 ... Cl6 H7)');

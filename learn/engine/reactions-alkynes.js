@@ -438,7 +438,11 @@ export function alkyneHXMechanism(alkyne, X) {
   const st = { before: [alkyne, X], layout: [{}, { hAngles: { 0: 180 } }], arrows: [], after: [], label: '' };
   const sc = buildScene(st);
   const H = sc.maps[1].h[0][0], Xi = sc.maps[1].heavy[0];
-  st.arrows = [{ from: { bond: [hC, pC] }, to: { bond: [hC, H] } }, { from: { bond: [H, Xi] }, to: { atom: Xi } }];
+  const nH0 = hC === s.carbons[0] ? s.nH[0] : s.nH[1], nH1 = hC === s.carbons[0] ? s.nH[1] : s.nH[0];
+  st.arrows = [
+    { from: { bond: [hC, pC] }, to: { bond: [hC, H] }, why: `A π pair of the triple bond attacks the δ+ H of H–${X} and forms a new C–H bond${nH0 > nH1 ? ', on the carbon with more H' : ''}.` },
+    { from: { bond: [H, Xi] }, to: { atom: Xi }, why: `The H–${X} bond pair leaves with ${X}, the more electronegative atom, so ${X} becomes ${X}⁻. The other carbon is left with the +.` }
+  ];
   st.after = cationFirst(canon(buildMolblock(stepResult(st))).split('.'));
   const nHh = hC === s.carbons[0] ? s.nH[0] : s.nH[1], nHp = hC === s.carbons[0] ? s.nH[1] : s.nH[0];
   st.label = `One π bond of the triple bond attacks the H of H–${X}; the H–${X} pair leaves with ${X}. H bonds to the carbon that has ${hText(nHh)}, so the + charge sits on the carbon with ${hText(nHp)}: the carbon with more alkyl groups, as in Lesson 09. The product of this step is a vinylic carbocation (+ on a carbon of a C=C), and ${X}⁻.`;
@@ -453,7 +457,7 @@ export function alkyneHXMechanism(alkyne, X) {
   const sc2 = buildScene(s2);
   const Ci = sc2.atoms.findIndex((a) => a.el === 'C' && a.charge === 1);
   const Xj = sc2.atoms.findIndex((a) => a.el === X);
-  s2.arrows = [{ from: { lp: Xj }, to: { atom: Ci } }];
+  s2.arrows = [{ from: { lp: Xj }, to: { atom: Ci }, why: `A lone pair on ${X}⁻ attacks the + carbon and forms the new C–${X} bond, giving the vinylic halide.` }];
   s2.after = [canonFlat(buildMolblock(stepResult(s2)))];    // the arrows move electrons in a flat scene: no cis/trans is claimed for the vinylic halide
   return { reactants: [alkyne, X], products: s2.after, steps: [st, s2] };
 }
@@ -475,7 +479,10 @@ export function acetylideAlkylationMechanism(alkyne, rx) {
   const s1 = { before: [alkyne, '[NH2-]'], layout: [{ hAngles: { [tC]: 0 } }, {}], arrows: [], after: [], label: '' };
   const sc1 = buildScene(s1);
   const Hn = sc1.maps[0].h[tC][0], Nn = sc1.maps[1].heavy[0];
-  s1.arrows = [{ from: { lp: Nn }, to: { atom: Hn } }, { from: { bond: [tC, Hn] }, to: { atom: tC } }];
+  s1.arrows = [
+    { from: { lp: Nn }, to: { atom: Hn }, why: 'A lone pair on the amide N (a strong base) takes the terminal H as H⁺ and forms a new N–H bond.' },
+    { from: { bond: [tC, Hn] }, to: { atom: tC }, why: 'The C–H bond pair stays on carbon as a lone pair. The carbon is now C⁻: the acetylide anion.' }
+  ];
   s1.after = canon(buildMolblock(stepResult(s1))).split('.').sort((p, q) => (q.includes('-') ? 1 : 0) - (p.includes('-') ? 1 : 0));
   s1.label = 'A lone pair on the amide ion (from NaNH₂) takes the terminal H as H⁺. The C–H bond pair stays on carbon and becomes a lone pair: the acetylide anion. NH₃ is the by-product, and Na⁺ only watches (a spectator).';
   // step 2: the acetylide attacks R–X
@@ -485,7 +492,11 @@ export function acetylideAlkylationMechanism(alkyne, rx) {
   const Xi = sc2.atoms.findIndex((a, i) => ['Cl', 'Br', 'I'].includes(a.el) && sc2.maps[1].heavy.includes(i));
   const Cr = sc2.bonds.find((b) => (b.a === Xi && sc2.atoms[b.b].el === 'C') || (b.b === Xi && sc2.atoms[b.a].el === 'C'));
   const CrI = Cr.a === Xi ? Cr.b : Cr.a;
-  s2.arrows = [{ from: { lp: Cm }, to: { atom: CrI } }, { from: { bond: [CrI, Xi] }, to: { atom: Xi } }];
+  const Xs = sc2.atoms[Xi].el;
+  s2.arrows = [
+    { from: { lp: Cm }, to: { atom: CrI }, why: `The acetylide's lone pair attacks the carbon bonded to ${Xs} and forms a new C–C bond. The chain gets longer.` },
+    { from: { bond: [CrI, Xi] }, to: { atom: Xi }, why: `The C–${Xs} bond pair leaves with ${Xs}, which becomes ${Xs}⁻. That keeps the carbon at four bonds.` }
+  ];
   s2.after = canon(buildMolblock(stepResult(s2))).split('.').sort((p, q) => (p.includes('-') ? 1 : 0) - (q.includes('-') ? 1 : 0));
   const Xn = sc2.atoms[Xi].el;
   s2.label = `A lone pair on the acetylide carbon attacks the carbon bonded to ${Xn} (a ${hc} carbon), and the C–${Xn} bond pair leaves with ${Xn}. A new C–C bond forms: the chain is longer, and the product is an internal alkyne. (The book studies this substitution in Chapter 7; for now it is one step of electron flow. NH₃ from step 1 is set aside.)`;

@@ -9,6 +9,8 @@
 //   facts     { adds, where, space, addsKey, spaceNote? }: three facts. `space` is exactly 'syn' | 'anti' | 'either' | 'n.a.'.
 //             `addsKey` lists the filter buttons the card belongs to: 'OH' | 'X' (Br or Cl) | 'H' | 'other' | 'O' (oxidation) | 'ring' (a new ring).
 //   apply     { pattern, steps[] }: the question as an exam would phrase it, then numbered steps to answer it.
+//   caveman   { what, facts: { adds, where, space }, steps[], note? }: the same card text in terse "caveman" voice (Piece 3). Same step count as apply.steps;
+//             `note` rewrites example.note and is present exactly when example.note is. facts.space is kept as is (an enum, not prose).
 //   lesson    { id, step }: the lesson step that teaches it (deep link #lesson-ID/step). `mech`: the step of the mechanism, when the lesson has one.
 //             `lesson: null` = the midterm needs it but no lesson teaches it: the card is the short version and the screen says so.
 //   example2  (optional) a second worked example, drawn under the first (Birch, alcohol oxidation).
@@ -59,6 +61,16 @@ export const HUB_CARDS = [
         'If the ring already carries a group, go to the director cards: they say ortho/para or meta.'
       ]
     },
+    caveman: {
+      what: 'One Br replace one H on ring. Substitute, not add. Cl₂, FeCl₃ same.',
+      facts: { adds: 'Br for one ring H', where: 'Ring. Six carbons all same.', space: 'n.a.' },
+      steps: [
+        'FeBr₃, FeCl₃, AlCl₃ plus ring: electrophilic aromatic substitution.',
+        'Br⁺ electrophile. FeBr₃ make Br₂ poor.',
+        'Swap ONE ring H for Br. Ring stay. No addition.',
+        'Group on ring: director cards say ortho/para or meta.'
+      ]
+    },
     lesson: { id: '13', step: 's01' }, mech: 's06'
   },
   {
@@ -75,6 +87,16 @@ export const HUB_CARDS = [
         'Remember: NO₂ is a meta director, so a second group goes meta to it.'
       ]
     },
+    caveman: {
+      what: 'NO₂ on ring. H₂SO₄ turn HNO₃ into NO₂⁺.',
+      facts: { adds: 'NO₂ for ring H', where: 'Ring', space: 'n.a.' },
+      steps: [
+        'HNO₃, H₂SO₄ make NO₂⁺. Electrophile.',
+        'ONE ring H to NO₂: nitrobenzene.',
+        'Aniline: Fe, H₃O⁺ reduce NO₂.',
+        'NO₂ meta director. Second group meta.'
+      ]
+    },
     lesson: { id: '13', step: 's10' }
   },
   {
@@ -88,6 +110,15 @@ export const HUB_CARDS = [
         'SO₃ plus H₂SO₄ gives HSO₃⁺. The ring attacks the S atom.',
         'Swap ONE ring H for SO₃H: benzenesulfonic acid.',
         'SO₃H is a meta director and a deactivator. A ring with SO₃H cannot do a Friedel–Crafts reaction.'
+      ]
+    },
+    caveman: {
+      what: 'SO₃H on ring. SO₃, H₂SO₄: HSO₃⁺ electrophile.',
+      facts: { adds: 'SO₃H for ring H', where: 'Ring. S bond to ring C.', space: 'n.a.' },
+      steps: [
+        'SO₃, H₂SO₄ → HSO₃⁺. Ring hit S.',
+        'SO₃H: benzenesulfonic acid.',
+        'SO₃H meta director, deactivator. No Friedel–Crafts.'
       ]
     },
     lesson: { id: '13', step: 's09' }
@@ -107,6 +138,17 @@ export const HUB_CARDS = [
         'In a synthesis with a second group, do the Friedel–Crafts step FIRST, while the ring is still reactive.'
       ]
     },
+    caveman: {
+      what: 'Alkyl on ring. AlCl₃ take Cl off R–Cl, carbocation R⁺. Ring hit.',
+      facts: { adds: 'Alkyl R for ring H', where: 'Ring', space: 'n.a.' },
+      steps: [
+        'Alkyl chloride + AlCl₃: Friedel–Crafts. Electrophile R⁺.',
+        'ONE H → R: ethylbenzene.',
+        'Cl on saturated C. Aryl, vinylic halide: no carbocation.',
+        'Ring has NO₂, C≡N, SO₃H or C=O (COR)? Too unreactive.',
+        'Synthesis, second group: Friedel–Crafts FIRST. Ring reactive.'
+      ]
+    },
     lesson: { id: '13', step: 's12' }
   },
   {
@@ -121,6 +163,16 @@ export const HUB_CARDS = [
         'AlCl₃ takes Cl⁻ and leaves the acylium ion, CH₃C≡O⁺.',
         'The ring attacks it, then loses H⁺: one ring H is now C(=O)CH₃.',
         'The same limits apply as for alkylation: no NO₂, C≡N, SO₃H or COR already on the ring.'
+      ]
+    },
+    caveman: {
+      what: 'Acyl R–C(=O)– on ring. Aryl ketone. Electrophile acylium RC≡O⁺.',
+      facts: { adds: 'Acyl RC=O for ring H', where: 'Ring', space: 'n.a.' },
+      steps: [
+        'Acetophenone: ring C(=O)CH₃. Reagent CH₃COCl, AlCl₃.',
+        'AlCl₃ take Cl⁻: acylium CH₃C≡O⁺',
+        'Ring attack, lose H⁺: H now C(=O)CH₃.',
+        'Alkylation limits: no NO₂, C≡N, SO₃H, COR on ring.'
       ]
     },
     lesson: { id: '13', step: 's17' }
@@ -139,6 +191,17 @@ export const HUB_CARDS = [
         'Why: after ortho or para attack, one resonance form of the carbocation has its + on the carbon that holds the group. The group helps carry the +.'
       ]
     },
+    caveman: {
+      what: 'Group give electrons. Substitution faster. New group ortho, para.',
+      facts: { adds: 'New group (NO₂, Br) for H', where: 'Ortho, para to group', space: 'n.a.' },
+      steps: [
+        'Alkyl, or lone-pair atom (–NH₂, –OH, –OR): activator. Directs ortho/para.',
+        'Mark two ortho, one para carbons. Skip two meta.',
+        'New group ortho, para. Draw both.',
+        'Why: ortho, para attack: one resonance form has + on group carbon. Group carry +.'
+      ],
+      note: 'Para, ortho form. Draw both.'
+    },
     lesson: { id: '14', step: 's01' }, mech: 's04'
   },
   {
@@ -155,6 +218,17 @@ export const HUB_CARDS = [
         'Draw the ortho and para products.'
       ]
     },
+    caveman: {
+      what: 'Halogen odd: deactivating, but ortho and para.',
+      facts: { adds: 'New group (NO₂, Br) for H', where: 'Ortho, para to halogen', space: 'n.a.' },
+      steps: [
+        'Halogen: slower ring, still ortho/para. Only exception to "deactivator means meta".',
+        'Cl pull electrons via σ bond (inductive). Ring slower.',
+        'Ortho, para: Cl lone pair share + (extra resonance form). Meta cannot.',
+        'Draw ortho, para products.'
+      ],
+      note: 'Slow, but ortho, para.'
+    },
     lesson: { id: '14', step: 's07' }
   },
   {
@@ -169,6 +243,16 @@ export const HUB_CARDS = [
         'Number the ring from that group: ortho = 2 and 6, meta = 3 and 5, para = 4.',
         'Put the new group on a meta carbon (a 1,3 relationship). Both meta carbons give the same product.',
         'There are no meta-directing activators. Friedel–Crafts does not work on these rings.'
+      ]
+    },
+    caveman: {
+      what: 'Groups pull electrons out. Ring much slower. New group meta.',
+      facts: { adds: 'New group (Br, NO₂) for H', where: 'Meta to group', space: 'n.a.' },
+      steps: [
+        'δ+ atom, no lone pair (NO₂, C≡N, SO₃H, C=O): deactivator, meta director.',
+        'Number ring: ortho 2,6. meta 3,5. para 4.',
+        'New group on meta carbon (1,3). Both meta same product.',
+        'No meta activators. No Friedel–Crafts here.'
       ]
     },
     lesson: { id: '14', step: 's03' }, mech: 's05'
@@ -187,6 +271,16 @@ export const HUB_CARDS = [
         'In a synthesis this turns CH₃ (ortho/para director) into CO₂H (meta director).'
       ]
     },
+    caveman: {
+      what: 'Alkyl chain to –CO₂H on ring. Ring not attacked.',
+      facts: { adds: 'O: side-chain C to CO₂H', where: 'Benzylic C, next to ring. Rest of chain lost.', space: 'n.a.' },
+      steps: [
+        'Benzylic carbon: bonded to ring. Count its H.',
+        'Benzylic H: chain become one –CO₂H. Propylbenzene: benzoic acid.',
+        'No benzylic H (tert-butyl): no reaction.',
+        'Synthesis: CH₃ (ortho/para) to CO₂H (meta).'
+      ]
+    },
     lesson: { id: '14', step: 's10' }
   },
   {
@@ -203,6 +297,16 @@ export const HUB_CARDS = [
         'Order matters: there is nothing to reduce until the nitro group is on the ring.'
       ]
     },
+    caveman: {
+      what: 'NO₂ on ring to NH₂. Make aromatic amine.',
+      facts: { adds: 'H: NO₂ to NH₂', where: 'Nitro group. Rest of ring same.', space: 'n.a.' },
+      steps: [
+        'No direct NH₂. Go via nitro.',
+        'HNO₃, H₂SO₄ → nitrobenzene.',
+        'Fe (Sn, SnCl₂), H₃O⁺, HO⁻: NO₂ to NH₂.',
+        'Order matter. No nitro, nothing to reduce.'
+      ]
+    },
     lesson: { id: '13', step: 's11' }
   },
   {
@@ -217,6 +321,16 @@ export const HUB_CARDS = [
         'Pd/C at ordinary pressure reduces only the ordinary C=C.',
         'Add H₂ across the side-chain C=C and leave the ring exactly as drawn: ethylbenzene.',
         'The ring itself needs H₂ with Pt (or Rh) at high pressure. Benzene then gives cyclohexane.'
+      ]
+    },
+    caveman: {
+      what: 'H₂ add to side-chain C=C. Mild: ring not touched.',
+      facts: { adds: 'H, H: side-chain C=C to C–C', where: 'C=C outside ring', space: 'n.a.' },
+      steps: [
+        'Styrene: side-chain C=C, plus aromatic ring.',
+        'Pd/C: ordinary C=C only.',
+        'H₂ across side C=C. Ring same: ethylbenzene.',
+        'Ring: H₂, Pt/Rh, high pressure: cyclohexane.'
       ]
     },
     lesson: { id: '14', step: 's12' }
@@ -237,6 +351,17 @@ export const HUB_CARDS = [
         'Wolff–Kishner (H₂NNH₂, KOH, heat) does the same job in base. Use Clemmensen if the molecule survives acid, Wolff–Kishner if it survives base.'
       ]
     },
+    caveman: {
+      what: 'Aryl ketone C=O to CH₂. Acylbenzene to alkylbenzene.',
+      facts: { adds: 'H, H. C=O to CH₂.', where: 'Only carbonyl on ring', space: 'n.a.' },
+      steps: [
+        'Alkylation rearranges: CH₃CH₂CH₂Cl give isopropylbenzene. Go round.',
+        'CH₃CH₂COCl, AlCl₃: ring C(=O)CH₂CH₃. Acylium no rearrange.',
+        'Zn(Hg), HCl, heat: ring C=O to CH₂. Chain straight: propylbenzene.',
+        'Wolff–Kishner (H₂NNH₂, KOH, heat) in base. Acid-safe: Clemmensen. Else Wolff–Kishner'
+      ],
+      note: 'Acetophenone→ethylbenzene'
+    },
     lesson: null
   },
   {
@@ -255,6 +380,18 @@ export const HUB_CARDS = [
         'An electron-donating group (OCH₃, alkyl) goes on an sp² carbon: it stays on a C=C.'
       ]
     },
+    caveman: {
+      what: 'Two H on ring, carbons para. Product 1,4-cyclohexadiene, not cyclohexane.',
+      facts: { adds: 'H, H: para, make 1,4-diene', where: 'Withdrawing (CO₂H, CO₂R): sp³ carbon. Donating (OCH₃, alkyl): sp² (C=C) carbon.', space: 'n.a.' },
+      steps: [
+        'Na, liquid NH₃, alcohol: Birch. Ring reduced, two C=C left.',
+        'One H on each para carbon (1 and 4). Other four stay sp²: two separate C=C.',
+        'No 1,3-diene. C=C apart (1,4).',
+        'Withdrawing group (CO₂H, CO₂R): on sp³ carbon.',
+        'Donating (OCH₃, alkyl): sp² carbon, on C=C.'
+      ],
+      note: 'cyclohexa-2,5-diene-1-carboxylic acid. CO₂H on sp³.'
+    },
     lesson: null
   },
   {
@@ -272,6 +409,18 @@ export const HUB_CARDS = [
         'If the benzylic carbon becomes a stereocentre, the product is a racemate.'
       ]
     },
+    caveman: {
+      what: 'Br on benzylic carbon (bonded to ring). Radical. Benzylic radical stabilised by resonance.',
+      facts: { adds: 'Br for H', where: 'ONLY benzylic C. Ring Br needs FeBr₃.', space: 'n.a.' },
+      steps: [
+        'Light (hν) or NBS, heat: radical, not electrophilic.',
+        'Benzylic carbon: bonded to ring. Needs one H.',
+        'Benzylic radical stabilised by ring resonance. Br replace H there only.',
+        'Br₂, FeBr₃: Br on ring, ortho, para. Light: side chain. FeBr₃: ring.',
+        'Benzylic carbon stereocentre: racemate.'
+      ],
+      note: 'Gives (1-bromopropyl)benzene. Drawn flat: stereocentre, racemate.'
+    },
     lesson: { id: '14', step: 's10' }
   },
   {
@@ -288,6 +437,17 @@ export const HUB_CARDS = [
         'Put NO₂ there. A little para product can still form from the small amount of free amine.'
       ]
     },
+    caveman: {
+      what: 'Strong acid: amine becomes –NR₂H⁺. No lone pair. No longer ortho/para activator. Now meta director, deactivator.',
+      facts: { adds: 'NO₂ for ring H', where: 'Strong acid: meta to N. CH₃ ortho/para. Both agree.', space: 'n.a.' },
+      steps: [
+        'Strong acid? HNO₃, H₂SO₄ yes.',
+        'Yes: –NR₂ is –NR₂H⁺. No lone pair. Meta, deactivator.',
+        'CH₃ directs ortho/para. Carbon ortho to CH₃ is meta to N. Both agree.',
+        'NO₂ there. Little para product from free amine.'
+      ],
+      note: 'N,N,4-trimethylaniline: NO₂ meta N, ortho CH₃.'
+    },
     lesson: { id: '14', step: 's03' }
   },
   {
@@ -303,6 +463,17 @@ export const HUB_CARDS = [
         'SO₃H can be a temporary blocking group: put it on the para carbon, do the reaction at the ortho carbon, then remove it.',
         'This is a tool for the multi-step aromatic syntheses in Lesson 14.'
       ]
+    },
+    caveman: {
+      what: 'SO₃H off ring, H (or D) in. Reverse of sulfonation.',
+      facts: { adds: 'H (or D) for SO₃H', where: 'Where SO₃H was', space: 'n.a.' },
+      steps: [
+        'Reversible: hot dilute acid, D₂SO₄ in D₂O.',
+        'SO₃H to H (or D), same carbon. Rest stay.',
+        'SO₃H blocking group: on para carbon, react at ortho, then remove.',
+        'Tool: Lesson 14 syntheses.'
+      ],
+      note: 'Gives toluene-4-d. Dilute H₂SO₄ give toluene.'
     },
     lesson: { id: '13', step: 's09' }
   },
@@ -321,6 +492,18 @@ export const HUB_CARDS = [
         'Here: the 1° OH at the chain end gives CHO, and the 2° OH next to the ring gives a ketone.'
       ]
     },
+    caveman: {
+      what: 'Oxidise alcohol, no water, stop early. 1° gives aldehyde. 2° gives ketone. 3° no reaction.',
+      facts: { adds: 'Lose two H: C–OH to C=O', where: '1° → aldehyde, stop. 2° → ketone. 3° → no reaction.', space: 'n.a.' },
+      steps: [
+        'Sort OH: 1° (CH₂), 2° (CH), 3° (no H).',
+        'PCC: 1°, 2° lose two H. C–OH to C=O.',
+        '1° to aldehyde, stops. No water to carry on to acid.',
+        '2° to ketone. 3° no H to lose: nothing.',
+        'Here: end 1° OH to CHO. 2° OH by ring to ketone.'
+      ],
+      note: '4-oxo-4-phenylbutanal. 1° OH to CHO, 2° to ketone.'
+    },
     lesson: null
   },
   {
@@ -338,6 +521,18 @@ export const HUB_CARDS = [
         'A 3° alcohol has no H on its carbon, so nothing happens.',
         'Compare PCC in CH₂Cl₂ (no water): it stops a 1° alcohol at the aldehyde.'
       ]
+    },
+    caveman: {
+      what: 'Oxidise alcohol, water around. 1° to carboxylic acid. 2° gives ketone. 3° no reaction.',
+      facts: { adds: 'Lose two H: C–OH to C=O. 1° also gain O: CO₂H.', where: '1° → CARBOXYLIC ACID, not aldehyde. 2° ketone. 3° none.', space: 'n.a.' },
+      steps: [
+        'Sort OH: 1°, 2°, 3°.',
+        '2° lose two H: ketone. Stop.',
+        '1° first aldehyde. Water add H₂O, Cr(VI) oxidise again: carboxylic acid.',
+        '3° no H on carbon: nothing.',
+        'PCC, CH₂Cl₂, no water: 1° stop at aldehyde.'
+      ],
+      note: '2° alcohol: acetophenone.'
     },
     lesson: null
   },
@@ -358,6 +553,18 @@ export const HUB_CARDS = [
         'If the new C–Br carbon is a stereocentre, both enantiomers form (a racemate), because the cation is flat.'
       ]
     },
+    caveman: {
+      what: 'H and X across C=C. H to carbon with more H. Markovnikov. X to more alkyl.',
+      facts: { adds: 'H, Br/Cl', where: 'Markovnikov: H to more H', space: 'either' },
+      steps: [
+        'Count alkyl on each C=C carbon.',
+        'H⁺ to carbon with MORE H. + on more substituted: 3° > 2° > 1°.',
+        'Br⁻ go to + carbon. More alkyl.',
+        'Same alkyl count (pent-2-ene): mixture of both.',
+        'C–Br stereocentre: racemate. Cation flat.'
+      ],
+      note: 'Br on CH₃ carbon.'
+    },
     lesson: { id: '09', step: 's01' }, mech: 's08'
   },
   {
@@ -373,6 +580,17 @@ export const HUB_CARDS = [
         'Here the product is a tertiary alcohol. The acid is a catalyst: it is not in the product.',
         'Equal ends (pent-2-ene) give a mixture of two alcohols. Pent-1-ene gives mainly the 2-alcohol.'
       ]
+    },
+    caveman: {
+      what: 'H, OH across C=C. Markovnikov like HX. Acid catalyst only.',
+      facts: { adds: 'H, OH', where: 'Markovnikov: OH to more alkyl.', space: 'either' },
+      steps: [
+        'Water, acid: hydration. H, OH across C=C.',
+        'H to more H. OH to more alkyl: Markovnikov.',
+        'Here tertiary alcohol. Acid catalyst: not in product.',
+        'Equal ends (pent-2-ene): mix. Pent-1-ene: 2-alcohol.'
+      ],
+      note: 'OH on CH₃ carbon.'
     },
     lesson: { id: '09', step: 's10' }, mech: 's11'
   },
@@ -391,6 +609,18 @@ export const HUB_CARDS = [
         'Acyclic check: anti addition of Br₂ to (E)-but-2-ene gives the meso compound; to (Z)-but-2-ene it gives a racemic pair.'
       ]
     },
+    caveman: {
+      what: 'Two halogens across C=C, anti. Bridged bromonium, chloronium ion.',
+      facts: { adds: 'Br, Br (or Cl, Cl)', where: 'One each. No Markovnikov.', space: 'anti' },
+      steps: [
+        'Br₂, Cl₂, CH₂Cl₂: anti, halonium ion.',
+        'One halogen per C=C carbon.',
+        'OPPOSITE faces: one wedge, one dash. Ring: trans.',
+        'Two stereocentres, not meso: racemate. Say so.',
+        'Acyclic: anti Br₂ to (E)-but-2-ene: meso. (Z)-but-2-ene: racemic pair.'
+      ],
+      note: 'trans, racemate: one of two mirror images.'
+    },
     lesson: { id: '10', step: 's01' }, mech: 's04'
   },
   {
@@ -406,6 +636,17 @@ export const HUB_CARDS = [
         'On a ring, the two groups that were on the old C=C carbons are pushed to the other face together: they end up cis. Draw both CH₃ wedged (or both dashed).',
         'This product is cis-1,2-dimethylcyclohexane, a meso compound.'
       ]
+    },
+    caveman: {
+      what: 'Two H across C=C, alkane. Both H same face (syn).',
+      facts: { adds: 'H, H', where: 'One H each. No Markovnikov.', space: 'syn' },
+      steps: [
+        'H₂, Pd/C (PtO₂): C=C→C–C.',
+        'Both H from metal onto SAME face (syn).',
+        'Ring: groups on old C=C pushed to other face together: cis. Both CH₃ wedged (or dashed).',
+        'cis-1,2-dimethylcyclohexane. Meso.'
+      ],
+      note: 'cis, meso. CH₃ same face.'
     },
     lesson: { id: '10', step: 's06' }
   },
@@ -424,6 +665,18 @@ export const HUB_CARDS = [
         'Do not mix it up with ACIDIC KMnO₄, which cuts the C=C (next card).'
       ]
     },
+    caveman: {
+      what: 'Two OH across C=C, one step. Diol. Same face (syn).',
+      facts: { adds: 'OH, OH', where: 'One OH each', space: 'syn' },
+      steps: [
+        'OH⁻ KMnO₄: syn. Purple fades, brown MnO₂ forms.',
+        'One OH each, SAME face.',
+        'Ring: cis. Both OH wedged/dashed.',
+        'Acyclic: cis alkene meso, trans racemic pair.',
+        'Not ACIDIC KMnO₄: cuts C=C (next card).'
+      ],
+      note: 'cis, meso.'
+    },
     lesson: { id: '10', step: 's12' }
   },
   {
@@ -439,6 +692,17 @@ export const HUB_CARDS = [
         'Every other carbon stays where it was.',
         'Read the conditions: in BASE the same reagent stops at the cis diol (previous card).'
       ]
+    },
+    caveman: {
+      what: 'Cut C=C. Each carbon C=O: no H ketone, one H carboxylic acid, two H CO₂.',
+      facts: { adds: 'O: each C=C end gain O', where: 'At C=C: count H each carbon', space: 'n.a.' },
+      steps: [
+        'Acidic KMnO₄ break C=C. Two pieces. Ring opens to one chain.',
+        'H count. None: ketone. One: –CO₂H. Two (=CH₂): CO₂.',
+        'Other carbons stay.',
+        'BASE: stops at cis diol (previous card).'
+      ],
+      note: 'Acetone (no H end), acetic acid (one H end).'
     },
     lesson: { id: '10', step: 's13' }
   },
@@ -456,6 +720,17 @@ export const HUB_CARDS = [
         'The trans epoxide from (E)-but-2-ene is a racemic pair. The cis epoxide from (Z)-but-2-ene is meso.'
       ]
     },
+    caveman: {
+      what: 'One O to C=C: epoxide, three-membered ring with O. Groups stay.',
+      facts: { adds: 'O: one atom, bridge both C', where: 'Both carbons', space: 'syn' },
+      steps: [
+        'RCO₃H peroxyacid: epoxidation.',
+        'O same face (syn). Nothing else moves.',
+        'Trans alkene: trans epoxide. Cis: cis epoxide.',
+        '(E)-but-2-ene: trans, racemic pair. (Z): cis, meso.'
+      ],
+      note: 'trans, racemate: one of two mirror images.'
+    },
     lesson: { id: '10', step: 's09' }
   },
   {
@@ -471,6 +746,17 @@ export const HUB_CARDS = [
         'Step 2: H₃O⁺ and water. Water attacks one carbon from the side OPPOSITE the C–O bond that breaks.',
         'Result: OH on opposite faces (trans). It forms as a racemate.'
       ]
+    },
+    caveman: {
+      what: 'Epoxide, water opens from back. Two OH opposite (anti): trans diol.',
+      facts: { adds: 'OH, OH', where: 'One OH each', space: 'anti' },
+      steps: [
+        'KMnO₄, OH⁻ give CIS diol. Use two steps.',
+        'Step 1: RCO₃H: epoxide, O on one face.',
+        'Step 2: H₃O⁺, water attack OPPOSITE the C–O bond.',
+        'OH opposite faces (trans). Racemate.'
+      ],
+      note: 'trans, racemate: one of two mirror images'
     },
     lesson: { id: '10', step: 's11' }
   },
@@ -490,6 +776,18 @@ export const HUB_CARDS = [
         'Compare H₂O with H₂SO₄ (Markovnikov): that puts the OH on the more substituted carbon.'
       ]
     },
+    caveman: {
+      what: 'H, OH across C=C, no carbocation. OH on MORE H carbon: anti-Markovnikov. Same face.',
+      facts: { adds: 'H, OH', where: 'Anti-Markovnikov: OH MORE H', space: 'syn' },
+      steps: [
+        'BH₃ one step: B on more-H (less crowded) carbon, H on other, same face. Syn addition.',
+        'H₂O₂, NaOH swap B for OH. Geometry kept.',
+        'OH on more-H carbon: CH, not CH₃ carbon.',
+        'New H (on C–CH₃) and OH same face. CH₃ already there: OH trans to CH₃.',
+        'H₂O, H₂SO₄: Markovnikov, OH on more substituted C.'
+      ],
+      note: 'trans-2-methylcyclohexanol. One of two mirror images: racemate.'
+    },
     lesson: null
   },
 
@@ -505,6 +803,15 @@ export const HUB_CARDS = [
         'Count the equivalents. One HX stops at the alkene, a vinylic halide.',
         'H goes to the terminal carbon (the one with the H). Br goes to the more substituted carbon.',
         'Check: Br is on C2 and the C=C is between C1 and C2.'
+      ]
+    },
+    caveman: {
+      what: 'One H, X across C≡C. Stop: vinylic halide.',
+      facts: { adds: 'H, Br/Cl, one HX', where: 'Markovnikov: H to H-carbon, X to other.', space: 'n.a.' },
+      steps: [
+        'One HX: stop at vinylic halide.',
+        'H to terminal carbon (has H). Br to more substituted.',
+        'Br on C2. C=C is C1–C2.'
       ]
     },
     lesson: { id: '12', step: 's05' }, mech: 's07'
@@ -523,6 +830,16 @@ export const HUB_CARDS = [
         'Result: C1 is CH₃ and C2 holds two Br (a gem-dibromide).'
       ]
     },
+    caveman: {
+      what: 'Second HX: geminal dihalide. Both X same carbon.',
+      facts: { adds: 'H,H,Br,Br: two HX', where: 'Both X, more substituted C', space: 'n.a.' },
+      steps: [
+        'Two equivalents: goes twice.',
+        'First HX Markovnikov: H on C1, Br C2.',
+        'Second HX: H on C1, Br on SAME C2.',
+        'C1 CH₃, C2 two Br (gem-dibromide)'
+      ]
+    },
     lesson: { id: '12', step: 's06' }
   },
   {
@@ -539,6 +856,17 @@ export const HUB_CARDS = [
         'Two equivalents would go on to the tetrabromide (next card).'
       ]
     },
+    caveman: {
+      what: 'X₂ once, anti. Stop: 1,2-dihaloalkene. Halogens opposite sides.',
+      facts: { adds: 'Br, Br (Cl, Cl). One X₂', where: 'One each triple-bond C', space: 'anti' },
+      steps: [
+        'One equivalent: alkene stop.',
+        'Anti: two Br opposite sides of new C=C.',
+        'Br on C1, Br on C2, across C=C. (E) isomer.',
+        'Two: tetrabromide (next card).'
+      ],
+      note: '(E): two Br opposite sides.'
+    },
     lesson: { id: '12', step: 's08' }
   },
   {
@@ -552,6 +880,15 @@ export const HUB_CARDS = [
         'Two equivalents means X₂ adds twice.',
         'The first X₂ gives the (E)-dibromoalkene. The second X₂ adds across that C=C.',
         'Each old triple-bond carbon now holds two Br: –CBr₂–CBr₂–.'
+      ]
+    },
+    caveman: {
+      what: 'X₂ twice. Tetrahaloalkane. Two X per old C≡C carbon.',
+      facts: { adds: 'Br,Br,Br,Br: two X₂', where: 'Two each triple-bond C', space: 'n.a.' },
+      steps: [
+        'Two equivalents: X₂ twice.',
+        'First X₂: (E)-dibromoalkene. Second: that C=C.',
+        'Each carbon two Br: –CBr₂–CBr₂–.'
       ]
     },
     lesson: { id: '12', step: 's08' }
@@ -570,6 +907,17 @@ export const HUB_CARDS = [
         'A terminal alkyne gives a methyl ketone. A symmetrical internal alkyne gives one ketone. An unsymmetrical internal alkyne gives a mixture of two.'
       ]
     },
+    caveman: {
+      what: 'H, OH on C≡C, OH Markovnikov. Enol flips to ketone.',
+      facts: { adds: 'H, OH. Enol to C=O', where: 'Markovnikov: C=O on more substituted C.', space: 'n.a.' },
+      steps: [
+        'Water, acid, Hg²⁺: hydration.',
+        'OH on more substituted C. Markovnikov. Enol.',
+        'Enol tautomerises: OH hydrogen moves, O to C=O. Ketone.',
+        'Terminal: methyl ketone. Symmetrical internal: one ketone. Unsymmetrical: two.'
+      ],
+      note: 'Enol (C=C–OH), ketone. Terminal: methyl ketone'
+    },
     lesson: { id: '12', step: 's09' }
   },
   {
@@ -584,6 +932,16 @@ export const HUB_CARDS = [
         'Syn addition: both H on the same face, so the two alkyl groups end up on the SAME side of the C=C.',
         'Draw the cis alkene and label it (Z).'
       ]
+    },
+    caveman: {
+      what: 'One H₂, stop at alkene. Both H same face (syn): cis (Z) alkene.',
+      facts: { adds: 'H, H: one H₂', where: 'One H each triple-bond C', space: 'syn' },
+      steps: [
+        'Lindlar: stop at alkene. Pd/C: alkane.',
+        'Syn: both H same face, alkyl groups SAME side of C=C.',
+        'Draw cis alkene, label (Z).'
+      ],
+      note: '(Z): both CH₃ same side.'
     },
     lesson: { id: '12', step: 's11' }
   },
@@ -600,6 +958,15 @@ export const HUB_CARDS = [
         'If the question wants the alkene, you need the Lindlar catalyst instead.'
       ]
     },
+    caveman: {
+      what: 'Two H₂, all way to alkane. No stop at alkene.',
+      facts: { adds: 'H,H,H,H: two H₂', where: 'Both carbons end CH₂', space: 'n.a.' },
+      steps: [
+        'Pd/C, two H₂: C≡C to C–C.',
+        'Chain same. Only bonds change.',
+        'Want alkene? Use Lindlar catalyst.'
+      ]
+    },
     lesson: { id: '12', step: 's11' }
   },
   {
@@ -614,6 +981,16 @@ export const HUB_CARDS = [
         'Step 1: NaNH₂. NH₃ has pKa about 36, the alkyne about 25, so NH₂⁻ wins. NaOH is too weak (water pKa 15.7).',
         'Step 2: the alkyl halide. It must be methyl or primary (RCH₂X). Secondary and tertiary halides fail.',
         'If the target can be cut two ways, choose the one where the halide is methyl or primary.'
+      ]
+    },
+    caveman: {
+      what: 'Longer chain. NaNH₂ take terminal alkyne H: acetylide. It hit methyl or primary halide.',
+      facts: { adds: 'New carbon group R, C–C bond', where: 'Terminal carbon, had acidic H', space: 'n.a.' },
+      steps: [
+        'Only TERMINAL alkyne (≡C–H).',
+        'NaNH₂: NH₃ pKa 36, alkyne 25, NH₂⁻ wins. NaOH weak (water 15.7)',
+        'Halide: methyl or primary (RCH₂X). Secondary, tertiary fail.',
+        'Target cut two ways: pick methyl or primary halide.'
       ]
     },
     lesson: { id: '12', step: 's14' }, mech: 's15'
@@ -634,6 +1011,18 @@ export const HUB_CARDS = [
         'Compare H₂O with HgSO₄ and H₂SO₄: the OH goes on the inner carbon, so a terminal alkyne gives the methyl ketone.'
       ]
     },
+    caveman: {
+      what: 'H, OH across C≡C, OH on END carbon. Enol tautomerises: terminal alkyne, aldehyde.',
+      facts: { adds: 'H, OH on C≡C. Enol to C=O', where: 'Anti-Markovnikov: OH on END. Terminal: ALDEHYDE. Internal: ketone.', space: 'n.a.' },
+      steps: [
+        'BH₃: B on END carbon (less crowded), H on other.',
+        'H₂O₂, NaOH swap B for OH. Enol C=C–OH.',
+        'Enol tautomerises: H from O to C. Now H–C–C=O.',
+        'Terminal: aldehyde (OH on end carbon). Internal: ketone.',
+        'H₂O, HgSO₄, H₂SO₄: OH inner carbon, methyl ketone.'
+      ],
+      note: 'Hex-1-yne: hexanal. Hg²⁺, H₂O: methyl ketone.'
+    },
     lesson: null
   },
 
@@ -652,6 +1041,17 @@ export const HUB_CARDS = [
         'If both routes lead to the same compound (cyclohexa-1,3-diene), there is only one product.'
       ]
     },
+    caveman: {
+      what: 'H⁺ to end carbon. Allylic cation share + over two carbons. X either one: 1,2- and 1,4-products. Short version.',
+      facts: { adds: 'H, Br/Cl', where: '1,2 and 1,4. H on end carbon.', space: 'n.a.' },
+      steps: [
+        'Diene C=C–C=C. H⁺ on END carbon C1: allylic cation.',
+        '+ on C2, C4 (resonance). Br⁻ attack either.',
+        '1,2: Br on C2, C3=C4 stays. 1,4: Br on C4, new C=C between C2, C3.',
+        'Both routes same (cyclohexa-1,3-diene): one product.'
+      ],
+      note: '1,2: 3-bromobut-1-ene (racemate). 1,4: 1-bromobut-2-ene.'
+    },
     lesson: { id: '11', step: 's11' }, mech: 's13'
   },
   {
@@ -668,6 +1068,18 @@ export const HUB_CARDS = [
         'Move the double bonds: the new C=C sits between the old C2 and C3. The dienophile C=C becomes a single bond.',
         'Place the groups. A 1-substituted diene gives the "1,2" product, a 2-substituted diene the "1,4" product. Groups that were cis on the dienophile stay cis.'
       ]
+    },
+    caveman: {
+      what: 'Diene + dienophile: new six-membered ring. Two new C–C σ bonds. Two C=C become one, old C2–C3.',
+      facts: { adds: 'New six-membered ring: two C–C σ, one C=C (C2–C3)', where: 'C1, C4 bond dienophile carbons. 1-substituted: "1,2" (ortho-like). 2-substituted: "1,4" (para-like).', space: 'syn' },
+      steps: [
+        'Diene (C=C–C=C) + C=C with withdrawing group (C=O). Heat only.',
+        'Number diene C1–C4. Ends C1, C4 bond.',
+        'C1, C4 to dienophile C=C. Six-membered ring closes.',
+        'New C=C old C2–C3. Dienophile C=C to single bond.',
+        'Groups: 1-substituted diene "1,2", 2-substituted "1,4". Cis on dienophile stay cis.'
+      ],
+      note: '2-methylcyclohex-3-ene-1-carbaldehyde. Flat: two stereocentres, racemates.'
     },
     lesson: null
   }

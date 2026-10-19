@@ -87,7 +87,10 @@ function stepProtonate(diene, X, T, nT, ends) {
   const st = { before: [diene, R.donor], layout: [{}, { hAngles: { 0: 180 } }], arrows: [], after: [], label: '' };
   const sc = buildScene(st);
   const H = sc.maps[1].h[0][0], Xi = sc.maps[1].heavy[0];
-  st.arrows = [{ from: { bond: [T, nT] }, to: { bond: [T, H] } }, { from: { bond: [H, Xi] }, to: { atom: Xi } }];
+  st.arrows = [
+    { from: { bond: [T, nT] }, to: { bond: [T, H] }, why: `A π pair at the end of the diene attacks the δ+ H of H–${X} and forms a new C–H bond. The + lands next to the other C=C.` },
+    { from: { bond: [H, Xi] }, to: { atom: Xi }, why: `The H–${X} bond pair leaves with ${X}, the more electronegative atom, so ${X} becomes ${X}⁻.` }
+  ];
   st.after = cationFirst(canon(buildMolblock(stepResult(st))).split('.'));
   st.label = `One of the two π bonds attacks the H of H–${X}; the H–${X} pair leaves with ${X}. H bonds to an end carbon of the diene (C1), which leaves a ${clsName(ends.near)} cation next to the other C=C: an ALLYLIC carbocation. (H on an inner carbon would give a non-allylic cation, much less stable, so it does not form.)`;
   // the learner says which carbon of the C=C bonds to H; the inner carbon would give the non-allylic cation
@@ -111,7 +114,7 @@ function stepResonance(prev, ends) {
     if (d) { Cx = n; Cy = d.a === n ? d.b : d.a; break; }
   }
   if (Cx < 0) throw new Error('no allylic C=C next to the cation');
-  st.arrows = [{ from: { bond: [Cx, Cy] }, to: { bond: [Cp, Cx] } }];
+  st.arrows = [{ from: { bond: [Cx, Cy] }, to: { bond: [Cp, Cx] }, why: 'The π pair next to the + slides into the neighboring C–C bond and makes it a double bond. The + moves to the far carbon.' }];
   st.after = prev.after.map((s) => (s.includes('+') ? canon(buildMolblock(stepResult(st))).split('.').find((x) => x.includes('+')) : s));
   st.label = `Resonance: the π bond next to the + charge slides over (curved arrow from the C=C to the C–C bond). The C=C moves one place along and the + charge moves to the other end of the three-carbon unit. Both drawings are the same cation (↔), so the + charge is shared by C2 and C4, and Br⁻ can attack either one. Here the new + carbon is ${clsName(ends.far)}.`;
   return st;
@@ -123,7 +126,7 @@ function stepHalide(prev, X, where) {
   const sc = buildScene(st);
   const Ci = sc.atoms.findIndex((a) => a.el === 'C' && a.charge === 1);
   const Xi = sc.atoms.findIndex((a) => a.el === X);
-  st.arrows = [{ from: { lp: Xi }, to: { atom: Ci } }];
+  st.arrows = [{ from: { lp: Xi }, to: { atom: Ci }, why: `A lone pair on ${X}⁻ attacks the + carbon of this drawing and forms the new C–${X} bond.` }];
   st.after = [canon(buildMolblock(stepResult(st)))];
   return st;
 }

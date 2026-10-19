@@ -7,7 +7,7 @@
 //     the previous structures, so the arrows, the structures and the atom/charge balance always agree (checkMechanism proves it).
 // Not taught here, so not modelled: rearrangements, peroxide (anti-Markovnikov) additions, aromatic rings (styrene is refused: Ch 5).
 import { canon, analyze } from './chem.js';
-import { buildScene, stepResult } from './widgets/mechanism-core.js';
+import { buildScene, stepResult, WHY } from './widgets/mechanism-core.js';
 import { buildMolblock } from './widgets/lewis-core.js';
 import { nameAlkeneBoth } from './naming.js';
 
@@ -106,7 +106,11 @@ function stepProtonate(alkene, reagent, hC, pC, sites) {
   const st = { before: [alkene, R.donor], layout: [{}, { hAngles: { 0: 180 } }], arrows: [], after: [], label: '' };
   const sc = buildScene(st);
   const H = sc.maps[1].h[0][0], Xi = sc.maps[1].heavy[0];
-  st.arrows = [{ from: { bond: [hC, pC] }, to: { bond: [hC, H] } }, { from: { bond: [H, Xi] }, to: { atom: Xi } }];
+  const donorText = R.kind === 'HX' ? 'H–' + R.X : 'H₃O⁺';
+  st.arrows = [
+    { from: { bond: [hC, pC] }, to: { bond: [hC, H] }, why: WHY.piToH(donorText, sites.cls[hC] === sites.cls[pC] ? '' : sites.nH[hC] > sites.nH[pC] ? WHY.MORE_H : WHY.FEWER_H) },
+    { from: { bond: [H, Xi] }, to: { atom: Xi }, why: R.kind === 'HX' ? WHY.XLeaves(R.X) : 'The O–H bond pair stays on oxygen, so H₃O⁺ gives up its H and leaves as neutral water (H₂O).' }
+  ];
   st.after = cationFirst(canon(buildMolblock(stepResult(st))).split('.'));
   const cls = sites.cls[pC];
   const lost = R.kind === 'HX' ? `${R.X}⁻` : 'water';
@@ -129,7 +133,7 @@ function stepHalide(prev, X, cls) {
   const sc = buildScene(st);
   const Ci = sc.atoms.findIndex((a) => a.el === 'C' && a.charge === 1);
   const Xi = sc.atoms.findIndex((a) => a.el === X);
-  st.arrows = [{ from: { lp: Xi }, to: { atom: Ci } }];
+  st.arrows = [{ from: { lp: Xi }, to: { atom: Ci }, why: WHY.halideAttacks(X) }];
   st.after = [canon(buildMolblock(stepResult(st)))];
   return st;
 }
@@ -140,7 +144,7 @@ function stepWater(prev, cls) {
   const sc = buildScene(st);
   const Ci = sc.atoms.findIndex((a) => a.el === 'C' && a.charge === 1);
   const Oi = sc.atoms.findIndex((a) => a.el === 'O');
-  st.arrows = [{ from: { lp: Oi }, to: { atom: Ci } }];
+  st.arrows = [{ from: { lp: Oi }, to: { atom: Ci }, why: 'A lone pair on the oxygen of a water molecule attacks the positive carbon and forms a new C–O bond; that oxygen now carries the +.' }];
   st.after = [canon(buildMolblock(stepResult(st)))];
   return st;
 }
@@ -152,7 +156,10 @@ function stepDeprotonate(prev) {
   const Oox = sc.maps[0].heavy.find((i) => sc.atoms[i].el === 'O' && sc.atoms[i].charge === 1);
   const Ow = sc.maps[1].heavy[0];
   const H = sc.maps[0].h[Oox][0];
-  st.arrows = [{ from: { lp: Ow }, to: { atom: H } }, { from: { bond: [Oox, H] }, to: { atom: Oox } }];
+  st.arrows = [
+    { from: { lp: Ow }, to: { atom: H }, why: "A lone pair on a solvent water's oxygen takes the H from the oxonium ion and forms a new O–H bond." },
+    { from: { bond: [Oox, H] }, to: { atom: Oox }, why: 'The O–H bond pair stays on oxygen, so the oxonium O is neutral again and the alcohol is formed.' }
+  ];
   st.after = canon(buildMolblock(stepResult(st))).split('.').sort((p, q) => (p.includes('+') ? 1 : 0) - (q.includes('+') ? 1 : 0));
   return st;
 }

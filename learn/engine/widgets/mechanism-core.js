@@ -2,7 +2,8 @@
 //
 // Mechanism data:
 //   { reactants:[smiles], reagents?:[smiles], products:[smiles],
-//     steps:[{ before:[smiles], arrows:[{from,to}], after:[smiles], label, layout?:[{at?:[x,y], hAngles?:{heavyIdx: degrees}}] }] }
+//     steps:[{ before:[smiles], arrows:[{from,to,why?}], after:[smiles], label, layout?:[{at?:[x,y], hAngles?:{heavyIdx: degrees}}] }] }
+// `why` (one or two short beginner-voice sentences) is shown under the scene when the player moves that arrow; without it the player shows the step's label.
 // `arrows` use the arrow-core format, with atom numbers of the scene that buildScene(step) makes from `before`:
 // the SMILES parts in order, each part's heavy atoms first (in SMILES order) and then its hydrogens, heavy atom by heavy atom.
 // (A lone pair is never listed: it is computed from the structure.)  A pi bond that attacks an atom k is written
@@ -168,5 +169,31 @@ export function changeSentence(step) {
 
 /** Draw style for the species figures of a step: full (every H) for small species, skeletal for larger ones. */
 export function autoStyle(smiles, max = 4) { return analyze(smiles).heavy.length <= max ? 'full' : 'skeletal'; }
+
+/** The sentence the player shows for arrow i of a step: the arrow's own `why`, else the step's label. */
+export const whyOf = (step, i) => (step.arrows && step.arrows[i] && step.arrows[i].why) || step.label;
+
+/**
+ * State after only the first k arrows of a step (k = 0 is the starting scene): {atoms, bonds} with the original coordinates, lone pairs and charges recomputed.
+ * `mid` lists atoms that are over-full for the moment (more than 8 electrons, H with more than 2): the player hides their charge badge, since a charge on such an
+ * atom is bookkeeping in the middle of a step, not a real species.
+ */
+export function partialState(step, k) {
+  const cfg = stepConfig(step);
+  const base = applyArrows({ atoms: cfg.atoms, bonds: cfg.bonds, arrows: [] });
+  const st = applyArrows({ atoms: cfg.atoms, bonds: cfg.bonds, arrows: step.arrows.slice(0, k) });
+  // charges: the scene's own charges plus what the arrows changed (so atoms the arrows never touch keep exactly their drawn charge)
+  const atoms = cfg.atoms.map((a, i) => ({ el: a.el, x: a.x, y: a.y, charge: (a.charge || 0) + (st.atoms[i].charge - base.atoms[i].charge) }));
+  return { atoms, bonds: st.bonds.map((b) => ({ a: b.a, b: b.b, order: b.order })), lp: st.atoms.map((a) => a.lp), mid: k ? octetViolations(st).map((o) => o.idx) : [] };
+}
+
+/** Beginner-voice texts for the arrows that many generated mechanisms share (HX, hydration, resonance, halide attack). */
+export const WHY = {
+  piToH: (donor, where = '') => `The π pair attacks ${/⁺/.test(donor) ? 'an' : 'the δ+'} H of ${donor} and forms a new C–H bond${where}.`,
+  XLeaves: (X) => `The H–${X} bond pair leaves with ${X}, the more electronegative atom, so ${X} becomes ${X}⁻.`,
+  halideAttacks: (X, cation = 'positive') => `A lone pair on ${X}⁻ attacks the ${cation} carbon and becomes the new C–${X} bond.`,
+  MORE_H: ', on the carbon with more H, so the + lands on the other carbon',
+  FEWER_H: ', on the carbon with fewer H, so the + lands on the less substituted carbon (minor path)'
+};
 
 export { VALENCE };

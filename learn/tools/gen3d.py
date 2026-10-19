@@ -27,7 +27,37 @@ MOLS = {
     "but-2-yne": "CC#CC",
     # Lesson 13: benzene (flat hexagon, all six C-C bonds equal, 139 pm in the book; MMFF gives about 1.40 A). Checked below and in the tests.
     "benzene": "c1ccccc1",
+    # Piece 4 (3D stereo toggle, engine/stereo-moments.js): the planar 1-methylcyclohexyl cation (attack from either face), the cis epoxide of cis-but-2-ene,
+    # the syn-diol (cis-cyclohexane-1,2-diol), anti-addition product (trans-1,2-dibromocyclohexane) and the cis / trans 1,2-dimethylcyclohexanes (syn H2/Pd gives cis).
+    # Whether each pair of substituents is cis or trans is CHECKED on the embedded 3D geometry (same side of the ring mean plane), see RING_REL below.
+    "methylcyclohexyl-cation": "C[C+]1CCCCC1",
+    "cis-2-3-epoxybutane": "C[C@H]1O[C@H]1C",
+    "cis-cyclohexane-1-2-diol": "O[C@@H]1CCCC[C@@H]1O",
+    "trans-1-2-dibromocyclohexane": "Br[C@H]1CCCC[C@@H]1Br",
+    "cis-1-2-dimethylcyclohexane": "C[C@H]1CCCC[C@H]1C",
+    "trans-1-2-dimethylcyclohexane": "C[C@H]1CCCC[C@@H]1C",
 }
+# id -> 'cis' | 'trans': the two ring substituents (non-H atoms outside the ring) must lie on the same / opposite sides of the ring mean plane
+RING_REL = {"cis-2-3-epoxybutane": "cis", "cis-cyclohexane-1-2-diol": "cis", "trans-1-2-dibromocyclohexane": "trans",
+            "cis-1-2-dimethylcyclohexane": "cis", "trans-1-2-dimethylcyclohexane": "trans"}
+
+def ring_relation(m):
+    """Return 'cis' or 'trans' for the two non-H substituents on a ring (Newell mean-plane normal of the ring atoms, in ring order)."""
+    import numpy as np
+    ri = m.GetRingInfo(); ring = list(min(ri.AtomRings(), key=len)) if False else list(ri.AtomRings()[0])
+    P = m.GetConformer().GetPositions()
+    n = np.zeros(3)
+    for i in range(len(ring)):
+        a, b = P[ring[i]], P[ring[(i + 1) % len(ring)]]
+        n += np.cross(a, b)
+    n /= np.linalg.norm(n)
+    subs = []
+    for r in ring:
+        for nb in m.GetAtomWithIdx(r).GetNeighbors():
+            if nb.GetIdx() not in ring and nb.GetAtomicNum() > 1:
+                subs.append(float(np.dot(P[nb.GetIdx()] - P[r], n)))
+    assert len(subs) == 2, subs
+    return ("cis" if subs[0] * subs[1] > 0 else "trans"), subs
 STAND_IN = {"bromonium-cyclohexene": "C1CC[C@H]2[Se][C@H]2C1"}
 # Conformers that must be a specific shape: id -> (check on the embedded molecule).
 # butane must be the anti (zig-zag) conformer: lowest-energy of many embeds, C1-C2-C3-C4 dihedral ~180.
@@ -64,7 +94,7 @@ for name, smi in MOLS.items():
     else:
         assert AllChem.EmbedMolecule(m, randomSeed=7) == 0, name
         # MMFF pyramidalises a bare C+ a little (angle sum ~356 deg); UFF keeps the trigonal-planar sp2 centre
-        if name == "tert-butyl-cation": AllChem.UFFOptimizeMolecule(m, maxIters=2000)
+        if name in ("tert-butyl-cation", "methylcyclohexyl-cation"): AllChem.UFFOptimizeMolecule(m, maxIters=2000)
         elif name in STAND_IN: AllChem.UFFOptimizeMolecule(m, maxIters=5000)
         elif name == "benzene": AllChem.MMFFOptimizeMolecule(m, maxIters=20000)   # the default 200 iterations stop on a slightly twisted ring
         else: AllChem.MMFFOptimizeMolecule(m)
@@ -87,6 +117,16 @@ for name, smi in MOLS.items():
         # the three C-C-C angles at the cation centre must add to 360 (planar), i.e. trigonal planar sp2
         cc = m.GetConformer(); tot = sum(rdMolTransforms.GetAngleDeg(cc, a, 1, b) for a, b in ((0, 2), (0, 3), (2, 3)))
         assert abs(tot - 360) < 3, (name, tot)
+    if name == "methylcyclohexyl-cation":
+        # the cationic carbon is atom 1: its three C-C-C angles add to 360 (flat, sp2)
+        cc = m.GetConformer(); nb = [a.GetIdx() for a in m.GetAtomWithIdx(1).GetNeighbors()]
+        assert len(nb) == 3, nb
+        tot = sum(rdMolTransforms.GetAngleDeg(cc, a, 1, b) for a, b in ((nb[0], nb[1]), (nb[0], nb[2]), (nb[1], nb[2])))
+        assert abs(tot - 360) < 3, (name, tot)
+    if name in RING_REL:
+        rel, subs = ring_relation(m)
+        assert rel == RING_REL[name], (name, rel, subs)
+        print("ring check", name, rel, [round(x, 2) for x in subs])
     if name in STAND_IN:
         for a in m.GetAtoms():
             if a.GetSymbol() == "Se":

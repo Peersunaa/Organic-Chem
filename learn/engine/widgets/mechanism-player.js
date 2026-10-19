@@ -1,99 +1,247 @@
-// Widget: mechanism-player. Plays a mechanism stored as DATA, one step at a time (see mechanism-core.js for the data shape).
+// Widget: mechanism-player. Plays a mechanism stored as DATA, one ARROW at a time (see mechanism-core.js for the data shape).
 //
 // config: { mech, mode?: 'draw' | 'watch', modes?: ['draw'|'watch', ...] (one per step, overrides mode), drawing?: 'auto' | 'full' | 'skeletal' }
 //
-// draw step : the learner draws the arrows with arrow-draw (same grading and diagnoses as Lesson 03). When they are right, the arrows
-//             animate (two electron dots travel along each curve, nothing moves under prefers-reduced-motion), the structure changes
-//             to the next state (new bonds, charges, lone pairs), and the step's change summary and the species are shown.
-// watch step: the arrows are shown; the learner presses Play and watches the same animation (for steps already learned).
-// After three wrong checks on a step a "Show me this step" button turns it into a watch step.
-// The outer ctx.onResult({ok:false, diagnosis}) fires on every wrong check; ctx.onResult({ok:true}) fires once, after the LAST step.
+// watch step: press-to-advance. Each press of Next moves exactly ONE arrow: the curve is drawn, two electron dots travel along it, the bond or lone pair it breaks
+//             fades out and the one it makes fades in, then the picture HOLDS with a "why" line under it (the arrow's `why`, else the step's label). When every arrow of
+//             a step has played, the structure is the step's `after` state; the next press starts the next step. Back undoes one arrow at once (the earlier state is
+//             recomputed from the step's `before` and the first n-1 arrows, no animation). Auto plays arrow by arrow with the same hold (slow 2.4 s, normal 1.4 s).
+// draw step : the learner draws the arrows with arrow-draw (same grading and diagnoses as Lesson 03). When they are right, the same one-arrow-at-a-time playback
+//             reveals the step (Back / Next / Auto), then a "Next step" button moves on.
+// After three wrong checks on a step a "Show me this step" button turns it into the same playback.
+// Under prefers-reduced-motion nothing travels: a press swaps the state at once; the why lines still show.
+// The outer ctx.onResult({ok:false, diagnosis}) fires on every wrong check; ctx.onResult({ok:true}) fires once, when the LAST arrow of the LAST step has played.
 import arrowDraw from './arrow-draw.js';
-import { stepConfig, buildScene, changeSentence, autoStyle } from './mechanism-core.js';
+import { stepConfig, buildScene, changeSentence, autoStyle, partialState, whyOf } from './mechanism-core.js';
 import { svg as rdSvg } from '../chem.js';
 
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const HOLD = { slow: 2400, normal: 1400 };   // ms the picture stays before Auto presses Next for you
 
 export default {
   id: 'mechanism-player',
   mount(host, config, ctx) {
     const mech = config.mech;
     const N = mech.steps.length;
-    const modeOf = (n) => (config.modes && config.modes[n]) || config.mode || 'draw';
-    let n = 0, wrongHere = 0, finished = false, inst = null, gen = 0;
+    const modeOf = (k) => (config.modes && config.modes[k]) || config.mode || 'draw';
+    let n = 0, c = 0;                 // step index; arrows of that step already played
+    let phase = 'play';               // 'draw' while the learner draws a step, 'play' for the arrow-by-arrow view
+    let lead = '';                    // words in front of the prompt ("Correct. ")
+    let wrongHere = 0, reported = false, inst = null, gen = 0, busy = false, auto = false, speed = 'normal', timer = null;
     host.innerHTML = '';
     const root = h('div', 'mp');
     const strip = h('ol', 'mp-strip');
     const prompt = h('p', 'mp-prompt');
     prompt.setAttribute('aria-live', 'polite');
     const stage = h('div', 'mp-stage');
+    const why = h('p', 'mp-why');
+    why.setAttribute('aria-live', 'polite');
+    const ctl = h('div', 'mp-ctl');
+    const count = h('span', 'mp-count');
+    const row = h('div', 'mp-ctlrow');
+    const mkBtn = (cls, text) => { const b = h('button', cls); b.type = 'button'; b.textContent = text; return b; };
+    const back = mkBtn('btn small ghost', 'Back');
+    const nextB = mkBtn('btn small primary', 'Next');
+    const autoB = mkBtn('btn small ghost mp-auto', 'Auto');
+    autoB.setAttribute('aria-pressed', 'false');
+    const spLab = h('label', 'mp-speed');
+    const sel = h('select');
+    sel.innerHTML = '<option value="slow">Slow</option><option value="normal" selected>Normal</option>';
+    sel.setAttribute('aria-label', 'Auto speed');
+    spLab.append(h('span', 'sr-only', 'Auto speed'), sel);
+    row.append(back, nextB, autoB, spLab);
+    ctl.append(count, row);
     const out = h('div', 'mp-out');
-    root.append(strip, prompt, stage, out);
+    root.append(strip, prompt, stage, why, ctl, out);
     host.append(root);
+
+    const len = () => mech.steps[n].arrows.length;
+    const canNext = () => phase === 'play' && (c < len() || (n < N - 1 && modeOf(n) !== 'draw'));
+    const canBack = () => phase === 'play' && (c > 0 || (n > 0 && modeOf(n) !== 'draw'));
 
     const paintStrip = () => {
       strip.innerHTML = '';
       mech.steps.forEach((s, i) => {
-        const li = h('li', 'mp-dot' + (i < n || (finished && i === n) ? ' done' : i === n ? ' on' : ''), `Step ${i + 1}`);
-        if (i === n && !finished) li.setAttribute('aria-current', 'step');
+        const done = i < n || (i === n && phase === 'play' && c === s.arrows.length);
+        const li = h('li', 'mp-dot' + (done ? ' done' : i === n ? ' on' : ''), `Step ${i + 1}`);
+        if (i === n && !done) li.setAttribute('aria-current', 'step');
         strip.append(li);
       });
     };
 
+    // ---------------------------------------------------------------- scenes
     function figs(step) {
-      const row = h('div', 'mp-figs');
-      row.append(h('span', 'mp-figlab', 'As a normal structure:'));
+      const r = h('div', 'mp-figs');
+      r.append(h('span', 'mp-figlab', 'As a normal structure:'));
       step.after.forEach((smi, i) => {
-        if (i) row.append(h('span', 'mp-plus', '+'));
+        if (i) r.append(h('span', 'mp-plus', '+'));
         const style = config.drawing && config.drawing !== 'auto' ? config.drawing : autoStyle(smi);
         const f = h('figure', 'mol mp-fig');
         f.append(h('div', 'mol-svg'));
         f.firstChild.innerHTML = rdSvg(smi, { style, width: 150, height: 110, showCharge: true });
-        row.append(f);
+        r.append(f);
       });
-      return row;
+      return r;
+    }
+    const mountScene = (box, atoms, bonds, arrows) => arrowDraw.mount(box, { atoms, bonds, arrows, preset: true }, { onResult() {} });
+    /** Over-full atoms (the H of H-Br while it is bonding to carbon, a Br with two bonds and three lone pairs ...) are in the middle of the step: no charge badge for them. */
+    function hideMidCharges(box, st) {
+      if (!st.mid || !st.mid.length) return;
+      const svg = box.querySelector('svg');
+      const badges = [...svg.children].filter((g) => g.classList.contains('lb-atom') && !g.classList.contains('ad-atom'));
+      st.atoms.map((a, i) => (a.charge ? i : -1)).filter((i) => i >= 0).forEach((i, k) => { if (st.mid.includes(i) && badges[k]) badges[k].remove(); });
+    }
+    /** Bonds and lone pairs that the last arrow made fade in. */
+    function markNew(box, prev, now) {
+      const svg = box.querySelector('svg');
+      const order = (st, a, b) => { const x = st.bonds.find((q) => (q.a === a && q.b === b) || (q.a === b && q.b === a)); return x ? x.order : 0; };
+      now.bonds.forEach((b) => { if (b.order > order(prev, b.a, b.b)) svg.querySelector(`[data-bond="${b.a}-${b.b}"]`)?.classList.add('mp-new'); });
+      now.lp.forEach((v, i) => { if (v > prev.lp[i]) svg.querySelectorAll(`[data-lp^="${i}-"]`).forEach((g) => g.classList.add('mp-new')); });
+    }
+    /** The bond or lone pair that the moving arrow breaks fades out while the electrons travel. */
+    function markBreaking(box, st, ar) {
+      const svg = box.querySelector('svg');
+      if (!svg) return;
+      if (ar.from.bond) {
+        const [i, j] = ar.from.bond;
+        const b = st.bonds.find((q) => (q.a === i && q.b === j) || (q.a === j && q.b === i));
+        if (b && b.order === 1) svg.querySelector(`[data-bond="${b.a}-${b.b}"]`)?.classList.add('mp-breaking');
+      } else if (ar.from.lp != null) {
+        const groups = [...svg.querySelectorAll(`[data-lp^="${ar.from.lp}-"]`)];
+        const d = (svg.querySelector('.ad-path')?.getAttribute('d') || '').match(/^M(-?[\d.]+) (-?[\d.]+)/);
+        if (!groups.length) return;
+        if (!d) { groups[0].classList.add('mp-breaking'); return; }
+        const at = (g) => { const k = g.querySelector('circle'); return Math.hypot(Number(k.getAttribute('cx')) - Number(d[1]), Number(k.getAttribute('cy')) - Number(d[2])); };
+        groups.sort((p, q) => at(p) - at(q))[0].classList.add('mp-breaking');
+      }
+    }
+    /** The arrow that made the current picture, drawn faint on top of it (its geometry comes from the picture before the move). */
+    function addGhost(box, step, k) {
+      const svg = box.querySelector('svg');
+      const st = partialState(step, k - 1);
+      const tmp = h('div');
+      mountScene(tmp, st.atoms, st.bonds, [step.arrows[k - 1]]);
+      const g = tmp.querySelector('.ad-arrow');
+      if (!g || !svg) return;
+      const gh = g.cloneNode(true);
+      gh.setAttribute('class', 'ad-arrow mp-ghost');
+      svg.append(gh);
     }
 
-    function showAfter(step, token) {
-      if (token !== gen) return;
-      // the structures that come out of the step, laid out exactly as the next step starts (or the products after the last step)
-      const nxt = mech.steps[n + 1];
-      const sc = buildScene(nxt ? { before: nxt.before, layout: nxt.layout } : { before: step.after });
-      stage.innerHTML = '';
-      const box = h('div', 'mp-scene' + (reduceMotion() ? '' : ' mp-fade'));
-      stage.append(box);
-      arrowDraw.mount(box, { atoms: sc.atoms, bonds: sc.bonds, arrows: [], preset: true }, { onResult() {} });
-      out.innerHTML = '';
-      out.append(h('p', 'mp-changes', `<b>What happened.</b> ${changeSentence(step)}.`), h('p', 'mp-label', step.label), figs(step));
-      const row = h('div', 'mp-actions');
-      const again = h('button', 'btn ghost'); again.type = 'button'; again.textContent = 'Replay';
-      again.addEventListener('click', () => playStep(step, true));
-      row.append(again);
-      const last = n === N - 1;
-      const next = h('button', 'btn primary'); next.type = 'button'; next.textContent = last ? 'Finish mechanism' : 'Next step';
-      next.addEventListener('click', () => {
-        if (last) { finished = true; paintStrip(); next.disabled = true; again.disabled = true; prompt.textContent = 'Mechanism complete.'; ctx.onResult({ ok: true }); return; }
-        n++; wrongHere = 0; renderStep();
-      });
-      row.append(next);
-      out.append(row);
-      next.focus({ preventScroll: true });
-    }
-
-    /** Show the step's own arrows on its starting scene and animate them, then the result. */
-    function playStep(step, replay) {
-      const token = ++gen;
+    /** Show the picture after k arrows of the current step. `from` = the state before the arrow that just moved (so new bonds can fade in). */
+    function showState(k, from) {
+      const step = mech.steps[n];
+      c = k;
       stage.innerHTML = '';
       out.innerHTML = '';
       const box = h('div', 'mp-scene');
       stage.append(box);
-      const cfg = stepConfig(step);
-      const a = arrowDraw.mount(box, { atoms: cfg.atoms, bonds: cfg.bonds, arrows: step.arrows, preset: true }, { onResult() {} });
-      prompt.textContent = `Step ${n + 1} of ${N}: the electrons move.`;
-      a.play().then(() => showAfter(step, token));
+      if (k >= step.arrows.length) {
+        // the structures that come out of the step, laid out exactly as the next step starts (or the products after the last step)
+        const nxt = mech.steps[n + 1];
+        const sc = buildScene(nxt ? { before: nxt.before, layout: nxt.layout } : { before: step.after });
+        if (!reduceMotion() && from) box.classList.add('mp-fade');
+        mountScene(box, sc.atoms, sc.bonds, []);
+        out.append(h('p', 'mp-changes', `<b>What happened.</b> ${changeSentence(step)}.`));
+        if (step.label !== whyOf(step, step.arrows.length - 1)) out.append(h('p', 'mp-label', step.label));   // no second copy of the same sentence
+        out.append(figs(step));
+        if (modeOf(n) === 'draw' && n < N - 1) {
+          const r = h('div', 'mp-actions');
+          const nb = mkBtn('btn primary', 'Next step');
+          nb.addEventListener('click', () => { stopAuto(); n++; wrongHere = 0; lead = ''; renderStep(); });
+          r.append(nb);
+          out.append(r);
+        }
+      } else {
+        const st = partialState(step, k);
+        mountScene(box, st.atoms, st.bonds, []);
+        hideMidCharges(box, st);
+        if (k > 0) {
+          addGhost(box, step, k);
+          if (from && !reduceMotion()) markNew(box, from, st);
+        }
+      }
+      chrome();
     }
 
+    /** Words, counter and buttons that go with the current position. */
+    function chrome() {
+      paintStrip();
+      const play = phase === 'play';
+      ctl.hidden = !play; why.hidden = !play;
+      if (!play) return;
+      const step = mech.steps[n], L = step.arrows.length;
+      const k = busy ? c + 1 : c;                // the arrow on screen (while one is moving it is the next one)
+      count.textContent = k === 0 ? `${L} arrow${L > 1 ? 's' : ''} in this step` : `Arrow ${k} of ${L}`;
+      why.classList.toggle('mp-why-idle', k === 0);
+      if (!busy) why.textContent = k === 0 ? 'Press Next to move the first electron pair.' : whyOf(step, k - 1);
+      prompt.textContent = `Step ${n + 1} of ${N}: ${lead}` + (k === 0 ? (modeOf(n) === 'draw' ? 'Press Next to watch each electron pair move.' : 'Press Next to watch the electrons move, one arrow at a time.')
+        : k < L ? 'Press Next for the next arrow.' : n < N - 1 ? (modeOf(n) === 'draw' ? 'That is the whole step. Press Next step to go on.' : 'That is the whole step. Press Next to start the next one.') : 'That is the whole mechanism.');
+      back.disabled = busy || !canBack();
+      nextB.disabled = busy || !canNext();
+      nextB.textContent = c >= L && canNext() ? 'Next step' : 'Next';
+      autoB.disabled = !auto && !canNext();
+      autoB.setAttribute('aria-pressed', auto ? 'true' : 'false');
+      autoB.textContent = auto ? 'Auto: on' : 'Auto';
+      if (!busy && (nextB.disabled && document.activeElement === nextB) && !back.disabled) back.focus({ preventScroll: true });
+    }
+
+    // ---------------------------------------------------------------- moving
+    /** Animate arrow j of the current step (the picture before it, the arrow, the travelling electrons), then hold the picture after it. */
+    async function playArrow(j) {
+      const step = mech.steps[n];
+      const token = ++gen;
+      const prev = partialState(step, j);
+      if (reduceMotion()) { showState(j + 1, prev); } else {
+        busy = true;
+        stage.innerHTML = ''; out.innerHTML = '';
+        const box = h('div', 'mp-scene');
+        stage.append(box);
+        const a = mountScene(box, prev.atoms, prev.bonds, [step.arrows[j]]);
+        hideMidCharges(box, prev);
+        why.textContent = whyOf(step, j);
+        chrome();
+        const t = setTimeout(() => markBreaking(box, prev, step.arrows[j]), 900);
+        await a.play();
+        clearTimeout(t);
+        if (token !== gen) return;
+        busy = false;
+        showState(j + 1, prev);
+      }
+      if (n === N - 1 && c === step.arrows.length && !reported) { reported = true; prompt.textContent = 'Mechanism complete.'; ctx.onResult({ ok: true }); }
+    }
+
+    async function doNext() {
+      if (busy || !canNext()) return;
+      if (c >= len()) {                       // the step is complete: start the next one (a watch step moves its first arrow at once)
+        n++; c = 0; wrongHere = 0; lead = '';
+        if (modeOf(n) === 'draw') { stopAuto(); renderStep(); return; }
+      }
+      await playArrow(c);
+    }
+    function doBack() {
+      if (busy || !canBack()) return;
+      if (c > 0) showState(c - 1, null);
+      else { n--; showState(mech.steps[n].arrows.length - 1, null); }
+    }
+
+    // ---------------------------------------------------------------- auto
+    function stopAuto() { auto = false; clearTimeout(timer); timer = null; if (phase === 'play') chrome(); }
+    async function tick() {
+      if (!auto || busy) return;
+      if (!canNext()) { stopAuto(); return; }
+      await doNext();
+      if (!auto) return;
+      if (!canNext()) { stopAuto(); return; }
+      timer = setTimeout(tick, HOLD[speed]);
+    }
+    back.addEventListener('click', () => { stopAuto(); doBack(); });
+    nextB.addEventListener('click', () => { stopAuto(); doNext(); });
+    autoB.addEventListener('click', () => { if (auto) { stopAuto(); return; } if (!canNext() || busy) return; auto = true; chrome(); tick(); });
+    sel.addEventListener('change', () => { speed = sel.value; });
+
+    // ---------------------------------------------------------------- drawing
     /** The lesson's grader keeps the last wrong-answer message and hints under the widget; a correct step clears them. */
     function clearFeedback() {
       const par = host.parentElement;
@@ -104,39 +252,30 @@ export default {
     function renderStep() {
       const step = mech.steps[n];
       const token = ++gen;
-      finished = false;
-      paintStrip();
+      busy = false; c = 0;
       stage.innerHTML = ''; out.innerHTML = '';
-      const mode = modeOf(n);
+      if (modeOf(n) === 'watch') { phase = 'play'; showState(0, null); return; }
+      phase = 'draw';
+      chrome();
+      prompt.textContent = `Step ${n + 1} of ${N}: draw the curved arrows. Tap the electrons an arrow starts from, then the atom that receives them.`;
       const box = h('div', 'mp-scene');
       stage.append(box);
       const cfg = stepConfig(step);
-      if (mode === 'watch') {
-        prompt.textContent = `Step ${n + 1} of ${N}: watch the electrons move.`;
-        inst = arrowDraw.mount(box, { atoms: cfg.atoms, bonds: cfg.bonds, arrows: step.arrows, preset: true }, { onResult() {} });
-        const row = h('div', 'mp-actions');
-        const play = h('button', 'btn primary'); play.type = 'button'; play.textContent = 'Play the electron flow';
-        play.addEventListener('click', () => { play.disabled = true; inst.play().then(() => showAfter(step, token)); });
-        row.append(play);
-        out.append(row);
-        return;
-      }
-      prompt.textContent = `Step ${n + 1} of ${N}: draw the curved arrows. Tap the electrons an arrow starts from, then the atom that receives them.`;
       inst = arrowDraw.mount(box, { atoms: cfg.atoms, bonds: cfg.bonds, arrows: step.arrows, products: step.after, extraHint: config.extraHint, regio: cfg.regio, equiv: cfg.equiv }, {
         onResult(r) {
           if (token !== gen) return;
-          if (r.ok) { wrongHere = 0; clearFeedback(); prompt.textContent = `Step ${n + 1} of ${N}: correct. Watch the electrons move.`; inst.play().then(() => showAfter(step, token)); return; }
+          if (r.ok) { wrongHere = 0; clearFeedback(); phase = 'play'; lead = 'Correct. '; showState(0, null); return; }
           if (r.code !== 'start') wrongHere++;
           ctx.onResult(r);
           if (wrongHere >= 3 && !out.querySelector('.mp-show')) {
             const b = h('button', 'btn ghost mp-show'); b.type = 'button'; b.textContent = 'Show me this step';
-            b.addEventListener('click', () => playStep(step, false));
+            b.addEventListener('click', () => { gen++; phase = 'play'; lead = ''; showState(0, null); });
             out.append(b);
           }
         }
       });
     }
     renderStep();
-    return { destroy() { gen++; } };
+    return { destroy() { gen++; clearTimeout(timer); auto = false; } };
   }
 };
