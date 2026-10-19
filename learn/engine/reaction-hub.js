@@ -1085,4 +1085,7 @@ export const HUB_CARDS = [
   }
 ];
 
+/** The words for `facts.space` (an enum on the card). Shared by the hub view and the player's what-if panel. */
+export const SPACE_TEXT = { syn: 'Syn: both groups on the same face', anti: 'Anti: groups on opposite faces', either: 'Either face', 'n.a.': 'Nothing to show here' };
+
 export const HUB_BY_ID = Object.fromEntries(HUB_CARDS.map((c) => [c.id, c]));

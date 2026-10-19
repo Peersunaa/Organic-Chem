@@ -10,10 +10,17 @@
 //             reveals the step (Back / Next / Auto), then a "Next step" button moves on.
 // After three wrong checks on a step a "Show me this step" button turns it into the same playback.
 // Under prefers-reduced-motion nothing travels: a press swaps the state at once; the why lines still show.
+// What-if (Piece 2): on the final state of a mechanism that engine/whatif.js knows (alkene + HX / Br2 / hydration, alkyne + HX, EAS) a "What if it were ..." row offers the other
+//   reagents that have a mechanism in the course. A chip replays that mechanism in this same player from the start (watch mode) and ends with both products side by side, each with the three
+//   facts of its hub card; "Back to the lesson's reaction" returns to the lesson's own final state. The lesson's onResult is never called for an alternative.
+// Caveman (Piece 3): the why line goes through voice.tAuto (the arrow's `cavemanWhy` if it has one, else the rule-based squeeze) and repaints when the header switch flips.
 // The outer ctx.onResult({ok:false, diagnosis}) fires on every wrong check; ctx.onResult({ok:true}) fires once, when the LAST arrow of the LAST step has played.
 import arrowDraw from './arrow-draw.js';
 import { stepConfig, buildScene, changeSentence, autoStyle, partialState, whyOf } from './mechanism-core.js';
 import { svg as rdSvg } from '../chem.js';
+import { whatIfFor } from '../whatif.js';
+import { chipRow, comparePanel } from './whatif-view.js';
+import { tAuto, onVoiceChange } from '../voice.js';
 
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -22,9 +29,14 @@ const HOLD = { slow: 2400, normal: 1400 };   // ms the picture stays before Auto
 export default {
   id: 'mechanism-player',
   mount(host, config, ctx) {
-    const mech = config.mech;
-    const N = mech.steps.length;
-    const modeOf = (k) => (config.modes && config.modes[k]) || config.mode || 'draw';
+    const lessonMech = config.mech;   // read once: some lessons build it in a getter
+    let mech = lessonMech;
+    let N = mech.steps.length;
+    let alt = null;                   // the what-if alternative being played (an option from whatIfFor), or null for the lesson's own mechanism
+    let info = null;                  // whatIfFor(config.mech), found once at the first final state
+    let infoDone = false;
+    const modeOf = (k) => (alt ? 'watch' : (config.modes && config.modes[k]) || config.mode || 'draw');
+    const whyText = (step, k) => tAuto(whyOf(step, k), step.arrows && step.arrows[k] && step.arrows[k].cavemanWhy);
     let n = 0, c = 0;                 // step index; arrows of that step already played
     let phase = 'play';               // 'draw' while the learner draws a step, 'play' for the arrow-by-arrow view
     let lead = '';                    // words in front of the prompt ("Correct. ")
@@ -146,6 +158,8 @@ export default {
         out.append(h('p', 'mp-changes', `<b>What happened.</b> ${changeSentence(step)}.`));
         if (step.label !== whyOf(step, step.arrows.length - 1)) out.append(h('p', 'mp-label', step.label));   // no second copy of the same sentence
         out.append(figs(step));
+        wiSlot = null;
+        if (n === N - 1) { wiSlot = h('div', 'mp-wi'); out.append(wiSlot); paintWhatIf(); }
         if (modeOf(n) === 'draw' && n < N - 1) {
           const r = h('div', 'mp-actions');
           const nb = mkBtn('btn primary', 'Next step');
@@ -165,6 +179,31 @@ export default {
       chrome();
     }
 
+    // ---------------------------------------------------------------- what-if
+    let wiSlot = null;
+    /** The what-if row (or, while an alternative is shown, the side-by-side) under the final state of the last step. Nothing at all when the mechanism has no alternatives. */
+    function paintWhatIf() {
+      if (!wiSlot) return;
+      wiSlot.innerHTML = '';
+      if (!infoDone) { infoDone = true; try { info = whatIfFor(lessonMech); } catch (e) { info = null; } }
+      if (!info) return;
+      if (alt) wiSlot.append(comparePanel(info, alt));
+      wiSlot.append(chipRow(info, alt, { onPick: startAlt, onBack: backToLesson }));
+    }
+    function startAlt(option) {
+      stopAuto();
+      alt = option; mech = option.mech; N = mech.steps.length;
+      n = 0; c = 0; wrongHere = 0; lead = ''; phase = 'play';
+      renderStep();
+      stage.scrollIntoView && stage.scrollIntoView({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' });
+    }
+    function backToLesson() {
+      stopAuto();
+      alt = null; mech = lessonMech; N = mech.steps.length;
+      n = N - 1; phase = 'play'; lead = '';
+      showState(mech.steps[n].arrows.length, null);
+    }
+
     /** Words, counter and buttons that go with the current position. */
     function chrome() {
       paintStrip();
@@ -175,7 +214,7 @@ export default {
       const k = busy ? c + 1 : c;                // the arrow on screen (while one is moving it is the next one)
       count.textContent = k === 0 ? `${L} arrow${L > 1 ? 's' : ''} in this step` : `Arrow ${k} of ${L}`;
       why.classList.toggle('mp-why-idle', k === 0);
-      if (!busy) why.textContent = k === 0 ? 'Press Next to move the first electron pair.' : whyOf(step, k - 1);
+      if (!busy) why.textContent = k === 0 ? 'Press Next to move the first electron pair.' : whyText(step, k - 1);
       prompt.textContent = `Step ${n + 1} of ${N}: ${lead}` + (k === 0 ? (modeOf(n) === 'draw' ? 'Press Next to watch each electron pair move.' : 'Press Next to watch the electrons move, one arrow at a time.')
         : k < L ? 'Press Next for the next arrow.' : n < N - 1 ? (modeOf(n) === 'draw' ? 'That is the whole step. Press Next step to go on.' : 'That is the whole step. Press Next to start the next one.') : 'That is the whole mechanism.');
       back.disabled = busy || !canBack();
@@ -200,7 +239,7 @@ export default {
         stage.append(box);
         const a = mountScene(box, prev.atoms, prev.bonds, [step.arrows[j]]);
         hideMidCharges(box, prev);
-        why.textContent = whyOf(step, j);
+        why.textContent = whyText(step, j);
         chrome();
         const t = setTimeout(() => markBreaking(box, prev, step.arrows[j]), 900);
         await a.play();
@@ -209,7 +248,7 @@ export default {
         busy = false;
         showState(j + 1, prev);
       }
-      if (n === N - 1 && c === step.arrows.length && !reported) { reported = true; prompt.textContent = 'Mechanism complete.'; ctx.onResult({ ok: true }); }
+      if (n === N - 1 && c === step.arrows.length && !reported && !alt) { reported = true; prompt.textContent = 'Mechanism complete.'; ctx.onResult({ ok: true }); }
     }
 
     async function doNext() {
@@ -276,6 +315,12 @@ export default {
       });
     }
     renderStep();
-    return { destroy() { gen++; clearTimeout(timer); auto = false; } };
+    // the header's Caveman switch: repaint the why line and the facts without losing the place
+    const offVoice = onVoiceChange(() => {
+      if (!host.isConnected) { offVoice(); return; }
+      if (phase === 'play' && !busy) chrome();
+      if (wiSlot && n === N - 1 && c >= mech.steps[n].arrows.length) paintWhatIf();
+    });
+    return { destroy() { gen++; clearTimeout(timer); auto = false; offVoice(); } };
   }
 };

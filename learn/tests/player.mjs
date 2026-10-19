@@ -17,6 +17,8 @@ import * as MC from '../engine/widgets/mechanism-core.js';
 import { WIDGETS } from '../engine/widgets/index.js';
 import { buildMolblock } from '../engine/widgets/lewis-core.js';
 import { lpCount } from '../engine/widgets/arrow-core.js';
+import * as WI from '../engine/whatif.js';
+import { HUB_BY_ID } from '../engine/reaction-hub.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const NAMES = { H: 'hydrogen', C: 'carbon', N: 'nitrogen', O: 'oxygen', S: 'sulfur', F: 'fluorine', Cl: 'chlorine', Br: 'bromine', I: 'iodine', Fe: 'iron', Al: 'aluminum', B: 'boron' };
@@ -115,6 +117,63 @@ export async function player({ ok, eq }) {
     ok(pred.major[0].mech.steps[0].arrows[0].why.includes('more H'), 'propene + HBr: the major path says the H goes to the carbon with more H');
     const sym = R.buildMechanism('CC=CC', 'HBr', 1, 2);
     ok(!/more H|fewer H/.test(sym.steps[0].arrows[0].why), 'but-2-ene + HBr: both ends are alike, so no regiochemistry is claimed');
+  }
+
+  // ---- (4) what-if branching: the alternatives the player offers on its final state (engine/whatif.js)
+  {
+    const EXPECT = { 'lesson 08 s10': 'alkene-hx', 'lesson 08 s17': 'alkene-hx', 'lesson 09 s08': 'alkene-hx', 'lesson 09 s11': 'alkene-hydration', 'lesson 10 s04': 'alkene-x2', 'lesson 12 s07': 'alkyne-hx', 'lesson 13 s06': 'eas', 'lesson 13 s08': 'eas' };
+    const kinds = new Set();
+    for (const { src, mech } of lessonMechs) {
+      const w = WI.whatIfFor(mech), want = EXPECT[src] || null;
+      const k = WI.kindOf(mech);
+      eq(k ? k.kind : null, want, `${src}: what-if kind`);
+      if (!want) { ok(w === null, `${src}: no what-if row when the course has no alternative (the player shows nothing)`); continue; }
+      ok(w && w.options.length >= 1, `${src}: has at least one what-if alternative`);
+      if (!w) continue;
+      kinds.add(want);
+      // the lesson's own product, side by side, is the engine's product
+      if (k.kind === 'eas') eq(canon(w.origin.product), canon(R.predictEAS(R.BENZENE, k.reagent, k.halide).product), `${src}: the lesson's EAS product is the engine's`);
+      else ok(R.sameProducts([w.origin.product], [mech.products.find((p) => !/\+\]|-\]/.test(p))]), `${src}: the lesson's product is the mechanism's organic product`);
+      ok(!!HUB_BY_ID[w.origin.cardId], `${src}: the lesson's reagent has a hub card (${w.origin.cardId})`);
+      for (const o of w.options) {
+        const t = `${src} what-if ${o.id}`;
+        ok(o.mech.steps.length >= 1 && o.mech.steps.every((st) => st.arrows.length >= 1 && st.arrows.every((a) => typeof a.why === 'string' && a.why.length > 0)), `${t}: its mechanism has steps and a why on every arrow`);
+        const card = HUB_BY_ID[o.cardId];
+        ok(!!card && !!card.facts && !!card.facts.adds && !!card.facts.where && !!card.facts.space, `${t}: has a hub card with the three facts (${o.cardId})`);
+        const m = o.meta;
+        let want2;
+        if (o.kind === 'alkene-hx') want2 = R.predict(m.substrate, 'H' + m.X).products;
+        else if (o.kind === 'alkene-hydration') want2 = R.predict(m.substrate, 'H2O').products;
+        else if (o.kind === 'alkene-x2') want2 = R.predictAdd(m.substrate, m.X + '2').products;
+        else if (o.kind === 'alkyne-hx') want2 = R.predictAlkyne(m.substrate, 'H' + m.X + '_1').products;
+        else if (o.kind === 'acetylide') want2 = [R.alkylateAcetylide(R.acetylideOf(m.substrate), m.halide)];
+        else if (o.kind === 'eas') want2 = [R.predictEAS(R.BENZENE, m.reagent, m.halide).product];
+        ok(!!want2 && R.sameProducts([o.product], want2), `${t}: the side-by-side product ${o.product} equals the engine's ${JSON.stringify(want2)}`);
+        ok(typeof o.label === 'string' && o.label.length > 0, `${t}: has a chip label`);
+      }
+      ok(new Set(w.options.map((o) => o.id)).size === w.options.length, `${src}: what-if chips are unique`);
+    }
+    eq([...kinds].sort(), ['alkene-hx', 'alkene-hydration', 'alkene-x2', 'alkyne-hx', 'eas'], 'what-if alternatives exist for every supported mechanism kind');
+    for (const [key, id] of Object.entries(WI.CARD_OF)) ok(!!HUB_BY_ID[id], `reagent key ${key} maps to a real hub card (${id})`);
+    // the other mechanism kinds get nothing
+    ok(WI.whatIfFor(R.dieneMechanism('C=CC=C', 'HBr', '1,4')) === null, 'a diene mechanism has no what-if row');
+    ok(WI.whatIfFor(R.acetylideAlkylationMechanism('C#C', 'CBr')) === null, 'the acetylide mechanism has no what-if row (not one of the five kinds)');
+    // over the symmetric alkenes the lab uses: never throws, every option is well formed
+    let offered = 0;
+    for (const a of M.HX_ALKENES) for (const X of ['Cl', 'Br']) {
+      const w = WI.whatIfFor(M.hxMechanism(a.smiles, X));
+      if (w) { offered++; ok(w.options.every((o) => o.mech.steps.length >= 1 && o.product), `hxMechanism ${a.label} + H${X}: options are well formed`); }
+    }
+    ok(offered >= 3, `what-if rows exist for most of the symmetric alkenes + HX (${offered})`);
+    // the player: promises read from its source
+    const psrc = fs.readFileSync(path.join(HERE, '..', 'engine', 'widgets', 'mechanism-player.js'), 'utf8');
+    const vsrc = fs.readFileSync(path.join(HERE, '..', 'engine', 'widgets', 'whatif-view.js'), 'utf8');
+    ok(/whatIfFor\(lessonMech\)/.test(psrc) && /startAlt/.test(psrc) && /backToLesson/.test(psrc), 'the player offers what-if chips, replays an alternative and goes back');
+    ok(/n === N - 1\) \{ wiSlot = h\('div', 'mp-wi'\)/.test(psrc), 'the what-if row sits on the final state of the last step only');
+    ok(/!reported && !alt/.test(psrc), 'an alternative never calls the lesson onResult');
+    ok(/What if it were/.test(vsrc) && /Back to the lesson/.test(vsrc) && /comparePanel/.test(vsrc) && /factList/.test(vsrc), 'the what-if view has the chips, the back chip and the side-by-side with the card facts');
+    ok(/modeOf = \(k\) => \(alt \? 'watch'/.test(psrc), 'an alternative plays in watch mode from its first step');
+    ok(/tAuto\(whyOf\(step, k\)/.test(psrc) && /whyText\(step, k - 1\)/.test(psrc) && /cavemanWhy/.test(psrc), 'the why line goes through the caveman voice (cavemanWhy, else the automatic squeeze)');
   }
 
   // ---- (3) the player, read from its source

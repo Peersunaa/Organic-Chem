@@ -21,6 +21,7 @@ import { HUB_CARDS, HUB_GROUPS, HUB_SPACE, HUB_ADDS, HUB_BY_ID } from '../engine
 import * as R from '../engine/reactions.js';
 import { lessonHref, NO_LESSON } from '../hub-view.js';
 import { formulaOf } from '../engine/skeletal.js';
+import * as V from '../engine/voice.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TOOLS = path.join(HERE, '..', 'tools');
@@ -296,6 +297,15 @@ export async function hub({ ok, eq }) {
   ok(/class: 'side'/.test(app) && /h\('h2', \{ id: 'rx-h' \}, 'Reactions'\)/.test(app), 'home screen has a Reactions panel');
   ok(/const deepAt = startId \?/.test(app) && !/done\.add\(L\.steps/.test(app), 'deep link sets the step without marking earlier steps done');
   ok(/idx: deep \? resumeIdx : idx/.test(app), 'a deep-link visit does not move the saved resume point');
+  // ---- (5) the Caveman switch on the hub: t() gives each card's caveman text when the mode is on, the normal text when it is off
+  V.setCaveman(false);
+  ok(HUB_CARDS.every((c) => V.t(c.what, c.caveman.what) === c.what), 'caveman off: every card shows its normal text');
+  V.setCaveman(true);
+  ok(HUB_CARDS.every((c) => V.t(c.what, c.caveman.what) === c.caveman.what && V.t(c.what, c.caveman.what) !== c.what), 'caveman on: every card shows its caveman text');
+  ok(HUB_CARDS.every((c) => c.apply.steps.every((s, i) => V.t(s, c.caveman.steps[i]) === c.caveman.steps[i])), 'caveman on: every step shows its caveman step');
+  V.setCaveman(false);
+  ok(/\bt\(c\.what, c\.caveman && c\.caveman\.what\)/.test(view) && /onVoiceChange\(/.test(view), 'the hub view reads the caveman text and repaints in place on a toggle');
+  ok(/id: 'caveman-switch'/.test(app) && /voice\.setCaveman\(/.test(app), 'the header has the Caveman switch');
   const html = fs.readFileSync(path.join(HERE, '..', 'index.html'), 'utf8');
   ok((html.match(/\/\* reaction hub \*\//g) || []).length === 1, 'index.html has one "/* reaction hub */" CSS block');
   const hubCss = html.slice(html.indexOf('/* reaction hub */'), html.indexOf('</style>'));

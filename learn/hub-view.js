@@ -1,10 +1,10 @@
 // Reaction hub screen (#reactions): one card per reagent from engine/reaction-hub.js, grouped by substrate, with filters.
 // Each card has the same four parts in the same order: What it does, Worked example, Three facts, When the question looks like this.
 import { h, equationRow } from './engine/steps.js';
-import { HUB_CARDS, HUB_GROUPS, HUB_SPACE, HUB_ADDS } from './engine/reaction-hub.js';
+import { HUB_CARDS, HUB_GROUPS, HUB_SPACE, HUB_ADDS, SPACE_TEXT } from './engine/reaction-hub.js';
+import { t, tAuto, onVoiceChange } from './engine/voice.js';
 
 export const NO_LESSON = 'Not in a lesson: this card is the short version';
-const SPACE_TEXT = { syn: 'Syn: both groups on the same face', anti: 'Anti: groups on opposite faces', either: 'Either face', 'n.a.': 'Nothing to show here' };
 
 /** "#lesson-13/s06" (the router opens the lesson at that step without marking earlier steps done). */
 export const lessonHref = (ref) => `#lesson-${ref.id}/${ref.step}`;
@@ -16,19 +16,19 @@ function exampleBlock(c, ex = c.example, second = false) {
   return h('div', { class: second ? 'hub-example hub-example2' : 'hub-example' },
     second ? h('p', { class: 'hub-rx small' }, h('b', {}, 'Second example')) : null, eq,
     h('p', { class: 'hub-rx small' }, h('span', { class: 'muted' }, 'Reagent: '), h('b', {}, ex.reagent || c.reagent)),
-    ex.note ? h('p', { class: 'muted small hub-note' }, ex.note) : null);
+    ex.note ? h('p', { class: 'muted small hub-note' }, (second ? tAuto(ex.note) : t(ex.note, c.caveman && c.caveman.note))) : null);
 }
 
 function factsBlock(c) {
-  const f = c.facts;
+  const f = c.facts, cv = c.caveman && c.caveman.facts;
   const chip = (label, value, extra) => h('li', { class: 'chip hub-chip' }, h('span', { class: 'hub-chip-k' }, label), h('span', { class: 'hub-chip-v' }, value), extra ? h('span', { class: 'hub-chip-n' }, extra) : null);
   return h('ul', { class: 'hub-facts', 'aria-label': 'Three facts' },
-    chip('What adds', f.adds), chip('Where it adds', f.where), chip('How, in space', SPACE_TEXT[f.space], f.spaceNote));
+    chip('What adds', t(f.adds, cv && cv.adds)), chip('Where it adds', t(f.where, cv && cv.where)), chip('How, in space', SPACE_TEXT[f.space], f.spaceNote ? tAuto(f.spaceNote) : null));
 }
 
 function applyBlock(c) {
   const details = h('details', { class: 'hub-steps-box' }, h('summary', {}, 'Steps to answer it'),
-    h('ol', { class: 'hub-steps' }, c.apply.steps.map((s) => h('li', {}, s))));
+    h('ol', { class: 'hub-steps' }, c.apply.steps.map((s, i) => h('li', {}, t(s, c.caveman && c.caveman.steps && c.caveman.steps[i])))));
   // phones: collapsed, so a card stays about one screen; wider screens: open
   try { if (window.innerWidth >= 700) details.open = true; } catch (e) { /* ignore */ }
   return h('div', { class: 'hub-apply' }, h('p', { class: 'hub-pattern' }, c.apply.pattern), details);
@@ -43,7 +43,7 @@ function cardNode(c) {
   const grp = HUB_GROUPS.find((g) => g.id === c.group);
   return h('article', { class: 'card hub-card', id: 'rx-' + c.id, 'data-group': c.group, 'data-space': c.facts.space, 'data-adds': c.facts.addsKey.join(' ') },
     h('h3', { class: 'hub-title' }, c.reagent),
-    h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'What it does'), h('p', {}, c.what)),
+    h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'What it does'), h('p', {}, t(c.what, c.caveman && c.caveman.what))),
     h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'Worked example'), exampleBlock(c), c.example2 ? exampleBlock(c, c.example2, true) : null),
     h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'Three facts'), factsBlock(c)),
     h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'When the question looks like this'), applyBlock(c)),
@@ -112,6 +112,20 @@ export function buildHub(ready, anchor) {
       list.append(sec);
     });
     apply();
+    // the header's Caveman switch: swap the card texts in place (filters, scroll position and open step lists stay as they are)
+    const off = onVoiceChange(() => {
+      if (!root.isConnected) { off(); return; }
+      cards.forEach((entry) => {
+        const old = entry.node, box = old.querySelector('.hub-steps-box');
+        const fresh = cardNode(entry.c);
+        fresh.hidden = old.hidden;
+        if (old.classList.contains('hub-target')) fresh.classList.add('hub-target');
+        const nb = fresh.querySelector('.hub-steps-box');
+        if (box && nb) nb.open = box.open;
+        old.replaceWith(fresh);
+        entry.node = fresh;
+      });
+    });
     if (anchor) {
       const target = list.querySelector('#rx-' + anchor);
       if (target) {

@@ -407,7 +407,8 @@ export function mechanismPart(mech, from, to = mech.steps.length) {
   const steps = mech.steps.slice(from, to);
   const reactants = from === 0 ? mech.reactants : mech.steps[from - 1].after;
   const products = steps[steps.length - 1].after;
-  return { reactants, products, steps };
+  // keep the reagent and the full prediction, so the player can offer what-if alternatives (engine/whatif.js)
+  return { reactants, products, steps, reagent: mech.reagent, halide: mech.halide, pred: mech.pred };
 }
 
 // ---------------------------------------------------------------- reduction of a nitro group (Fe or Sn or SnCl2, H3O+, then HO-)

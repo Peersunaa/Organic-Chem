@@ -5,6 +5,7 @@ import { WIDGETS } from './widgets/index.js';
 import { skillRule } from './skills.js';
 import { generate } from './generators.js';
 import { normName } from './naming.js';
+import { tAuto } from './voice.js';
 
 export function h(tag, props, ...kids) {
   const e = document.createElement(tag);
@@ -333,7 +334,7 @@ export function renderProblems(cfg, ctx, host) {
     const onWrong = (why) => {
       wrong++;
       ctx.mistake(p.skill, 'mastery', why);
-      fb.className = 'fb bad'; fb.textContent = why;
+      fb.className = 'fb bad'; fb.textContent = cfg.skill ? tAuto(why) : why;   // drills (practice) answer in caveman words when that switch is on; lessons keep their own text
       hints.innerHTML = '';
       if (wrong >= 1) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 1 '), p.hints[0]));
       if (wrong >= 2) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 2 '), p.hints[1]));

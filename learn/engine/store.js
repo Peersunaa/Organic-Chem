@@ -3,7 +3,7 @@ const KEY = 'orgo-learn-v1';
 const DAY = 86400000;
 let state = null;
 
-function fresh() { return { v: 1, iupac: 'new', progress: {}, log: [], wins: [] }; }
+function fresh() { return { v: 1, iupac: 'new', caveman: false, progress: {}, log: [], wins: [] }; }
 
 function load() {
   try {
@@ -17,6 +17,8 @@ function st() { return state || (state = load()); }
 
 export function getIupac() { return st().iupac; }
 export function setIupac(v) { st().iupac = v; save(); }
+export function getCaveman() { return st().caveman === true; }
+export function setCaveman(v) { st().caveman = !!v; save(); }
 
 export function getProgress(id) { return st().progress[id] || { idx: 0, done: [], complete: false }; }
 export function setProgress(id, patch) {

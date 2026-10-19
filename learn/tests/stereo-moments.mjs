@@ -5,7 +5,12 @@
 import { ready, canon } from '../engine/chem.js';
 import { LESSONS } from '../lessons/index.js';
 import models from '../data/3d/models.js';
-import { STEREO_MOMENTS } from '../engine/stereo-moments.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { STEREO_MOMENTS, momentFor, viewerSpecs } from '../engine/stereo-moments.js';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
 
 function parse(mb) {
   const L = mb.split('\n');
@@ -104,6 +109,29 @@ export async function stereoMoments({ ok, eq }) {
     ok(!!step, `${where}: ${mo.lesson}/${mo.step} is a real step`);
     check('main', mo.model, mo.shows, mo.caption, where);
     if (mo.contrast) check('contrast', mo.contrast.model, mo.contrast.shows, mo.contrast.caption, where + ' contrast');
+  }
+  // ---- the "See it in 3D" button (Piece 4 UI): every moment has a viewer spec, app.js puts the button under the step, stereo-view.js opens model3d inline
+  eq(momentFor('99', 's01'), null, 'a step with no moment has no 3D button');
+  for (const mo of STEREO_MOMENTS) {
+    const where = `moment ${mo.id}`;
+    eq(momentFor(mo.lesson, mo.step), mo, `${where}: the lesson step finds its moment (so app.js renders the button)`);
+    const specs = viewerSpecs(mo);
+    eq(specs.length, mo.contrast ? 2 : 1, `${where}: one viewer, or two when there is a contrast`);
+    eq(specs.map((s) => s.model), [mo.model].concat(mo.contrast ? [mo.contrast.model] : []), `${where}: the viewers show the moment's models in order`);
+    ok(specs.every((s) => !!models[s.model] && typeof s.caption === 'string' && s.caption.length > 0), `${where}: every viewer has an existing model and its own caption`);
+  }
+  {
+    const app = fs.readFileSync(path.join(HERE, '..', 'app.js'), 'utf8');
+    const view = fs.readFileSync(path.join(HERE, '..', 'stereo-view.js'), 'utf8');
+    const html = fs.readFileSync(path.join(HERE, '..', 'index.html'), 'utf8');
+    ok(/momentFor\(L\.id, step\.id\)/.test(app) && /stereoBlock\(moment\)/.test(app) && /host\.append\(stereoNode\)/.test(app), 'app.js looks the lesson step up in STEREO_MOMENTS and renders the 3D block under the step');
+    ok(/step\.type === 'try' \|\| done\.has\(step\.id\)/.test(app) && /if \(stereoNode\) stereoNode\.hidden = false/.test(app), 'a question that asks for the answer keeps its 3D button hidden until it is answered');
+    ok(/'See it in 3D'/.test(view) && /'aria-expanded'/.test(view) && /aria-controls/.test(view) && /'Hide the 3D view'/.test(view), 'the button says "See it in 3D", toggles open and closed and says which');
+    ok(/model3d\.mount\(box, \{ mol: s\.model \}/.test(view) && /viewerSpecs\(moment\)/.test(view) && /figcaption/.test(view), 'the viewer is the existing model3d widget, one per spec, each with its caption');
+    ok(/\.st3-grid \{[^}]*repeat\(auto-fit, minmax\(260px, 1fr\)\)/.test(html) && /max-width: 460px\) \{[^@]*\.st3-grid \{ grid-template-columns: minmax\(0, 1fr\)/.test(html), 'two viewers sit side by side and stack on a phone');
+    const css = html.slice(html.indexOf('/* what-if row, Caveman switch'), html.indexOf('</style>'));
+    ok(css.length > 200 && !/#[0-9a-fA-F]{3,6}\b/.test(css), 'the new CSS uses the colour tokens only');
+    ok(/\.mp-wi-chip, \.mp-wi-back \{ min-height: 44px/.test(css) && /\.switch \{[^}]*min-height: 44px/.test(html), 'the what-if chips and the header switches are 44 px targets');
   }
   // the models the brief names, even if a moment is later dropped
   for (const id of ['methylcyclohexyl-cation', 'cis-2-3-epoxybutane', 'cis-cyclohexane-1-2-diol', 'trans-1-2-dibromocyclohexane', 'cis-1-2-dimethylcyclohexane', 'trans-1-2-dimethylcyclohexane', 'bromonium-cyclohexene']) ok(!!models[id], `models.js has ${id}`);

@@ -7,6 +7,9 @@ import { skillLabel } from './engine/skills.js';
 import { LESSONS, PLANNED } from './lessons/index.js';
 import { buildHub } from './hub-view.js';
 import { buildPastpaper } from './pastpaper-view.js';
+import { momentFor } from './engine/stereo-moments.js';
+import { stereoBlock } from './stereo-view.js';
+import * as voice from './engine/voice.js';
 
 const app = document.getElementById('app');
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -22,9 +25,15 @@ function header(extra) {
   const paint = () => { const old = store.getIupac() === 'old'; sw.setAttribute('aria-checked', String(old)); sw.innerHTML = `<span class="sw-track"><span class="sw-knob"></span></span><span class="sw-label">${old ? 'Old' : 'New'} IUPAC</span>`; };
   paint();
   sw.addEventListener('click', () => { store.setIupac(store.getIupac() === 'old' ? 'new' : 'old'); setIupacMode(store.getIupac()); paint(); });
+  // Caveman: short, plain wording on the reaction cards, the player's why lines and the drill feedback (engine/voice.js; the views repaint themselves)
+  const cav = h('button', { type: 'button', class: 'switch', role: 'switch', 'aria-checked': String(voice.cavemanOn()), id: 'caveman-switch', title: 'Short, plain wording on reaction cards, mechanism notes and drill feedback' });
+  const paintCav = () => { cav.setAttribute('aria-checked', String(voice.cavemanOn())); cav.innerHTML = '<span class="sw-track"><span class="sw-knob"></span></span><span class="sw-label">Caveman</span>'; };
+  paintCav();
+  cav.addEventListener('click', () => voice.setCaveman(!voice.cavemanOn()));
+  const offVoice = voice.onVoiceChange(() => { if (!cav.isConnected) { offVoice(); return; } paintCav(); });
   const brand = h('a', { class: 'brand', href: '#home', 'aria-label': 'Orgo Learn home' });
   brand.innerHTML = ORBIT + '<span>Orgo Learn</span>';
-  return h('header', { class: 'top' }, brand, extra || null, sw);
+  return h('header', { class: 'top' }, brand, extra || null, h('div', { class: 'switches' }, sw, cav));
 }
 
 function mount(...nodes) {
@@ -192,12 +201,14 @@ function lessonView(L, startId) {
   };
   const save = () => store.setProgress(L.id, { idx: deep ? resumeIdx : idx, done: [...done] });
 
+  let stereoNode = null;   // the "See it in 3D" block of the current step (Piece 4), if it has one
   const ctxFor = (step) => ({
     lessonId: L.id,
     mistake: (skill, stepId, diagnosis) => store.logMistake({ skill, stepId, lessonId: L.id, diagnosis }),
     win: (skill) => store.logWin(skill),
     done: () => {
       done.add(step.id); save(); paint();
+      if (stereoNode) stereoNode.hidden = false;
       if (step.type !== 'explain' && step.type !== 'useit') next.focus({ preventScroll: true });
     },
     complete: () => { store.setProgress(L.id, { complete: true, idx: steps.length - 1, done: steps.map((s) => s.id) }); location.hash = '#home'; }
@@ -210,7 +221,11 @@ function lessonView(L, startId) {
     recapSlot.innerHTML = '';
     const prev = steps[idx - 1];
     if (prev && done.has(prev.id) && step.type !== 'useit') { const rc = recapCard(prev); if (rc) recapSlot.append(rc); }
+    stereoNode = null;
     renderStep(step, ctxFor(step), host);
+    // Piece 4: where the 3D shape decides the answer, a "See it in 3D" button under the step. A question that asks for the answer stays unspoiled until it is answered.
+    const moment = momentFor(L.id, step.id);
+    if (moment) { stereoNode = stereoBlock(moment); stereoNode.hidden = !(step.type === 'try' || done.has(step.id)); host.append(stereoNode); }
     setIupacMode(store.getIupac());
     if (!reduceMotion()) { host.classList.remove('enter'); void host.offsetWidth; host.classList.add('enter'); }
     paint();

@@ -38,3 +38,12 @@ export const STEREO_MOMENTS = [
     caption: 'KMnO₄ in base puts both OH groups on the same face of the ring. Look for the two O atoms on the same side: this is the cis diol.'
   }
 ];
+
+/** The moment for a lesson step (null when the step has none). */
+export const momentFor = (lesson, step) => STEREO_MOMENTS.find((m) => m.lesson === lesson && m.step === step) || null;
+/** What the "See it in 3D" panel shows for a moment: one viewer, or two (the moment and its contrast), each with its caption. DOM-free, so the tests can read it. */
+export function viewerSpecs(moment) {
+  const specs = [{ model: moment.model, caption: moment.caption, shows: moment.shows }];
+  if (moment.contrast) specs.push({ model: moment.contrast.model, caption: moment.contrast.caption, shows: moment.contrast.shows });
+  return specs;
+}

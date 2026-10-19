@@ -49,7 +49,7 @@ svg :focus-visible { outline: none; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 8px; }
 .brand { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); text-decoration: none; font: 700 1.15rem/1 var(--display); letter-spacing: -.01em; }
 .brand svg { color: var(--accent); } .e-dot { fill: var(--electron); }
-.switch { display: inline-flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px 6px 8px; min-height: 40px; cursor: pointer; }
+.switch { display: inline-flex; align-items: center; gap: 8px; background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px 6px 8px; min-height: 44px; cursor: pointer; }
 .sw-track { width: 34px; height: 20px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line-strong); position: relative; flex: none; }
 .sw-knob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--muted); transition: transform .18s ease; }
 .switch[aria-checked="true"] .sw-knob { transform: translateX(14px); background: var(--accent); }
@@ -564,6 +564,29 @@ button.sg-cell { cursor: pointer; touch-action: manipulation; } button.sg-cell:h
 .pp-steps { padding: 0 14px 8px; background: var(--surface-2); border-left: 3px solid var(--electron); border-radius: 4px 12px 12px 4px; }
 .hub-target { outline: 2px solid var(--accent); outline-offset: 3px; scroll-margin-top: 12px; }
 @media (max-width: 460px) { .pp-links .btn { flex: 1 1 140px; } }
+/* what-if row, Caveman switch, See it in 3D (Pieces 2 to 4) */
+.switches { display: flex; flex-wrap: wrap; gap: 8px; }
+.mp-wi { display: grid; gap: 12px; min-width: 0; }
+.mp-wi-row { display: grid; gap: 8px; padding: 12px 14px; border: 1px dashed var(--line-strong); border-radius: 12px; background: var(--surface); }
+.mp-wi-q { margin: 0; font-weight: 600; }
+.mp-wi-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.mp-wi-chip, .mp-wi-back { min-height: 44px; }
+.mp-wi-chip:focus-visible, .mp-wi-back:focus-visible, .st3-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.mp-wi-cmp { display: grid; gap: 10px; padding: 12px; border-radius: 4px 12px 12px 4px; background: var(--surface-2); border-left: 3px solid var(--electron); min-width: 0; }
+.mp-wi-h { margin: 0; font-weight: 700; }
+.mp-wi-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.mp-wi-col { margin: 0; display: grid; gap: 8px; align-content: start; min-width: 0; padding: 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+.mp-wi-head { overflow-wrap: anywhere; font-size: .9rem; }
+.mp-wi-mol { display: grid; place-items: center; max-width: 100%; } .mp-wi-mol svg { max-width: 100%; height: auto; }
+.st3 { display: grid; gap: 10px; margin-top: 12px; min-width: 0; }
+.st3-btn { justify-self: start; }
+.st3-panel { display: grid; gap: 10px; min-width: 0; }
+.st3-title { margin: 0; font-weight: 600; }
+.st3-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.st3-fig { margin: 0; display: grid; gap: 8px; min-width: 0; align-content: start; }
+.st3-cap { font-size: .9rem; padding: 8px 12px; border-radius: 4px 12px 12px 4px; background: var(--surface-2); border-left: 3px solid var(--electron); overflow-wrap: anywhere; }
+.st3 .m3-views { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 460px) { .mp-wi-chips .btn { flex: 1 1 100%; } .mp-wi-cols, .st3-grid { grid-template-columns: minmax(0, 1fr); } }
 </style>
 
 <div id="app" aria-live="off"><p class="muted" style="padding:24px 16px">Loading Orgo Learn…</p></div>
