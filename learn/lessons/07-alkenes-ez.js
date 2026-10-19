@@ -75,7 +75,7 @@ export default {
     },
     {
       id: 's06', type: 'explain', skill: 'ez',
-      html: '<p>Cis/trans only works for an alkene with one H on each carbon. For anything else use <b>E/Z</b>: on each double-bond carbon <b>rank the two groups</b> (CIP rules). Higher-ranked groups on the <b>same</b> side = <b>Z</b> (zusammen); on <b>opposite</b> sides = <b>E</b> (entgegen).</p><p><b>Rule 1:</b> look at the atoms directly on the carbon; higher atomic number wins: Br &gt; Cl &gt; S &gt; O &gt; N &gt; C &gt; H.</p>'
+      html: '<p>Cis/trans only works for an alkene with one H on each carbon. For anything else use <b>E/Z</b>: on each double-bond carbon <b>rank the two groups</b> (CIP rules, the standard ranking rules). Higher-ranked groups on the <b>same</b> side = <b>Z</b> (zusammen); on <b>opposite</b> sides = <b>E</b> (entgegen).</p><p><b>Rule 1:</b> look at the atoms directly on the carbon; higher atomic number (more protons) wins: Br &gt; Cl &gt; S &gt; O &gt; N &gt; C &gt; H.</p>'
     },
     {
       id: 's07', type: 'try', skill: 'ez', widget: 'cip-ranker',
@@ -119,7 +119,7 @@ export default {
     },
     {
       id: 's11', type: 'try', skill: 'ez', widget: 'cip-ranker',
-      prompt: 'Apply rule 3. Tap the higher-ranked group on each double-bond carbon of this diene (look at the C=C in the middle), then choose E or Z.',
+      prompt: 'Apply rule 3. Tap the higher-ranked group on each double-bond carbon of this diene (a molecule with two C=C; look at the C=C in the middle), then choose E or Z.',
       config: { smiles: 'C=C/C(CC)=C\\C', bond: [2, 5] },
       confirm: 'On C3 the vinyl group (C,C,H) beats ethyl (C,H,H) once its double bond is duplicated; on C4 CH₃ beats H. Both winners are on the same side: Z.',
       hints: ['On the left carbon both groups start with C. Write the vinyl group as (C, C, H) by duplicating its double bond, and ethyl as (C, H, H).', 'Compare the two sets position by position, highest first: C against C ties, then C against H decides.'],
@@ -139,7 +139,7 @@ export default {
     },
     {
       id: 's13', type: 'explain', skill: 'naming',
-      html: '<p><b>Alkene recipe.</b> 1 Parent: longest chain containing the C=C (<b>-ene</b>; C≡C is <b>-yne</b>). 2 Number from the end nearer the multiple bond (on a tie, nearer the first branch). 3 Add the locant: <name new="but-2-ene" old="2-butene"></name>, <name new="buta-1,3-diene" old="1,3-butadiene"></name>, <name new="pent-1-yne" old="1-pentyne"></name>. 4 Branches alphabetically, then <b>(E)</b> or <b>(Z)</b> first.</p><p>A cycloalkene is numbered C1=C2, then to give branches the lowest numbers.</p>'
+      html: '<p><b>Alkene recipe.</b> 1 Parent: longest chain containing the C=C (<b>-ene</b>; C≡C is <b>-yne</b>). 2 Number from the end nearer the multiple bond (on a tie, nearer the first branch). 3 Add the locant (position number): <name new="but-2-ene" old="2-butene"></name>, <name new="buta-1,3-diene" old="1,3-butadiene"></name>, <name new="pent-1-yne" old="1-pentyne"></name>. 4 Branches alphabetically, then <b>(E)</b> or <b>(Z)</b> first.</p><p>A cycloalkene is numbered C1=C2, then to give branches the lowest numbers.</p>'
     },
     {
       id: 's14', type: 'worked', skill: 'naming',
@@ -169,7 +169,7 @@ export default {
           ask: 'E or Z? Rank the groups on C3 and on C4 and see which side the winners are on. The higher-ranked groups are…',
           options: [
             { text: 'ethyl on C3 and ethyl on C4: on opposite sides, so E', correct: true, why: 'Yes. On C3, ethyl (C,H,H) beats methyl (H,H,H); on C4, ethyl beats H. The two ethyl groups are drawn on opposite sides of the double bond: E.' },
-            { text: 'ethyl on C3 and ethyl on C4: on the same side, so Z', why: 'Look at the drawing again: one ethyl goes down-left and the other up-right, so the winners are on opposite sides.' },
+            { text: 'ethyl on C3 and ethyl on C4: on the same side, so Z', why: 'Look at the drawing again: the two ethyl groups are on opposite sides of the double bond, not the same side.' },
             { text: 'methyl on C3 and ethyl on C4', why: 'Methyl loses to ethyl: its set is (H,H,H), against ethyl’s (C,H,H).' }
           ],
           then: 'So the geometry is E.'
@@ -189,7 +189,7 @@ export default {
     },
     {
       id: 's15', type: 'input', skill: 'naming',
-      prompt: 'Name this alkene, including E or Z. Type it in either IUPAC style; spaces, capitals and hyphens do not matter, but numbers and order do.',
+      prompt: 'Name this alkene, including E or Z. Type it in either IUPAC style; spaces, capitals and hyphens do not matter, but numbers and order do. (With two C=C the ending is -diene, <name new="hexa-1,3-diene" old="1,3-hexadiene"></name>; if both bonds can be E/Z give both letters, <name new="(2Z,4E)-octa-2,4-diene" old="(2Z,4E)-2,4-octadiene"></name>.)',
       smiles: S_TYPED,
       name: true,
       answer: '(E)-3-methylpent-2-ene', accept: ['(E)-3-methyl-2-pentene'],

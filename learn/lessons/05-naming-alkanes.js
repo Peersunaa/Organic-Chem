@@ -82,7 +82,7 @@ export default {
       options: [
         { text: '1', why: 'The end carbons and the middle carbon are different places. A group attached through an end carbon is not the same as one attached through the middle carbon.' },
         { text: '2', correct: true, why: 'Yes. All six end H are equivalent (same group) and the two middle H are equivalent (a second group).' },
-        { text: '3', why: 'The two end carbons are mirror images of each other, so removing an H from either gives the same group.' },
+        { text: '3', why: 'The two end carbons are equivalent by symmetry, so removing an H from either gives the same group.' },
         { text: '8', why: 'Eight is the number of hydrogens, not the number of different groups. Many of them are equivalent by symmetry.' }
       ],
       reveal: 'Attached through an end carbon, the group is <b>propyl</b>. Attached through the middle carbon, it is <b><name new="propan-2-yl" old="isopropyl"></name></b>. Groups made this way are <b>alkyl groups</b>, and butane and isobutane give four more.'
@@ -123,15 +123,15 @@ export default {
       id: 's10', type: 'try', skill: 'naming', widget: 'chain-tracer',
       prompt: 'Now the naming itself. The first job is to find the longest continuous chain, which may bend. Trace it on 4-ethyl-2-methylhexane.',
       config: { smiles: 'CC(C)CC(CC)CC', task: 'trace' },
-      confirm: 'Six carbons in a row: the parent is hexane. The chain can turn a corner at a branch point; the leftovers are branches.',
+      confirm: 'Six carbons in a row: the parent (the chain you name from) is hexane. The chain can turn a corner at a branch point; the leftovers are branches.',
       hints: ['Start at a CH₃ end and keep walking from carbon to carbon without lifting your finger. The chain can bend.', 'Try both arms at the branch point: you want the path with the most carbons.'],
       worked: 'Start at a CH₃ on the CH(CH₃) fork, go through that CH, the CH₂ and the CH that carries the ethyl, then out along one of its two-carbon arms. That is 6 carbons. What is left over is a methyl branch and an ethyl branch.'
     },
     {
       id: 's11', type: 'try', skill: 'naming', widget: 'chain-tracer',
-      prompt: 'Two chains here tie for longest. Trace the one that should be the parent of 3-ethyl-2-methylpentane.',
+      prompt: 'Several chains here tie for longest (five carbons). Trace the one that should be the parent of 3-ethyl-2-methylpentane.',
       config: { smiles: 'CC(C)C(CC)CC', task: 'trace' },
-      confirm: 'Both chains have five carbons, but yours leaves two branches (ethyl and methyl) instead of one. The parent with more branches wins a tie: 3-ethyl-2-methylpentane, not <name new="3-(propan-2-yl)pentane" old="3-isopropylpentane"></name>.',
+      confirm: 'All the five-carbon chains tie, but yours leaves two branches (ethyl and methyl) instead of one. The parent with more branches wins a tie: 3-ethyl-2-methylpentane, not <name new="3-(propan-2-yl)pentane" old="3-isopropylpentane"></name>.',
       hints: ['Find every five-carbon path. There is more than one.', 'When chains tie, pick the one that leaves more branches off the chain.'],
       worked: 'The path from a CH₃ of the CH(CH₃)₂ end, through the CH and the CH, and out along an ethyl has 5 carbons and leaves 2 branches (a methyl and an ethyl). The path through both ethyls also has 5 carbons but leaves only 1 branch (a <name new="propan-2-yl" old="isopropyl"></name>). More branches wins.'
     },
@@ -140,7 +140,7 @@ export default {
       prompt: 'Next the numbering. The parent chain of 4-ethyl-2-methylhexane is outlined. Tap the carbon that should be C1.',
       config: { smiles: 'CC(C)CC(CC)CC', task: 'number' },
       confirm: 'Counting from this end, the branches sit on C2 and C4. From the other end they would be on C3 and C5. The first branch should get the lowest number.',
-      hints: ['C1 is one of the two ends of the outlined chain. Which end is nearer to the first branch?', 'Count both ways: the right end puts the branches on 3 and 5. Pick the end that gives the lower first number.'],
+      hints: ['C1 is one of the two ends of the outlined chain. Which end is nearer to the first branch?', 'Count both ways: one end puts the branches on 2 and 4, the other on 3 and 5. Pick the end that gives the lower first number.'],
       worked: 'From the end nearer the methyl: methyl on C2, ethyl on C4. From the other end: ethyl on C3, methyl on C5. The first number is lower from the methyl end (2 against 3), so that end is C1.'
     },
     {
@@ -169,7 +169,7 @@ export default {
             { text: 'The other end: the first branch is on C4', why: 'From the other end the first branch is on C4, then 4 and 5. The first number (4) is higher than 3, so this is the wrong end.' },
             { text: 'Either end, it makes no difference', why: 'It does: 3, 4, 4 from one end and 4, 4, 5 from the other. At the first difference 3 beats 4.' }
           ],
-          then: 'The locants are 3, 4 and 4.'
+          then: 'The locants (position numbers) are 3, 4 and 4.'
         },
         {
           ask: 'Name the branches with their numbers. Which list is right?',
@@ -257,7 +257,7 @@ export default {
       diagnoseFn: (raw) => diagnoseTyped(S18, raw),
       confirm: '<name new="1-ethyl-3-methylcyclopentane" old="1-ethyl-3-methylcyclopentane"></name>: either direction gives 1,3, so the first branch alphabetically (ethyl) takes C1. A ring with a single branch needs no number at all.',
       hints: ['The ring has 5 carbons, so the parent is cyclopentane. Start numbering at one of the two branches.', 'Choose the direction that gives the lowest numbers. If both directions tie, ethyl (e) gets 1 before methyl (m).'],
-      worked: 'Cyclopentane with an ethyl and a methyl two carbons apart: the numbers are 1,3 either way, so ethyl takes 1 (alphabetical): 1-ethyl-3-methylcyclopentane.'
+      worked: 'Cyclopentane with an ethyl and a methyl with one ring carbon between them: the numbers are 1,3 either way, so ethyl takes 1 (alphabetical): 1-ethyl-3-methylcyclopentane.'
     }
   ],
   mastery: { count: 3, generator: 'alkane-names' },

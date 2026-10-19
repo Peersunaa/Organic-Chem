@@ -73,7 +73,7 @@ export default arrange({
     },
     {
       id: 's04', type: 'explain', skill: 'markovnikov',
-      html: '<p><b>Why Markovnikov?</b> H⁺ can add to either carbon, which makes two different carbocations. The <b>more stable</b> cation forms faster, so its path wins. H goes to the carbon with more H, leaving the + charge on the more substituted carbon: the 3° or 2° cation instead of the 1°. X⁻ then bonds where the charge is.</p><p>If both carbons are equally substituted, both cations are equally stable and you get a <b>mixture</b>.</p>'
+      html: '<p><b>Why Markovnikov?</b> H⁺ can add to either carbon, which makes two different carbocations. The <b>more stable</b> cation forms faster, so its path wins. H goes to the carbon with more H, leaving the + charge on the more substituted carbon (more alkyl groups): the 3° or 2° cation instead of the 1°. X⁻ then bonds where the charge is.</p><p>If both carbons are equally substituted, both cations are equally stable and you get a <b>mixture</b>.</p>'
     },
     {
       id: 's05', type: 'choice', skill: 'carbocations',
@@ -90,7 +90,7 @@ export default arrange({
     },
     {
       id: 's06', type: 'explain', skill: 'carbocations',
-      html: `<div style="text-align:center">${CATION_SVG}</div><p>The C⁺ is sp² and planar. Its <b>p orbital is empty</b>, above and below the plane: that hole is what attracts a pair of electrons. Alkyl groups push electron density toward C⁺ (the <b>inductive effect</b>), so stability runs <b>3° > 2° > 1° > methyl</b>.</p>`
+      html: `<div style="text-align:center">${CATION_SVG}</div><p>The C⁺ (R = an alkyl group) is sp² and planar. Its <b>p orbital is empty</b>, above and below the plane: that hole is what attracts a pair of electrons. Alkyl groups push electron density toward C⁺ (the <b>inductive effect</b>), so stability runs <b>3° > 2° > 1° > methyl</b>.</p>`
     },
     {
       id: 's07', type: 'choice', skill: 'energy-diagram',
@@ -140,7 +140,7 @@ export default arrange({
     },
     {
       id: 's11', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
-      prompt: 'Draw the 3-step mechanism of acid-catalysed hydration of 2-methylpropene. Step 1: the π bond attacks H₃O⁺. Step 2: water attacks the carbocation. Step 3: water removes H⁺.',
+      prompt: 'Draw the 3-step mechanism of acid-catalysed hydration of 2-methylpropene. Step 1: the π bond attacks H₃O⁺. Step 2: water attacks the carbocation, giving an oxonium ion (an O with three bonds and a + charge). Step 3: water removes H⁺.',
       reaction: { reactants: ['CC(C)=C', '[OH3+]'], products: ['CC(C)(C)O', '[OH3+]'] },
       config: { get mech() { return mech('CC(C)=C', 'H2O', 3, 1); }, mode: 'draw' },
       confirm: 'Protonation gives the tertiary cation, water’s lone pair attacks it to make an oxonium ion, and another water pulls off H⁺. The product is the alcohol, and H₃O⁺ is regenerated.',

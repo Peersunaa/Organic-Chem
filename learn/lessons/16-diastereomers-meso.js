@@ -90,7 +90,7 @@ export default {
     },
     {
       id: 's09', type: 'explain', skill: 'meso',
-      html: '<p>A <b>meso compound</b> has chirality centers <i>and</i> a plane of symmetry. It is identical to its own mirror image, so it is achiral and optically inactive. For tartaric acid, (2R,3S) and (2S,3R) are the <i>same</i> compound: <b>(+)</b>, <b>(−)</b> and <b>meso</b> make three stereoisomers.</p><p>A meso form needs two matching halves. 2,3-Dibromobutane has one; 2-bromo-3-chlorobutane does not, because the two ends differ.</p>'
+      html: '<p>A <b>meso compound</b> has chirality centers <i>and</i> a plane of symmetry. It is identical to its own mirror image, so it is achiral and optically inactive. For tartaric acid, (2R,3S) and (2S,3R) are the <i>same</i> compound: <b>(+)</b>, <b>(−)</b> and <b>meso</b> make three stereoisomers.</p><p>A meso form needs two matching halves. 2,3-Dibromobutane has one; 2-bromo-3-chlorobutane does not, because the two ends differ. The plane can pass through an atom between centers (2,4-dibromopentane); a cis-1,2 ring with like groups is meso.</p>'
     },
     {
       id: 's10', type: 'choice', skill: 'meso',
@@ -124,7 +124,7 @@ export default {
           options: [
             { text: '2² = 4: (2R,3R), (2S,3S), (2R,3S), (2S,3R)', correct: true, why: 'Yes: each of the 2 centers can be R or S.' },
             { text: '2 × 2 × 2 = 8', why: 'Each CENTER gives a factor of 2, and there are two centers, so 2² = 4.' },
-            { text: '2 + 2 = 4, but the pairs matter less', why: 'The rule is multiplication (2 × 2); it gives 4, but for the right reason: each center is independent.' }
+            { text: '2 + 2 = 4: add the two choices of one center to the two choices of the other', why: 'The choices multiply, they do not add: every option at C2 can be paired with every option at C3. Here 2 + 2 and 2 × 2 both give 4 by coincidence; with three centers it would be 8, not 6.' }
           ],
           visual: { widget: 'stereo-grid', config: { entry: 'dibromobutane', view: true } },
           then: 'Here are all four drawings.'
@@ -195,7 +195,7 @@ export default {
     },
     {
       id: 's15', type: 'explain', skill: 'racemates',
-      html: '<p>A <b>racemic mixture</b> (racemate), (±), is a 50:50 mixture of two enantiomers: two compounds, each optically active, whose rotations cancel. A <b>meso compound</b> is one compound that is optically inactive because of its own plane of symmetry.</p><p>Both read 0°, but they are not the same thing. A racemate can be resolved into its two enantiomers; a meso compound cannot be split.</p>'
+      html: '<p>A <b>racemic mixture</b> (racemate), (±), is a 50:50 mixture of two enantiomers: two compounds, each optically active, whose rotations cancel. A <b>meso compound</b> is one compound that is optically inactive because of its own plane of symmetry.</p><p>Both read 0°, but they are not the same thing. A racemate can be resolved (separated) into its two enantiomers; a meso compound cannot be split.</p>'
     },
     {
       id: 's16', type: 'try', skill: 'racemates', widget: 'resolution-flow',

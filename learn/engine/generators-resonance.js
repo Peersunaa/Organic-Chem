@@ -125,6 +125,7 @@ function drawProblem(rng) {
     config: { start: sys.start, fold: !!sys.fold, need: 1, name: sys.name, hybrid: false },
     system: sys.id, start: sys.start, nForms: forms.length,
     derive: `${FAM_WHY[sys.fam]} The ${sys.name} has ${forms.length} resonance form${forms.length > 1 ? 's' : ''}: ${forms.map((f) => f.smiles).join(' ↔ ')}. Only electrons moved; every atom and σ bond stayed put.`,
+    deriveHtml: `${FAM_WHY[sys.fam]} The ${sys.name} has ${forms.length} resonance form${forms.length > 1 ? 's' : ''}: ${forms.map((f) => `<mol smiles="${f.smiles}">`).join(' ↔ ')}. Only electrons moved; every atom and σ bond stayed put.`,
     hints: ['Find the pair of electrons that can move: a lone pair or an empty p orbital sitting right next to a π bond. Atoms never move, only these electrons.', 'Draw the arrow from the π bond (or lone pair) to the bond between it and the charged atom. When a pair arrives at an atom that already has an octet, a second arrow must take a π pair away from it.']
   };
 }

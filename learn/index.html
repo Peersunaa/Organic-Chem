@@ -91,6 +91,15 @@ a.lesson { box-shadow: var(--shadow); } a.lesson:hover { border-color: var(--acc
 .ws .btn { justify-self: start; }
 
 /* lesson player */
+.recap-slot:empty { display: none; } .recap-slot { margin-bottom: 18px; }
+.recap { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 4px 12px 12px 4px; background: var(--surface-2); padding: 0 14px; }
+.recap summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; font: 600 .78rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.recap-body { display: grid; gap: 6px; padding-bottom: 12px; font-size: .93rem; }
+.recap-q { color: var(--muted); } .recap-a b { color: var(--ink); } .recap-note p { margin: 0; display: inline; } .recap-note p + p::before { content: ' '; }
+.recap-body:not(.full) .recap-q { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.recap-body:not(.full) .recap-note { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.recap-more { justify-self: start; background: none; border: 0; padding: 4px 0; min-height: 32px; color: var(--accent); font-weight: 600; font-size: .85rem; cursor: pointer; }
+.recap .mol { display: inline-grid; vertical-align: middle; } .recap .mol-svg { max-width: 110px; }
 .lhead { display: grid; gap: 10px; }
 .back-home { font-size: .9rem; text-decoration: none; justify-self: start; min-height: 32px; display: inline-flex; align-items: center; }
 .ltitle { display: flex; align-items: baseline; gap: 12px; font-size: clamp(1.5rem, 5.5vw, 2.1rem); }

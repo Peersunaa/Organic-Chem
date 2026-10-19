@@ -338,13 +338,13 @@ export function renderProblems(cfg, ctx, host) {
       if (wrong >= 2) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 2 '), p.hints[1]));
       if (wrong >= 3 && !settled) {
         const ans = p.kind === 'groupfind' ? '' : p.kind === 'input' ? `The answer is ${p.answer}. ` : p.kind === 'choice' ? `The answer is ${p.answer || p.options.find((o) => o.correct).text}. ` : '';
-        hints.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), ans + p.derive));
+        hints.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), p.deriveHtml ? rich(ans + p.deriveHtml, 'span') : ans + p.derive));
         advance(false);
       }
     };
     const onRight = () => {
       if (wrong === 0) ctx.win(p.skill);
-      fb.className = 'fb ok'; fb.textContent = 'Correct. ' + p.derive;
+      fb.className = 'fb ok'; if (p.deriveHtml) { fb.textContent = ''; fb.append(rich('Correct. ' + p.deriveHtml, 'span')); } else fb.textContent = 'Correct. ' + p.derive;
       hints.innerHTML = '';
       advance(true);
     };

@@ -45,13 +45,13 @@ export default {
     },
     {
       id: 's04', type: 'choice', skill: 'conjugate-pairs',
-      prompt: 'Methanol gives its O–H proton to amide ion: CH₃OH + NH₂⁻ → CH₃O⁻ + NH₃. Which structure is the conjugate base of methanol?',
+      prompt: 'Methanol gives its O–H proton to amide ion: CH₃OH + NH₂⁻ → CH₃O⁻ + NH₃ (NH₂⁻ is amide ion). Which structure is the conjugate base of methanol?',
       reaction: { reactants: ['CO', '[NH2-]'], products: ['C[O-]', 'N'] },
       options: [
-        { smiles: 'C[O-]', label: 'A', correct: true, why: 'Yes. Methanol minus H⁺ from its O–H gives methoxide, CH₃O⁻.' },
-        { smiles: '[NH2-]', label: 'B', why: 'That is amide ion, the base that took the proton. The conjugate base of methanol is what methanol itself becomes.' },
-        { smiles: 'N', label: 'C', why: 'Ammonia is the conjugate acid of amide ion (NH₂⁻ + H⁺). It belongs to the other pair.' },
-        { smiles: '[CH2-]O', label: 'D', why: 'This lost an H from carbon. The acidic H of methanol is the one on oxygen, and oxygen holds a negative charge far better than carbon does.' }
+        { smiles: 'C[O-]', label: 'A: CH₃O⁻, negative charge on O', correct: true, why: 'Yes. Methanol minus H⁺ from its O–H gives methoxide, CH₃O⁻.' },
+        { smiles: '[NH2-]', label: 'B: NH₂⁻', why: 'That is amide ion, the base that took the proton. The conjugate base of methanol is what methanol itself becomes.' },
+        { smiles: 'N', label: 'C: NH₃', why: 'Ammonia is the conjugate acid of amide ion (NH₂⁻ + H⁺). It belongs to the other pair.' },
+        { smiles: '[CH2-]O', label: 'D: HOCH₂⁻, H removed from C, negative charge on C', why: 'This lost an H from carbon. The acidic H of methanol is the one on oxygen, and oxygen holds a negative charge far better than carbon does.' }
       ],
       hints: ['The conjugate base is the acid minus H⁺: one H off, one more negative charge.', 'Methanol’s acidic H is the one on oxygen. Remove it and keep the three C–H bonds.'],
       worked: 'Methanol is the acid. Remove H⁺ from the O–H: CH₃O⁻ (methoxide) is its conjugate base. Amide ion is the base; its conjugate acid is NH₃.'
@@ -83,7 +83,7 @@ export default {
     },
     {
       id: 's07', type: 'choice', skill: 'pka-direction',
-      prompt: 'Cl⁻, CH₃CO₂⁻, CN⁻ and HO⁻ are the conjugate bases of HCl (' + M + '7.0), acetic acid (4.76), HCN (9.31) and water (15.74). Which one is the STRONGEST base?',
+      prompt: 'Cl⁻, CH₃CO₂⁻ (acetate), CN⁻ (cyanide) and HO⁻ (hydroxide) are the conjugate bases of HCl (' + M + '7.0), acetic acid (4.76), HCN (9.31) and water (15.74). Which one is the STRONGEST base?',
       derive: { quantity: 'weakestAcid', ids: ['hcl', 'acetic', 'hcn', 'water'] },
       options: [
         { text: 'Cl⁻', val: 'hcl', why: 'Cl⁻ comes from the strongest acid of the four, so it is the weakest base: it hardly wants an H⁺ back.' },
@@ -163,7 +163,7 @@ export default {
     },
     {
       id: 's10', type: 'choice', skill: 'pka-direction',
-      prompt: 'Ethoxide, CH₃CH₂O⁻, is the conjugate base of ethanol (pKa 16.00). Which of these acids can it deprotonate to a large extent?',
+      prompt: 'Ethoxide, CH₃CH₂O⁻, is the conjugate base of ethanol (pKa 16.00). Which of these acids can it deprotonate (pull H⁺ off) to a large extent?',
       derive: { quantity: 'deprotonates', base: 'ethanol', ids: ['acetic', 'acetone', 'acetylene', 'ammonia'] },
       options: [
         { text: 'Acetone, pKa 19.3', val: 'acetone', why: 'Acetone (19.3) is a weaker acid than ethanol (16.00). The equilibrium would favour ethoxide and acetone, not the products.' },
@@ -195,11 +195,11 @@ export default {
         { text: 'A hydrogen atom', why: 'Hydrogens only have their bonding pair. They can leave as H⁺, but cannot accept one.' }
       ],
       hints: ['A base needs a lone pair to bond to H⁺. Count them: (valence electrons − bonds) ÷ 2.', 'N: (5 − 3) ÷ 2 = 1 lone pair. C: (4 − 4) ÷ 2 = 0.'],
-      worked: 'Only nitrogen has a lone pair. It uses it to bond to H⁺, giving CH₃NH₃⁺. This is why amines are the typical organic bases.'
+      worked: 'Only nitrogen has a lone pair. It uses it to bond to H⁺, giving CH₃NH₃⁺. This is why amines (compounds with N bonded to carbon, like methylamine) are the typical organic bases.'
     },
     {
       id: 's13', type: 'explain', skill: 'pka-direction',
-      html: '<p><b>Organic acids</b>: O–H groups (alcohols such as ethanol, 16.00; carboxylic acids such as acetic acid, 4.76) and C–H bonds next to C=O (acetone, 19.3).</p><p><b>Organic bases</b>: anything with a lone pair, mostly the N of amines. Oxygen compounds are weak bases and take H⁺ only from strong acids.</p>'
+      html: '<p><b>Organic acids</b>: O–H groups (alcohols such as ethanol, 16.00; carboxylic acids such as acetic acid, 4.76) and C–H bonds next to C=O (acetone, 19.3).</p><p><b>Organic bases</b>: anything with a lone pair, mostly the N of amines (such as methylamine). Oxygen compounds are weak bases and take H⁺ only from strong acids.</p>'
     },
     {
       id: 's14', type: 'predict', skill: 'curved-arrows',
@@ -265,8 +265,8 @@ export default {
           ask: 'Mg²⁺: a metal ion that has lost its outer electrons.',
           check: { smiles: '[Mg+2]', quantity: 'lewis' },
           options: [
-            { text: 'Lewis acid', val: 'acid', correct: true, why: 'Yes. A positive ion with empty room in its outer shell accepts electron pairs.' },
-            { text: 'Lewis base', val: 'base', why: 'Mg²⁺ has no electrons in its outer shell, so no lone pair to donate.' }
+            { text: 'Lewis acid', val: 'acid', correct: true, why: 'Yes. A positive metal ion has empty orbitals and accepts electron pairs.' },
+            { text: 'Lewis base', val: 'base', why: 'Mg²⁺ has lost its two outer electrons and carries a 2+ charge, so it has no lone pair to donate.' }
           ]
         },
         {

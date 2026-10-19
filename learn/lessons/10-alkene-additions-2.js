@@ -32,7 +32,7 @@ export default arrange({
   steps: [
     {
       id: 's01', type: 'predict', skill: 'stereo-addition',
-      prompt: 'Br₂ is added to cyclopentene in CH₂Cl₂. The red-brown colour of Br₂ disappears at once, and a dibromide forms by addition across the C=C. The two new Br atoms could land on the same face of the ring (cis) or on opposite faces (trans). Which do you expect?',
+      prompt: 'Br₂ is added to cyclopentene in CH₂Cl₂ (dichloromethane, a solvent). The red-brown colour of Br₂ disappears at once, and a dibromide forms by addition across the C=C. The two new Br atoms could land on the same face of the ring (cis) or on opposite faces (trans). Which do you expect?',
       equation: { reactants: ['C1=CCCC1'], products: [], cond: 'Br₂, CH₂Cl₂' },
       options: [
         opt('<mol smiles="Br[C@H]1CCC[C@@H]1Br" label="trans-1,2-dibromocyclopentane">', true, 'Yes. Only the trans dibromide is found: the two Br atoms end up on opposite faces of the ring. Wedge and dash show the two faces.', { chk: ['C1=CCCC1', 'Br2', 'right'] }),
@@ -84,7 +84,7 @@ export default arrange({
         opt('<mol smiles="C[C@@H]1CCCC[C@@H]1C" label="cis-1,2-dimethylcyclohexane">', true, 'Yes. Both H atoms add to the same face of the ring. The two CH₃ groups are pushed to the other face together, so they are cis.', { chk: ['CC1=C(C)CCCC1', 'H2', 'right'] }),
         opt('<mol smiles="C[C@H]1CCCC[C@@H]1C" label="trans-1,2-dimethylcyclohexane">', false, 'trans would need the two H atoms to add to opposite faces. Catalytic hydrogenation does not do that: both H atoms come from the same catalyst surface.', { chk: ['CC1=C(C)CCCC1', 'H2', 'opposite'] }),
         opt('<mol smiles="CC1(C)CCCCC1" label="1,1-dimethylcyclohexane">', false, 'H₂ only adds two H atoms. A CH₃ group would have to move to give this, and nothing moves.'),
-        opt('No reaction: the C=C is too crowded', false, 'It is a tetrasubstituted alkene, and hydrogenation is slower for crowded alkenes, but it does work and gives this product in good yield.')
+        opt('No reaction: the C=C is too crowded', false, 'It is a tetrasubstituted alkene (four carbon groups on the C=C), and hydrogenation is slower for crowded alkenes, but it does work and gives this product in good yield.')
       ],
       reveal: 'The product is <b>cis-1,2-dimethylcyclohexane</b>. Hydrogenation is <b>syn addition</b>: both H atoms are delivered to the same face of the C=C.'
     },
@@ -99,7 +99,7 @@ export default arrange({
         opt('H₂, Pd/C gives cyclohexane', true, 'Yes. Two H atoms are added to the molecule: a reduction.'),
         opt('A peroxyacid, RCO₃H, gives cyclohexene oxide', false, 'An O atom is added to the molecule. Adding O is an oxidation.'),
         opt('KMnO₄, OH⁻ gives cyclohexane-1,2-diol', false, 'Two O atoms (as OH groups) are added: an oxidation.'),
-        opt('KMnO₄, H₃O⁺ gives hexanedioic acid', false, 'The product has far more O than the alkene (the C=C is cut and O is added to each end): an oxidation.')
+        opt('KMnO₄, H₃O⁺ gives hexanedioic acid, HO₂C(CH₂)₄CO₂H', false, 'The product has far more O than the alkene (the C=C is cut and O is added to each end): an oxidation.')
       ],
       hints: ['Count what is added to the carbons: H atoms, or O atoms?', 'H added (or O removed) is a reduction. Only one reagent here adds H.'],
       worked: 'H₂ adds two H atoms to the C=C, giving cyclohexane. That is the only reaction that adds H. The other three add O (as an epoxide O, two OH groups, or C=O and CO₂H groups), so they are oxidations.'
@@ -152,7 +152,7 @@ export default arrange({
         opt('<mol smiles="C1CC[C@H]2O[C@H]2C1" label="cyclohexene oxide">', false, 'KMnO₄ adds an OH to each carbon. An epoxide is the peroxyacid product, with one O shared by both carbons.', { chk: ['C1=CCCCC1', 'RCO3H', 'right'] }),
         opt('<mol smiles="O=C(O)CCCCC(=O)O" label="hexanedioic acid">', false, 'The C=C is cut in ACID, not in base. In basic solution the oxidation stops at the diol.')
       ],
-      reveal: 'KMnO₄ in base gives the <b>cis-diol</b>: <b>syn hydroxylation</b>, in one step. With an acyclic alkene the same rule gives cis alkene → meso diol and trans alkene → racemic diol.'
+      reveal: 'KMnO₄ in base gives the <b>cis-diol</b>: <b>syn hydroxylation</b>, in one step. With an acyclic alkene the same rule gives cis alkene → a meso diol (a diol that is its own mirror image) and trans alkene → a racemic diol (equal amounts of two mirror-image diols).'
     },
     {
       id: 's13', type: 'choice', skill: 'alkene-oxidation',
@@ -230,7 +230,7 @@ export default arrange({
     },
     {
       id: 's17', type: 'choice', skill: 'polymers',
-      prompt: 'Polymers: heated benzoyl peroxide supplies radicals that start the chain. In the step shown, a growing chain radical (R = the benzoyloxy group from the initiator) meets another ethylene. What kind of step is it?',
+      prompt: 'Polymers: heated benzoyl peroxide supplies radicals that start the chain. In the step shown, a growing chain radical (the benzoyloxy group from the initiator is at the left end) meets another ethylene. A radical chain has three stages: <b>initiation</b> (the start), <b>propagation</b> (the chain grows) and <b>termination</b> (the chain stops). Which stage is this step?',
       equation: { reactants: ['O=C(c1ccccc1)OC[CH2]', 'C=C'], products: ['O=C(c1ccccc1)OCCC[CH2]'] },
       options: [
         opt('Propagation', true, 'Yes. A radical adds to a C=C and leaves a new, longer radical. This step repeats hundreds or thousands of times as the chain grows.'),
@@ -249,7 +249,7 @@ export default arrange({
         mo('*CC(*)Cl', 'repeat unit of PVC', true, 'Yes. The π bond is used up: each former C=C carbon forms a single bond to a neighbour in the chain. The repeat unit has exactly the atoms of the monomer.'),
         mo('C=CCl', 'the monomer itself', false, 'This is the monomer, with its C=C. In the polymer that π bond is gone: its electrons make the bonds that link the units together.'),
         mo('CCCl', 'chloroethane', false, 'This is the alkane you would get by adding H₂. Polymerisation joins monomers to each other; it does not add H₂.'),
-        mo('*C=C(*)Cl', 'C=C kept in the chain', false, 'This keeps the C=C but has two atoms fewer than the monomer. An addition polymer loses nothing: the repeat unit has exactly the atoms of the monomer, with the C=C turned into a C–C single bond.')
+        mo('*C=C(*)Cl', 'C=C kept in the chain', false, 'This keeps the C=C but has two H atoms fewer than the monomer. An addition polymer loses nothing: the repeat unit has exactly the atoms of the monomer, with the C=C turned into a C–C single bond.')
       ],
       hints: ['Nothing is lost in an addition polymer. The repeat unit must have the same atoms as the monomer, C₂H₃Cl.', 'Turn the C=C into a single bond and add one bond to the chain at each of its two carbons (the * marks). The Cl stays on its carbon.'],
       worked: 'Break the π bond of H₂C=CHCl and use its electrons to bond each carbon to a neighbouring unit. The repeat unit is –CH₂–CHCl–: C₂H₃Cl with a bond to the chain on each carbon, so Cl appears on every other carbon of the chain.'

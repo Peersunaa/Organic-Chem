@@ -30,7 +30,7 @@ export default {
     },
     {
       id: 's02', type: 'try', skill: 'conformations',
-      prompt: 'Turn the rear CH₃ with the slider (or drag around the Newman circle). Lock two arrangements: first the one where the six C–H bonds are as <b>far apart</b> as possible, then the one where they are as <b>close together</b> as possible.',
+      prompt: 'Turn the rear CH₃ with the slider (or drag around the Newman circle, a view looking straight down the C–C bond: front carbon in the centre, rear carbon as the circle). Lock two arrangements: first the one where the six C–H bonds are as <b>far apart</b> as possible, then the one where they are as <b>close together</b> as possible.',
       widget: 'newman-rotator',
       config: { mol: 'ethane', need: ['min', 'max'], energy: false, pill: false, start: 25, lockLabels: { min: 'Lock: C–H bonds as far apart as possible', max: 'Lock: C–H bonds as close together as possible' } },
       hints: ['In the Newman circle the “far apart” arrangement has six bonds evenly spaced, each 60° from its neighbours.', 'The crowded arrangement hides each rear bond directly behind a front bond, so you only see three lines.'],
@@ -43,7 +43,7 @@ export default {
     },
     {
       id: 's04', type: 'input', skill: 'conformations',
-      prompt: 'The energy is switched on now. Turn through a full circle and watch the marker on the curve. By how many kJ/mol is the eclipsed arrangement higher in energy than the staggered one?',
+      prompt: 'The energy is switched on now. Turn through a full circle and watch the marker on the curve. By how many kJ/mol (kilojoules per mole, a unit of energy) is the eclipsed arrangement higher in energy than the staggered one?',
       visual: { widget: 'newman-rotator', config: { mol: 'ethane', need: [], energy: true, pill: true, start: 25 } },
       answer: 12, accept: ['12.0'],
       diagnose: [
@@ -70,7 +70,7 @@ export default {
     },
     {
       id: 's06', type: 'try', skill: 'conformations',
-      prompt: 'Now swap one H for a bromine: this is bromoethane (the CH₂Br carbon is in front, its Br is one of the front bonds). The energy curve is on. Find and lock the highest-energy arrangement. Is the peak higher or lower than ethane’s 12?',
+      prompt: 'Now swap one H for a bromine: this is bromoethane (the CH₂Br carbon is in front, its Br is one of the front bonds). The energy curve is on. Find and lock the highest-energy arrangement, then note whether its peak is higher or lower than ethane’s 12.',
       widget: 'newman-rotator',
       config: { mol: 'bromoethane', need: ['max'], energy: true, pill: true, start: 40, lockLabels: { max: 'Lock the highest-energy arrangement' } },
       hints: ['Follow the marker on the energy curve up to its peak.', 'At the peak every rear bond is hidden behind a front bond, including one rear H directly behind the Br.'],
@@ -141,7 +141,7 @@ export default {
     },
     {
       id: 's13', type: 'try', skill: 'chairs',
-      prompt: 'This is methylcyclohexane. Decide whether the circled CH₃ is axial or equatorial in this chair. Then press Flip and decide again.',
+      prompt: 'This is methylcyclohexane. Decide whether the circled CH₃ is axial or equatorial in this chair. Then press Flip (a <b>ring flip</b>: the chair turns into the other chair) and decide again.',
       widget: 'chair-flip',
       config: { mode: 'flip-identify', model: 'methylcyclohexane' },
       hints: ['Compare the methyl’s bond with the dashed axis line: parallel means axial.', 'An equatorial bond leaves the ring around its rim, nearly level with the ring’s own plane.'],
@@ -182,7 +182,7 @@ export default {
     },
     {
       id: 's17', type: 'explain', skill: 'chairs',
-      html: '<p>Both groups can sit equatorial in <b>trans-1,2</b>, <b>cis-1,3</b> and <b>trans-1,4</b> isomers, and that isomer is the more stable one. In the others one group must be axial, so the <b>bigger</b> group takes the equatorial spot.</p><p>Size order: H &lt; F &lt; Cl &lt; OH &lt; Me &lt; Et &lt; iPr &lt; tBu.</p>'
+      html: '<p>Both groups can sit equatorial in <b>trans-1,2</b>, <b>cis-1,3</b> and <b>trans-1,4</b> isomers, and that isomer is the more stable one. In the others one group must be axial, so the <b>bigger</b> group takes the equatorial spot.</p><p>Size order: H &lt; F &lt; Cl &lt; OH &lt; Me &lt; Et &lt; iPr &lt; tBu (Me methyl, Et ethyl, iPr isopropyl, tBu tert-butyl).</p>'
     },
     {
       id: 's18', type: 'worked', skill: 'chairs',

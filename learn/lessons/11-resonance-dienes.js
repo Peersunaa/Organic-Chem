@@ -52,7 +52,7 @@ export default arrange({
     },
     {
       id: 's03', type: 'explain', skill: 'resonance',
-      html: '<p><b>Resonance forms.</b> Neither drawing of the allyl cation is real alone. The ion has one fixed structure, a <b>resonance hybrid</b> of both: each end carbon holds half the + charge (δ+) and both C–C bonds lie between single and double. We join the drawings with a double-headed arrow, ↔. Spreading charge over more atoms steadies it, so allylic cations beat ordinary ones.</p>'
+      html: '<p><b>Resonance forms.</b> Neither drawing of the allyl cation is real alone. The ion has one fixed structure, a <b>resonance hybrid</b> of both: each end carbon holds half the + charge (δ+) and both C–C bonds lie between single and double. We join the drawings with a double-headed arrow, ↔. Spreading charge over more atoms steadies it, so allylic cations (the + next to a C=C) beat ordinary ones.</p>'
     },
     {
       id: 's04', type: 'try', skill: 'resonance', widget: 'resonance-drawer',
@@ -98,13 +98,13 @@ export default arrange({
       id: 's08', type: 'try', skill: 'resonance', widget: 'resonance-drawer',
       prompt: 'A glimpse of Lesson 13. <b>Benzene</b>, C₆H₆, is drawn here with three double bonds. Draw <b>three</b> arrows, each from a double bond to the single bond next to it, all going the same way around the ring. What do you get?',
       config: { start: 'C1=CC=CC=C1', name: 'benzene' },
-      confirm: 'The double and single bonds swapped places: the second Kekulé form. Neither is real. Benzene is a hybrid in which all six C–C bonds are the same, halfway between single and double (the dashed ring). This is why benzene is so stable; Lesson 13 builds on it.',
+      confirm: 'The double and single bonds swapped places: the second Kekulé form (the other way of placing the three double bonds). Neither is real. Benzene is a hybrid in which all six C–C bonds are the same, halfway between single and double (the dashed ring). This is why benzene is so stable; Lesson 13 builds on it.',
       hints: ['Each arrow starts at a double bond (its π pair) and ends at the single bond that comes next, going round the ring in one direction.', 'Tap a double bond, then the single bond clockwise next to it. Repeat for the other two double bonds so every π pair moves one place, then press Check.'],
       worked: 'Three arrows, each from a C=C bond to the C–C bond after it in the same direction. Every double bond becomes single and every single bond becomes double: the other Kekulé form, with all atoms in place and no charge anywhere.'
     },
     {
       id: 's09', type: 'explain', skill: 'resonance',
-      html: '<p><b>The ground rules.</b> Forms are imaginary; the real species is the hybrid, more stable than any form. Only π electrons and lone pairs move; atoms and σ bonds never do (moving an H gives a different molecule). Every form is a valid Lewis structure with the same total charge and no carbon with five bonds. The usual pattern is a p orbital next to a C=C. More forms means more stability.</p>'
+      html: '<p><b>The ground rules.</b> Forms are imaginary; the real species is the hybrid, more stable than any form. Only π electrons and lone pairs move; atoms and σ bonds never do (moving an H gives a different molecule). Every form is a valid Lewis structure with the same total charge and no carbon with five bonds. The pattern: a p orbital or lone pair next to a π bond (cations, anions, enolates, nitro, amides). More forms means more stability.</p>'
     },
     {
       id: 's10', type: 'choice', skill: 'dienes',
@@ -117,11 +117,11 @@ export default arrange({
         opt('C2 and C3 are sp³ carbons because each carries an H, so only C1 and C4 have p orbitals', false, 'Every carbon of C=C–C=C is sp²: three groups around it (the carbons or H atoms) and one p orbital. C2 and C3 have p orbitals just as C1 and C4 do.')
       ],
       hints: ['Rotate the model so you look along the chain from the side. Do all four highlighted carbons sit in one sheet?', 'Count the p orbitals: each sp² carbon has one, perpendicular to the plane. If they are all parallel, they can all overlap in a row.'],
-      worked: 'The model is the s-trans conformer (the C1=C2–C3=C4 twist is about 180°) and all four carbons lie in one plane. Each is sp², so each has one p orbital perpendicular to that plane, and the four parallel p orbitals overlap in a row: the π electrons are shared over all four carbons.'
+      worked: 'The model is the s-trans conformer (the two C=C bonds point in opposite directions across C2–C3, a twist of about 180°) and all four carbons lie in one plane. Each is sp², so each has one p orbital perpendicular to that plane, and the four parallel p orbitals overlap in a row: the π electrons are shared over all four carbons.'
     },
     {
       id: 's11', type: 'predict', skill: 'dienes',
-      prompt: 'Now the chemistry. <b>One equivalent of HBr</b> is added to buta-1,3-diene. Lesson 09 would give one Markovnikov product for each C=C. How many different bromides do you expect from this diene?',
+      prompt: 'Now the chemistry. <b>One equivalent of HBr</b> (one HBr molecule for each diene molecule) is added to buta-1,3-diene. Lesson 09 would give one Markovnikov product for each C=C. How many different bromides do you expect from this diene?',
       equation: { reactants: ['C=CC=C'], products: [], cond: 'HBr (1 equiv.)' },
       options: [
         opt('One: only the Markovnikov product, 3-bromobut-1-ene', false, 'That is half the answer. The cation made here is special: its + charge is shared by two carbons, and Br⁻ can attack either of them.'),
@@ -176,7 +176,7 @@ export default arrange({
     },
     {
       id: 's16', type: 'choice', skill: 'dienes',
-      prompt: '<b>Cyclohexa-1,3-diene</b> reacts with one equivalent of HBr. The allylic cation has two ends: one next to the new CH₂ and one across the ring. How many different products form?',
+      prompt: '<b>Cyclohexa-1,3-diene</b> reacts with one equivalent of HBr. H⁺ adds to one end of the diene, and the + charge is shared by two ring carbons (the two ends of the allylic cation). How many different products form?',
       equation: { reactants: ['C1=CC=CCC1'], products: [], cond: 'HBr (1 equiv.)' },
       options: [
         opt(mols([['BrC1C=CCCC1', '3-bromocyclohexene']]), true, 'Yes. Attack at either end of the allylic cation gives 3-bromocyclohexene: the 1,2- and the 1,4-addition products are the same compound in this ring, so there is only one product.', { chk: { diene: 'C1=CC=CCC1', reagent: 'HBr', kind: 'major' } }),
@@ -231,7 +231,7 @@ export default arrange({
           ask: 'So the product is…',
           options: [
             opt('<mol smiles="CC=CC(C)Cl" label="4-chloropent-2-ene">', true, 'Yes. Cl on a carbon next to the C=C: 4-chloropent-2-ene (also called pent-3-en-2-yl chloride).'),
-            opt('<mol smiles="C=CCC(C)Cl" label="2-chloropent-4-ene">', false, 'This has no C=C next to the Cl-bearing carbon. It would come from a non-allylic cation, which does not form.'),
+            opt('<mol smiles="C=CCC(C)Cl" label="4-chloropent-1-ene">', false, 'This has no C=C next to the Cl-bearing carbon. It would come from a non-allylic cation, which does not form.'),
             opt('<mol smiles="C=CC(Cl)CC" label="3-chloropent-1-ene">', false, 'That is the 1,2-product from the less stable allylic cation (H on C4, + shared by C3 and C1, one end primary). The cation with H on C1 is better, so this is not the major product.')
           ]
         }
@@ -248,7 +248,7 @@ export default arrange({
     },
     {
       id: 's20', type: 'explain', skill: 'dienes',
-      html: '<p><b>Recap.</b> A conjugated diene has four coplanar sp² carbons with overlapping p orbitals. HX adds H⁺ to an end carbon, making an <b>allylic cation</b> whose + charge is shared by two carbons (two resonance forms). The halide attacks either one: <b>1,2-</b> and <b>1,4-addition</b> products, a mixture. Resonance steadies the cation, so it forms faster than a non-allylic one.</p>'
+      html: '<p><b>Recap.</b> A conjugated diene has four coplanar (in one plane) sp² carbons with overlapping p orbitals. HX adds H⁺ to an end carbon, making an <b>allylic cation</b> whose + charge is shared by two carbons (two resonance forms). The halide attacks either one: <b>1,2-</b> and <b>1,4-addition</b> products, a mixture. Resonance steadies the cation, so it forms faster than a non-allylic one.</p>'
     }
   ],
   mastery: { count: 3, generator: 'resonance' },

@@ -182,7 +182,7 @@ export default arrange({
     },
     {
       id: 's11', type: 'try', skill: 'energy-diagram', widget: 'energy-diagram',
-      prompt: 'This energy diagram is for the reaction you just drew. The curve climbs and falls twice. Find the special points.',
+      prompt: 'This energy diagram is for the reaction you just drew. The curve climbs and falls twice. A <b>transition state</b> is the top of a peak (an unstable in-between arrangement that cannot be isolated); a <b>reaction intermediate</b> is a real but short-lived species in a valley between two peaks. Find them.',
       config: { levels: HCL_ETHYLENE_LEVELS, mode: 'tasks', tasks: ['ts', 'intermediate'], caption: 'Illustrative energies, not measured values.' },
       confirm: 'The peaks are transition states (they cannot be isolated); the valley between them is the carbocation intermediate.',
       hints: ['A peak is the highest-energy point of a step. A valley between two peaks is something that really forms.', 'The transition states are the two peaks (B and D). The intermediate is the valley between them (C).'],
@@ -190,7 +190,7 @@ export default arrange({
     },
     {
       id: 's12', type: 'try', skill: 'energy-diagram', widget: 'energy-diagram',
-      prompt: 'Same reaction, now with the energies written in (kJ/mol). Read the diagram.',
+      prompt: 'Same reaction, now with the energies written in (kJ/mol). <b>Eact</b> (activation energy) is the climb from where a step starts up to its peak; <b>ΔH</b> is the overall energy change from reactants to products; the <b>rate-determining step</b> is the slowest step. Read the diagram.',
       config: { levels: HCL_ETHYLENE_LEVELS, mode: 'tasks', tasks: ['eact:1', 'dh', 'dhsign', 'rds'], showValues: true, reveal: true, caption: 'Illustrative energies, not measured values.' },
       confirm: 'Eact is the climb from where a step starts to its peak. ΔH compares the products with the reactants. The highest peak marks the rate-determining step.',
       hints: ['Eact starts at the level where the step begins (here the reactants) and goes UP to the peak. ΔH compares only the first and last level.', 'Step 1 climbs from A to B. ΔH runs from A to E (E is lower, so it is negative). The slow step has the highest peak: B.'],
@@ -216,7 +216,7 @@ export default arrange({
         { text: 'Eact gets smaller; ΔH stays −40 kJ/mol', correct: true, why: 'Yes. The catalyst opens a different pathway with a lower barrier. The starting and ending molecules are the same, so ΔH does not change.' },
         { text: 'ΔH becomes more negative, so more product forms', why: 'A catalyst cannot change where the reaction ends up. Reactants and products are the same molecules, so ΔH and the equilibrium are unchanged.' },
         { text: 'Both Eact and ΔH get smaller', why: 'Only the barrier changes. ΔH depends on the reactants and products alone, and the catalyst changes neither.' },
-        { text: 'Nothing: catalysts matter only in living things', why: 'Catalysts are used all the time in the lab and in industry (Pd for hydrogenation). Enzymes are the biological case.' }
+        { text: 'Nothing: catalysts matter only in living things', why: 'Catalysts are used all the time in the lab and in industry (Pd, which helps add H₂ across a C=C). Enzymes are the biological case.' }
       ],
       reveal: 'A <b>catalyst</b> speeds a reaction by providing an alternative mechanism with a lower activation energy. It takes part, but is regenerated, so there is no net change in it. The reactants and products are the same, so <b>ΔH</b> and the equilibrium stay put. Enzymes are biological catalysts.'
     },

@@ -79,7 +79,7 @@ export default arrange({
     },
     {
       id: 's05', type: 'predict', skill: 'alkynes',
-      prompt: '<b>Propyne</b> reacts with <b>one</b> equivalent of HBr. H–Br adds across the triple bond, as it added across a C=C in Lesson 09. Which major product do you expect?',
+      prompt: '<b>Propyne</b> reacts with <b>one</b> equivalent of HBr (one HBr for each alkyne). H–Br adds across the triple bond, as it added across a C=C in Lesson 09. Which major product do you expect?',
       equation: { reactants: ['CC#C'], products: [], cond: 'HBr (1 equiv.)' },
       options: [
         opt(`${mol('C=C(C)Br', '2-bromopropene')}`, true, 'Yes. H goes to the carbon that already has the H, and Br to the more substituted carbon (Markovnikov). One equivalent stops at the vinylic halide, with the C=C still there.', { chk: ['CC#C', 'HBr_1', 'major'] }),
@@ -126,7 +126,7 @@ export default arrange({
     },
     {
       id: 's09', type: 'choice', skill: 'alkynes',
-      prompt: '<b>But-1-yne</b> is hydrated with H₂O, H₂SO₄ and HgSO₄. OH adds in the Markovnikov sense, so the first product is the <b>enol</b> drawn below (C=C–OH). It does not stay that way. Which structure is the product you can actually collect, and where is its C=O?',
+      prompt: '<b>But-1-yne</b> is hydrated with H₂O, H₂SO₄ and HgSO₄. OH adds in the Markovnikov sense, so the first product is the <b>enol</b> drawn here (C=C–OH). It does not stay that way: an H shifts and the O becomes double-bonded (it tautomerises). Which structure is the product you can actually collect, and where is its C=O?',
       equation: { reactants: ['C=C(O)CC'], products: [], cond: 'tautomerises' },
       options: [
         mo('CCC(C)=O', 'butan-2-one', true, 'Yes. The enol turns into the ketone: the C=O is on C2, the carbon that carried the OH. A terminal alkyne gives a methyl ketone.', { chk: ['CCC#C', 'H2O_Hg', 'major'] }),
@@ -166,7 +166,7 @@ export default arrange({
     },
     {
       id: 's13', type: 'try', skill: 'pka-direction', widget: 'equilibrium-arrow',
-      prompt: 'Now try <b>NaOH</b> instead. Hydroxide, HO⁻, is the conjugate base of water (pKa 15.74). Does HO⁻ deprotonate acetylene? Locate the two acids and decide which side wins.',
+      prompt: 'Now try <b>NaOH</b> instead. Hydroxide, HO⁻, is the conjugate base of water (pKa 15.74). Does HO⁻ deprotonate acetylene? Locate the two acids and decide which side wins. (Other bases are tested the same way, with the pKa of their conjugate acid from Lesson 03: ethoxide, from ethanol 16.00; cyanide, from HCN 9.31; acetate, from acetic acid 4.76. All are below 25, so all are too weak.)',
       reaction: { reactants: ['C#C', '[OH-]'], products: ['C#[C-]', 'O'] },
       config: { a: 'acetylene', b: 'water' },
       confirm: 'The left side holds the weaker acid (acetylene, 25, against water, 15.74), so it is favoured: hydroxide is too weak a base to make the acetylide anion.',
@@ -188,7 +188,7 @@ export default arrange({
     },
     {
       id: 's16', type: 'choice', skill: 'acetylides',
-      prompt: '<b>4-Methylpent-2-yne</b>, CH₃–C≡C–CH(CH₃)₂ <mol smiles="CC#CC(C)C" label="4-methylpent-2-yne">, can be cut in two places on paper: between the acetylide and CH₃, or between the acetylide and the isopropyl group. Only one route works. Which one?',
+      prompt: '<b>4-Methylpent-2-yne</b>, CH₃–C≡C–CH(CH₃)₂ <mol smiles="CC#CC(C)C" label="4-methylpent-2-yne">, can be built in two ways on paper, depending on which side of the C≡C the new bond is made (next to CH₃, or next to the isopropyl group). Only one route works. Which one?',
       options: [
         opt('3-Methylbut-1-yne, NaNH₂, then CH₃Br', true, 'Yes. The acetylide of 3-methylbut-1-yne attacks CH₃Br, a methyl halide, which works. The branched piece is built into the alkyne, not into the halide.', { chk: { start: 'CC(C)C#C', target: 'CC#CC(C)C', cards: ['NaNH2', 'CH3Br'], ok: true } }),
         opt('Propyne, NaNH₂, then (CH₃)₂CHBr', false, '(CH₃)₂CHBr is a SECONDARY alkyl halide. Only primary (RCH₂X) and methyl halides work with an acetylide; the book explains why in Chapter 7.', { chk: { start: 'CC#C', target: 'CC#CC(C)C', cards: ['NaNH2', 'iPrBr'], ok: false, code: 'notPrimary' } }),

@@ -106,7 +106,7 @@ export default arrange({
         return `Chlorobenzene is nitrated about 30 times <b>slower</b> than benzene, yet the products are the ortho and para isomers. Here are the carbocation forms for ortho attack on chlorobenzene (the last has the + on Cl).<br>${formTags(a, 'chlorobenzene, ortho attack')} ${mol(a.donor, 'extra form: + on Cl')}<br>Which statement explains <b>both</b> facts?`;
       },
       options: [
-        opt('Cl pulls electrons through the σ bond, which slows every attack; but in ortho and para attack its lone pair can share the +, which meta attack cannot do', true, 'Yes. The inductive withdrawal makes the ring less reactive than benzene (deactivating), while the lone-pair donation only helps the ortho and para carbocations, so the orientation is ortho/para.', { chk: { arene: 'Clc1ccccc1', rel: 'ortho', donor: true } }),
+        opt('Cl pulls electrons through the σ bond, which slows every attack; but in ortho and para attack its lone pair can share the +, which meta attack cannot do', true, 'Yes. The inductive withdrawal (pulling electrons through the σ bond) makes the ring less reactive than benzene (deactivating), while the lone-pair donation only helps the ortho and para carbocations, so the orientation is ortho/para.', { chk: { arene: 'Clc1ccccc1', rel: 'ortho', donor: true } }),
         opt('Cl is a strong electron donor, so it activates the ring and directs ortho/para', false, 'The lone-pair donation is real, but it only helps in ortho and para attack. Overall the ring is less reactive than benzene (30 times slower), so the electron-withdrawing effect through the σ bond must win on rate.'),
         opt('Cl carries a δ+ atom on the ring like NO₂, so it deactivates and should direct meta', false, 'The atom on the ring is Cl itself, and it is more electronegative than carbon: it is δ− and has lone pairs. –NO₂ is different: its atom on the ring is a δ+ nitrogen with no lone pair to give.'),
         opt('Cl is large, so it blocks the carbons next to it, and ortho/para is all that is left', false, 'Size does not explain it: the meta carbons are no more crowded than the para carbon. The directing effect comes from electron donation by the lone pair in the carbocation.')
@@ -172,7 +172,7 @@ export default arrange({
     },
     {
       id: 's13', type: 'input', skill: 'directors',
-      prompt: 'Aromatic rings are not always benzene. <b>Pyridine</b> has a ring N in place of one CH. Each of the six ring atoms is sp² and has one p orbital pointing up and down; the N lone pair points <i>outward</i> in the plane of the ring, not into the π system. How many π electrons does the ring of pyridine have?',
+      prompt: 'Aromatic rings are not always benzene: some contain an atom other than carbon (these are heterocycles). <b>Pyridine</b> has a ring N in place of one CH. Each of the six ring atoms is sp² and has one p orbital pointing up and down; the N lone pair points <i>outward</i> in the plane of the ring, not into the π system. How many π electrons does the ring of pyridine have?',
       smiles: 'c1ccncc1',
       answer: 6, accept: ['six'],
       diagnose: [

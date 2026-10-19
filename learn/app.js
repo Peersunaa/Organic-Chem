@@ -2,7 +2,7 @@
 import { ready, setDrawStyle } from './engine/chem.js';
 import * as store from './engine/store.js';
 import { generatorForSkill } from './engine/generators.js';
-import { renderStep, renderProblems, h, setIupacMode } from './engine/steps.js';
+import { renderStep, renderProblems, h, rich, setIupacMode } from './engine/steps.js';
 import { skillLabel } from './engine/skills.js';
 import { LESSONS, PLANNED } from './lessons/index.js';
 
@@ -108,6 +108,41 @@ function home() {
 }
 
 // ---------------------------------------------------------------- Lesson player
+// "Last step" recap: after Continue, the learner sees the question they just answered,
+// its answer and the one-line reason, so the next step builds on something visible.
+const noMol = (s) => String(s || '').replace(/<mol\b[^>]*?(?:label="([^"]*)")?[^>]*>\s*<\/mol>/g, (m, l) => (l ? ' ' + l : '')).replace(/<\/?p>/g, ' ').trim();
+const MINUS = (v) => (typeof v === 'number' && v < 0 ? '−' + -v : String(v));
+function recapOf(step) {
+  const correct = (step.options || []).find((o) => o.correct);
+  const ans = (o) => (!o ? '' : o.text || o.label || (o.smiles ? `<mol smiles="${o.smiles}"></mol>` : ''));
+  switch (step.type) {
+    case 'predict': return { q: step.prompt, a: ans(correct), note: step.reveal || correct?.why };
+    case 'choice': return { q: step.prompt, a: ans(correct), note: step.worked || correct?.why };
+    case 'input': return { q: step.prompt, a: step.skill === 'formal-charge' && step.answer > 0 ? '+' + step.answer : MINUS(step.answer), note: step.confirm || step.worked };
+    case 'try': return { q: step.prompt, a: '', note: step.confirm || step.worked };
+    case 'worked': return { q: step.problem, a: step.moves?.length ? step.moves[step.moves.length - 1].then : '', note: step.rule };
+    case 'explain': return { q: '', a: '', note: step.html, idea: true };
+    default: return null;
+  }
+}
+let recapOpen = true; // remembered while the page is open
+function recapCard(step) {
+  const r = recapOf(step);
+  if (!r || !(r.q || r.note)) return null;
+  const body = h('div', { class: 'recap-body' });
+  if (r.q) body.append(rich(noMol(r.q), 'p', 'recap-q'));
+  if (r.a) body.append(rich('<b>Answer:</b> ' + r.a, 'p', 'recap-a'));
+  if (r.note) body.append(rich(r.idea ? r.note : noMol(r.note), 'div', 'recap-note'));
+  const more = h('button', { type: 'button', class: 'recap-more', 'aria-expanded': 'false' }, 'Show all');
+  more.addEventListener('click', () => { const on = body.classList.toggle('full'); more.textContent = on ? 'Show less' : 'Show all'; more.setAttribute('aria-expanded', String(on)); });
+  body.append(more);
+  requestAnimationFrame(() => { if (![...body.querySelectorAll('.recap-q, .recap-note')].some((e) => e.scrollHeight > e.clientHeight + 1)) more.hidden = true; });
+  const d = h('details', { class: 'recap' }, h('summary', {}, r.idea ? 'Last step: the key idea' : 'Last step'), body);
+  if (recapOpen) d.open = true;
+  d.addEventListener('toggle', () => { recapOpen = d.open; });
+  return d;
+}
+
 function lessonView(L) {
   setDrawStyle(L.drawing || 'full');
   const steps = [...L.steps,
@@ -123,7 +158,8 @@ function lessonView(L) {
   const fill = h('i');
   const track = h('div', { class: 'progress', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(steps.length), 'aria-label': 'Lesson progress' }, fill, h('b', { class: 'e-dot' }));
   const host = h('div', { class: 'step', id: 'step-host' });
-  const card = h('article', { class: 'card', 'aria-live': 'off' }, host);
+  const recapSlot = h('div', { class: 'recap-slot' });
+  const card = h('article', { class: 'card', 'aria-live': 'off' }, recapSlot, host);
   const back = h('button', { type: 'button', class: 'btn ghost', id: 'back-btn' }, 'Back');
   const next = h('button', { type: 'button', class: 'btn primary', id: 'next-btn' }, 'Continue');
   const foot = h('div', { class: 'foot' }, back, next);
@@ -156,6 +192,9 @@ function lessonView(L) {
     const step = steps[idx];
     save(); paint();
     if (!chemReady) { host.innerHTML = '<p class="muted">Loading chemistry engine…</p>'; try { await chemP; } catch (e) { host.innerHTML = '<p class="fb bad">The chemistry engine could not load. Reload the page to try again.</p>'; return; } }
+    recapSlot.innerHTML = '';
+    const prev = steps[idx - 1];
+    if (prev && done.has(prev.id) && step.type !== 'useit') { const rc = recapCard(prev); if (rc) recapSlot.append(rc); }
     renderStep(step, ctxFor(step), host);
     setIupacMode(store.getIupac());
     if (!reduceMotion()) { host.classList.remove('enter'); void host.offsetWidth; host.classList.add('enter'); }

@@ -65,7 +65,7 @@ export default arrange({
     },
     {
       id: 's03', type: 'try', skill: 'resonance', widget: 'resonance-drawer',
-      prompt: 'Chemists draw benzene with three C=C, but the double bonds could sit in two places. Slide the π electrons round the ring: draw the curved arrows that turn this drawing into the <b>other</b> Kekulé drawing, then press Check.',
+      prompt: 'Chemists draw benzene with three C=C, but the double bonds could sit in two places. Slide the π electrons round the ring: draw the curved arrows that turn this drawing into the <b>other</b> Kekulé drawing (the other way of placing the three double bonds), then press Check.',
       config: { start: 'C1=CC=CC=C1', name: 'benzene' },
       confirm: 'Three arrows, each moving a π pair one bond round the ring, turn one drawing into the other. Neither drawing is real alone: benzene is the hybrid of both, with every C–C between single and double.',
       hints: ['Arrows start at electrons. Tap a C=C π bond, then tap the single bond next to it where its electrons go. Do the same for each of the three double bonds.', 'Each of the three arrows goes from a double bond to the neighbouring single bond in the same direction round the ring (all clockwise or all anticlockwise). Press Check when all three are drawn.'],
@@ -90,7 +90,7 @@ export default arrange({
     },
     {
       id: 's06', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
-      prompt: 'Now draw the first two steps of the bromination yourself. <b>Step 1:</b> FeBr₃ activates Br₂. A lone pair on one Br of Br₂ goes to Fe (a new Br–Fe bond), and the Br–Br bond pair goes back onto that Br, leaving Br⁺ and FeBr₄⁻. <b>Step 2:</b> a π bond of benzene attacks the Br⁺ (tap the double bond, then the Br⁺).',
+      prompt: 'Now draw the first two steps of the bromination yourself. <b>Step 1:</b> FeBr₃ activates Br₂. A lone pair on one Br of Br₂ goes to Fe (a new Br–Fe bond), and the Br–Br bond pair goes back onto that Br, leaving Br⁺ (an <b>electrophile</b>: electron-poor) and FeBr₄⁻. <b>Step 2:</b> a π bond of benzene attacks the Br⁺ (tap the double bond, then the Br⁺).',
       config: { get mech() { return mechanismPart(easMechanism('Br2'), 0, 2); }, modes: ['draw', 'draw'], drawing: 'skeletal' },
       confirm: 'In step 1 the Br–Br bond pair stays on the Br that bonded to Fe, so the other Br is left without its pair: an electrophile, Br⁺. In step 2 the ring’s π electrons become a C–Br bond, and the ring carries a + charge: the carbocation intermediate.',
       hints: ['Step 1 has two arrows: a lone pair on Br (of Br₂) to the Fe atom, and the Br–Br bond to that same Br atom. Step 2 has one arrow: from a C=C π bond of the ring to the Br⁺.', 'Arrows start at electrons and end where they go. In step 2 the arrow starts on a double bond (any of the three, they are equivalent) and ends on the Br⁺ atom: those π electrons make the new C–Br bond.'],
@@ -101,7 +101,7 @@ export default arrange({
       prompt: 'The carbocation from step 2 is drawn below: one sp³ carbon (with Br and H) and a + on a neighbouring carbon. That + is not stuck. Slide the ring π electrons toward the C⁺ with curved arrows to move the + charge, and keep going until you have found <b>every</b> resonance form.',
       config: { get start() { return predictEAS(BENZENE, 'Br2').sigma; }, name: 'carbocation intermediate' },
       confirm: 'The + sits on the two carbons next to the sp³ carbon and on the carbon opposite it (ortho, para, ortho): three forms, so the charge is shared by three carbons. This resonance is why the intermediate is reasonably stable, though still much less stable than benzene.',
-      hints: ['Arrows start at electrons: tap the C=C π bond that is NEXT to the C⁺, then tap the single bond between them, where those electrons go. The + moves to the far end of that C=C.', 'Press an earlier form in the row to start from it. The sp³ carbon never takes part: only the five sp² carbons share the + charge, on every second carbon (ortho, para, ortho).'],
+      hints: ['Arrows start at electrons: tap the C=C π bond that is NEXT to the C⁺, then tap the single bond between them, where those electrons go. The + moves to the far end of that C=C.', 'Press an earlier form in the row to start from it. The sp³ carbon never takes part: only the five sp² carbons share the + charge, on every second carbon (the two carbons next to the sp³ carbon, and the one opposite it).'],
       worked: 'Arrow 1: the π bond next to the C⁺ → the single bond between them. The + moves two carbons round the ring (to the carbon opposite the sp³ carbon). Arrow 2 from there moves it again, to the other carbon next to the sp³ carbon. Three forms in all; the sp³ carbon cannot hold the +.'
     },
     {
@@ -171,7 +171,7 @@ export default arrange({
     },
     {
       id: 's10', type: 'choice', skill: 'eas',
-      prompt: 'Benzene is treated with a mixture of <b>concentrated nitric acid and sulfuric acid</b>. Which product forms?',
+      prompt: 'Benzene is treated with a mixture of <b>concentrated nitric acid and sulfuric acid</b>. Which monosubstituted product forms?',
       equation: { reactants: [BENZENE], products: [], cond: 'HNO₃, H₂SO₄' },
       options: [
         mo('O=[N+]([O-])c1ccccc1', 'nitrobenzene', true, 'Yes. NO₂⁺ replaces one H on the ring; the ring stays aromatic. Nitrobenzene can later be reduced to aniline.', { chk: ['HNO3', null, 'major'] }),
@@ -198,15 +198,15 @@ export default arrange({
         opt('Benzene + CH₃CH₂Cl, AlCl₃', true, 'Yes. An alkyl halide and an ordinary ring: AlCl₃ makes CH₃CH₂⁺, the ring attacks it, and ethylbenzene forms.', { chk: { arene: 'c1ccccc1', reagent: 'RCl', halide: 'CCCl', ok: true } }),
         opt('Benzene + chlorobenzene, AlCl₃', false, 'Only alkyl halides work. In chlorobenzene the Cl is on a ring carbon (an aryl halide), and no carbocation forms.', { chk: { arene: 'c1ccccc1', reagent: 'RCl', halide: 'Clc1ccccc1', ok: false, code: 'arylHalide' } }),
         opt('Benzene + CH₂=CHCl (vinyl chloride), AlCl₃', false, 'A vinylic halide has Cl on a C=C carbon. AlCl₃ cannot pull it off to make a carbocation, so nothing happens.', { chk: { arene: 'c1ccccc1', reagent: 'RCl', halide: 'C=CCl', ok: false, code: 'vinylicHalide' } }),
-        opt('Nitrobenzene + CH₃Cl, AlCl₃', false, 'The ring already carries an –NO₂ group, which makes it far less reactive than benzene. Friedel–Crafts fails on rings with –NO₂, –C≡N, –SO₃H or –COR.', { chk: { arene: 'O=[N+]([O-])c1ccccc1', reagent: 'RCl', halide: 'CCl', ok: false, code: 'deactivated' } })
+        opt('Nitrobenzene + CH₃Cl, AlCl₃', false, 'The ring already carries an –NO₂ group, which makes it far less reactive than benzene. Friedel–Crafts fails on rings with –NO₂, –C≡N, –SO₃H or –COR (an acyl group, C=O).', { chk: { arene: 'O=[N+]([O-])c1ccccc1', reagent: 'RCl', halide: 'CCl', ok: false, code: 'deactivated' } })
       ],
-      hints: ['Check two things in each option: is the halide an ALKYL halide (Cl on a saturated carbon), and is the ring free of deactivating groups?', 'Aryl halides (Cl on the ring) and vinylic halides (Cl on a C=C) do not make carbocations. Rings with –NO₂, –C≡N, –SO₃H or –COR are too unreactive.'],
+      hints: ['Check two things in each option: is the halide an ALKYL halide (Cl on a saturated carbon), and is the ring free of deactivating groups (groups that make it far less reactive)?', 'Aryl halides (Cl on the ring) and vinylic halides (Cl on a C=C) do not make carbocations. Rings with –NO₂, –C≡N, –SO₃H or –COR are too unreactive.'],
       worked: 'The two halide traps are chlorobenzene (aryl) and vinyl chloride (vinylic): neither gives a carbocation. The nitro-substituted ring is too deactivated. Only benzene + an alkyl chloride works: CH₃CH₂Cl and AlCl₃ give ethylbenzene.',
       confirm: 'Friedel–Crafts needs an alkyl (or acyl) halide and a ring that is not deactivated by –NO₂, –C≡N, –SO₃H or –COR.'
     },
     {
       id: 's13', type: 'try', skill: 'aromatic-naming', widget: 'ring-position',
-      prompt: 'Rings with two groups are named by how far apart the groups are: <b>ortho</b> (next to it), <b>meta</b> (one carbon between), <b>para</b> (opposite). Start from the CH₃ of toluene. Tap the ring carbons that are ortho, then meta, then para to it.',
+      prompt: 'Rings with two groups are named by how far apart the groups are: <b>ortho</b> (next to it), <b>meta</b> (one carbon between), <b>para</b> (opposite). Start from the CH₃ of toluene (methylbenzene). Tap the ring carbons that are ortho, then meta, then para to it.',
       config: { smiles: 'Cc1ccccc1', tasks: ['ortho', 'meta', 'para'] },
       confirm: 'ortho = the two carbons next to the CH₃ (1,2), meta = the next two round (1,3), para = the single carbon opposite (1,4). A second group on a ring is described by which of these positions it takes.',
       hints: ['Start at the carbon that carries the CH₃ (outlined). The ortho carbons are its two neighbours on the ring.', 'Meta carbons: one carbon in between, on each side. Para: straight across the ring, three bonds away from the CH₃ carbon.'],
@@ -214,7 +214,7 @@ export default arrange({
     },
     {
       id: 's14', type: 'input', skill: 'aromatic-naming',
-      prompt: 'Name this disubstituted benzene. Either style is accepted: numbers or <b>o-, m-, p-</b>. Aniline is the parent, so its NH₂ is carbon 1. Spaces, capitals and hyphens do not matter.',
+      prompt: 'Name this disubstituted benzene. Either style is accepted: numbers or <b>o-, m-, p-</b>. Aniline (benzene with an NH₂) is the parent, so its NH₂ is carbon 1; other special parents work the same way: toluene (CH₃), phenol (OH), benzoic acid (CO₂H), benzaldehyde (CHO), benzonitrile (C≡N), benzenesulfonic acid (SO₃H). If two groups could both be the parent, the more senior one wins: CO₂H, then SO₃H, C≡N, CHO, OH, NH₂ (so HO–C₆H₄–CHO is a hydroxybenzaldehyde, not a formylphenol). Spaces, capitals and hyphens do not matter.',
       smiles: 'Nc1ccc(Cl)cc1', name: true,
       answer: '4-chloroaniline', accept: ['p-chloroaniline'],
       diagnose: [
@@ -295,7 +295,7 @@ export default arrange({
           figure: { smiles: 'CC(=O)c1ccccc1', label: 'acetophenone' }
         }
       ],
-      rule: 'Friedel–Crafts <b>acylation</b>: RCOCl + AlCl₃ → the acylium ion RC≡O⁺ → ring attack → sigma complex → loss of H⁺ → an <b>aryl ketone</b>. Alkylation uses R–Cl and gives R–Ar. Both fail on rings with –NO₂, –C≡N, –SO₃H or –COR.'
+      rule: 'Friedel–Crafts <b>acylation</b>: RCOCl + AlCl₃ → the acylium ion RC≡O⁺ → ring attack → carbocation intermediate → loss of H⁺ → an <b>aryl ketone</b> (CH₃COCl gives acetophenone; CH₃CH₂COCl gives 1-phenylpropan-1-one, a propanone chain with the ring on C1). Alkylation uses R–Cl and gives R–Ar. Both fail on rings with –NO₂, –C≡N, –SO₃H or –COR.'
     },
     {
       id: 's18', type: 'try', skill: 'eas', widget: 'reaction-lab',

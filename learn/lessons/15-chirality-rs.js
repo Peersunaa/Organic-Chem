@@ -38,7 +38,7 @@ export default {
     },
     {
       id: 's03', type: 'try', skill: 'chirality', widget: 'mirror-pair',
-      prompt: 'Three molecules, each next to its mirror image. Turn the models if you like, press <b>Try to superimpose</b>, then decide for each one: chiral or achiral?',
+      prompt: 'Three molecules, each next to its mirror image. Turn the models if you like, press <b>Try to superimpose</b>, then decide for each one: chiral, or achiral (it can be laid exactly on its mirror image)?',
       config: { models: ['chfclbr', 'ch2clbr', 'butan-2-ol'], titles: { chfclbr: 'CHFClBr', ch2clbr: 'CH₂ClBr', 'butan-2-ol': 'CH₃CH(OH)CH₂CH₃' } },
       confirm: 'CHFClBr and CH₃CH(OH)CH₂CH₃ cannot be superimposed on their mirror images, so each one is <b>chiral</b> (the pair are <b>enantiomers</b>). CH₂ClBr lands exactly on its mirror image once its two H atoms swap places: it is achiral.',
       hints: ['Press “Try to superimpose” and read the report: do all the atoms of the mirror image land on partner atoms?', 'In the overlay, an atom that cannot land is drawn as a ghost with a red dashed line. If any atom stays off, no turn can fix it, and the molecule is chiral.'],
@@ -60,7 +60,7 @@ export default {
       id: 's06', type: 'try', skill: 'chirality', widget: 'stereocenter-finder',
       prompt: 'Rings and a benzene ring now. Find the chirality centers (or say there is none). In a ring, the two directions around the ring count as two groups, and they are different only if the ring is different on its two sides.',
       config: { rounds: [{ smiles: 'CC1CCCCC1' }, { smiles: 'CC1(O)CCCCC1' }, { smiles: 'CC1CCCCC1=O' }, { smiles: 'CC(C)Cc1ccc(cc1)C(C)C(=O)O' }] },
-      confirm: 'Methylcyclohexane and 1-methylcyclohexanol have none: going either way round the ring from the carbon with CH₃ you meet the same atoms. 2-Methylcyclohexanone has one (C2: CH₃, H, the C=O side and the CH₂ side). Ibuprofen has one: the carbon with H, CH₃, CO₂H and the benzene ring.',
+      confirm: 'Methylcyclohexane and 1-methylcyclohexanol have none: going either way round the ring from the carbon with CH₃ you meet the same atoms. 2-Methylcyclohexanone has one (C2: CH₃, H, the C=O side and the CH₂ side). Ibuprofen (a painkiller) has one: the carbon with H, CH₃, CO₂H and the benzene ring.',
       hints: ['Ask of each sp³ carbon: are its two ring directions different? If you can walk both ways round and meet identical atoms, they are one group.', 'A C=O carbon or a benzene carbon is sp² and can never be a center. The CH(CH₃) carbons next to them are the ones to inspect.'],
       worked: 'Methylcyclohexane and 1-methylcyclohexanol: the ring is symmetrical about that carbon, so its two ring directions are identical (no center). 2-Methylcyclohexanone: C2 has CH₃, H, C1 (the C=O) and C3 (a CH₂), four different groups. Ibuprofen: only the CH(CH₃)CO₂H carbon has four different groups.'
     },
@@ -125,7 +125,7 @@ export default {
     },
     {
       id: 's13', type: 'explain', skill: 'rs',
-      html: '<p><b>R/S in three moves.</b> 1 Rank the four groups (the CIP rules of Lesson 7). 2 Turn the molecule so group 4, the lowest, points <b>away</b> from you. 3 Follow 1 → 2 → 3: <b>clockwise = R</b> (<i>rectus</i>), <b>counterclockwise = S</b> (<i>sinister</i>).</p><p>Two traps in step 1: the first atom decides before size does, and a C=O counts its oxygen twice (CHO is (O,O,H)).</p>'
+      html: '<p><b>R/S in three moves.</b> 1 Rank the four groups (the CIP rules of Lesson 7). 2 Turn the molecule so group 4, the lowest, points <b>away</b> from you. 3 Follow 1 → 2 → 3: <b>clockwise = R</b> (<i>rectus</i>), <b>counterclockwise = S</b> (<i>sinister</i>).</p><p>Two traps in step 1: the first atom decides before size does, and a double bond counts its far atom twice (CHO is (O,O,H); CH=CH₂ is (C,C,H); CO₂H is (O,O,O)).</p>'
     },
     {
       id: 's14', type: 'try', skill: 'rs', widget: 'rs-assigner',
@@ -137,7 +137,7 @@ export default {
     },
     {
       id: 's15', type: 'try', skill: 'rs', widget: 'rs-assigner',
-      prompt: 'Glyceraldehyde, HOCH₂–CH(OH)–CHO, in 3D. Two of its groups have an O on the first carbon. Use <b>Go one atom further</b> and remember the C=O. R or S?',
+      prompt: 'Glyceraldehyde, HOCH₂–CH(OH)–CHO, in 3D. Two of its groups (CHO and CH₂OH) start with a carbon that carries an O. Use <b>Go one atom further</b> and remember the C=O. R or S?',
       config: { mode: '3d', model: 'glyceraldehyde', which: 'molblock' },
       confirm: 'OH &gt; CHO (O,O,H) &gt; CH₂OH (O,H,H) &gt; H. With H behind, 1 → 2 → 3 runs clockwise: <b>R</b>.',
       hints: ['OH is clearly 1 and H is 4. CHO and CH₂OH both start with a carbon that carries an O, so look at the next atoms.', 'Duplicate the C=O: CHO counts as (O,O,H), which beats CH₂OH (O,H,H).'],
@@ -145,7 +145,7 @@ export default {
     },
     {
       id: 's16', type: 'try', skill: 'rs', widget: 'rs-assigner',
-      prompt: 'The same job on a flat drawing, like those in an exam. A solid wedge comes toward you, a dashed bond goes away, a plain line is in the page. Rank the groups, say where group 4 is, then decide R or S.',
+      prompt: 'The same job on a flat drawing, like those in an exam. A solid wedge comes toward you, a dashed bond goes away, a plain line is in the page. Rank the groups, say where group 4 is, then decide R or S. (Group 4 is the lowest-ranked group: usually H, but at a center with no H it is whichever group ranks last, often CH₃.)',
       config: { mode: 'wedge', smiles: 'CC[C@@H](C)Br', style: 'low', lowOn: 'wedge' },
       confirm: 'Br &gt; CH₂CH₃ &gt; CH₃ &gt; H. H is on a wedge, toward you. 1 → 2 → 3 looks counterclockwise, but you are viewing from the wrong side, so reverse it: <b>R</b>.',
       hints: ['Rank the groups first. Then find group 4: a wedge means it points toward you.', 'If group 4 points toward you, the direction you read is the opposite of the true one. Reverse your answer.'],
@@ -218,7 +218,7 @@ export default {
     },
     {
       id: 's20', type: 'input', skill: 'rs',
-      prompt: 'Name this molecule, including (R) or (S) at the front. Work out the configuration of its one center. Type the name in either IUPAC style; spaces, capitals and hyphens do not matter, but the letter and the numbers do.',
+      prompt: 'Name this molecule, including (R) or (S) at the front. An OH on a chain gives the ending -ol with the number of its carbon, counted from the end nearer the OH (<name new="hexan-3-ol" old="3-hexanol"></name>); halogens are prefixes (2-bromopentane). Work out the configuration of its one center. Type the name in either IUPAC style; spaces, capitals and hyphens do not matter, but the letter and the numbers do.',
       smiles: 'C[C@@H](O)CC',
       name: true,
       answer: '(R)-butan-2-ol', accept: ['(R)-2-butanol'],

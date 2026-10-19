@@ -17,6 +17,9 @@ function shuffle(rng, arr) { const a = arr.slice(); for (let i = a.length - 1; i
 const LETTERS = 'ABCD';
 const nmOpt = (s) => { const n = nameBothAny(s) || nameBothArene(s); return n ? n.new : null; };
 const nm = (s) => nmOpt(s) || s;
+/** Subject of a sentence: the name when the naming engine has one, else a pointer to the drawing (never a raw SMILES string). */
+const who = (s) => nmOpt(s) || (s === 'C=Cc1ccccc1' ? 'styrene' : 'The compound shown below');
+const shown = (s) => { const n = nmOpt(s); return n || `<mol smiles="${s}">`; };
 
 // ---------------------------------------------------------------- 1. classify a group
 function classifyProblem(rng) {
@@ -96,9 +99,10 @@ function oxProblem(rng) {
   const opts = shuffle(rng, out.slice(0, 4)).map((o, i) => ({ ...o, text: 'Option ' + LETTERS[i] }));
   return {
     kind: 'choice', skill: 'side-chains', smiles: null, equation: { reactants: [s], products: [], cond: 'KMnO₄, H₂O' },
-    prompt: `${nm(s)} is heated with KMnO₄ in water. What is the aromatic product?`,
+    prompt: `${who(s)} is heated with KMnO₄ in water. What is the aromatic product?`,
     options: opts, answer: opts.find((o) => o.correct).text, substrate: s, product: r.product, reacts: r.reacts,
     derive: `${r.why} Product: ${nm(r.product)}.`,
+    deriveHtml: `${r.why} Product: ${shown(r.product)}${nmOpt(r.product) ? '.' : ''}`,
     hints: ['Look at the carbon bonded directly to the ring (the benzylic carbon). Does it carry at least one H? If so, KMnO₄ oxidises that group; if not (tert-butyl), nothing happens.', 'When a group does react, the whole alkyl group, whatever its length, becomes –CO₂H on the same ring carbon. Other groups on the ring (halogens, –NO₂, tert-butyl) are not touched.']
   };
 }
@@ -121,7 +125,7 @@ function hydProblem(rng) {
   const opts = shuffle(rng, out.slice(0, 4)).map((o, i) => ({ ...o, text: 'Option ' + LETTERS[i] }));
   return {
     kind: 'choice', skill: 'side-chains', smiles: null, equation: { reactants: [s], products: [], cond: C.label },
-    prompt: `${nm(s)} is treated with ${C.label}. What is the product?`,
+    prompt: `${who(s)} is treated with ${C.label}. What is the product?`,
     options: opts, answer: opts.find((o) => o.correct).text, substrate: s, cond, product: r.product,
     derive: r.why,
     hints: ['A benzene ring is much harder to reduce than a C=C. Under mild conditions (Pd/C, 1 atm) only the C=C outside the ring reacts; the ring needs Pt (or Rh) and high pressure.', 'Count the multiple bonds that can react under these conditions: a side-chain C=C or C≡C always does; the ring only at high pressure with Pt.']

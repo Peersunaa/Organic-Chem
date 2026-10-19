@@ -62,7 +62,7 @@ export default {
     },
     {
       id: 's05', type: 'explain', skill: 'skeletal',
-      html: '<p><b>H on a carbon = 4 − (lines into it).</b> A double bond counts as 2 lines, a triple bond as 3.</p><p>One line in: CH₃. Two: CH₂. Three: CH. Four: no H at all.</p><p>Heteroatoms are different: you can see their H because it is written (OH, NH₂, SH).</p>'
+      html: '<p><b>H on a carbon = 4 − (lines into it).</b> A double bond counts as 2 lines, a triple bond as 3.</p><p>One line in: CH₃. Two: CH₂. Three: CH. Four: no H at all.</p><p>Heteroatoms (any atom except C and H) are different: you can see their H because it is written (OH, NH₂, SH).</p>'
     },
     {
       id: 's06', type: 'choice', skill: 'skeletal',
@@ -95,7 +95,7 @@ export default {
     },
     {
       id: 's08', type: 'worked', skill: 'skeletal',
-      problem: 'Worked example: draw the condensed formula <b>CH₃CH₂CH(OH)CH₂CH₃</b> as a skeletal structure. You choose each move.',
+      problem: 'Worked example: draw the condensed formula <b>CH₃CH₂CH(OH)CH₂CH₃</b> (the molecule written as a row of groups) as a skeletal structure. You choose each move.',
       moves: [
         {
           ask: 'Each CH₃, CH₂ or CH in the formula is one carbon. How many carbons will your zig-zag have?',
@@ -152,7 +152,7 @@ export default {
           { smiles: 'CC(C)O', why: 'This has only three carbons. The formula has four: CH₃, CH₂, CH and CH₃.' }
         ]
       },
-      confirm: 'Four carbons with the OH on the third (or second from the other end): that is butan-2-ol.',
+      confirm: 'Four carbons with the OH on the third (or second from the other end): that is butan-2-ol (naming comes in the next lesson).',
       hints: ['Count the carbon units first, then ask which one carries the OH.', 'Four units: CH₃, CH₂, CH(OH), CH₃. The OH is not on an end.'],
       worked: 'Four carbons in a chain; the OH hangs on the third carbon, so a CH₃ is on one side and a CH₂CH₃ on the other. That is the second drawing.'
     },
@@ -170,7 +170,7 @@ export default {
     },
     {
       id: 's11', type: 'try', skill: 'functional-groups', widget: 'group-finder',
-      prompt: 'Find the functional groups in this molecule. First the alkene.',
+      prompt: 'Find the functional groups in this molecule. First the alkene (a C=C double bond).',
       config: { smiles: 'CC=CC(C)O', group: 'alkene' },
       confirm: 'An alkene is a carbon–carbon double bond, and the group is just those two carbons.',
       hints: ['An alkene is a C=C double bond. Look for the doubled line.', 'Tap the two carbons at the ends of the double bond.'],
@@ -178,7 +178,7 @@ export default {
     },
     {
       id: 's12', type: 'try', skill: 'functional-groups', widget: 'group-finder',
-      prompt: 'Same molecule. Now find the alcohol.',
+      prompt: 'Same molecule. Now find the alcohol (an O–H on a carbon that has only single bonds).',
       config: { smiles: 'CC=CC(C)O', group: 'alcohol' },
       confirm: 'An alcohol is an OH on a carbon that has only single bonds. The group is the O plus the carbon it sits on.',
       hints: ['An alcohol has an O–H attached to a carbon with four single bonds.', 'Tap the O of the OH and the carbon it is bonded to.'],
@@ -186,7 +186,7 @@ export default {
     },
     {
       id: 's13', type: 'explain', skill: 'functional-groups',
-      html: '<p><b>C=C</b> alkene · <b>C≡C</b> alkyne · benzene ring arene · <b>C–X</b> alkyl halide · <b>C–OH</b> alcohol · <b>C–O–C</b> ether · <b>C–N</b> amine · <b>C–SH</b> thiol · <b>C–S–C</b> sulfide · <b>C≡N</b> nitrile.</p><p>For C=O, look at what else is on that carbon: <b>H</b> aldehyde, <b>C</b> ketone, <b>OH</b> carboxylic acid, <b>O–C</b> ester, <b>N</b> amide. Alkanes have no functional group.</p>'
+      html: '<p><b>C=C</b> alkene · <b>C≡C</b> alkyne · benzene ring arene · <b>C–X</b> (X = F, Cl, Br, I) alkyl halide · <b>C–OH</b> alcohol · <b>C–O–C</b> ether · <b>C–N</b> amine · <b>C–SH</b> thiol · <b>C–S–C</b> sulfide · <b>C≡N</b> nitrile.</p><p>For C=O (a carbonyl), look at what else is on that carbon: <b>H</b> aldehyde, <b>C</b> ketone, <b>OH</b> carboxylic acid, <b>O–C</b> ester, <b>N</b> amide. Alkanes have no functional group.</p>'
     },
     {
       id: 's14', type: 'choice', skill: 'functional-groups',
@@ -230,7 +230,7 @@ export default {
       config: { smiles: 'CC(=O)Nc1ccc(O)cc1', group: 'amide' },
       confirm: 'The N is bonded to the ring, but because it sits on a C=O carbon the group is an amide: C, =O and N.',
       hints: ['An amide is a C=O with an N on the same carbon.', 'Tap three atoms: the carbonyl carbon, its O and the N.'],
-      worked: 'Find the C=O first, then the N on the same carbon. Those three atoms (C, O, N) are the amide; the ring is an arene and the ring OH is not counted as an alcohol here.'
+      worked: 'Find the C=O first, then the N on the same carbon. Those three atoms (C, O, N) are the amide; the ring is an arene and the ring OH is a different group (a phenol), not an alcohol.'
     }
   ],
   mastery: { count: 3, generator: 'skeletal-fg' },

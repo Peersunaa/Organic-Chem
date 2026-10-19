@@ -20,11 +20,11 @@ export default {
       derive: { smiles: 'C', atom: 0, quantity: 'angle', value: 109.5 },
       options: [
         { text: '90°', val: 90, why: '90° is what you get if the H atoms sat flat in a square around C. Four bonds that repel each other spread out in 3D instead, so they can be farther apart than that.' },
-        { text: '109.5°', val: 109.5, correct: true, why: 'Yes. Four equal bonds point to the corners of a tetrahedron.' },
+        { text: '109.5°', val: 109.5, correct: true, why: 'Yes. Four equal bonds point to the corners of a tetrahedron (a pyramid with four triangular faces).' },
         { text: '120°', val: 120, why: '120° is the angle for three bonds spread flat around an atom. Four bonds need a 3D arrangement and end up a little closer together.' },
         { text: '180°', val: 180, why: '180° is a straight line, which only fits two bonds.' }
       ],
-      reveal: 'Carbon blends its 2s orbital with three 2p orbitals into four identical <b>sp³</b> hybrid orbitals. They point to the corners of a tetrahedron, 109.5° apart.'
+      reveal: 'Carbon blends its 2s orbital with three 2p orbitals into four identical <b>sp³</b> hybrid orbitals (orbital: the region where an electron is likely to be found). They point to the corners of a tetrahedron, 109.5° apart.'
     },
     {
       id: 's02', type: 'explain', skill: 'sigma-pi',
@@ -36,7 +36,7 @@ export default {
       visual: { widget: 'model3d', config: { mol: 'ethylene' } },
       options: [
         { text: 'All six atoms lie in one flat plane', correct: true, why: 'Yes. Ethylene is flat. Look at it edge-on and you see one line of atoms.' },
-        { text: 'Each carbon is tetrahedral, like methane, so the H atoms stick out above and below', why: 'That would make the H–C–H angles 109.5°, but each carbon has only 3 neighbours here (2 H and the other C), and 3 groups spread flat.' },
+        { text: 'Each carbon is tetrahedral (four bonds to the corners of a pyramid), like methane, so the H atoms stick out above and below', why: 'That would make the H–C–H angles 109.5°, but each carbon has only 3 neighbours here (2 H and the other C), and 3 groups spread flat.' },
         { text: 'The two CH₂ ends are twisted 90° from each other', why: 'A twist is exactly what the C=C double bond prevents. The sideways overlap that makes the second bond only works when both CH₂ ends sit in the same plane.' }
       ],
       reveal: 'Each carbon has 3 neighbours, so it uses three <b>sp²</b> hybrid orbitals, flat and 120° apart. The fourth, unmixed p orbital points up and down.'
@@ -170,7 +170,7 @@ export default {
           then: 'The CH₂ carbon is sp².'
         },
         {
-          ask: 'The next carbon, =CH–: bonded to H, the CH₂ carbon and the nitrile carbon. Hybridization?',
+          ask: 'The next carbon, =CH–: bonded to H, the CH₂ carbon and the C≡N carbon (the nitrile carbon). Hybridization?',
           check: { smiles: 'C=CC#N', atom: 1, quantity: 'hyb' },
           options: [
             { text: 'sp³', val: 'sp3', why: 'It has three neighbours (H, C, C), not four.' },
@@ -236,7 +236,7 @@ export default {
     },
     {
       id: 's15', type: 'explain', skill: 'polarity',
-      html: '<p>EN values to know: <b>H 2.1, C 2.5, N 3.0, O 3.5, F 4.0, Cl 3.0, Br 2.8, I 2.5</b>.</p><p>The gap (ΔEN) sets the bond type: under 0.5 is nonpolar, 0.5 to 2 is polar covalent, above 2 is largely ionic. In a polar bond the more electronegative atom is <b>δ' + M + '</b> and its partner is <b>δ+</b>.</p>'
+      html: '<p>EN values to know: <b>H 2.1, C 2.5, N 3.0, O 3.5, F 4.0, Cl 3.0, Br 2.8, I 2.5</b>.</p><p>The gap (ΔEN) sets the bond type: under 0.5 is nonpolar, 0.5 to 2 is polar covalent, above 2 is largely ionic. In a polar bond the more electronegative atom gets a partial charge, <b>δ' + M + '</b>, and its partner is <b>δ+</b>.</p>'
     },
     {
       id: 's16', type: 'try', skill: 'polarity', widget: 'polarity-mark',

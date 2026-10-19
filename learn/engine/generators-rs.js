@@ -73,8 +73,8 @@ const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
 const sub = (n) => (n > 1 ? String(n).split('').map((d) => '₀₁₂₃₄₅₆₇₈₉'[d]).join('') : '');
 
 /** One pool molecule as a specific enantiomer: { entry, smiles, label ('R'|'S'), center }. */
-export function pickMolecule(rng, id = null, want = null) {
-  const entry = id ? RS_POOL.find((e) => e.id === id) : pick(rng, RS_POOL);
+export function pickMolecule(rng, id = null, want = null, only = null) {
+  const entry = id ? RS_POOL.find((e) => e.id === id) : pick(rng, only ? RS_POOL.filter(only) : RS_POOL);
   let smiles = entry.smiles;
   if (rng() < 0.5) smiles = flipStereo(smiles);
   let T = tetraInfo(smiles).find((x) => x.center && x.label);
@@ -128,8 +128,10 @@ function mirrorProblem(rng) {
     hints: ['A mirror image is an enantiomer: every chirality center is reversed. Only the letter in front changes.', `Write the name as (${otherLabel(m.label)})- followed by the rest of the name, which is the same.`]
   };
 }
+// The learner must TYPE this name, and the lessons teach only alkane, halo and alcohol (-ol) names: no acids, aldehydes, ketones, amines, diols or alkenols.
+const NAMEABLE = (e) => !e.carbonyl && !e.alkene && !/amin|diol/.test(e.new);
 function nameProblem(rng) {
-  const m = pickMolecule(rng);
+  const m = pickMolecule(rng, null, null, NAMEABLE);
   const nm = rsName(m.entry, m.label), wrongNm = rsName(m.entry, otherLabel(m.label));
   return {
     kind: 'input', name: true, skill: 'rs', smiles: m.smiles,
