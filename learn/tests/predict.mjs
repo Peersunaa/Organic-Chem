@@ -7,6 +7,9 @@
 //      (canonical isomeric SMILES; a racemic product may be drawn as either mirror image);
 //  (4) stereo: the card's own `space` (syn / anti) is read back in Python (cis / trans on a ring from 3D coordinates, meso or chiral for but-2-ene, E / Z of an alkyne
 //      product) and must match; a chiral product with specified centres is flagged racemic; a wrong "space" option has the same atoms as the right one;
+//      The ten workbook B3.1 cards have no engine model: their DRILL entries are `fixed: true`, and for them the right option must equal the hub card's own
+//      example product (card.example, or card.example2 for the second substrate), canonical SMILES. Everything else (parse, distinct, tagged wrong options) is the same;
+//  (4b) alkene-hydroboration: the right option is read back in 3D as the TRANS isomer (OH trans to CH3) and the "space" distractor as CIS;
 //  (5) each card's drill answer for the hub card's own example equals the hub card's example product (the fact lives once).
 // Run on its own with `node learn/tests/predict.mjs`, or as part of run.mjs.
 import { ready, canon } from '../engine/chem.js';
@@ -55,7 +58,14 @@ function engineProducts(p) {
       return r.ok ? [r.final.smiles] : null;
     }
     case 'diene-hx': return R.predictDiene(sub, rg).products;
-    default: throw new Error('no engine call for ' + id);
+    default: {
+      // fixed-answer card (no engine): the answer IS the hub card's example for that substrate
+      if (DRILL[id] && DRILL[id].fixed) {
+        const c = HUB_BY_ID[id], ex = [c.example, c.example2].filter(Boolean).find((x) => x.substrate === sub);
+        return ex ? ex.product.split('.') : null;
+      }
+      throw new Error('no engine call for ' + id);
+    }
   }
 }
 
@@ -69,7 +79,13 @@ export async function predict({ ok, eq }) {
   eq(DRILL_EXCLUDED, [], 'no hub card is left out of the drill (every card has an engine model)');
   eq(DRILL_IDS.slice().sort(), HUB_CARDS.map((c) => c.id).sort(), 'every hub card has a drill entry');
   eq(Object.keys(DRILL).sort(), HUB_CARDS.map((c) => c.id).sort(), 'the drill has no stale card');
-  for (const id of DRILL_IDS) ok(DRILL[id].subs.length >= 3 && DRILL[id].subs.length <= 6, `${id}: 3 to 6 substrates (${DRILL[id].subs.length})`);
+  for (const id of DRILL_IDS) {
+    const e = DRILL[id];
+    if (e.fixed) {   // fixed-answer card: one substrate per hub example
+      eq(e.subs, [HUB_BY_ID[id].example, HUB_BY_ID[id].example2].filter(Boolean).map((x) => x.substrate), `${id}: fixed entry has one substrate per hub example`);
+    } else ok(e.subs.length >= 3 && e.subs.length <= 6, `${id}: 3 to 6 substrates (${e.subs.length})`);
+  }
+  eq(DRILL_IDS.filter((id) => DRILL[id].fixed).sort(), ['alkene-hydroboration', 'alkyne-hydroboration', 'amine-in-acid', 'benzylic-bromination', 'birch', 'clemmensen', 'desulfonation', 'diels-alder', 'oxidation-cr', 'oxidation-pcc'], 'the ten B3.1 cards are the fixed-answer drill entries');
   const app = fs.readFileSync(path.join(HERE, '..', 'app.js'), 'utf8');
   ok(/\^practise-\(\[a-z0-9-\]\+\)\$/.test(app), 'router serves #practise-<skill>');
   ok(/id: 'drill-predict'/.test(app) && (app.match(/#practise-predict-product/g) || []).length >= 3, 'the hub, the home Reactions panel and the weak-spot panel link to #practise-predict-product');
@@ -166,7 +182,7 @@ export async function predict({ ok, eq }) {
   const rd = (list) => list.split('.').map((s) => py.get(s));
   const flatKey = (list) => rd(list).map((m) => m.flat).sort().join('.');
 
-  let ringChecked = 0, mesoChecked = 0, ezChecked = 0, chiralChecked = 0, spaceChecked = 0;
+  let hydroChecked = 0, ringChecked = 0, mesoChecked = 0, ezChecked = 0, chiralChecked = 0, spaceChecked = 0;
   for (const [i, p] of all.entries()) {
     const t = `${p.card} ${p.substrate} ${p.reagent} #${i}`;
     const card = HUB_BY_ID[p.card];
@@ -189,6 +205,15 @@ export async function predict({ ok, eq }) {
         if (p.substrate === 'C/C=C/CC' || p.substrate === 'C/C=C\\CC') ok(!two.achiral, `${t}: two different ends give a chiral product`);
       }
     }
+    // alkene-hydroboration (fixed answer): H and OH add syn, so the OH is TRANS to the CH3. Read back in 3D from the drawn option, not from the card's words.
+    if (p.card === 'alkene-hydroboration') {
+      const two = ms.find((m) => m.centres.length === 2);
+      hydroChecked++;
+      ok(!!two && two.cistrans === 'trans', `${t}: the right option has the OH trans to the CH₃ (${two && two.cistrans})`);
+      const sp = p.options.filter((x) => x.fact === 'space');
+      eq(sp.length, 1, `${t}: one "space" distractor`);
+      for (const o of sp) { const m = rd(o.smiles).find((x) => x.centres.length === 2); ok(!!m && m.cistrans === 'cis', `${t}: the "space" distractor has the OH cis to the CH₃ (${m && m.cistrans})`); }
+    }
     if (p.card === 'alkyne-x2-1') { ezChecked++; eq(ms.flatMap((m) => m.ez), ['E'], `${t}: anti addition of X₂ gives the (E) dihaloalkene`); }
     if (p.card === 'alkyne-lindlar') {
       const both = !p.substrate.endsWith('#C');
@@ -197,7 +222,9 @@ export async function predict({ ok, eq }) {
     // a wrong "space" option has the same atoms as the right one (only the faces differ)
     for (const o of p.options.filter((x) => x.fact === 'space')) { spaceChecked++; eq(flatKey(o.smiles), flatKey(right.smiles), `${t}: a wrong "space" option differs only in stereochemistry`); }
   }
-  ok(ringChecked >= 20 && mesoChecked >= 8 && ezChecked >= 15 && chiralChecked >= 10 && spaceChecked >= 40, `stereo read-backs ran (ring ${ringChecked}, meso ${mesoChecked}, E/Z ${ezChecked}, chiral ${chiralChecked}, space ${spaceChecked})`);
+  ok(hydroChecked >= 1, `alkene-hydroboration was read back in 3D (${hydroChecked})`);
+  // (ring was 20 before the ten fixed-answer cards joined the 200 random draws: they now take a quarter of the draws; every card x substrate pair is also read back once)
+  ok(ringChecked >= 12 && mesoChecked >= 8 && ezChecked >= 15 && chiralChecked >= 10 && spaceChecked >= 40, `stereo read-backs ran (ring ${ringChecked}, meso ${mesoChecked}, E/Z ${ezChecked}, chiral ${chiralChecked}, space ${spaceChecked})`);
 
   // ---- (5) the drill agrees with the hub's own example for every card
   for (const c of HUB_CARDS) {

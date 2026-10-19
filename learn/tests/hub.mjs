@@ -5,6 +5,9 @@
 //      Each card has an EXPECTATION written by hand below: no stereo at all unless the card needs it.
 //  (3) where an engine models the reagent (HX, hydration, X2, H2, KMnO4, peracid, alkyne reactions, EAS, directors, side chains, acetylide, diene HX) the card's
 //      example product equals the engine's product for that substrate (canonical isomeric SMILES), and the card's `space` agrees with the engine's syn/anti.
+//  (3b) the ten workbook B3.1 cards (Diels-Alder, Clemmensen, Birch, two hydroborations, benzylic bromination, PCC, Cr(VI), amine in acid, desulfonation) have no
+//      engine model, so their example products are checked by hand-written molecular formulas (HAND below), RDKit parse (JS and Python) and the stereo read-back;
+//      the cards with no lesson say "Not in a lesson" on the screen instead of a lesson link;
 //  (4) the router accepts #lesson-NN/sK and the view code keeps its promises (no progress faked), read from the source.
 // Run on its own with `node learn/tests/hub.mjs`, or as part of run.mjs.
 import { ready, canon } from '../engine/chem.js';
@@ -16,7 +19,8 @@ import { fileURLToPath } from 'node:url';
 import { LESSONS } from '../lessons/index.js';
 import { HUB_CARDS, HUB_GROUPS, HUB_SPACE, HUB_ADDS, HUB_BY_ID } from '../engine/reaction-hub.js';
 import * as R from '../engine/reactions.js';
-import { lessonHref } from '../hub-view.js';
+import { lessonHref, NO_LESSON } from '../hub-view.js';
+import { formulaOf } from '../engine/skeletal.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TOOLS = path.join(HERE, '..', 'tools');
@@ -33,8 +37,31 @@ const EXPECT = {
   'alkene-epoxide-diol': { centres: 2, chiral: true, labels: 'same', cistrans: 'trans' },
   'alkyne-x2-1': { ez: ['E'] },
   'alkyne-lindlar': { ez: ['Z'] },
-  'diene-hx': { unassigned: 1, unassignedBonds: 1 }
+  'diene-hx': { unassigned: 1, unassignedBonds: 1 },
+  // workbook B3.1 cards
+  'alkene-hydroboration': { centres: 2, chiral: true, labels: 'same', cistrans: 'trans' },   // trans-2-methylcyclohexanol, (1R,2R) as drawn, racemic
+  'benzylic-bromination': { unassigned: 1 },
+  'oxidation-pcc': { subUnassigned: 1 },   // the 1° and 2° alcohol substrate is a racemate drawn flat; the product has no stereocentre
+  'oxidation-cr': { subUnassigned: 1 },   // 1-phenylethanol is a racemate drawn flat; its ketone has none
+  'diels-alder': { unassigned: 2, flat: true }   // two stereocentres drawn flat on purpose (the card says syn, but only in words)
 };
+
+// The ten cards with no engine model. formula = the example product (Hill formula, D counted as H by the formula code); formula2 = the second example.
+// sum = the substrate formulas must add up to the product (Diels-Alder: nothing is lost).
+const HAND = {
+  'diels-alder': { formula: 'C8H12O', sum: ['C5H8', 'C3H4O'] },
+  'clemmensen': { formula: 'C8H10' },
+  'birch': { formula: 'C7H8O2', formula2: 'C7H10O' },
+  'alkyne-hydroboration': { formula: 'C6H12O' },
+  'alkene-hydroboration': { formula: 'C7H14O' },
+  'benzylic-bromination': { formula: 'C9H11Br' },
+  'oxidation-pcc': { formula: 'C10H10O2' },
+  'oxidation-cr': { formula: 'C8H8O', formula2: 'C4H8O2' },
+  'amine-in-acid': { formula: 'C9H12N2O2' },
+  'desulfonation': { formula: 'C7H8' }
+};
+const NO_LESSON_IDS = ['diels-alder', 'clemmensen', 'birch', 'alkyne-hydroboration', 'alkene-hydroboration', 'oxidation-pcc', 'oxidation-cr'];
+const SUBGROUP = 'Side chains and alcohols (not in the book)';
 
 // The engine's answer for the card's example (products as canonical isomeric SMILES), and, where the engine knows it, how the new groups add.
 const BENZENE = 'c1ccccc1';
@@ -85,7 +112,15 @@ export async function hub({ ok, eq }) {
   ok(HUB_GROUPS.length === 4 && HUB_GROUPS.every((g) => nonEmpty(g.id) && nonEmpty(g.label) && nonEmpty(g.sub)), 'four groups, each with id, label and sub');
   const spaceIds = HUB_SPACE.map((s) => s.id), addsIds = HUB_ADDS.map((a) => a.id);
   eq(spaceIds.slice().sort(), ['anti', 'either', 'n.a.', 'syn'], 'space filter ids');
-  eq(addsIds, ['OH', 'X', 'H', 'other'], 'adds filter ids');
+  eq(addsIds, ['OH', 'X', 'H', 'other', 'O', 'ring'], 'adds filter ids');
+  eq(HUB_GROUPS.map((g) => g.id), ['arene', 'alkene', 'alkyne', 'diene'], 'group order is unchanged');
+  eq(Object.keys(HAND).sort(), HUB_CARDS.filter((c) => !ENGINE[c.id]).map((c) => c.id).sort(), 'HAND covers exactly the cards with no engine model');
+  eq(HUB_CARDS.filter((c) => c.lesson === null).map((c) => c.id).sort(), NO_LESSON_IDS.slice().sort(), 'the cards with no lesson are the seven the brief names');
+  eq(HUB_CARDS.filter((c) => c.subgroup).map((c) => c.id), ['oxidation-pcc', 'oxidation-cr'], 'only the two oxidation cards have a sub-header');
+  for (const c of HUB_CARDS.filter((x) => x.subgroup)) ok(c.group === 'arene' && c.subgroup === SUBGROUP, `${c.id}: sits in the aromatics group under "${SUBGROUP}"`);
+  // the sub-header cards are the last cards of their group, so they stay together under one header
+  const areneIds = HUB_CARDS.filter((c) => c.group === 'arene').map((c) => c.id);
+  eq(areneIds.slice(-2), ['oxidation-pcc', 'oxidation-cr'], 'the sub-header cards come last in the aromatics group');
   for (const g of HUB_GROUPS) ok(HUB_CARDS.some((c) => c.group === g.id), `group ${g.id} has at least one card`);
   const hrefs = [];
   for (const c of HUB_CARDS) {
@@ -104,7 +139,9 @@ export async function hub({ ok, eq }) {
     if (c.facts.spaceNote !== undefined) ok(nonEmpty(c.facts.spaceNote), `${id}: spaceNote not empty when given`);
     ok(c.apply && nonEmpty(c.apply.pattern) && Array.isArray(c.apply.steps) && c.apply.steps.length >= 3 && c.apply.steps.length <= 6 && c.apply.steps.every(nonEmpty), `${id}: pattern and 3 to 6 steps`);
     ok(!c.apply.steps.some((s) => /^\s*\d+[.)]/.test(s)), `${id}: steps are not numbered by hand (the list numbers them)`);
-    // lesson and mechanism steps resolve
+    if (c.example2 !== undefined) ok(c.example2 && nonEmpty(c.example2.substrate) && nonEmpty(c.example2.product) && nonEmpty(c.example2.note), `${id}: second example has substrate, product and note`);
+    // lesson and mechanism steps resolve (a card with no lesson has none and no mechanism step)
+    if (c.lesson === null) { ok(c.mech === undefined, `${id}: a card with no lesson has no mechanism step`); continue; }
     ok(c.lesson && /^\d\d$/.test(c.lesson.id) && /^s\d\d$/.test(c.lesson.step), `${id}: lesson ref shape`);
     const L = LESSONS.find((l) => l.id === c.lesson.id);
     ok(!!L, `${id}: lesson ${c.lesson.id} exists`);
@@ -128,6 +165,11 @@ export async function hub({ ok, eq }) {
     for (const c of HUB_CARDS) {
       const mols = [c.example.substrate, ...c.example.product.split('.')];
       mols.forEach((s) => ok(canon(s) !== null, `${c.id}: ${s} parses in RDKit (JS)`));
+      if (c.example2) {
+        const m2 = [c.example2.substrate, ...c.example2.product.split('.')];
+        m2.forEach((s) => ok(canon(s) !== null, `${c.id}: second example ${s} parses in RDKit (JS)`));
+        cases.push({ id: c.id + '#2', smiles: m2 });
+      }
       ok(!c.example.product.includes('..') && !/^\.|\.$/.test(c.example.product), `${c.id}: product SMILES has no empty component`);
       cases.push({ id: c.id, smiles: mols });
     }
@@ -135,14 +177,19 @@ export async function hub({ ok, eq }) {
     fs.writeFileSync(inp, JSON.stringify({ cases }));
     execFileSync('python3', ['-I', path.join(TOOLS, 'check_hub.py'), inp, outp], { stdio: ['ignore', 'ignore', 'inherit'] });
     const py = JSON.parse(fs.readFileSync(outp, 'utf8')).cases;
-    eq(py.length, HUB_CARDS.length, 'Python read every card');
+    eq(py.length, HUB_CARDS.length + HUB_CARDS.filter((c) => c.example2).length, 'Python read every card and every second example');
+    for (const c of HUB_CARDS.filter((x) => x.example2)) {
+      const row = py.find((x) => x.id === c.id + '#2');
+      ok(!!row && row.mols.every((m) => m.ok), `${c.id}: second example parses in Python RDKit`);
+      ok(!!row && row.mols.every((m) => m.centres.length === 0 && m.unassigned === 0 && m.ez.length === 0), `${c.id}: second example has no stereochemistry to show`);
+    }
     for (const c of HUB_CARDS) {
       const row = py.find((x) => x.id === c.id);
       const exp = EXPECT[c.id] || {};
       ok(!!row && row.mols.every((m) => m.ok), `${c.id}: every molecule parses in Python RDKit`);
       if (!row) continue;
       const [sub, ...prods] = row.mols;
-      ok(sub.centres.length === 0 && sub.unassigned === 0, `${c.id}: the substrate has no stereocentre`);
+      ok(sub.centres.length === 0 && sub.unassigned === (exp.subUnassigned || 0), `${c.id}: the substrate has no specified stereocentre (${exp.subUnassigned || 0} drawn flat on purpose)`);
       const centres = prods.flatMap((m) => m.centres), ez = prods.flatMap((m) => m.ez);
       eq(centres.length, exp.centres || 0, `${c.id}: number of specified stereocentres in the product`);
       eq(prods.reduce((n, m) => n + m.unassigned, 0), exp.unassigned || 0, `${c.id}: stereocentres left unspecified on purpose`);
@@ -158,7 +205,10 @@ export async function hub({ ok, eq }) {
         }
       }
       // a card that says syn or anti must show it: two stereocentres or a C=C with geometry
-      if (c.facts.space === 'syn' || c.facts.space === 'anti') ok((exp.centres || 0) >= 2 || (exp.ez || []).length > 0, `${c.id}: syn/anti card shows its stereochemistry in the product`);
+      if (c.facts.space === 'syn' || c.facts.space === 'anti') ok((exp.centres || 0) >= 2 || (exp.ez || []).length > 0 || (exp.flat && exp.unassigned >= 2), `${c.id}: syn/anti card shows its stereochemistry in the product (or is drawn flat on purpose with two stereocentres)`);
+      if (exp.flat) ok(/racemate/.test(c.example.note || ''), `${c.id}: a flat drawing says so in the note`);
+      // hydroboration is syn: H and OH end up on the same face, so OH is TRANS to the CH3 (read back in 3D, not just claimed)
+      if (c.id === 'alkene-hydroboration') ok(prods.some((m) => m.cistrans === 'trans'), `${c.id}: the drawn product has the OH trans to the CH3`);
       // a single stereocentre that forms as a racemate is drawn flat AND the card says so
       if (exp.unassigned) ok(/racemate/.test(c.example.note || ''), `${c.id}: a flat racemic centre is explained in the note`);
       if (exp.centres && exp.chiral) ok(/racemate/.test(c.example.note || ''), `${c.id}: a chiral drawn product says it is one of two mirror images`);
@@ -166,10 +216,27 @@ export async function hub({ ok, eq }) {
   } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 
   // ---- (3) the engine's product equals the card's product; space agrees with the engine
-  const modelled = [];
+  const modelled = [], byHand = [];
   for (const c of HUB_CARDS) {
     const fn = ENGINE[c.id];
-    if (!fn) { ok(false, `${c.id}: no engine check and no hand-authored marker`); continue; }
+    if (!fn) {
+      const hand = HAND[c.id];
+      if (!hand) { ok(false, `${c.id}: no engine check and no hand-authored marker`); continue; }
+      byHand.push(c.id);
+      // (3b) formulas written by hand: the drawn product has the formula the chemistry gives
+      const fp = c.example.product.split('.').map((x) => formulaOf(x));
+      eq(fp, [hand.formula], `${c.id}: formula of the example product`);
+      if (hand.sum) {
+        const sub = c.example.substrate.split('.').map((x) => formulaOf(x));
+        eq(sub, hand.sum, `${c.id}: the two reactants`);
+      }
+      ok(!c.example.substrate.split('.').some((x) => parts(x).join() === parts(c.example.product).join()), `${c.id}: the product differs from the substrate`);
+      if (c.example2) {
+        eq(c.example2.product.split('.').map((x) => formulaOf(x)), [hand.formula2], `${c.id}: formula of the second example product`);
+        ok(canon(c.example2.substrate) !== canon(c.example2.product), `${c.id}: the second product differs from its substrate`);
+      }
+      continue;
+    }
     let got;
     try { got = fn(c); } catch (e) { ok(false, `${c.id}: engine threw ${e.message}`); continue; }
     modelled.push(c.id);
@@ -182,13 +249,17 @@ export async function hub({ ok, eq }) {
     if (got.rel !== undefined && got.rel !== null) eq(c.facts.space, got.rel, `${c.id}: space agrees with the engine (${got.rel})`);
     if (got.racemic !== undefined) ok(!!got.racemic === /racemate/.test(c.example.note || '') || got.racemic === false, `${c.id}: racemate noted when the engine says racemic`);
   }
-  eq(modelled.length, HUB_CARDS.length, 'every card has an engine model');
+  eq(modelled.length + byHand.length, HUB_CARDS.length, 'every card has an engine model or a hand-written formula check');
   // no card is left out of the engine map, and the map has no stale card
-  eq(Object.keys(ENGINE).sort(), HUB_CARDS.map((c) => c.id).sort(), 'ENGINE map covers exactly the hub cards');
+  eq([...Object.keys(ENGINE), ...Object.keys(HAND)].sort(), HUB_CARDS.map((c) => c.id).sort(), 'ENGINE and HAND together cover exactly the hub cards');
 
   // ---- (4) router and view promises, read from the source
   const app = fs.readFileSync(path.join(HERE, '..', 'app.js'), 'utf8');
   ok(/lesson-\(\\d\+\)\(\?:\\\/\(s\\d\+\)\)\?\$/.test(app), 'router accepts #lesson-NN and #lesson-NN/sK');
+  const view = fs.readFileSync(path.join(HERE, '..', 'hub-view.js'), 'utf8');
+  eq(NO_LESSON, 'Not in a lesson: this card is the short version', 'the no-lesson line');
+  ok(/c\.lesson\s*\?/.test(view) && /NO_LESSON/.test(view), 'hub view shows the no-lesson line when a card has no lesson, the lesson link otherwise');
+  ok(/c\.subgroup/.test(view) && /hub-subhead/.test(view), 'hub view draws the sub-header for cards that have one');
   ok(/hash === 'reactions'/.test(app) && /buildHub\(/.test(app), 'router serves #reactions with the hub view');
   ok(/href: '#reactions'/.test(app), 'home screen has a button to #reactions');
   ok(/class: 'side'/.test(app) && /h\('h2', \{ id: 'rx-h' \}, 'Reactions'\)/.test(app), 'home screen has a Reactions panel');

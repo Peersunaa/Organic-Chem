@@ -1,6 +1,8 @@
 // Mixed "predict the product" drill (generator `predict-product`, skill tag `predict-product`). It reads the reaction hub (engine/reaction-hub.js): every hub card has an
-// entry in DRILL below, which says which substrates go with that card and how to compute the answer. The answer is ALWAYS computed by the engines the lessons use
-// (reactions.js, reactions-additions.js, reactions-alkynes.js, reactions-dienes.js, reactions-aromatic.js), never typed. The wrong options are the engines' own
+// entry in DRILL below, which says which substrates go with that card and how to compute the answer. The answer is computed by the engines the lessons use
+// (reactions.js, reactions-additions.js, reactions-alkynes.js, reactions-dienes.js, reactions-aromatic.js), never typed. The exception: the ten workbook B3.1 cards
+// (Diels-Alder, Clemmensen, Birch, hydroborations, benzylic bromination, PCC, Cr(VI), amine in acid, desulfonation) have no engine model. Their entries are
+// `fixed: true`: the right answer is the hub card's own example (read from the hub), and only the wrong answers are typed. The wrong options are the engines' own
 // distractors (anti-Markovnikov, wrong orientation, syn for anti, unreacted, over-reacted, wrong reagent) plus a few small hand edits (nitro reduction, side chains, acetylides).
 // Every wrong option is tagged with the hub's three facts: what adds ("adds"), where it adds ("where"), how it adds in space ("space"), and its `why` starts with the slip.
 // tests/predict.mjs checks 200 generated problems (RDKit parse, one right answer, the engine product, the card's stereo) and every substrate x reagent pair of every card.
@@ -193,6 +195,124 @@ const ALKYNE_T = ['CC#C', 'CCC#C', 'CCCC#C', 'CCCCC#C'];
 const ALKYNE_X = ['CC#CC', 'CCC#CCC', 'CCCC#C', 'CCCCC#C', 'CCCC#CCCC'];
 const STEREO_RING = ['C1=CCCC1', 'C1=CCCCC1', 'CC1=CCCCC1', 'C/C=C/C', 'C/C=C\\C', 'C/C=C/CC'];
 
+// ---------------------------------------------------------------- fixed-answer cards (workbook B3.1): no engine model, so the right answer is the hub card's own example
+// (card.example, then card.example2), read from the hub so the fact lives once. The wrong answers are typed here, each tagged with the fact it misses.
+// tests/predict.mjs checks that the right option equals the card's example product, that every drawing parses (JS and Python RDKit) and that all options differ.
+const W = (smiles, kind, fact, why) => ({ smiles, kind, fact, why });
+const FIXED = {
+  'diels-alder': { fam: 'diene', racemic: true, items: [{
+    label: 'heat', subText: 'The diene and the dienophile drawn below',
+    right: 'The diene ends (C1 and C4) bond to the two dienophile carbons and close a six-membered ring. The new C=C sits between the old C2 and C3, and the CHO lands next to the CH₃: the "1,2" product.',
+    wrong: [
+      W('O=CC1CC(C)C=CC1', 'meta', 'where', 'The CHO and the CH₃ are 1,3 here: the diene end that carries the CH₃ bonded to the wrong dienophile carbon. A 1-substituted diene gives the "1,2" product.'),
+      W('O=CC1C(C)CC=CC1', 'shifted', 'where', 'The new C=C is in the wrong place. It must sit between the old C2 and C3, right next to the carbon that holds the CH₃.'),
+      W('O=CC1C(C)CCCC1', 'saturated', 'adds', 'A Diels–Alder adds no H atoms. The diene and the dienophile just join, and one C=C is left in the ring.')
+    ] }] },
+  'clemmensen': { fam: 'arene', items: [{
+    label: 'Zn(Hg), HCl, heat',
+    right: 'Zn(Hg) with HCl and heat reduces the C=O next to the ring all the way to CH₂. The O leaves and the ring is untouched.',
+    wrong: [
+      W('CC(O)c1ccccc1', 'alcohol', 'adds', 'The reduction goes all the way to CH₂. An alcohol (C–OH) would be only a partial reduction, and Clemmensen does not stop there.'),
+      W('CC(=O)c1ccccc1', 'unchanged', 'adds', 'That is the starting ketone. Zn(Hg) with HCl is a strong reducing mix, so the C=O does not survive.'),
+      W('CCC1CCCCC1', 'ringReduced', 'where', 'The ring is not reduced. Clemmensen reduces only the carbonyl next to the ring and leaves the benzene ring alone.')
+    ] }] },
+  'birch': { fam: 'arene', items: [{
+    label: 'Na, liquid NH₃, EtOH',
+    right: 'Birch puts H on two para ring carbons and leaves a 1,4-diene. The CO₂H (electron-withdrawing) sits on an sp³ carbon.',
+    wrong: [
+      W('OC(=O)C1C=CC=CC1', 'conjugated', 'where', 'That is a conjugated 1,3-diene. Birch gives the 1,4-diene: the two H atoms add para to each other, so the two C=C bonds are apart.'),
+      W('OC(=O)C1=CCC=CC1', 'ewgOnSp2', 'where', 'Here the CO₂H sits on a C=C carbon. An electron-withdrawing group ends up on an sp³ carbon in the Birch product.'),
+      W('OC(=O)C1CCCCC1', 'saturated', 'adds', 'That is the fully reduced ring. Birch adds only two H atoms and stops at the diene.')
+    ] }, {
+    label: 'Na, liquid NH₃, EtOH',
+    right: 'Birch puts H on two para ring carbons and leaves a 1,4-diene. The OCH₃ (electron-donating) stays on a C=C carbon (sp²).',
+    wrong: [
+      W('COC1=CC=CCC1', 'conjugated', 'where', 'That is a conjugated 1,3-diene. Birch gives the 1,4-diene: the two H atoms add para to each other, so the two C=C bonds are apart.'),
+      W('COC1C=CCC=C1', 'donorOnSp3', 'where', 'Here the OCH₃ sits on an sp³ carbon. An electron-donating group stays on a C=C carbon in the Birch product.'),
+      W('COC1CCCCC1', 'saturated', 'adds', 'That is the fully reduced ring. Birch adds only two H atoms and stops at the diene.')
+    ] }] },
+  'alkyne-hydroboration': { fam: 'alkyne', items: [{
+    label: '1) BH₃  2) H₂O₂, NaOH',
+    right: 'B, and then OH, go on the END carbon (anti-Markovnikov). The enol tautomerises, so a terminal alkyne gives an aldehyde.',
+    wrong: [
+      W('CCCCC(C)=O', 'methylKetone', 'where', 'That is the methyl ketone. It comes from Hg²⁺ with H₂O, where the OH goes on the inner carbon. Hydroboration puts the OH on the END carbon.'),
+      W('CCCCC=CO', 'enol', 'adds', 'An enol (C=C–OH) is only the intermediate. It tautomerises to the C=O, so it is not the product you isolate.'),
+      W('CCCCCCO', 'alcohol', 'adds', 'That adds two extra H atoms. Hydroboration adds one H and one OH across the triple bond, and the enol then becomes the C=O.')
+    ] }] },
+  'alkene-hydroboration': { fam: 'alkene', racemic: true, items: [{
+    label: '1) BH₃ · THF  2) H₂O₂, NaOH',
+    right: 'The OH goes on the carbon with MORE H (anti-Markovnikov). H and OH add to the same face, so the OH ends up trans to the CH₃.',
+    wrong: [
+      W('CC1(O)CCCCC1', 'markovnikov', 'where', 'That is the Markovnikov alcohol, the one H₂O with H₂SO₄ gives. Hydroboration puts the OH on the carbon with MORE H.'),
+      W('C[C@H]1CCCC[C@H]1O', 'cis', 'space', 'The atoms are right, but the OH is cis to the CH₃. H and OH add to the same face, so the OH ends up trans to the CH₃.'),
+      W('CC1CCCCC1', 'alkane', 'adds', 'That only adds H₂. Hydroboration adds one H and one OH across the C=C.')
+    ] }] },
+  'benzylic-bromination': { fam: 'arene', racemic: true, items: [{
+    label: 'NBS, heat (or Br₂, light)',
+    right: 'A radical reaction puts Br on the benzylic carbon, the one bonded to the ring, because that radical is stabilised by the ring. It forms as a racemate.',
+    wrong: [
+      W('CCCc1ccc(Br)cc1', 'ring', 'where', 'That puts Br on the ring (para). Ring bromination needs Br₂ with FeBr₃. Light or NBS brominates the benzylic carbon instead.'),
+      W('CC(Br)Cc1ccccc1', 'secondCarbon', 'where', 'Br went on the middle carbon of the chain. The benzylic radical is the stable one, so Br goes on the carbon bonded to the ring.'),
+      W('BrCCCc1ccccc1', 'farEnd', 'where', 'Br went on the far end of the chain. Only the benzylic position is brominated, because that radical is stabilised by the ring.'),
+      W('CCC(Br)(Br)c1ccccc1', 'twice', 'adds', 'Two Br atoms is too many. One equivalent of Br₂ or NBS replaces one benzylic H.')
+    ] }] },
+  'oxidation-pcc': { fam: 'arene', items: [{
+    label: 'PCC, CH₂Cl₂',
+    right: 'PCC takes two H from each alcohol that has an H on its carbon: the 1° OH becomes CHO (and stops there) and the 2° OH becomes a ketone.',
+    wrong: [
+      W('OC(=O)CCC(=O)c1ccccc1', 'acid', 'adds', 'That oxidises the aldehyde further, to the carboxylic acid. PCC in CH₂Cl₂ has no water, so a 1° alcohol stops at the aldehyde.'),
+      W('O=C(CCCO)c1ccccc1', 'onlySecondary', 'where', 'Only the 2° OH was oxidised. PCC oxidises every 1° and 2° alcohol, so the 1° OH at the chain end must become CHO too.'),
+      W('OC(CCC=O)c1ccccc1', 'onlyPrimary', 'where', 'Only the 1° OH was oxidised. The 2° alcohol next to the ring also loses two H and becomes a ketone.')
+    ] }] },
+  'oxidation-cr': { fam: 'arene', items: [{
+    label: 'Na₂Cr₂O₇, H₂SO₄, H₂O',
+    right: 'A 2° alcohol loses two H and becomes a ketone. It cannot go further, because there is no H left on that carbon.',
+    wrong: [
+      W('CC(O)c1ccccc1', 'unchanged', 'adds', 'That is the starting alcohol. Cr(VI) with H₂SO₄ is a strong oxidant, so a 2° alcohol is oxidised.'),
+      W('OC(=O)c1ccccc1', 'cleaved', 'adds', 'That would need a C–C bond to be cut. Na₂Cr₂O₇ oxidises the C–OH carbon only and keeps the carbon skeleton.'),
+      W('C=Cc1ccccc1', 'dehydrated', 'adds', 'That loses H₂O (a dehydration), which is not an oxidation. The oxidant takes two H from the alcohol carbon and keeps the O as C=O.')
+    ] }, {
+    label: 'Na₂Cr₂O₇, H₂SO₄, H₂O',
+    right: 'In water, a 1° alcohol goes through the aldehyde and on to the carboxylic acid. Cr(VI) does not stop at the aldehyde (PCC does).',
+    wrong: [
+      W('CCCC=O', 'aldehyde', 'where', 'That is the aldehyde, where PCC stops. In water, Cr(VI) oxidises the aldehyde again, so the 1° alcohol ends as the acid.'),
+      W('CCCCO', 'unchanged', 'adds', 'That is the starting alcohol. Cr(VI) with H₂SO₄ oxidises a 1° alcohol.'),
+      W('CCC(=O)O', 'shorter', 'adds', 'The acid keeps all four carbons. Oxidation changes the CH₂OH into CO₂H and does not cut the chain.')
+    ] }] },
+  'amine-in-acid': { fam: 'arene', items: [{
+    label: 'HNO₃, H₂SO₄',
+    right: 'In strong acid the N is protonated to –NR₂H⁺, a meta director. The CH₃ directs ortho/para. The carbon ortho to the CH₃ is also meta to the N, so the NO₂ goes there.',
+    wrong: [
+      W('CN(C)c1ccc(C)cc1[N+](=O)[O-]', 'orthoToN', 'where', 'This puts the NO₂ ortho to the nitrogen, as a free –NR₂ (an ortho/para director) would. In strong acid the N is protonated and directs meta.'),
+      W('CN(C)c1ccc(C)c([N+](=O)[O-])c1[N+](=O)[O-]', 'twice', 'adds', 'Two NO₂ groups is too many. The protonated amine deactivates the ring, so only one NO₂ goes on.'),
+      W('CN(C)c1ccc(C)cc1', 'unchanged', 'adds', 'That is the starting material. HNO₃ with H₂SO₄ nitrates the ring, even though the –NR₂H⁺ group slows it down.')
+    ] }] },
+  'desulfonation': { fam: 'arene', items: [{
+    label: 'D₂SO₄, D₂O, heat',
+    right: 'Hot acid reverses sulfonation: D (from D₂SO₄ and D₂O) replaces the SO₃H on the same carbon, and nothing else on the ring moves.',
+    wrong: [
+      W('Cc1ccc(S(=O)(=O)O)cc1', 'unchanged', 'adds', 'That is the starting acid. Hot D₂SO₄ in D₂O runs sulfonation backwards, so the SO₃H is removed.'),
+      W('Cc1ccccc1', 'plainH', 'adds', 'The SO₃H is gone, but the atom that replaces it is D, not H. D₂SO₄ in D₂O supplies D.'),
+      W('Cc1cccc([2H])c1', 'moved', 'where', 'The D must go exactly where the SO₃H was (para to the CH₃). It does not end up on a different ring carbon.')
+    ] }] }
+};
+/** A drill entry for a fixed-answer card: one substrate per hub example, the right answer read from the hub card, the wrong answers from FIXED. */
+function fixedEntry(id) {
+  const spec = FIXED[id], card = HUB_BY_ID[id];
+  const exs = [card.example, card.example2].filter(Boolean);
+  if (exs.length !== spec.items.length) throw new Error(`${id}: ${exs.length} hub examples but ${spec.items.length} drill items`);
+  return {
+    fam: spec.fam, fixed: true, subs: exs.map((e) => e.substrate), variants: [V('fixed', '')], ex: 0,
+    solve: (sub) => {
+      const i = exs.findIndex((e) => e.substrate === sub);
+      if (i < 0) throw new Error(`${id}: ${sub} is not an example of the card`);
+      const it = spec.items[i], products = exs[i].product.split('.');
+      const choices = [{ smiles: products, correct: true, kind: 'major', why: 'Yes. ' + it.right }, ...it.wrong.map((w) => ({ smiles: [w.smiles], correct: false, kind: w.kind, why: w.why }))];
+      return { label: it.label, subText: it.subText, family: 'fixed', racemic: !!spec.racemic, facts: Object.fromEntries(it.wrong.map((w) => [w.kind, w.fact])), choices, products };
+    }
+  };
+}
+
 export const DRILL = {
   'eas-bromination': { fam: 'arene', subs: MONO_ANY, variants: [V('Br2', ''), V('Cl2', '')], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
   'eas-nitration': { fam: 'arene', subs: MONO_ANY, variants: [V('HNO3', '')], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
@@ -226,8 +346,10 @@ export const DRILL = {
 
   'diene-hx': { fam: 'diene', subs: ['C=CC=C', 'CC=CC=C', 'C=C(C)C=C', 'C1=CC=CCC1', 'C1=CC=CC1'], variants: [V('HBr', 'HBr'), V('HCl', 'HCl')], ex: 0, solve: (s, v) => solveDiene(s, v) }
 };
+// the ten workbook B3.1 cards: fixed answers (see FIXED above)
+for (const id of Object.keys(FIXED)) DRILL[id] = fixedEntry(id);
 export const DRILL_IDS = HUB_CARDS.filter((c) => DRILL[c.id]).map((c) => c.id);
-/** Hub cards with no drill entry (none: every card has an engine model). */
+/** Hub cards with no drill entry (none: the cards with an engine model use it, the ten B3.1 cards use fixed answers). */
 export const DRILL_EXCLUDED = HUB_CARDS.filter((c) => !DRILL[c.id]).map((c) => c.id);
 /** Every (card, substrate, reagent variant) triple. */
 export function drillCombos() { return DRILL_IDS.flatMap((id) => DRILL[id].subs.flatMap((s) => DRILL[id].variants.filter((v) => !(v.skip || []).includes(s)).map((v, vi) => ({ card: id, sub: s, variant: v, vi })))); }
@@ -264,12 +386,12 @@ function finalize(card, entry, sub, v, S, rng) {
   const f = card.facts;
   const spaceText = SPACE_LINE[f.space];
   const spaceCap = spaceText[0].toUpperCase() + spaceText.slice(1);
-  const nm = nameTag(sub, entry.fam);
+  const nm = entry.fixed && sub.includes('.') ? null : nameTag(sub, entry.fam);
   const hasSpace = chosen.some((d) => d.fact === 'space');
   const rightWhy = String(right.why || '').replace(/^Yes\.\s*/, '');
   return {
     kind: 'choice', skill: 'predict-product', smiles: null, equation: { reactants: [sub], products: [], cond: S.label },
-    promptHtml: `${nm || 'The molecule drawn below'} + <b>${S.label}</b>. Which is the major product${flat(right.smiles).length > 1 ? ' (or products)' : ''}?${hasSpace ? ' Look at how the groups sit in space.' : ''}`,
+    promptHtml: `${nm || S.subText || 'The molecule drawn below'} + <b>${S.label}</b>. Which is the major product${flat(right.smiles).length > 1 ? ' (or products)' : ''}?${hasSpace ? ' Look at how the groups sit in space.' : ''}`,
     prompt: `${S.label}: which is the major product?`,
     options: opts, answer: opts.find((o) => o.correct).text,
     card: card.id, group: card.group, substrate: sub, reagent: v.id, halide: v.halide || null, products: S.products, racemic: S.racemic, family: S.family,

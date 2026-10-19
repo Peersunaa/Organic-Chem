@@ -3,16 +3,18 @@
 import { h, equationRow } from './engine/steps.js';
 import { HUB_CARDS, HUB_GROUPS, HUB_SPACE, HUB_ADDS } from './engine/reaction-hub.js';
 
+export const NO_LESSON = 'Not in a lesson: this card is the short version';
 const SPACE_TEXT = { syn: 'Syn: both groups on the same face', anti: 'Anti: groups on opposite faces', either: 'Either face', 'n.a.': 'Nothing to show here' };
 
 /** "#lesson-13/s06" (the router opens the lesson at that step without marking earlier steps done). */
 export const lessonHref = (ref) => `#lesson-${ref.id}/${ref.step}`;
 const lessonText = (ref) => `Lesson ${Number(ref.id)}, step ${Number(ref.step.slice(1))}`;
 
-function exampleBlock(c) {
-  const ex = c.example;
-  const eq = equationRow({ reactants: [ex.substrate], products: ex.product.split('.'), style: 'auto' });
-  return h('div', { class: 'hub-example' }, eq,
+/** One worked example. A substrate with a '.' (Diels–Alder: diene . dienophile) is drawn as two reactants joined by '+'. */
+function exampleBlock(c, ex = c.example, second = false) {
+  const eq = equationRow({ reactants: ex.substrate.split('.'), products: ex.product.split('.'), style: 'auto' });
+  return h('div', { class: second ? 'hub-example hub-example2' : 'hub-example' },
+    second ? h('p', { class: 'hub-rx small' }, h('b', {}, 'Second example')) : null, eq,
     h('p', { class: 'hub-rx small' }, h('span', { class: 'muted' }, 'Reagent: '), h('b', {}, ex.reagent || c.reagent)),
     ex.note ? h('p', { class: 'muted small hub-note' }, ex.note) : null);
 }
@@ -33,13 +35,16 @@ function applyBlock(c) {
 }
 
 function cardNode(c) {
-  const links = [h('a', { class: 'btn small', href: lessonHref(c.lesson) }, lessonText(c.lesson))];
-  if (c.mech) links.push(h('a', { class: 'btn small ghost', href: lessonHref({ id: c.lesson.id, step: c.mech }) }, 'See the mechanism'));
+  // a card with no lesson says so: it is the short version
+  const links = [c.lesson
+    ? h('a', { class: 'btn small', href: lessonHref(c.lesson) }, lessonText(c.lesson))
+    : h('span', { class: 'muted small hub-nolesson' }, NO_LESSON)];
+  if (c.lesson && c.mech) links.push(h('a', { class: 'btn small ghost', href: lessonHref({ id: c.lesson.id, step: c.mech }) }, 'See the mechanism'));
   const grp = HUB_GROUPS.find((g) => g.id === c.group);
   return h('article', { class: 'card hub-card', id: 'rx-' + c.id, 'data-group': c.group, 'data-space': c.facts.space, 'data-adds': c.facts.addsKey.join(' ') },
     h('h3', { class: 'hub-title' }, c.reagent),
     h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'What it does'), h('p', {}, c.what)),
-    h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'Worked example'), exampleBlock(c)),
+    h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'Worked example'), exampleBlock(c), c.example2 ? exampleBlock(c, c.example2, true) : null),
     h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'Three facts'), factsBlock(c)),
     h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'When the question looks like this'), applyBlock(c)),
     h('div', { class: 'hub-links' }, ...links, h('span', { class: 'chip' }, grp ? grp.label : c.group)));
@@ -62,6 +67,7 @@ export function buildHub(ready) {
         && (state.adds === 'all' || c.facts.addsKey.includes(state.adds));
       node.hidden = !show; if (show) n++;
     });
+    list.querySelectorAll('.hub-subgroup').forEach((s) => { s.hidden = !s.querySelector('.hub-card:not([hidden])'); });
     list.querySelectorAll('.hub-group').forEach((s) => { s.hidden = !s.querySelector('.hub-card:not([hidden])'); });
     count.textContent = `Showing ${n} of ${HUB_CARDS.length} cards`;
     empty.hidden = n > 0;
@@ -94,10 +100,13 @@ export function buildHub(ready) {
     HUB_GROUPS.forEach((g) => {
       const sec = h('section', { class: 'hub-group', 'aria-labelledby': 'hub-g-' + g.id },
         h('div', { class: 'hub-ghead' }, h('h2', { id: 'hub-g-' + g.id }, g.label), h('p', { class: 'muted small' }, g.sub)));
+      let subName = null, sub = null;   // cards with the same `subgroup` sit together under a sub-header
       HUB_CARDS.filter((c) => c.group === g.id).forEach((c) => {
         const node = cardNode(c);
         cards.push({ c, node });
-        sec.append(node);
+        if (!c.subgroup) { sec.append(node); return; }
+        if (subName !== c.subgroup) { subName = c.subgroup; sub = h('div', { class: 'hub-subgroup' }, h('h3', { class: 'hub-subhead' }, c.subgroup)); sec.append(sub); }
+        sub.append(node);
       });
       list.append(sec);
     });
