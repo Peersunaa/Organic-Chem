@@ -3,6 +3,10 @@
 import { h, equationRow } from './engine/steps.js';
 import { HUB_CARDS, HUB_GROUPS, HUB_SPACE, HUB_ADDS, SPACE_TEXT } from './engine/reaction-hub.js';
 import { t, tAuto, onVoiceChange } from './engine/voice.js';
+import { figureCard } from './figures/figure-card.js';
+
+/** The crafted chapter figure shown (collapsed) at the top of a hub group: alkenes -> ch4, aromatics -> ch5 (ch3 and ch6 have no group here). */
+export const GROUP_FIGURE = { alkene: 'ch4', arene: 'ch5' };
 
 export const NO_LESSON = 'Not in a lesson: this card is the short version';
 
@@ -31,7 +35,14 @@ function applyBlock(c) {
     h('ol', { class: 'hub-steps' }, c.apply.steps.map((s, i) => h('li', {}, t(s, c.caveman && c.caveman.steps && c.caveman.steps[i])))));
   // phones: collapsed, so a card stays about one screen; wider screens: open
   try { if (window.innerWidth >= 700) details.open = true; } catch (e) { /* ignore */ }
-  return h('div', { class: 'hub-apply' }, h('p', { class: 'hub-pattern' }, c.apply.pattern), details);
+  // a card with a `draw` list (Diels-Alder) adds a numbered walk-through inside the exam box; the caveman list is used when the card has one
+  let draw = null;
+  if (Array.isArray(c.draw) && c.draw.length) {
+    const cv = c.caveman && c.caveman.draw;
+    draw = h('div', { class: 'hub-draw' }, h('p', { class: 'hub-draw-h' }, 'Draw it, step by step'),
+      h('ol', { class: 'hub-steps hub-draw-list' }, c.draw.map((s, i) => h('li', {}, t(s, cv && cv[i])))));
+  }
+  return h('div', { class: 'hub-apply' }, h('p', { class: 'hub-pattern' }, c.apply.pattern), details, draw);
 }
 
 function cardNode(c) {
@@ -101,6 +112,9 @@ export function buildHub(ready, anchor) {
     HUB_GROUPS.forEach((g) => {
       const sec = h('section', { class: 'hub-group', 'aria-labelledby': 'hub-g-' + g.id },
         h('div', { class: 'hub-ghead' }, h('h2', { id: 'hub-g-' + g.id }, g.label), h('p', { class: 'muted small' }, g.sub)));
+      const figId = GROUP_FIGURE[g.id];
+      const fig = figId ? figureCard(figId, { key: 'hub:' + figId, open: false }) : null;
+      if (fig) sec.querySelector('.hub-ghead').append(fig);
       let subName = null, sub = null;   // cards with the same `subgroup` sit together under a sub-header
       HUB_CARDS.filter((c) => c.group === g.id).forEach((c) => {
         const node = cardNode(c);

@@ -105,9 +105,11 @@ export function termsIn(text) {
 
 // ---------------------------------------------------------------- the DOM layer
 const SKIP = '.widget, .visual, svg, input, textarea, select, button, .opt, .gl-term, .gl-pop, figure, .eqn, .pair, a, summary, .iupac, .chips, mol, molpair, [data-gl-skip]';
-function textNodes(root) {
+// `scoped`: `root` itself sits inside a skipped block (a widget's why line); only skipped blocks BELOW root count.
+function textNodes(root, scoped) {
   const out = [];
-  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.nodeValue.trim() && !(n.parentElement && n.parentElement.closest(SKIP)) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+  const skipped = (el) => { const hit = el && el.closest(SKIP); return !!hit && (!scoped || (hit !== root && root.contains(hit))); };
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.nodeValue.trim() && !skipped(n.parentElement) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
   while (w.nextNode()) out.push(w.currentNode);
   return out;
 }
@@ -123,10 +125,10 @@ function placePop(btn, pop) {
   else (btn.closest('div') || btn.parentNode).append(pop);
 }
 /** Wrap the first occurrence of each term not in `seen` inside `root`; mutates `seen`. Returns the buttons made. */
-export function annotate(root, seen) {
+export function annotate(root, seen, scoped = false) {
   const made = [];
   const left = () => new Set(GLOSSARY.filter((g) => !seen.has(g.id)).map((g) => g.id));
-  for (let node of textNodes(root)) {
+  for (let node of textNodes(root, scoped)) {
     for (;;) {
       const ids = left();
       if (!ids.size) return made;
@@ -145,6 +147,14 @@ export function annotate(root, seen) {
     }
   }
   return made;
+}
+
+/** Make the first occurrence of each term in one short line (a mechanism why line, which lives inside a widget) tappable.
+ *  Taps are handled by the lesson's attachGlossary(host). Returns a function that removes the definition notes again (call it before the line is rewritten). */
+export function annotateLine(el) {
+  injectStyle();
+  const btns = annotate(el, new Set(), true);
+  return () => btns.forEach((b) => { const pop = document.getElementById(b.getAttribute('aria-controls')); if (pop) pop.remove(); });
 }
 
 /** Make the terms of a rendered lesson step tappable, now and as the step grows (feedback, reveals). Returns a function that stops it. */
@@ -217,10 +227,10 @@ export function injectStyle() {
   s.id = 'gl-style';
   s.textContent = `
 .gl-term{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;border-bottom:1.5px dotted var(--accent,#0a727c);position:relative;text-align:inherit;letter-spacing:inherit}
-.gl-term::after{content:"";position:absolute;left:-4px;right:-4px;top:-14px;bottom:-14px}
+.gl-term::after{content:"";position:absolute;left:50%;top:50%;width:calc(100% + 8px);height:calc(100% + 28px);min-width:44px;min-height:44px;transform:translate(-50%,-50%)}
 .gl-term:hover{background:var(--accent-soft,rgba(10,114,124,.09))}
 .gl-term[aria-expanded="true"]{background:var(--accent-soft,rgba(10,114,124,.09));border-bottom-style:solid}
-.gl-term:focus-visible{outline:2px solid var(--accent,#0a727c);outline-offset:2px;border-radius:2px}
+.gl-term:focus-visible{outline:2px solid var(--accent,#0a727c);outline-offset:3px;border-radius:3px}
 .gl-pop{display:block;margin:8px 0;padding:10px 12px;background:var(--surface-2,#eaf0f1);border:1px solid var(--line,#d9e3e5);border-left:3px solid var(--accent,#0a727c);border-radius:6px;color:var(--ink,#0c1d23);font:400 .9375rem/1.375rem var(--body,system-ui,sans-serif);letter-spacing:0;text-transform:none}
 .gl-pop[hidden]{display:none}
 .gl-pop b{color:var(--accent,#0a727c);font-weight:600}

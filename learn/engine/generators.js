@@ -93,7 +93,7 @@ function totalProblem(rng, smi) {
     answer: info.totalValence,
     derive: `Add each atom's valence electrons: ${parts.join(' + ')}${ch ? (ch > 0 ? `, then subtract ${ch} for the + charge` : `, then add ${-ch} for the ${MINUS} charge`) : ''} = ${info.totalValence}.`,
     wrong: ch ? [{ match: info.totalValence + ch, why: `You forgot the charge. A ${ch > 0 ? 'positive ion has lost' : 'negative ion has gained'} ${Math.abs(ch)} electron${Math.abs(ch) > 1 ? 's' : ''}.` }] : [],
-    hints: ['Count every atom, hydrogens included (skeletal drawings leave out the H on carbon).', 'H gives 1, C 4, N 5, O 6, halogens 7. Adjust for any charge at the end.']
+    hints: ['Count every atom, hydrogens included (a line drawing can leave out the H on carbon, but you still count them).', 'H gives 1, C 4, N 5, O 6, halogens 7. Adjust for any charge at the end.']
   };
 }
 
@@ -145,7 +145,7 @@ function octetProblem(rng, smi) {
     answer: a.electrons,
     derive: `${a.bondSum} bond${a.bondSum === 1 ? '' : 's'} × 2 = ${2 * a.bondSum}, plus ${a.lp} lone pair${a.lp === 1 ? '' : 's'} × 2 = ${2 * a.lp}, giving ${a.electrons}.`,
     wrong: [],
-    hints: ['Count the bonds on the atom, bonds to hydrogens included (skeletal drawings leave out the H on carbon).', 'A double bond counts as two bonds. Each bond contributes 2 electrons, each lone pair 2.']
+    hints: ['Count the bonds on the atom, bonds to hydrogens included (a line drawing can leave out the H on carbon, but you still count them).', 'A double bond counts as two bonds. Each bond contributes 2 electrons, each lone pair 2.']
   };
 }
 

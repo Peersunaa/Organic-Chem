@@ -3,7 +3,7 @@ const KEY = 'orgo-learn-v1';
 const DAY = 86400000;
 let state = null;
 
-function fresh() { return { v: 1, iupac: 'new', caveman: false, progress: {}, log: [], wins: [] }; }
+function fresh() { return { v: 1, iupac: 'new', caveman: false, progress: {}, log: [], wins: [], ui: {} }; }
 
 function load() {
   try {
@@ -19,6 +19,10 @@ export function getIupac() { return st().iupac; }
 export function setIupac(v) { st().iupac = v; save(); }
 export function getCaveman() { return st().caveman === true; }
 export function setCaveman(v) { st().caveman = !!v; save(); }
+
+/** Small remembered UI choices (a card left open or closed), keyed by string. */
+export function getUi(key) { const u = st().ui; return u ? u[key] : undefined; }
+export function setUi(key, v) { const s = st(); (s.ui ||= {})[key] = v; save(); }
 
 export function getProgress(id) { return st().progress[id] || { idx: 0, done: [], complete: false }; }
 export function setProgress(id, patch) {

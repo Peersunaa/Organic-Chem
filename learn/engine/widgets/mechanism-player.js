@@ -21,6 +21,7 @@ import { svg as rdSvg } from '../chem.js';
 import { whatIfFor } from '../whatif.js';
 import { chipRow, comparePanel } from './whatif-view.js';
 import { tAuto, onVoiceChange } from '../voice.js';
+import { annotateLine } from '../glossary.js';
 
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -49,6 +50,13 @@ export default {
     const stage = h('div', 'mp-stage');
     const why = h('p', 'mp-why');
     why.setAttribute('aria-live', 'polite');
+    // the why line is one sentence at a time; the first occurrence of each glossary term in it is tappable (the lesson's attachGlossary handles the tap)
+    let dropNotes = null;
+    const setWhy = (text, tappable = true) => {
+      if (dropNotes) { dropNotes(); dropNotes = null; }
+      why.textContent = text;
+      if (tappable) dropNotes = annotateLine(why);
+    };
     const ctl = h('div', 'mp-ctl');
     const count = h('span', 'mp-count');
     const row = h('div', 'mp-ctlrow');
@@ -214,7 +222,7 @@ export default {
       const k = busy ? c + 1 : c;                // the arrow on screen (while one is moving it is the next one)
       count.textContent = k === 0 ? `${L} arrow${L > 1 ? 's' : ''} in this step` : `Arrow ${k} of ${L}`;
       why.classList.toggle('mp-why-idle', k === 0);
-      if (!busy) why.textContent = k === 0 ? 'Press Next to move the first electron pair.' : whyText(step, k - 1);
+      if (!busy) { if (k === 0) setWhy('Press Next to move the first electron pair.', false); else setWhy(whyText(step, k - 1)); }
       prompt.textContent = `Step ${n + 1} of ${N}: ${lead}` + (k === 0 ? (modeOf(n) === 'draw' ? 'Press Next to watch each electron pair move.' : 'Press Next to watch the electrons move, one arrow at a time.')
         : k < L ? 'Press Next for the next arrow.' : n < N - 1 ? (modeOf(n) === 'draw' ? 'That is the whole step. Press Next step to go on.' : 'That is the whole step. Press Next to start the next one.') : 'That is the whole mechanism.');
       back.disabled = busy || !canBack();
@@ -239,7 +247,7 @@ export default {
         stage.append(box);
         const a = mountScene(box, prev.atoms, prev.bonds, [step.arrows[j]]);
         hideMidCharges(box, prev);
-        why.textContent = whyText(step, j);
+        setWhy(whyText(step, j));
         chrome();
         const t = setTimeout(() => markBreaking(box, prev, step.arrows[j]), 900);
         await a.play();

@@ -12,6 +12,8 @@ import { stereoBlock } from './stereo-view.js';
 import * as voice from './engine/voice.js';
 import { attachGlossary, glossaryView, GLOSSARY } from './engine/glossary.js';
 import { recapCard as prereqCard } from './engine/recap.js';
+import { FIGURES } from './figures/figures.js';
+import { figureCard } from './figures/figure-card.js';
 
 const app = document.getElementById('app');
 // A press of Check with nothing entered is not a slip: it must not count as a weak spot.
@@ -218,6 +220,8 @@ function lessonView(L, startId) {
 
   let stereoNode = null;   // the "See it in 3D" block of the current step (Piece 4), if it has one
   let glossaryStop = null; // stops the term-button observer of the step on screen
+  let figure;  // the chapter's "See the idea" figure card (built once per visit, so its open state and animation survive Back / Continue)
+  const figId = Object.keys(FIGURES).find((k) => FIGURES[k].lesson === L.id);
   let prereq; // the "what you need from earlier lessons" card (built once per visit, so a toggle survives Back / Continue)
   const ctxFor = (step) => ({
     lessonId: L.id,
@@ -237,7 +241,8 @@ function lessonView(L, startId) {
     if (!chemReady) { host.innerHTML = '<p class="muted">Loading chemistry engine…</p>'; try { await chemP; } catch (e) { host.innerHTML = '<p class="fb bad">The chemistry engine could not load. Reload the page to try again.</p>'; return; } }
     recapSlot.innerHTML = '';
     if (glossaryStop) { glossaryStop(); glossaryStop = null; }
-    if (idx === 0) { if (prereq === undefined) prereq = prereqCard(L.id); if (prereq) recapSlot.append(prereq); }
+    if (idx === 0) { if (prereq === undefined) prereq = prereqCard(L.id); if (prereq) recapSlot.append(prereq);
+      if (figId) { if (figure === undefined) figure = figureCard(figId, { key: 'lesson-' + L.id, open: true }); if (figure) recapSlot.append(figure); } }
     const prev = steps[idx - 1];
     if (prev && done.has(prev.id) && step.type !== 'useit') { const rc = recapCard(prev); if (rc) recapSlot.append(rc); }
     stereoNode = null;
