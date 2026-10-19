@@ -486,6 +486,13 @@ button.sg-cell { cursor: pointer; touch-action: manipulation; } button.sg-cell:h
 .spl .cf-tab { min-height: 44px; }
 .rd-figs { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; } .rd-fig { margin: 0; flex: 1 1 150px; max-width: 250px; display: grid; justify-items: center; gap: 2px; min-width: 0; color: var(--ink); } .rd-fig figcaption { font: 600 .85rem var(--mono); color: var(--muted); } .rd-svg { width: 100%; } .rd-vs { color: var(--muted); font-size: .9rem; }
 .rd-opts { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.fq { display: grid; gap: 12px; min-width: 0; } .fq-count, .fq-ask, .fq-key { margin: 0; } .fq-opts { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.fq-figs { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; } .fq-fig { margin: 0; flex: 1 1 150px; max-width: 240px; display: grid; justify-items: center; gap: 2px; min-width: 0; color: var(--ink); } .fq-fig figcaption { font: 600 .85rem var(--mono); color: var(--muted); text-align: center; }
+.fq-svgbox { width: 100%; } .fq-svg { width: 100%; height: auto; display: block; overflow: visible; } .fq-vs { color: var(--accent); font-size: 1.5rem; font-weight: 700; }
+.fq-bond { stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; fill: none; } .fq-hash { stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; } .fq-wedge { fill: currentColor; } .fq-core { fill: currentColor; }
+.fq-lab { font: 600 17px var(--body); fill: currentColor; } .fq-O { fill: var(--c-O); } .fq-N { fill: var(--c-N); } .fq-Cl { fill: var(--c-Cl); } .fq-Br { fill: var(--c-P); }
+.fq-badge { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; } .fq-num { font: 700 12px var(--body); fill: var(--ink); } .fq-arrow { fill: none; stroke: var(--electron); stroke-width: 2.6; stroke-linecap: round; } .fq-head { fill: var(--electron); }
+.fq-bar:empty { display: none; }
 .rf-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; } .rf-plus { font-weight: 700; color: var(--muted); } .rf-fig { max-width: 230px; }
 .rf-salts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; } .rf-salt { border: 1.5px solid var(--line-strong); border-radius: 12px; background: var(--surface); padding: 6px; cursor: pointer; color: var(--ink); touch-action: manipulation; }
 .rf-salt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent) inset; } .rf-salt:disabled { cursor: default; }

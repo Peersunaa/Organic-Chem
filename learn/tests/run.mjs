@@ -39,8 +39,9 @@ import { lesson13 } from './lesson13.mjs';
 import { lesson14 } from './lesson14.mjs';
 import { lesson15 } from './lesson15.mjs';
 import { lesson16 } from './lesson16.mjs';
+import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -153,7 +154,7 @@ for (const L of LESSONS) {
     for (const o of s.options || []) if (o.smiles && !o.raw) ok(canon(o.smiles) !== null, `${t} option smiles ${o.smiles} parses`);
     if (s.config && s.config.target) ok(canon(s.config.target) !== null, `${t} target parses`);
     if (s.derive && s.derive.smiles) ok(canon(s.derive.smiles) !== null, `${t} derive smiles parses`);
-    if (s.visual) ok((s.visual.widget === 'model3d' && models[s.visual.config.mol]) || (s.visual.widget === 'newman-rotator' && NR.MOLS[s.visual.config.mol] && models[s.visual.config.mol]) || (s.visual.widget === 'chair-flip' && CC.CHAIRS[s.visual.config.model]) || (s.visual.widget === 'energy-diagram' && Array.isArray(s.visual.config.levels)), `${t} visual model exists`);
+    if (s.visual) ok((s.visual.widget === 'model3d' && models[s.visual.config.mol]) || (s.visual.widget === 'newman-rotator' && NR.MOLS[s.visual.config.mol] && models[s.visual.config.mol]) || (s.visual.widget === 'chair-flip' && CC.CHAIRS[s.visual.config.model]) || (s.visual.widget === 'energy-diagram' && Array.isArray(s.visual.config.levels)) || (s.visual.widget === 'fischer-quiz' && (s.visual.config.figures || [s.visual.config]).every((f) => FISCHER_BY_ID[f.entry])), `${t} visual model exists`);
     // options
     if (s.type === 'predict' || s.type === 'choice') {
       ok(s.options.filter((o) => o.correct).length === 1, `${t} exactly one correct option`);

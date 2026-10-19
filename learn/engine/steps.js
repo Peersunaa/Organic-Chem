@@ -173,6 +173,7 @@ function mountVisual(host, visual) {
 const RENDER = {
   explain(step, ctx, host) {
     host.append(h('div', { class: 'explain' }, rich(step.html)));
+    if (step.visual) mountVisual(host, step.visual);
     ctx.done();
   },
 

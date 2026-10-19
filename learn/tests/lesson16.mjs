@@ -3,6 +3,7 @@
 // engine/stereoisomers.js enumeration) and RE-COMPUTED independently in Python RDKit (tools/check_relationships.py: EnumerateStereoisomers, every
 // tetrahedral tag inverted for the mirror image, 3D mirror-plane and Kabsch checks with numpy). Names with (2R,3S)-style prefixes are round-tripped
 // through OPSIN, and a hand-checked fixture (tests/fixtures/relationships.json) is given BY NAME so OPSIN, not our engine, supplies the structures.
+// Fischer projections (steps s21-s28, generator `fischer`) are checked in section (9) against Python RDKit (tools/check_fischer.py).
 // Run on its own with `node learn/tests/lesson16.mjs`, or as part of run.mjs.
 import { ready, rdkit, canon } from '../engine/chem.js';
 import { execFileSync } from 'node:child_process';
@@ -28,6 +29,9 @@ import * as RF from '../engine/widgets/resolution-flow.js';
 import * as MP from '../engine/widgets/mirror-pair.js';
 import { predictAdd } from '../engine/reactions-additions.js';
 import { skillLabel, skillRule } from '../engine/skills.js';
+import * as FI from '../engine/fischer.js';
+import * as FG from '../engine/generators-fischer.js';
+import * as FQ from '../engine/widgets/fischer-quiz.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TOOLS = path.join(HERE, '..', 'tools');
@@ -418,8 +422,8 @@ export async function lesson16({ ok, eq }) {
   {
     const l = L;
     const S = Object.fromEntries(l.steps.map((s) => [s.id, s]));
-    ok(l.steps.length >= 16 && l.steps.length <= 20, `L16 has 16-20 steps (${l.steps.length})`);
-    ok(l.drawing === 'skeletal' && l.minutes >= 28 && l.minutes <= 30, 'L16 skeletal drawing, 28-30 minutes');
+    ok(l.steps.length >= 16 && l.steps.length <= 28, `L16 has 16-28 steps (${l.steps.length})`);
+    ok(l.drawing === 'skeletal' && l.minutes >= 28 && l.minutes <= 40, 'L16 skeletal drawing, 28-40 minutes (the Fischer section adds about 8)');
     eq(l.sections, ['6.6', '6.7', '6.8', '6.9', '6.10'], 'L16 covers 6.6-6.10');
     ok(l.steps[0].type === 'predict' && /2\s*centers|TWO chirality/.test(l.steps[0].prompt), 'L16 opens with the predict-first "2 centers, how many stereoisomers?"');
     ok(['stereo-grid', 'symmetry-plane', 'mirror-pair', 'relationship-drill', 'resolution-flow', 'isomer-tree'].every((w) => l.steps.some((s) => s.widget === w)), 'L16 uses stereo-grid, symmetry-plane, mirror-pair, relationship drill, resolution and the isomer tree');
@@ -589,6 +593,205 @@ export async function lesson16({ ok, eq }) {
         eq(r.planes[i].symmetric, jsr.ok, `plane ${id} orientation ${smp.k} offset ${smp.o}: Python ${r.planes[i].symmetric} / JS ${jsr.ok}`);
         stats.planes++;
       });
+    }
+  }
+
+  // ===================================================================================================================
+  // (9) Fischer projections: steps s21-s28, engine/fischer.js, engine/generators-fischer.js (generator `fischer`), widget fischer-quiz.
+  // Every R/S letter and every turn/swap verdict is re-derived in Python RDKit three ways (tools/check_fischer.py): a wedge/dash molblock of the
+  // drawing (vertical = hashed, horizontal = wedged), 3D coordinates, and the SMILES the engine writes, with the letter from rdCIPLabeler.
+  {
+    const dirW = (d) => (d === 'cw' ? 'clockwise' : 'counterclockwise');
+    const perms = (a) => (a.length < 2 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map((p) => [x, ...p])));
+    const fcase = (id, d) => ({ id, groups: Object.fromEntries(FI.POSITIONS.map((p) => [p, d[p].frag])), smiles: FI.fischerSmiles(d) });
+    const labels = (d) => FI.POSITIONS.map((p) => d[p].label).join('/');
+    const jobs = [];       // { id, d, js, extra? }
+    const addJob = (id, d, extra = {}) => jobs.push({ id, d, js: FI.readRS(d).label, ...extra });
+
+    // ---- the pool: ranks agree with engine/cip.js (CIP rules 1-3), connectivity agrees with the flat SMILES
+    ok(FI.FISCHER_POOL.length >= 5, `Fischer pool: ${FI.FISCHER_POOL.length} molecules`);
+    for (const e of FI.FISCHER_POOL) {
+      const t = `Fischer pool ${e.id}`;
+      const info = tetraInfo(e.flat).find((x) => x.center);
+      ok(!!info, `${t}: one chirality center`);
+      eq(chiralCenters(e.flat).length, 1, `${t}: exactly one chirality center`);
+      const byLabel = Object.fromEntries(info.subs.map((s, i) => [s.label, info.rank[i]]));
+      for (const gp of [e.top, e.bottom, e.x, FI.H_GROUP]) eq(byLabel[gp.label], gp.rank, `${t}: CIP rank of ${gp.label} (engine/cip.js)`);
+      eq(new Set([e.top.rank, e.bottom.rank, e.x.rank, 4]).size, 4, `${t}: four different ranks`);
+      eq(canon(FI.fischerSmiles(FI.standardDrawing(e, 'right')).replace('@', '')), canon(e.flat), `${t}: the fragments rebuild the flat structure`);
+      ok(e.top.label !== e.bottom.label, `${t}: the vertical groups differ`);
+      // every arrangement of the four groups in the four places: 24 per molecule
+      for (const p of perms([e.top, e.bottom, e.x, FI.H_GROUP])) {
+        const d = {}; FI.POSITIONS.forEach((pos, i) => { d[pos] = p[i]; });
+        addJob(`${e.id}:${labels(d)}`, d);
+      }
+    }
+    // hand-checked textbook facts (D-glyceraldehyde is R; the L amino acids and L-lactic acid are S)
+    const std = (id, side) => FI.standardDrawing(FI.POOL_BY_ID[id], side);
+    eq(FI.readRS(std('glyceraldehyde', 'right')).label, 'R', 'D-glyceraldehyde (OH on the right) is R');
+    eq(FI.readRS(std('glyceraldehyde', 'left')).label, 'S', 'L-glyceraldehyde (OH on the left) is S');
+    eq(FI.readRS(std('alanine', 'left')).label, 'S', 'L-alanine (NH2 on the left) is S');
+    eq(FI.readRS(std('serine', 'left')).label, 'S', 'L-serine (NH2 on the left) is S');
+    eq(FI.readRS(std('lactic acid', 'left')).label, 'S', 'L-lactic acid (OH on the left) is S');
+    eq(canon(FI.fischerSmiles(std('glyceraldehyde', 'right'))), canon('O=C[C@H](O)CO'), 'D-glyceraldehyde Fischer = O=C[C@H](O)CO');
+    const rule = FI.readRS(std('glyceraldehyde', 'right'));
+    ok(rule.dir === 'ccw' && !rule.lowVertical && rule.direct === 'S' && rule.label === 'R', 's23: OH(right) -> CHO(top) -> CH2OH(bottom) is counterclockwise, H horizontal, so reversed: R');
+    eq(FI.readRS({ top: FI.H_GROUP, bottom: { label: 'a', rank: 3 }, left: { label: 'b', rank: 2 }, right: { label: 'c', rank: 1 } }).lowVertical, true, 'H on top is a vertical bond');
+
+    // ---- manipulations: every operation on every molecule, both sides, every choice of groups
+    const manip = [];
+    for (const e of FI.FISCHER_POOL) for (const side of ['right', 'left']) {
+      const a = FI.standardDrawing(e, side);
+      for (const op of FI.OPS) {
+        const n = op === 'swap1' ? 6 : op === 'swap2' ? 3 : 1;
+        for (let i = 0; i < n; i++) {
+          const r = FI.applyOp(a, op, () => i);
+          const idA = `${e.id}:${labels(a)}`, idB = `${e.id}:${op}${i}:${labels(r.drawing)}`;
+          manip.push({ e, op, a, b: r.drawing, idA, idB });
+          addJob(idB, r.drawing);
+          eq(FI.relationOf(a, r.drawing), FI.OP_VERDICT[op], `${idB}: the lesson's verdict for ${op}`);
+        }
+      }
+    }
+    ok(manip.length === FI.FISCHER_POOL.length * 2 * (1 + 1 + 6 + 3), `${manip.length} manipulation cases`);
+
+    // ---- the generator: 400 problems, then 120 per task
+    const rng = mulberry32(1604);
+    const probs = FG.generateFischer(400, { rng });
+    const seen = { 'rs-h': 0, 'rs-v': 0, manip: 0, R: 0, S: 0, same: 0, enantiomers: 0 };
+    const ops = new Set(), ents = new Set();
+    for (const p of probs) {
+      const r = p.round;
+      seen[r.task]++; seen[r.answer]++; ents.add(r.entry);
+      if (r.op) ops.add(r.op);
+      const t = `fischer problem ${r.key}`;
+      ok(p.kind === 'widget' && p.widget === 'fischer-quiz' && p.skill === 'fischer', `${t}: widget problem for the skill`);
+      ok(p.hints.length === 2 && p.hints.every((x) => x.length > 20) && p.derive.length > 20 && p.prompt.length > 10, `${t}: hints, derive, prompt`);
+      ok(WIDGETS['fischer-quiz'] && p.config.rounds.length === 1 && p.config.rounds[0] === r, `${t}: config carries the round`);
+      eq(p.answer, r.answer, `${t}: answer recorded`);
+      // the round's own drawing really gives its answer
+      if (r.task === 'manip') {
+        ok(r.answer === FI.relationOf(r.drawing, r.drawing2) && r.answer === FI.OP_VERDICT[r.op], `${t}: manipulation verdict`);
+        eq(r.options.map((o) => o.id), ['same', 'enantiomers'], `${t}: manipulation options`);
+        const w = r.answer === 'same' ? 'enantiomers' : 'same';
+        ok(FG.gradeRound(r, r.answer).ok && !FG.gradeRound(r, w).ok && FG.gradeRound(r, w).diagnosis.length > 40, `${t}: grading and diagnosis`);
+        addJob(`gen:${r.key}:A`, r.drawing); addJob(`gen:${r.key}:B`, r.drawing2);
+      } else {
+        const rd = FI.readRS(r.drawing);
+        eq(rd.label, r.answer, `${t}: R/S letter`);
+        eq(rd.lowVertical, r.task === 'rs-v', `${t}: H on a ${r.task === 'rs-v' ? 'vertical' : 'horizontal'} bond`);
+        eq(r.lowVertical, r.task === 'rs-v', `${t}: lowVertical flag`);
+        eq(r.options.map((o) => o.id), ['R', 'S'], `${t}: R/S options`);
+        const w = FI.otherLabel(r.answer);
+        ok(FG.gradeRound(r, r.answer).ok && !FG.gradeRound(r, w).ok && FG.gradeRound(r, w).diagnosis.length > 40, `${t}: grading and diagnosis`);
+        ok(new RegExp(`This center is ${r.answer}\\.`).test(r.derive), `${t}: derive names the letter`);
+        // the diagnosis names the right bond type
+        ok(r.lowVertical ? /vertical bond/.test(FG.gradeRound(r, w).diagnosis) : /horizontal bond/.test(FG.gradeRound(r, w).diagnosis), `${t}: diagnosis is about the bond H sits on`);
+        addJob(`gen:${r.key}`, r.drawing);
+      }
+      // every group is on a different place, and the four ranks 1-4 each appear once
+      eq(FI.POSITIONS.map((q) => r.drawing[q].rank).sort(), [1, 2, 3, 4], `${t}: ranks 1-4 once each`);
+    }
+    ok(seen['rs-h'] > 100 && seen['rs-v'] > 50 && seen.manip > 50, `generator mix: ${JSON.stringify(seen)}`);
+    ok(seen.R > 40 && seen.S > 40 && seen.same > 10 && seen.enantiomers > 10, 'generator gives both R and S, and both manipulation verdicts');
+    eq([...ops].sort(), ['rot180', 'rot90', 'swap1', 'swap2'], 'generator uses every manipulation');
+    eq(ents.size, FI.FISCHER_POOL.length, 'generator uses every molecule of the pool');
+    const forced = FG.makeRound(mulberry32(7), 'manip', { entry: 'alanine', op: 'rot90' });
+    eq([forced.entry, forced.op, forced.answer], ['alanine', 'rot90', 'enantiomers'], 'makeRound can force a molecule and an operation');
+    const plan = FG.buildRounds(['rs-h', 'rs-v', 'rs-h', 'manip'], mulberry32(3));
+    eq(plan.map((r) => r.task), ['rs-h', 'rs-v', 'rs-h', 'manip'], 'buildRounds follows the plan');
+    ok(new Set(plan.map((r) => r.key)).size === 4, 'buildRounds: no two questions alike');
+    ok(plan.every((r) => r.options.length === 2) && plan.some((r) => r.lowVertical) && plan.some((r) => r.task === 'rs-h' && !r.lowVertical), 'a plan covers H vertical and H horizontal');
+    eq(generatorForSkill('fischer'), 'fischer', 'practice for the skill uses the fischer generator');
+    ok(GENERATORS.fischer === true && FG.FISCHER_SKILLS.includes('fischer'), 'generator registered');
+    ok(skillLabel('fischer') === 'Fischer projections' && /vertical/.test(skillRule('fischer')) && /horizontal/.test(skillRule('fischer')), 'skill label and rule');
+    ok(generate('fischer', 12, { skill: 'fischer', rng: mulberry32(5) }).length === 12, 'generate("fischer") serves 12 problems');
+    ok(new Set(generate('fischer', 30, { rng: mulberry32(9) }).map((p) => p.round.key)).size >= 15, 'generated problems vary');
+
+    // ---- the picture: markup is made from the drawing (view mode needs no DOM)
+    {
+      const d = FI.standardDrawing(FI.POOL_BY_ID.glyceraldehyde, 'right');
+      const flat = FQ.fischerSvg(d), full = FQ.fischerSvg(d, { depth: true, numbers: true, arrow: true });
+      ok((flat.match(/<line class="fq-bond"/g) || []).length === 4 && !/fq-arrow|fq-badge/.test(flat), 'plain cross: four bonds, no badges or arrow');
+      ok((full.match(/<polygon class="fq-wedge"/g) || []).length === 2 && (full.match(/class="fq-hash"/g) || []).length === 14, 'depth view: two wedges (horizontal) and two hashed bonds (vertical)');
+      ok((full.match(/class="fq-num"/g) || []).length === 4 && /fq-arrow/.test(full), 'numbers and the 1 -> 2 -> 3 arrow');
+      ok(['CHO', 'CH₂OH', 'OH', '>H<'].every((t) => flat.includes(t)), 'all four groups are labelled');
+      // ccw arrow: sweep-flag 0 for glyceraldehyde (OH right -> CHO top -> CH2OH bottom is counterclockwise), 1 for the mirror image
+      ok(/ 0 0 0 /.test(full), 'arrow sweeps counterclockwise for D-glyceraldehyde');
+      ok(/ 0 0 1 /.test(FQ.fischerSvg(FI.standardDrawing(FI.POOL_BY_ID.glyceraldehyde, 'left'), { arrow: true })), 'arrow sweeps clockwise for L-glyceraldehyde');
+    }
+
+    // ---- Python RDKit: letters (wedge molblock, 3D, SMILES) and canonical SMILES agree with the JavaScript for every drawing
+    const idx = new Map();
+    const unique = jobs.filter((j) => (idx.has(j.id) ? false : (idx.set(j.id, j), true)));
+    const ref = pyJson('check_fischer', { cases: unique.map((j) => fcase(j.id, j.d)) });
+    const byId = Object.fromEntries(ref.cases.map((c) => [c.id, c]));
+    let nGood = 0, nR = 0, nS = 0;
+    for (const j of unique) {
+      const c = byId[j.id], jsSmi = canon(FI.fischerSmiles(j.d));
+      const good = !!c && c.wedge.cip === j.js && c.d3.cip === j.js && c.smiles.cip === j.js && c.wedge.smi === c.d3.smi && c.wedge.smi === c.smiles.smi && canon(c.wedge.smi) === jsSmi;
+      ok(good, `Fischer ${j.id}: JS says ${j.js}; RDKit wedge ${c && c.wedge.cip}, 3D ${c && c.d3.cip}, SMILES ${c && c.smiles.cip}; ${c && c.wedge.smi} vs ${jsSmi}`);
+      if (good) { nGood++; if (j.js === 'R') nR++; else nS++; }
+    }
+    ok(unique.length >= 168 + manip.length * 0.5 && nGood === unique.length && nR > 100 && nS > 100, `Python RDKit agreed on ${nGood} of ${unique.length} Fischer drawings (${nR} R, ${nS} S)`);
+    // turns and swaps in RDKit: same molecule = same canonical isomeric SMILES and letter; enantiomers = the mirror image's SMILES and the other letter
+    let nm = 0;
+    for (const m of manip) {
+      const A = byId[m.idA] || ref.cases.find((c) => c.id === m.idA), B = byId[m.idB];
+      const same = FI.OP_VERDICT[m.op] === 'same';
+      const a = A && A.wedge, b = B && B.wedge;
+      const good = !!a && !!b && (same ? a.smi === b.smi && a.cip === b.cip : a.cip !== b.cip && canon(CH.mirrorSmiles(a.smi)) === canon(b.smi));
+      ok(good, `${m.idB}: RDKit says ${m.op} gives ${same ? 'the same molecule' : 'the enantiomer'} (${a && a.cip} -> ${b && b.cip})`);
+      if (good) nm++;
+    }
+    ok(nm === manip.length, `RDKit confirmed all ${nm} turn/swap cases`);
+    stats.fischer = unique.length;
+    console.log(`  Lesson 16 Fischer: ${FI.FISCHER_POOL.length} molecules; ${unique.length} drawings read three ways in Python RDKit (${nR} R, ${nS} S); ${nm} turn/swap cases; ${probs.length} generated problems checked`);
+
+    // ---- the lesson's own steps
+    {
+      const ids = L.steps.map((s) => s.id);
+      eq(ids.slice(20), ['s21', 's22', 's23', 's24', 's25', 's26', 's27', 's28'], 'Fischer steps follow s20 with sequential ids');
+      const F = Object.fromEntries(L.steps.slice(20).map((s) => [s.id, s]));
+      ok(L.steps.slice(20).every((s) => s.skill === 'fischer'), 'all Fischer steps carry the skill fischer');
+      ok(L.steps.slice(20).map((s) => s.type).join() === 'predict,explain,worked,explain,try,predict,explain,try', 'Fischer steps: predict, explain, worked, explain, try, predict, explain, try');
+      // act before explain
+      ['s22', 's24', 's27'].forEach((id) => { const i = ids.indexOf(id); ok(L.steps[i - 1].type !== 'explain', `${id}: an explain card follows an action`); });
+      eq(F.s21.options.find((o) => o.correct).text.startsWith('The horizontal bonds point toward you'), true, 's21: horizontal toward you');
+      ok(/horizontal/i.test(F.s22.html) && /vertical/i.test(F.s22.html) && /C1/.test(F.s22.html) && /stereocenter/.test(F.s22.html), 's22: vertical back, horizontal toward you, C1 on top, the stereocenter');
+      // s23: every move agrees with the engine and RDKit
+      const gl = FI.standardDrawing(FI.POOL_BY_ID.glyceraldehyde, 'right');
+      const rd = FI.readRS(gl);
+      const ref23 = byId['glyceraldehyde:' + labels(gl)];
+      eq(F.s23.moves.length, 4, 's23: four moves');
+      F.s23.moves.forEach((m, i) => eq(m.options.filter((o) => o.correct).length, 1, `s23 move ${i}: one correct option`));
+      eq(F.s23.moves[0].options.find((o) => o.correct).text, FI.POSITIONS.map((p) => gl[p]).sort((x, y) => x.rank - y.rank).map((g) => g.label).join(' > '), 's23 move 1: the priority order from the engine');
+      ok(!!ref23 && ref23.wedge.cip === 'R' && ref23.d3.cip === 'R', 's23: RDKit reads this exact drawing as R');
+      eq(F.s23.moves[1].options.find((o) => o.correct).text.startsWith('A horizontal bond, so H points toward you'), !rd.lowVertical, 's23 move 2: H is on a horizontal bond');
+      eq(F.s23.moves[2].options.find((o) => o.correct).text.toLowerCase(), dirW(rd.dir), 's23 move 3: the drawn direction');
+      eq(F.s23.moves[3].options.find((o) => o.correct).text, rd.label, 's23 move 4: the letter');
+      eq(F.s23.moves[3].options.find((o) => o.correct).text, ref23.wedge.cip, 's23 move 4: the letter is the one RDKit gives');
+      eq(canon(F.s23.moves[3].figure.smiles), canon(FI.fischerSmiles(gl)), 's23: the (R)-glyceraldehyde drawn at the end is the same molecule as the projection');
+      const figCip = pyJson('check_rs', { smiles: [F.s23.moves[3].figure.smiles] }).smiles[F.s23.moves[3].figure.smiles];
+      eq(Object.values(figCip.cip), ['R'], 's23: RDKit labels the structure O=C[C@H](O)CO as R');
+      ok(F.s23.moves.every((m) => !m.visual || (m.visual.widget === 'fischer-quiz' && FI.POOL_BY_ID[m.visual.config.entry])), 's23: visuals use the new widget on pool molecules');
+      ok(/vertical/.test(F.s23.rule) && /horizontal/.test(F.s23.rule), 's23: the rule names both bonds');
+      // s24: the rule as it is stated
+      ok(/vertical/.test(F.s24.html) && /Clockwise is R/.test(F.s24.html) && /counterclockwise is S/.test(F.s24.html) && /Clockwise is S/.test(F.s24.html) && /counterclockwise is R/.test(F.s24.html), 's24: states both readings');
+      // s25 / s28: configs are generator plans covering both bond types and a manipulation
+      eq(F.s25.config.plan, ['rs-h', 'rs-v', 'rs-h'], 's25: two H-horizontal questions and one H-vertical');
+      eq(F.s28.config.plan, ['manip'], 's28: one manipulation question');
+      ok(FG.buildRounds(F.s25.config.plan).length === 3 && FG.buildRounds(F.s28.config.plan)[0].task === 'manip', 's25/s28: plans build rounds');
+      // s26: A and B really are enantiomers
+      const [fa, fb] = F.s26.visual.config.figures.map((f) => FI.fischerSmiles(FI.standardDrawing(FI.POOL_BY_ID[f.entry], f.xSide)));
+      eq(CH.relationship(fa, fb).kind, 'enantiomers', 's26: swapping OH and H gives the enantiomer');
+      ok(/enantiomer/.test(F.s26.options.find((o) => o.correct).text), 's26: the right option says enantiomer');
+      // s27: the four rules, checked above for every molecule
+      ok(/180°/.test(F.s27.html) && /90°/.test(F.s27.html) && /two pairs/.test(F.s27.html) && /once/.test(F.s27.html), 's27: states the four rules');
+      const s27 = plain(F.s27.html);
+      ok(s27.indexOf('Same molecule') < s27.indexOf('180°') && s27.indexOf('180°') < s27.indexOf('Enantiomer') && s27.indexOf('Enantiomer') < s27.indexOf('90°'), 's27: 180° and two swaps are under "Same molecule", 90° and one swap under "Enantiomer"');
+      // the mastery check of the lesson is unchanged
+      eq(L.mastery, { count: 3, generator: 'stereo-relationships' }, 'L16 mastery generator is unchanged');
     }
   }
 
