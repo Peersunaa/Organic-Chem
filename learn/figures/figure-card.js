@@ -29,7 +29,14 @@ export function figureCard(id, { key = id, open = false } = {}) {
   const frame = document.createElement('div');
   frame.className = 'fig-frame';
   frame.setAttribute('data-figure', id);
-  body.append(frame);
+  // below 600 px the figure keeps a readable size (the SVG is 560 px wide) and the frame pans sideways with a finger; the hint is only shown there (CSS)
+  frame.tabIndex = 0;
+  frame.setAttribute('role', 'group');
+  frame.setAttribute('aria-label', f.title + ' (scrolls sideways on a narrow screen)');
+  const pan = document.createElement('p');
+  pan.className = 'fig-pan';
+  pan.textContent = 'Drag to see more';
+  body.append(frame, pan);
   const sum = document.createElement('summary');
   sum.textContent = 'See the idea';
   const d = document.createElement('details');

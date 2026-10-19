@@ -48,6 +48,101 @@ const SPACE_LINE = {
   'n.a.': 'there is no stereochemistry to show here'
 };
 
+// ---------------------------------------------------------------- the specific first line of a wrong answer's feedback
+// Each wrong option names the exact slip with the real atoms and groups of THIS problem ("Br went on the carbon with MORE H: anti-Markovnikov", "this is the syn product;
+// Br₂ adds anti", "this adds HBr twice; one equivalent adds once"). The engine's longer explanation stays behind it as `more` (the drill shows it under "Why?").
+// The generic "Slip on WHERE it adds ..." sentence is only the fallback for a kind that has no line here (tests/predict.mjs asserts there is none).
+const first = (t) => String(t || '').split(/(?<=[.!?])\s+/)[0];
+const GROUP_TEXT = { Br: 'Br', Cl: 'Cl', I: 'I', '[N+](=O)[O-]': 'NO₂', 'S(=O)(=O)O': 'SO₃H' };
+const haloOf = (v) => (/Br/.test(v.id) ? 'Br' : /Cl/.test(v.id) ? 'Cl' : /(^|_)I/.test(v.id) ? 'I' : 'X');
+function leadFor(card, entry, sub, v, S, o) {
+  if (entry.fixed) return o.why;                                 // the ten fixed cards already say the concrete thing in their own words
+  const X = haloOf(v), label = S.label, f = card.facts, adds = f.adds;
+  const fam = S.family, kind = o.kind, id = card.id;
+  const E = EAS[v.id];
+  const grp = v.halide ? halideText(v.halide).replace(/Cl$/, '') : E ? (GROUP_TEXT[E.group] || E.group) : '';
+  const hxG = v.id === 'H2O' ? 'OH' : X;
+  const sp = f.space;
+  const T = {
+    hx: {
+      anti: () => `${hxG} went on the carbon with MORE H (the one with fewer alkyl groups): that is anti-Markovnikov. H must go to the carbon with more H.`,
+      unchanged: () => `This is still the alkene: nothing added. ${v.id === 'H2O' ? 'H₂O' : 'H' + X} adds H and ${hxG} across the C=C.`,
+      wrongAtom: () => (v.id === 'H2O' ? 'This is the alkane: two H added and no O. Water adds H and OH, so the product has an OH.' : `This carries a different halogen. The reagent is H${X}, so the atom that adds is ${X}, not the other halogen.`),
+      wrongAtom2: () => (v.id === 'H2O' ? 'This has Br on the carbon: that is the HBr product. With water and an acid catalyst the group that adds is OH, not Br.' : `This carries a different halogen. The reagent is H${X}, so the atom that adds is ${X}, not the other halogen.`),
+      onlyOne: () => `Only one product is drawn, but both C=C carbons carry the same number of alkyl groups, so both ${hxG} positions form (a mixture).`
+    },
+    add: {
+      alkane: () => (id === 'alkene-x2' ? `This adds two H (the alkane). ${X}₂ puts one ${X} on EACH carbon of the C=C, no H.` : `This adds two H (the alkane). ${label} adds ${adds}, not just H₂.`),
+      cleavage: () => 'The C=C is cut here, and that is KMnO₄ in ACID. In base the C–C bond stays and each carbon gains an OH.',
+      dihalide: () => `Two halogens added: that is Br₂ (or Cl₂), not ${label}. ${label} adds ${adds}.`,
+      diol: () => `This has an OH on each carbon (a diol). ${label} ${id === 'alkene-kmno4-acid' ? 'cuts the C=C in acid, so the diol is not the product' : 'adds ' + adds}.`,
+      epoxide: () => `This has an O bridging the two carbons (an epoxide). ${label} adds ${adds}, not an epoxide.`,
+      unchanged: () => `The C=C is still there, so nothing added. ${label} adds ${adds}, which uses up the C=C.`,
+      wrongHalogen: () => `This carries the other halogen. The reagent is ${X}₂, so ${X} is the atom that adds.`,
+      wrongStereo: () => {
+        if (id === 'alkene-epoxide') return 'This epoxide has the other geometry. The O joins one face of the C=C, so trans stays trans and cis stays cis.';
+        const what = id === 'alkene-x2' ? `the two ${X}` : id === 'alkene-h2-pd' ? 'the two H' : 'the two OH';
+        return sp === 'anti' ? `This is the syn product: ${what} sit on the SAME face. ${id === 'alkene-x2' ? X + '₂' : label} adds anti (opposite faces).`
+          : `This is the anti product: ${what} sit on OPPOSITE faces. ${label} adds syn (the same face).`;
+      }
+    },
+    alkyne: {
+      aldehyde: () => 'The C=O is on the END carbon (anti-Markovnikov). Alkyne hydration puts the OH on the more substituted carbon, so a terminal alkyne gives a methyl ketone, never an aldehyde.',
+      alkane: () => `This is the alkane (two H₂ added). ${label} ${id === 'alkyne-hydration' ? 'adds H and OH across the triple bond' : 'stops before the alkane'}.`,
+      alkene: () => (id === 'alkyne-hydration' ? 'This alkene has no O. Hydration adds H and OH, so the product has a C=O (after the enol flips).' : 'This stops at the alkene. H₂ with Pd/C does not stop there: a second H₂ adds and the alkane forms.'),
+      anti: () => `${X} went on the END carbon: that is anti-Markovnikov. H goes to the carbon that already has H, ${X} to the carbon with more alkyl groups.`,
+      enol: () => 'This is the enol (C=C–OH). It flips to the ketone at once, so the ketone is the product you isolate.',
+      ketone: () => `This has a C=O, so it is the hydration product. ${label} adds only H, no O.`,
+      once: () => (id === 'alkyne-x2-2' ? `This has only one ${X}₂ added (a C=C is left). With 2 equivalents a second ${X}₂ adds across it.` : `This has only one ${X} (the vinylic halide, a C=C is left). With 2 equivalents a second H${X} adds across it.`),
+      onceSyn: () => `This has only one ${X}₂ added (a C=C is left). With 2 equivalents a second ${X}₂ adds across it.`,
+      splitX: () => `The two ${X} are on different carbons. The second H${X} adds Markovnikov too, so both ${X} end up on the SAME carbon (a geminal dihalide).`,
+      syn: () => `Both ${X} are on the SAME side of the C=C (cis). ${X}₂ adds anti to an alkyne, so the two ${X} end up trans.`,
+      tetra: () => `Four ${X} added: that is 2 equivalents of ${X}₂. With 1 equivalent only one ${X}₂ adds.`,
+      trans: () => (id === 'alkyne-lindlar' ? 'This is the trans alkene. Lindlar adds both H on the SAME face (syn), so the alkene is cis (Z).' : 'This stops at the alkene. H₂ with Pd/C does not stop there: a second H₂ adds and the alkane forms.'),
+      twice: () => `This has two ${X} on one carbon: it needs a SECOND H${X}. With 1 equivalent the reaction stops at the vinylic halide (one ${X}, a C=C left).`,
+      unchanged: () => `This is still the alkyne: nothing added. ${label} uses up a π bond.`,
+      vicinal: () => `This has ${X} on BOTH carbons: that is ${X}₂. H${X} adds one H and one ${X}.`,
+      wrongAtom: () => `This carries a different halogen. The reagent is ${label}, so ${X} is the atom that adds.`,
+      onlyOther: () => 'Only one ketone is drawn, but the alkyne is unsymmetrical, so OH can go to either triple-bond carbon and both ketones form (a mixture).'
+    },
+    chain: {
+      endOxidised: () => 'The acid sits at the far end of the chain. KMnO₄ attacks the benzylic carbon (bonded to the ring) and cuts the rest off, so the CO₂H is on the ring.',
+      groupLost: () => 'A group on the ring (Cl or NO₂) is missing. KMnO₄ oxidises only the side chain; a halogen or nitro group on the ring survives.',
+      moved: () => 'The NH₂ is on a different ring carbon. It replaces the NO₂ on the SAME carbon; the ring positions do not change.',
+      ringOnly: () => 'Only the ring was reduced. H₂ with Pd/C reduces the C=C or C≡C outside the ring and leaves the benzene ring alone.',
+      ringSaturated: () => (id === 'nitro-reduction' ? 'The ring is saturated here. Fe with H₃O⁺ reduces only the NO₂ to NH₂ and leaves the ring aromatic.' : 'The ring is saturated here. KMnO₄ is an oxidant, so it does not add H to the ring: the ring stays aromatic.'),
+      ringToo: () => 'The ring is reduced as well. Pd/C at ordinary pressure reduces only the C=C or C≡C outside the ring (ring reduction needs Pt and high pressure).',
+      tooFar: () => 'A CO₂H on a carbon that still has four C–C bonds: tert-butyl has no benzylic H, so KMnO₄ cannot attack it and nothing like this forms.',
+      trap: () => 'The side chain is cut off to CO₂H here, but tert-butyl has no H on its benzylic carbon, so KMnO₄ cannot start and the group stays.',
+      unchanged: () => (id === 'nitro-reduction' ? 'The NO₂ is unchanged. Fe with H₃O⁺ reduces NO₂ to NH₂.' : id === 'side-chain-h2pd' ? 'The C=C or C≡C outside the ring is unchanged. H₂ with Pd/C adds H₂ to it.' : 'The side chain is unchanged. Its benzylic carbon has an H, so KMnO₄ oxidises it to CO₂H.'),
+      where: () => 'The new carbon group is on the carbon next to the triple bond. NaNH₂ removes only the ≡C–H, so R attaches to the triple-bond carbon.',
+      wrongR: () => `This has the wrong R group. The R that adds is the one in ${halideLabel(v.halide)}.`
+    },
+    diene: {
+      nonallylic: () => 'H went to an inner carbon, so the + is not next to the other C=C: no resonance, and that cation does not form. H goes to a terminal carbon.',
+      only12: () => `Only the 1,2 product (${X} on C2) is drawn. The allylic cation puts + on C2 and C4, so ${X}⁻ can also attack C4 and the 1,4 product forms too.`,
+      unchanged: () => `This is still the diene: nothing added. H${X} adds H and ${X} across one C=C.`,
+      wrongHalogen: () => `This carries the other halogen. The reagent is H${X}, so ${X} is the atom that adds.`
+    }
+  };
+  const t = T[fam] && T[fam][kind];
+  if (t) return t();
+  if (fam === 'subst') {
+    const why = String(o.why || '');
+    if (kind === 'opposite') { const m = /^(.*?\.)\s+(.*? director)[:.]/.exec(why); if (m) return `${m[1].replace('the group', grp)} ${m[2]}.`; }
+    if (kind === 'partial') {
+      if (/^Para forms/.test(why)) return `Only the para product is drawn, but an ortho/para director sends ${grp} ortho AND para, so both are made.`;
+      const m = /atom of (.+?) in one carbocation/.exec(why);
+      return `This puts ${grp} para to ${m ? m[1] : 'the group'}, but a meta director does not send the new group para.`;
+    }
+    if (kind === 'otherPlace') return first(why);
+    if (kind === 'twice') return `This ring has TWO new groups. ${label} puts on only one ${grp}.`;
+    if (kind === 'otherReagent') return `${first(why)} ${label} puts ${grp} on the ring.`;
+    if (kind === 'addition') return `${grp} and ${grp} added across a C=C of the ring. Benzene keeps its ring: one ${grp} REPLACES one ring H.`;
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------- names for the prompt
 const PLAIN = { 'C=Cc1ccccc1': 'styrene', 'C#Cc1ccccc1': 'phenylacetylene', 'CC=Cc1ccccc1': 'prop-1-enylbenzene', 'C=CCc1ccccc1': 'allylbenzene' };
 function nameTag(smiles, fam) {
@@ -379,10 +474,13 @@ function finalize(card, entry, sub, v, S, rng) {
   while (chosen.length < 3 && by.adds.length) chosen.push(by.adds.shift());
   for (const f of ['where', 'space', 'adds']) while (chosen.length < 3 && by[f].length) chosen.push(by[f].shift());
   const rightSmiles = S.racemic && rng() < 0.5 ? mirrorAll(flat(right.smiles)) : flat(right.smiles);
-  const opts = shuffle(rng, [{ ...right, smiles: rightSmiles, fact: null }, ...chosen]).map((o, i) => ({
-    smiles: flat(o.smiles).join('.'), text: 'Option ' + LETTERS[i], correct: !!o.correct, kind: o.kind, fact: o.fact,
-    why: o.correct ? o.why : `${SLIP[o.fact]} ${o.why}`
-  }));
+  const opts = shuffle(rng, [{ ...right, smiles: rightSmiles, fact: null }, ...chosen]).map((o, i) => {
+    const base = { smiles: flat(o.smiles).join('.'), text: 'Option ' + LETTERS[i], correct: !!o.correct, kind: o.kind, fact: o.fact };
+    if (o.correct) return { ...base, why: o.why };
+    const lead = leadFor(card, entry, sub, v, S, o);
+    // `lead` = the one specific line; `more` = the engine's longer reason (the drill shows it under "Why?"); `why` = both, for the log and the weak-spot panel
+    return lead ? { ...base, lead, more: lead === o.why ? '' : o.why, why: lead === o.why ? lead : `${lead} ${o.why}` } : { ...base, lead: null, more: o.why, why: `${SLIP[o.fact]} ${o.why}` };
+  });
   const f = card.facts;
   const spaceText = SPACE_LINE[f.space];
   const spaceCap = spaceText[0].toUpperCase() + spaceText.slice(1);

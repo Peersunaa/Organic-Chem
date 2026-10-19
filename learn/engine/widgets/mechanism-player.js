@@ -73,7 +73,9 @@ export default {
     row.append(back, nextB, autoB, spLab);
     ctl.append(count, row);
     const out = h('div', 'mp-out');
-    root.append(strip, prompt, stage, why, ctl, out);
+    const banner = h('div', 'mp-banner');       // "Now showing: <reagent> on the same alkene" + a chip back to the lesson's own reaction, only while a what-if alternative plays
+    banner.hidden = true;
+    root.append(banner, strip, prompt, stage, why, ctl, out);
     host.append(root);
 
     const len = () => mech.steps[n].arrows.length;
@@ -198,17 +200,45 @@ export default {
       if (alt) wiSlot.append(comparePanel(info, alt));
       wiSlot.append(chipRow(info, alt, { onPick: startAlt, onBack: backToLesson }));
     }
+    /** The lesson's own heading, "Try it" label and green summary live outside the player (in the step card). While an alternative plays they describe the OTHER reaction, so they are hidden and put back afterwards. */
+    let hiddenOuter = [];
+    function hideOuter() {
+      const par = host.parentElement;
+      if (!par || hiddenOuter.length) return;
+      hiddenOuter = [...par.querySelectorAll(':scope > .prompt, :scope > .eyebrow, :scope > .fb, :scope > .hints')].map((e) => [e, e.style.display]);
+      hiddenOuter.forEach(([e]) => { e.style.display = 'none'; });
+    }
+    function showOuter() { hiddenOuter.forEach(([e, d]) => { e.style.display = d; }); hiddenOuter = []; }
+    const SAME = { 'alkene-hx': 'alkene', 'alkene-x2': 'alkene', 'alkene-hydration': 'alkene', 'alkyne-hx': 'alkyne', acetylide: 'alkyne', eas: 'benzene ring' };
+    function paintBanner() {
+      banner.innerHTML = '';
+      banner.hidden = !alt;
+      if (!alt) return;
+      const b = mkBtn('btn small mp-banner-back', 'Back to the lesson’s reaction');
+      b.addEventListener('click', backToLesson);
+      banner.append(h('span', 'mp-banner-txt', `Now showing: <b>${alt.label}</b> on the same ${SAME[alt.kind] || 'molecule'}`), b);
+      // the halogen's bridged ion and anti addition are the subject of Lesson 10: say so, with a link, instead of leaving two new words unexplained here
+      if (alt.kind === 'alkene-x2') {
+        const note = h('p', 'mp-banner-note');
+        note.innerHTML = 'A <b>bromonium ion</b> is a three-membered ring with a positive Br; <b>anti</b> means the two Br end up on opposite faces. Lesson 10 explains both: <a href="#lesson-10/s01">see Lesson 10, step 1</a>.';
+        banner.append(note);
+      }
+    }
     function startAlt(option) {
       stopAuto();
       alt = option; mech = option.mech; N = mech.steps.length;
       n = 0; c = 0; wrongHere = 0; lead = ''; phase = 'play';
+      // replace everything the previous reaction left on screen: the lesson's heading and summary, this player's sentences and the old species block
+      hideOuter(); paintBanner();
+      stage.innerHTML = ''; out.innerHTML = ''; wiSlot = null; prompt.textContent = ''; setWhy('', false);
       renderStep();
-      stage.scrollIntoView && stage.scrollIntoView({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' });
+      banner.scrollIntoView && banner.scrollIntoView({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' });
     }
     function backToLesson() {
       stopAuto();
       alt = null; mech = lessonMech; N = mech.steps.length;
       n = N - 1; phase = 'play'; lead = '';
+      showOuter(); paintBanner();
       showState(mech.steps[n].arrows.length, null);
     }
 

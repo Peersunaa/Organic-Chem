@@ -1,11 +1,13 @@
 // Step renderers. Each renderer fills `host` and reports through ctx.
 import { svg as rdSvg, analyze } from './chem.js';
-import { gradeFormula } from './skeletal.js';
+import { gradeFormula, formulaOf } from './skeletal.js';
 import { WIDGETS } from './widgets/index.js';
 import { skillRule } from './skills.js';
 import { generate } from './generators.js';
 import { normName } from './naming.js';
 import { tAuto } from './voice.js';
+import { HUB_BY_ID } from './reaction-hub.js';
+import { svgWithLonePairs } from './lp-draw.js';
 
 /** An unclosed <mol ...> (or <molpair ...>) swallows the text after it when parsed as HTML; close any that are left open. Pure. */
 export function closeMolTags(html) {
@@ -63,8 +65,11 @@ export function molPair(smiles, label, opts = {}) {
 }
 
 export function molFigure(smiles, label, opts = {}) {
-  const fig = h('figure', { class: 'mol' });
-  fig.append(h('div', { class: 'mol-svg', html: rdSvg(smiles, opts), role: 'img', 'aria-label': label || smiles }));
+  const fig = h('figure', { class: 'mol' + (opts.inline ? ' mol-inline' : '') });
+  // opts.lp: draw the lone pairs as dots (a question about electron pairs); opts.alt: the accessible name when the figure has no visible caption
+  let name = opts.alt || label;
+  if (!name) { try { name = `Structure, formula ${formulaOf(smiles)}`; } catch (e) { name = 'Structure'; } }
+  fig.append(h('div', { class: 'mol-svg', html: opts.lp ? svgWithLonePairs(smiles, opts) : rdSvg(smiles, opts), role: 'img', 'aria-label': name }));
   if (label) fig.append(h('figcaption', {}, label));
   return fig;
 }
@@ -96,7 +101,12 @@ export function nameSpan(n) { const s = h('span', { class: 'iupac', 'data-name-n
 export function enhance(root) {
   root.querySelectorAll('mol').forEach((m) => {
     const draw = m.getAttribute('draw');
-    m.replaceWith(molFigure(m.getAttribute('smiles'), m.getAttribute('label') || '', { ...(draw ? { style: draw } : {}), ...(m.hasAttribute('raw') ? { raw: true } : {}), ...(m.getAttribute('rotate') ? { rotate: Number(m.getAttribute('rotate')) } : {}) }));
+    // a molecule written INSIDE a sentence ("Benzene, C6H6 <mol>, is drawn as ...") is a small inline picture with no caption of its own: the sentence already names it
+    const par = m.parentNode;
+    const inline = !!par && [...par.childNodes].some((n) => n !== m && ((n.nodeType === 3 && n.textContent.trim()) || (n.nodeType === 1 && /^(B|I|EM|STRONG|SPAN|SUB|SUP|A|CODE|NAME)$/i.test(n.tagName))));
+    if (inline && m.getAttribute('label') && !m.getAttribute('alt')) m.setAttribute('alt', m.getAttribute('label'));
+    if (inline) { m.removeAttribute('label'); m.setAttribute('inline', ''); }
+    m.replaceWith(molFigure(m.getAttribute('smiles'), m.getAttribute('label') || '', { ...(inline ? { inline: true, width: 120, height: 84 } : {}), ...(draw ? { style: draw } : {}), ...(m.getAttribute('alt') ? { alt: m.getAttribute('alt') } : {}), ...(m.hasAttribute('lp') ? { lp: true } : {}), ...(m.hasAttribute('raw') ? { raw: true } : {}), ...(m.getAttribute('rotate') ? { rotate: Number(m.getAttribute('rotate')) } : {}) }));
   });
   root.querySelectorAll('molpair').forEach((m) => {
     const hl = (m.getAttribute('hl') || '').split(',').filter(Boolean).map(Number);
@@ -239,7 +249,7 @@ const RENDER = {
     const g = grader(step, ctx, host);
     const list = h('div', { class: 'opts' + (step.options.some((o) => o.smiles) ? ' mols' : ''), role: 'group' });
     orderedOptions(step, ctx.lessonId, ctx.attempt).forEach((o) => {
-      const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.label || '', o.raw ? { raw: true, showCharge: true } : {}) : rich(o.text, 'span'));
+      const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.label || '', { ...(o.raw ? { raw: true, showCharge: true } : {}), ...(o.lp ? { lp: true } : {}), ...(o.alt ? { alt: o.alt } : {}) }) : rich(o.text, 'span'));
       b.addEventListener('click', () => {
         if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); g.right(o.why); }
         else { b.classList.add('bad'); b.disabled = true; g.wrong(o.why); }
@@ -368,10 +378,19 @@ export function renderProblems(cfg, ctx, host) {
       btn.addEventListener('click', () => { if (ok) got++; if (got >= need) { bar.textContent = `All ${need} correct.`; stage.innerHTML = ''; stage.append(h('div', { class: 'fb ok' }, h('p', {}, 'Mastery check passed.'))); ctx.done(); } else show(); });
       card.append(btn); btn.focus();
     };
-    const onWrong = (why) => {
+    const onWrong = (why, opt) => {
       wrong++;
-      ctx.mistake(p.skill, 'mastery', why);
-      fb.className = 'fb bad'; fb.textContent = cfg.skill ? tAuto(why) : why;   // drills (practice) answer in caveman words when that switch is on; lessons keep their own text
+      ctx.mistake(p.skill, 'mastery', opt && opt.lead ? opt.lead : why);
+      fb.className = 'fb bad'; fb.textContent = '';
+      if (opt && opt.lead) {
+        // a drill answer: the one specific line first, the longer reason behind "Why?", and a way back to the card (and its lesson step)
+        const say = (t) => (cfg.skill ? tAuto(t) : t);
+        fb.append(h('p', { class: 'fb-lead' }, say(opt.lead)));
+        if (opt.more) fb.append(h('details', { class: 'fb-more' }, h('summary', {}, 'Why?'), h('p', {}, say(opt.more))));
+        const card = HUB_BY_ID[p.card];
+        if (card) fb.append(h('p', { class: 'fb-links' }, h('a', { class: 'btn small ghost', href: '#reactions/' + card.id }, 'See the card'),
+          card.lesson ? h('a', { class: 'btn small ghost', href: `#lesson-${card.lesson.id}/${card.lesson.step}` }, `See Lesson ${Number(card.lesson.id)}, step ${Number(card.lesson.step.slice(1))}`) : null));
+      } else fb.textContent = cfg.skill ? tAuto(why) : why;   // drills (practice) answer in caveman words when that switch is on; lessons keep their own text
       hints.innerHTML = '';
       if (wrong >= 1) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 1 '), p.hints[0]));
       if (wrong >= 2) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 2 '), p.hints[1]));
@@ -403,7 +422,7 @@ export function renderProblems(cfg, ctx, host) {
         b.addEventListener('click', () => {
           if (settled) return;
           if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); onRight(); }
-          else { b.classList.add('bad'); b.disabled = true; onWrong(o.why); if (settled) [...list.children].forEach((x) => { x.disabled = true; }); }
+          else { b.classList.add('bad'); b.disabled = true; onWrong(o.why, o); if (settled) [...list.children].forEach((x) => { x.disabled = true; }); }
         });
         list.append(b);
       });

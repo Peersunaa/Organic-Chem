@@ -207,9 +207,9 @@ export default {
       id: 's15', type: 'choice', skill: 'formal-charge',
       prompt: 'Which one is a carbocation (a carbon with a + formal charge)?',
       options: [
-        { smiles: '[CH3+]', label: 'C: 3 bonds, no lone pair', correct: true, why: '3 bonds, no lone pair: 4 − 0 − 3 = +1.' },
-        { smiles: '[CH3-]', label: 'C: 3 bonds, 1 lone pair', why: 'That carbon has a lone pair: 4 − 2 − 3 = −1. It’s a carbanion.' },
-        { smiles: 'C', label: 'C: 4 bonds, no lone pair', why: 'That carbon has a formal charge of 4 − 0 − 4 = 0, so it is neutral. A carbocation has only 3 bonds and no lone pair.' }
+        { smiles: '[CH3+]', lp: true, label: 'C: 3 bonds, no lone pair', correct: true, why: '3 bonds, no lone pair: 4 − 0 − 3 = +1.' },
+        { smiles: '[CH3-]', lp: true, label: 'C: 3 bonds, 1 lone pair', why: 'That carbon has a lone pair: 4 − 2 − 3 = −1. It’s a carbanion.' },
+        { smiles: 'C', lp: true, label: 'C: 4 bonds, no lone pair', why: 'That carbon has a formal charge of 4 − 0 − 4 = 0, so it is neutral. A carbocation has only 3 bonds and no lone pair.' }
       ],
       hints: ['Work out the formal charge for each carbon: 4 − lone-pair electrons − bonds.', 'A + charge means the carbon owns fewer than 4 electrons.'],
       worked: '[CH₃]⁺: 4 − 0 − 3 = +1. The others give −1 and 0.'

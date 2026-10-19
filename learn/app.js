@@ -2,7 +2,7 @@
 import { ready, setDrawStyle } from './engine/chem.js';
 import * as store from './engine/store.js';
 import { generatorForSkill } from './engine/generators.js';
-import { renderStep, renderProblems, h, rich, setIupacMode } from './engine/steps.js';
+import { renderStep, renderProblems, h, rich, setIupacMode, closeMolTags } from './engine/steps.js';
 import { skillLabel } from './engine/skills.js';
 import { LESSONS, PLANNED } from './lessons/index.js';
 import { buildHub } from './hub-view.js';
@@ -40,7 +40,7 @@ function header(extra) {
   const offVoice = voice.onVoiceChange(() => { if (!cav.isConnected) { offVoice(); return; } paintCav(); });
   const brand = h('a', { class: 'brand', href: '#home', 'aria-label': 'Orgo Learn home' });
   brand.innerHTML = ORBIT + '<span>Orgo Learn</span>';
-  return h('header', { class: 'top' }, brand, extra || null, h('div', { class: 'switches' }, sw, cav));
+  return h('header', { class: 'top' }, brand, extra || null, h('a', { class: 'btn small ghost hdr-gloss', href: '#glossary', id: 'hdr-glossary' }, 'Glossary'), h('div', { class: 'switches' }, sw, cav));
 }
 
 function mount(...nodes) {
@@ -172,6 +172,7 @@ function recapCard(step) {
   const more = h('button', { type: 'button', class: 'recap-more', 'aria-expanded': 'false' }, 'Show all');
   more.addEventListener('click', () => { const on = body.classList.toggle('full'); more.textContent = on ? 'Show less' : 'Show all'; more.setAttribute('aria-expanded', String(on)); });
   body.append(more);
+  if (r.idea) { body.classList.add('full'); more.hidden = true; }   // the key idea of an explain step is never cut off: the next step may need a number from it
   requestAnimationFrame(() => { if (![...body.querySelectorAll('.recap-q, .recap-note')].some((e) => e.scrollHeight > e.clientHeight + 1)) more.hidden = true; });
   const d = h('details', { class: 'recap' }, h('summary', {}, r.idea ? 'Last step: the key idea' : 'Last step'), body);
   if (recapOpen) d.open = true;
@@ -238,11 +239,19 @@ function lessonView(L, startId) {
   const show = async () => {
     const step = steps[idx];
     save(); paint();
-    if (!chemReady) { host.innerHTML = '<p class="muted">Loading chemistry engine…</p>'; try { await chemP; } catch (e) { host.innerHTML = '<p class="fb bad">The chemistry engine could not load. Reload the page to try again.</p>'; return; } }
+    if (!chemReady) {
+      // the question text needs no chemistry: show it at once, and say the pictures are on their way
+      const words = (t) => { const d = document.createElement('div'); d.innerHTML = closeMolTags(String(t || '')); d.querySelectorAll('mol, molpair, svg, figure').forEach((x) => x.remove()); d.querySelectorAll('name').forEach((n) => n.replaceWith(n.getAttribute('new') || '')); return d.textContent.replace(/\s+/g, ' ').trim(); };
+      const quick = words(step.prompt || step.problem || step.html);
+      host.innerHTML = '';
+      if (quick) host.append(h('h2', { class: 'prompt' }, quick));
+      host.append(h('p', { class: 'muted' }, 'Loading chemistry engine… the pictures appear in a moment.'));
+      try { await chemP; } catch (e) { host.innerHTML = '<p class="fb bad">The chemistry engine could not load. Reload the page to try again.</p>'; return; } }
     recapSlot.innerHTML = '';
     if (glossaryStop) { glossaryStop(); glossaryStop = null; }
-    if (idx === 0) { if (prereq === undefined) prereq = prereqCard(L.id); if (prereq) recapSlot.append(prereq);
-      if (figId) { if (figure === undefined) figure = figureCard(figId, { key: 'lesson-' + L.id, open: true }); if (figure) recapSlot.append(figure); } }
+    if (idx === 0) { if (prereq === undefined) prereq = prereqCard(L.id); if (prereq) recapSlot.append(prereq); }
+    // the chapter figure sits above the step named by FIGURES[..].beforeStep (default: step 1), so it never shows words the learner has not met yet
+    if (figId && step.id === (FIGURES[figId].beforeStep || steps[0].id)) { if (figure === undefined) figure = figureCard(figId, { key: 'lesson-' + L.id, open: true }); if (figure) recapSlot.append(figure); }
     const prev = steps[idx - 1];
     if (prev && done.has(prev.id) && step.type !== 'useit') { const rc = recapCard(prev); if (rc) recapSlot.append(rc); }
     stereoNode = null;
@@ -289,7 +298,7 @@ function pastpaper() {
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Past papers, by topic'),
     h('p', { class: 'lede' }, 'Each midterm question from the workbook, in plain words, with the steps to answer it and a link to where you learn it.'),
     h('p', { class: 'muted small' }, 'This page covers only the sections on this midterm (A1, A2, A3, A5 HBr, B1, B2, B3, B4, B6).'),
-    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'pp-reactions' }, 'Reactions'), h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'pp-drill' }, 'Drill'))), buildPastpaper());
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'pp-reactions' }, 'Reactions'), h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'pp-drill' }, 'Drill'))), buildPastpaper(chemP));
 }
 
 // ---------------------------------------------------------------- Glossary

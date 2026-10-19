@@ -8,6 +8,8 @@
 //   steps   numbered steps to answer this KIND of question (same voice as the hub's "steps to answer").
 //   links   [{ label, href }]: '#lesson-NN/sK' (a real lesson step) or '#reactions/<card id>' (a real hub card).
 //   trap    optional: the one common mistake.
+//   show    optional: { label, structures: [{ smiles, label? }] } or { label, equation: { reactants, products, cond } }: one structure in the same style as the question, drawn above the steps.
+//           It is NOT the exam's own drawing (the workbook's drawings are not copied); the view says so. Items linked to a hub card get that card's worked example automatically.
 // The workbook's questions are drawings, so the text only says what is asked. Where the workbook does not say what the drawing is, the item stays general.
 // tests/pastpaper.mjs checks every field, every link, the scope and the section order.
 
@@ -60,7 +62,8 @@ export const PASTPAPER = [
           'Write it all as one name: stereo prefixes, branches in alphabetical order, parent.'
         ],
         links: [lesson('05', 's13'), lesson('07', 's13'), lesson('07', 's14'), lesson('15', 's20'), lesson('15', 's16')],
-        trap: 'Naming the skeleton right and forgetting the (R) or (E) prefix.'
+        trap: 'Naming the skeleton right and forgetting the (R) or (E) prefix.',
+        show: { label: 'A compound in this style: name it, with E/Z and R/S', structures: [{ smiles: 'C/C=C/[C@@H](C)CC' }] }
       },
       {
         id: 'A1.4', title: 'Systematic names, set 2', source: M24,
@@ -114,7 +117,8 @@ export const PASTPAPER = [
           'Two or more: look for a plane of symmetry (a mirror down the middle). A plane means meso, and so achiral. No plane means chiral.'
         ],
         links: [lesson('15', 's05'), lesson('15', 's06'), lesson('15', 's07')],
-        trap: 'Calling every molecule with two stereocentres chiral. Some are meso.'
+        trap: 'Calling every molecule with two stereocentres chiral. Some are meso.',
+        show: { label: 'Three molecules in this style: circle the chiral ones (answer: only a)', structures: [{ smiles: 'C[C@@H](O)CC', label: 'a' }, { smiles: 'CC(O)C', label: 'b' }, { smiles: 'C[C@H](Br)[C@@H](C)Br', label: 'c (meso)' }] }
       },
       {
         id: 'A2.3', title: 'R/S at each stereogenic atom', source: NYU,
@@ -545,7 +549,8 @@ export const PASTPAPER = [
           'Step 5: D₂SO₄ in D₂O, heat. Desulfonation swaps the SO₃H for D on the para carbon. Write every step with its reagent and the product after it.'
         ],
         links: [lesson('14', 's19'), lesson('14', 's20'), card('desulfonation', 'desulfonation'), card('eas-sulfonation', 'SO₃, H₂SO₄'), card('benzylic-bromination', 'NBS or Br₂, light')],
-        trap: 'Putting groups on in the wrong order, so a meta director sends the next group to the wrong place.'
+        trap: 'Putting groups on in the wrong order, so a meta director sends the next group to the wrong place.',
+        show: { label: 'Start and target', equation: { reactants: ['Cc1ccccc1'], products: ['O=Cc1c(Cl)cc([2H])cc1Br'], cond: '5 steps' } }
       }
     ]
   }

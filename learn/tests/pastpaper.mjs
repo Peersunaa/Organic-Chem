@@ -10,6 +10,9 @@ import { fileURLToPath } from 'node:url';
 import { LESSONS } from '../lessons/index.js';
 import { HUB_BY_ID } from '../engine/reaction-hub.js';
 import { PASTPAPER, PASTPAPER_ORDER } from '../data/pastpaper.js';
+import { ready, canon } from '../engine/chem.js';
+import { mirror } from '../engine/stereo-graph.js';
+import { showFor } from '../pastpaper-view.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const nonEmpty = (s) => typeof s === 'string' && s.trim().length > 0;
@@ -65,6 +68,26 @@ export async function pastpaper({ ok, eq }) {
   ok(b3.items.every((i) => i.links.some((l) => l.href.startsWith('#reactions/'))), 'every B3.1 item links to a hub card');
   const need = ['eas-bromination', 'amine-in-acid', 'desulfonation', 'benzylic-bromination', 'alkyne-hydroboration', 'clemmensen', 'oxidation-cr', 'oxidation-pcc', 'diels-alder', 'alkyne-hydration', 'birch', 'eas-sulfonation'];
   for (const c of need) ok(b3.items.some((i) => i.links.some((l) => l.href === '#reactions/' + c)), `B3.1 covers the ${c} card`);
+
+  // ---- (3b) drawings: an item shows an example structure (its own `show`, else its hub card's worked example), always labelled as an example, never the exam's drawing
+  await ready();
+  const all = PASTPAPER.flatMap((s) => s.items);
+  const withShow = all.filter((i) => showFor(i));
+  ok(withShow.length >= 15, `at least 15 items draw a structure (${withShow.length})`);
+  for (const i of all.filter((x) => x.links.some((l) => l.href.startsWith('#reactions/')))) ok(!!showFor(i), `${i.id}: linked to a hub card, so it draws that card's worked example`);
+  for (const id of ['A1.3', 'A2.2', 'B6.2', 'B3.1.9']) ok(!!showFor(all.find((i) => i.id === id)), `${id}: draws a structure`);
+  for (const i of withShow) {
+    const sh = showFor(i);
+    ok(nonEmpty(sh.label) && (/example|style|target/i.test(sh.label)), `${i.id}: the drawing is labelled as an example`);
+    const smi = sh.equation ? [...sh.equation.reactants, ...sh.equation.products] : sh.structures.map((x) => x.smiles);
+    ok(smi.length >= 1 && smi.every((x) => canon(x) !== null), `${i.id}: every drawn structure parses in RDKit`);
+  }
+  const a22 = showFor(all.find((i) => i.id === 'A2.2')).structures.map((x) => x.smiles);
+  eq(a22.map((x) => canon(x) === canon(mirror(x))), [false, true, true], 'A2.2 example: a is chiral, b is achiral, c is meso (read back from the mirror image)');
+  const b62 = showFor(all.find((i) => i.id === 'B6.2')).equation;
+  ok(b62.reactants[0] === 'Cc1ccccc1' && /\[2H\]/.test(b62.products[0]) && /Br/.test(b62.products[0]) && /Cl/.test(b62.products[0]) && /O=C/.test(b62.products[0]), 'B6.2 draws toluene and the target (CHO, Br, Cl, D)');
+  const ppv = fs.readFileSync(path.join(HERE, '..', 'pastpaper-view.js'), 'utf8');
+  ok(/pp-show/.test(ppv) && /drawShow\(node, it\)/.test(ppv) && /not the exam's own drawing/.test(ppv), 'the past-paper view draws the example above the steps and says it is not the exam drawing');
 
   // ---- (4) router, hub anchor, home panel, CSS (read from the source)
   const app = fs.readFileSync(path.join(HERE, '..', 'app.js'), 'utf8');

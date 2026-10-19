@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { LESSONS } from '../lessons/index.js';
 import { HUB_CARDS, HUB_GROUPS, HUB_SPACE, HUB_ADDS, HUB_BY_ID } from '../engine/reaction-hub.js';
 import * as R from '../engine/reactions.js';
-import { lessonHref, NO_LESSON } from '../hub-view.js';
+import { lessonHref, NO_LESSON, matchesQuery, fold, hubText } from '../hub-view.js';
 import { formulaOf } from '../engine/skeletal.js';
 import * as V from '../engine/voice.js';
 
@@ -297,6 +297,27 @@ export async function hub({ ok, eq }) {
   ok(/class: 'side'/.test(app) && /h\('h2', \{ id: 'rx-h' \}, 'Reactions'\)/.test(app), 'home screen has a Reactions panel');
   ok(/const deepAt = startId \?/.test(app) && !/done\.add\(L\.steps/.test(app), 'deep link sets the step without marking earlier steps done');
   ok(/idx: deep \? resumeIdx : idx/.test(app), 'a deep-link visit does not move the saved resume point');
+  // ---- (4b) navigation: the sticky jump bar (one chip per group), the search box, and the card links inside the steps
+  const hit = (q) => HUB_CARDS.filter((c) => matchesQuery(c, q)).map((c) => c.id);
+  eq(hit('').length, HUB_CARDS.length, 'an empty search shows every card');
+  ok(hit('PCC').includes('oxidation-pcc') && hit('pcc').length >= 1, 'search "PCC" finds the PCC card');
+  ok(hit('Br2').includes('eas-bromination') && hit('Br2').includes('alkene-x2'), 'search "Br2" finds the bromination and the alkene X2 cards (subscripts folded)');
+  ok(hit('hno3 h2so4').includes('eas-nitration'), 'search "hno3 h2so4" finds nitration (several words, all must match)');
+  ok(hit('benzene').length > 3 && hit('benzene').every((id) => HUB_BY_ID[id]), 'search "benzene" finds the aromatic cards');
+  eq(hit('zzzqq'), [], 'a search that matches nothing shows no card');
+  eq(fold('Br₂, FeBr₃'), 'br2febr3', 'fold turns "Br₂, FeBr₃" into br2febr3');
+  ok(HUB_CARDS.every((c) => hubText(c).length > 20), 'every card has searchable text');
+  ok(/class: 'hub-jump'/.test(view) && /data-jump/.test(view) && HUB_GROUPS.length === 4 && /HUB_GROUPS\.map\(\(g\) => \{\s*const b = h\('button'/.test(view), 'hub view has a jump bar with one chip per group (four groups)');
+  ok(/type: 'search'/.test(view) && /state\.q = search\.value/.test(view) && /matchesQuery\(c, state\.q\)/.test(view), 'hub view has a text search that filters the cards');
+  const hubHtml = fs.readFileSync(path.join(HERE, '..', 'index.html'), 'utf8');
+  ok(/\.hub-jump \{[^}]*position: sticky/.test(hubHtml), 'the jump bar is sticky');
+  const links = HUB_CARDS.flatMap((c) => [...(c.apply.steps || []), ...(c.draw || []), ...((c.caveman && c.caveman.steps) || [])].flatMap((x) => [...x.matchAll(/\[\[([a-z0-9-]+)\|([^\]]+)\]\]/g)].map((m) => m[1])));
+  ok(links.length >= 3 && links.every((id) => HUB_BY_ID[id]), 'every [[card|words]] link inside a step points at a real card');
+  ok(/director-activating/.test(JSON.stringify(HUB_BY_ID['eas-bromination'].apply.steps)) && /director-meta/.test(JSON.stringify(HUB_BY_ID['eas-bromination'].apply.steps)), 'the Br2/FeBr3 card links to the director cards in its last step');
+  ok(/ring neighbour/i.test(HUB_BY_ID['alkene-hx'].apply.steps[0]), 'the HBr card says a ring neighbour counts as an alkyl group');
+  const da = HUB_BY_ID['diels-alder'].draw.join(' ');
+  ok(['ortho-like', 'stereocentre', 'racemate', 'Cis stays cis', 'electron-rich C4'].every((w) => da.includes(w)), 'the Diels-Alder walk-through explains ortho-like, stereocentre, racemate, "cis stays cis" and why C4 joins b');
+  ok(/dielsAlderFrames\(\)/.test(view), 'the Diels-Alder card shows the three-frame hexagon sketch');
   // ---- (5) the Caveman switch on the hub: t() gives each card's caveman text when the mode is on, the normal text when it is off
   V.setCaveman(false);
   ok(HUB_CARDS.every((c) => V.t(c.what, c.caveman.what) === c.what), 'caveman off: every card shows its normal text');

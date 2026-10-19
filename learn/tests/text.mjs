@@ -120,7 +120,8 @@ export async function text({ ok, eq }) {
   }
 
   // ---------------------------------------------------------------- (3) glossary and recap cards
-  ok(GLOSSARY.length >= 40 && GLOSSARY.length <= 60, `glossary has 40 to 60 terms (${GLOSSARY.length})`);
+  ok(GLOSSARY.length >= 40 && GLOSSARY.length <= 80, `glossary has 40 to 80 terms (${GLOSSARY.length})`);
+  for (const t of ['catalyst', 'isomer', 'dienophile', 'oxonium', 'bromonium', 'inductive', 'equilibrium', 'ewg', 'kekule', 'solvent', 'leavinggroup']) ok(GLOSSARY.some((g) => g.id === t), `glossary has the term ${t} (the round-2 review's missing terms)`);
   ok(new Set(GLOSSARY.map((g) => g.id)).size === GLOSSARY.length, 'glossary ids are unique');
   for (const g of GLOSSARY) {
     ok(g.def.length >= 20 && g.def.length <= 140, `glossary "${g.label}": definition is at most 140 characters (${g.def.length})`);

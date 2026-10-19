@@ -147,8 +147,12 @@ export default {
         if (!a.charge) return;
         const [x, y] = P(a), r = radius(a.el);
         const bAngs = bonds.filter((b) => b.a === i || b.b === i).map((b) => { const j = b.a === i ? b.b : b.a; return Math.atan2(atoms[j].y - a.y, atoms[j].x - a.x); });
-        const [ct] = freeAngles(bAngs.concat(lpPts[i].map((p) => p.t)), 1);
-        const cx = x + Math.cos(ct) * r * 1.35, cy = y + Math.sin(ct) * r * 1.35;
+        const occ = bAngs.concat(lpPts[i].map((p) => p.t));
+        const [ct] = freeAngles(occ, 1);
+        // an atom with four groups (O+ with three bonds and a pair) leaves only a narrow gap: push the badge outward until it clears the bonds on both sides
+        const gap = occ.length ? Math.min(...occ.map((t) => { const d = Math.abs(ct - t) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; })) : Math.PI;
+        const dist = Math.min(Math.max(r * 1.35, 12 / Math.max(Math.sin(Math.min(gap, Math.PI / 2)), 0.2)), r * 2.6);
+        const cx = x + Math.cos(ct) * dist, cy = y + Math.sin(ct) * dist;
         const g = el('g', { class: 'lb-atom' });
         g.appendChild(el('circle', { cx, cy, r: 9, class: 'lb-chg' }));
         g.appendChild(el('text', { x: cx, y: cy + 0.5, class: 'lb-chgt' }, a.charge > 0 ? '+' : '−'));

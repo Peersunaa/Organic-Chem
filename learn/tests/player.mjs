@@ -173,6 +173,25 @@ export async function player({ ok, eq }) {
     ok(/!reported && !alt/.test(psrc), 'an alternative never calls the lesson onResult');
     ok(/What if it were/.test(vsrc) && /Back to the lesson/.test(vsrc) && /comparePanel/.test(vsrc) && /factList/.test(vsrc), 'the what-if view has the chips, the back chip and the side-by-side with the card facts');
     ok(/modeOf = \(k\) => \(alt \? 'watch'/.test(psrc), 'an alternative plays in watch mode from its first step');
+    // round 2: a chip REPLACES the lesson's own heading, summary and old species, and says what is on screen (banner + a chip back)
+    ok(/hideOuter\(\)/.test(psrc) && /showOuter\(\)/.test(psrc) && /':scope > \.prompt, :scope > \.eyebrow, :scope > \.fb, :scope > \.hints'/.test(psrc), 'an alternative hides the own heading of the lesson and green summary (outside the player) and backToLesson puts them back');
+    ok(/stage\.innerHTML = ''; out\.innerHTML = ''; wiSlot = null/.test(psrc.slice(psrc.indexOf('function startAlt'))), 'starting an alternative clears the old sentences, species block and what-if slot before anything is mounted');
+    ok(/Now showing: <b>\$\{alt\.label\}<\/b> on the same/.test(psrc) && /mp-banner-back/.test(psrc) && /Back to the lesson’s reaction/.test(psrc), 'the banner reads "Now showing: <reagent> on the same alkene" and has a chip back to the lesson reaction');
+    ok(/Lesson 10 explains both/.test(psrc) && /#lesson-10\/s01/.test(psrc), 'the Br2 alternative says where the bromonium ion and anti addition are explained (Lesson 10) instead of leaving them undefined');
+    // the "What happened" line never names two atoms identically
+    for (const { src, mech } of uniq) mech.steps.forEach((st, n) => {
+      const sent = MC.changeSentence(st);
+      ok(!/(O|Br|N|Cl|C) (?:goes from|becomes)[^.]*,  (?:goes from|becomes)/.test(sent), `${src} step ${n + 1}: "What happened" does not name two ${'atoms'} the same way: ${sent}`);
+      ok(/^[A-Z]/.test(sent), `${src} step ${n + 1}: "What happened" starts with a capital`);
+    });
+    // no two atoms of any scene the player draws sit on top of each other (the hydrogens used to land on the same spot)
+    for (const { src, mech } of uniq.slice(0, 120)) mech.steps.forEach((st, n) => {
+      for (const sc of [MC.buildScene(st), MC.buildScene({ before: st.after })]) {
+        let worst = 9;
+        for (let a = 0; a < sc.atoms.length; a++) for (let b = a + 1; b < sc.atoms.length; b++) worst = Math.min(worst, Math.hypot(sc.atoms[a].x - sc.atoms[b].x, sc.atoms[a].y - sc.atoms[b].y));
+        ok(worst >= 0.45, `${src} step ${n + 1}: no two atoms are drawn on top of each other (closest ${worst.toFixed(2)})`);
+      }
+    });
     ok(/tAuto\(whyOf\(step, k\)/.test(psrc) && /whyText\(step, k - 1\)/.test(psrc) && /cavemanWhy/.test(psrc), 'the why line goes through the caveman voice (cavemanWhy, else the automatic squeeze)');
   }
 

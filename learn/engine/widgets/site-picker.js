@@ -4,6 +4,7 @@
 // config: { items: [{ id: 'water', role: 'nuc' | 'elec' }, ...] }   (ids are keys of SITES; a round of several molecules per step)
 import { svgPick, analyze, NAME, rdkit } from '../chem.js';
 import { SITES, siteRules } from '../mechanisms.js';
+import { lonePairGroup } from '../lp-draw.js';
 
 const ROLE_WORD = { nuc: 'nucleophilic', elec: 'electrophilic' };
 
@@ -56,6 +57,9 @@ export default {
       const stage = document.createElement('div');
       stage.className = 'gf-stage sp-stage';
       stage.innerHTML = pick.svg;
+      // lone pairs as pairs of dots (the question is about electron pairs, so the picture shows them; they sit in the gaps between the bonds)
+      const svgEl = stage.querySelector('svg');
+      if (svgEl) svgEl.append(lonePairGroup(pick, info));
       stage.querySelector('svg')?.setAttribute('role', 'img');
       stage.querySelector('svg')?.setAttribute('aria-label', `${S.label}. Tap an atom.`);
       const msg = document.createElement('p');

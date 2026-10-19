@@ -144,7 +144,7 @@ function stepWater(prev, cls) {
   const sc = buildScene(st);
   const Ci = sc.atoms.findIndex((a) => a.el === 'C' && a.charge === 1);
   const Oi = sc.atoms.findIndex((a) => a.el === 'O');
-  st.arrows = [{ from: { lp: Oi }, to: { atom: Ci }, why: 'A lone pair on the oxygen of a water molecule attacks the positive carbon and forms a new C–O bond; that oxygen now carries the +.' }];
+  st.arrows = [{ from: { lp: Oi }, to: { atom: Ci }, why: 'A lone pair on a water oxygen attacks the positive carbon (it is short of electrons) and forms a new C–O bond; that oxygen now carries the +.' }];
   st.after = [canon(buildMolblock(stepResult(st)))];
   return st;
 }
@@ -157,7 +157,7 @@ function stepDeprotonate(prev) {
   const Ow = sc.maps[1].heavy[0];
   const H = sc.maps[0].h[Oox][0];
   st.arrows = [
-    { from: { lp: Ow }, to: { atom: H }, why: "A lone pair on a solvent water's oxygen takes the H from the oxonium ion and forms a new O–H bond." },
+    { from: { lp: Ow }, to: { atom: H }, why: "The oxonium O is positive and holds its H loosely, so a lone pair on a solvent water takes that H and forms a new O–H bond." },
     { from: { bond: [Oox, H] }, to: { atom: Oox }, why: 'The O–H bond pair stays on oxygen, so the oxonium O is neutral again and the alcohol is formed.' }
   ];
   st.after = canon(buildMolblock(stepResult(st))).split('.').sort((p, q) => (p.includes('+') ? 1 : 0) - (q.includes('+') ? 1 : 0));

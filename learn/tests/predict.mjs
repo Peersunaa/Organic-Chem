@@ -2,7 +2,7 @@
 //  (1) wiring: skill tag, label, generator registry, routes and links in app.js, every hub card has a drill entry, nothing excluded;
 //  (2) 200 seeded problems + every (card, substrate, reagent) pair: exactly one right option, 3 or 4 options, no duplicate drawing (the mirror image of a racemic
 //      product counts as the right drawing), every option parses in RDKit (JS) AND in Python RDKit (tools/check_hub.py), every wrong option names the missed fact
-//      (adds / where / space) and starts its `why` with that slip, hints are a pair, `worked` walks the three facts, consecutive problems use different cards;
+//      (adds / where / space) and starts its `why` with ONE SPECIFIC LINE naming the real atom, group or position of that problem (`lead`; the longer reason is `more`; no generic "Slip on ..." opener), hints are a pair, `worked` walks the three facts, consecutive problems use different cards;
 //  (3) the right option equals the engine product, recomputed here by calling the engines directly from the problem's card id, substrate and reagent
 //      (canonical isomeric SMILES; a racemic product may be drawn as either mirror image);
 //  (4) stereo: the card's own `space` (syn / anti) is read back in Python (cis / trans on a ring from 3D coordinates, meso or chiral for but-2-ene, E / Z of an alkyne
@@ -33,6 +33,8 @@ function mulberry32(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t 
 const comps = (smiles) => smiles.split('.').map((s) => canon(s)).sort();
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const mirrorComps = (list) => list.map((s) => canon(R.mirror(s))).sort();
+/** a wrong option's first line must name something concrete: an atom, a group, a bond or a position word */
+const CONCRETE = /(Br|Cl|OH|CH₃|CO₂H|NO₂|SO₃H|NH₂|H₂|carbon|face|Markovnikov|meta|ortho|para|ring|C=C|C=O|C≡C|alkene|alkane|alkyne|alkyl|ketone|aldehyde|enol|epoxide|diol|cation|syn|anti|cis|trans|geminal|R group|\bH\b|\bD\b|\bO\b)/;
 const SLIP_START = { adds: 'Slip on WHAT adds', where: 'Slip on WHERE it adds', space: 'Slip on HOW it adds in space' };
 
 /** The engine's products for a problem, computed from the card id, substrate and reagent (the hub test's engine calls, not the generator's choice helpers). */
@@ -142,7 +144,11 @@ export async function predict({ ok, eq }) {
       o.smiles.split('.').forEach((s) => { ok(canon(s) !== null, `${t}: ${s} parses in RDKit (JS)`); mols.add(s); });
       if (!o.correct) {
         ok(['adds', 'where', 'space'].includes(o.fact), `${t}: wrong option has a fact (${o.fact})`);
-        ok(o.fact && o.why.startsWith(SLIP_START[o.fact]) && o.why.length > SLIP_START[o.fact].length + 30, `${t}: wrong option's why starts with the slip and says more`);
+        ok(typeof o.lead === 'string' && o.lead.length >= 25 && o.lead.length <= 260 && o.why.startsWith(o.lead), `${t}: wrong option has a specific first line (lead) and the why starts with it`);
+        ok(!/^Slip on /.test(o.why), `${t}: wrong option's why does not open with the generic slip sentence`);
+        ok(CONCRETE.test(o.lead), `${t}: the first line names a concrete group, atom or position: ${o.lead}`);
+        ok(!/the group (meta|ortho|para)/.test(o.lead) && !/X/.test(o.lead), `${t}: the first line has the real group substituted in: ${o.lead}`);
+        ok(typeof o.more === 'string' && (o.more === '' || o.why.endsWith(o.more)), `${t}: the longer reason is kept as \`more\``);
         factsSeen.add(o.fact);
       } else ok(/^Yes\./.test(o.why), `${t}: right option explains itself`);
     }

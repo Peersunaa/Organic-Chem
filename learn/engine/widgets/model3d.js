@@ -21,6 +21,29 @@ function webglOK() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; }
 }
 
+/**
+ * Make the molecule fill about `frac` of the viewer (its bounding sphere, so it still fits after a turn). 3Dmol's own zoomTo leaves small molecules tiny:
+ * water came out about 40 px wide in a 260 px box. We read the screen size of the atom centres, work out pixels per angstrom, and zoom by the missing factor.
+ * `pad` = atom radius in angstroms (about 0.45 for ball and stick, about 1.5 when the atoms are drawn space-filling).
+ */
+export function fillView(v, box, frac = 0.7, pad = 0.45) {
+  try {
+    v.zoomTo();
+    const A = v.selectedAtoms({});
+    const W = box.clientWidth, H = box.clientHeight;
+    if (!A.length || !W || !H) return;
+    const pts = v.modelToScreen(A.map((a) => ({ x: a.x, y: a.y, z: a.z })));
+    const rng = (arr) => Math.max(...arr) - Math.min(...arr);
+    const dx = rng(A.map((a) => a.x)), dy = rng(A.map((a) => a.y));
+    const px = dx >= dy ? rng(pts.map((p) => p.x)) / dx : rng(pts.map((p) => p.y)) / dy;   // pixels per angstrom in the starting view
+    if (!(px > 0) || !isFinite(px)) return;
+    const c = [0, 1, 2].map((k) => A.reduce((s, a) => s + [a.x, a.y, a.z][k], 0) / A.length);
+    const R = Math.max(...A.map((a) => Math.hypot(a.x - c[0], a.y - c[1], a.z - c[2]))) + pad;
+    const f = (frac * Math.min(W, H)) / 2 / (R * px);
+    if (f > 1.02 || f < 0.98) v.zoom(Math.max(0.4, Math.min(8, f)), 0);
+  } catch (e) { /* the default zoom is still a working view */ }
+}
+
 export function modelAngle(molblock, center, a, b) {
   const lines = molblock.split('\n');
   const n = parseInt(lines[3].slice(0, 3), 10);
@@ -77,6 +100,14 @@ export default {
       });
       bar.querySelectorAll('[data-m]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.m === style)));
     };
+    // the molecule fills about 70% of the view (space-filling atoms are fat, so they get a wider margin); linked viewers move together, so the smallest fit wins
+    const refit = () => {
+      const pad = style === 'sphere' ? 1.5 : 0.45;
+      const boxes = [...views.querySelectorAll('.m3-view')];
+      // two viewers are linked (one camera for both): fit the first and let the link carry it to the second
+      (viewers.length === 2 && viewers[0].linkViewer ? viewers.slice(0, 1) : viewers).forEach((v, k) => fillView(v, boxes[k] || boxes[0], 0.7, pad));
+      viewers.forEach((v) => { try { v.render(); } catch (e) { /* ignore */ } });
+    };
     loadLib().then(($3Dmol) => {
       try {
         ids.forEach((id) => {
@@ -92,6 +123,7 @@ export default {
         if (viewers.length === 2 && viewers[0].linkViewer) viewers[0].linkViewer(viewers[1]);
         if (config.spin) viewers.forEach((v) => v.spin('y', 0.6));
         apply();
+        refit();
       } catch (e) { viewers.length = 0; fallback('3D view failed to start, so this is the flat drawing.'); }
     }).catch(() => fallback('3D view could not load, so this is the flat drawing.'));
     // Lesson 13: config.pi shows two translucent doughnut-shaped clouds (above and below the ring) on request
@@ -110,7 +142,7 @@ export default {
     bar.addEventListener('click', (e) => {
       const pb = e.target.closest('[data-pi]');
       if (pb) { piOn = !piOn; paintPi(); return; }
-      const b = e.target.closest('[data-m]'); if (b) { style = b.dataset.m; apply(); }
+      const b = e.target.closest('[data-m]'); if (b) { style = b.dataset.m; apply(); refit(); }
     });
     return { destroy() { viewers.forEach((v) => { try { v.clear(); } catch (e) { /* ignore */ } }); } };
   }

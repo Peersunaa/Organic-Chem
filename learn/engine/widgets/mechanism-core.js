@@ -131,25 +131,47 @@ const pairKey = (i, j) => (i < j ? i + '-' + j : j + '-' + i);
 const bondMap = (bonds) => { const m = new Map(); bonds.forEach((b) => m.set(pairKey(b.a, b.b), b.order)); return m; };
 const sym = (o) => (o >= 3 ? '≡' : o === 2 ? '=' : '–');
 
-/** Bonds that form / break / change order and atoms whose charge changes, for the step's scene before and after the arrows. */
+/** Bonds that form / break / change order and atoms whose charge changes, for the step's scene before and after the arrows.
+ *  When two atoms of the same element are involved (the oxonium O and the water O; the two Br of Br2) each is named by what tells it apart, never just "O" twice. */
 export function describeChanges(step) {
   const cfg = stepConfig(step);
   const after = applyArrows(cfg);
   const B0 = bondMap(cfg.bonds), B1 = bondMap(after.bonds);
   const out = { formed: [], broken: [], changed: [], charges: [] };
+  const diffs = [];
   for (const k of new Set([...B0.keys(), ...B1.keys()])) {
     const [i, j] = k.split('-').map(Number);
     const o0 = B0.get(k) || 0, o1 = B1.get(k) || 0;
-    let A = cfg.atoms[i].el, Bm = cfg.atoms[j].el;
-    if (A !== 'H' && Bm === 'H' && ['F', 'Cl', 'Br', 'I', 'O', 'N', 'S'].includes(A)) [A, Bm] = [Bm, A]; // write H-Cl, H-O ... but C-H
-    if (o0 === o1) continue;
-    if (!o0) out.formed.push(`${A}${sym(o1)}${Bm}`);
-    else if (!o1) out.broken.push(`${A}${sym(o0)}${Bm}`);
-    else out.changed.push({ text: `${A}${sym(o0)}${Bm} becomes ${A}${sym(o1)}${Bm}`, lost: o1 < o0, o0, o1 });
+    if (o0 !== o1) diffs.push({ i, j, o0, o1 });
   }
-  cfg.atoms.forEach((a, i) => {
-    const c0 = a.charge || 0, c1 = after.atoms[i].charge;
-    if (c0 !== c1) out.charges.push(`${a.el} ${c0 === 0 ? 'becomes' : 'goes from ' + fmtCharge(c0) + ' to'} ${fmtCharge(c1)}`);
+  const c0 = (i) => cfg.atoms[i].charge || 0, c1 = (i) => after.atoms[i].charge;
+  const moved = cfg.atoms.map((a, i) => (c0(i) !== c1(i) ? i : -1)).filter((i) => i >= 0);
+  // two atoms of one element in the charge list (the oxonium O and the water O; the two Br of Br2) get names that tell them apart: never "O ... O"
+  const byEl = {};
+  moved.forEach((i) => { (byEl[cfg.atoms[i].el] = byEl[cfg.atoms[i].el] || []).push(i); });
+  const word = (c) => (c === 0 ? 'neutral' : c > 0 ? 'positively charged' : 'negatively charged');
+  const nameOf = {};
+  Object.entries(byEl).forEach(([el, list]) => {
+    if (list.length < 2) { nameOf[list[0]] = el; return; }
+    const uniq = list.length === new Set(list.map(c0)).size;
+    const ordered = [...list].sort((p, q) => c1(q) - c1(p));
+    list.forEach((i) => { nameOf[i] = uniq ? `the ${word(c0(i))} ${el}` : list.length === 2 ? (ordered[0] === i ? `one ${el}` : `the other ${el}`) : `${el} number ${ordered.indexOf(i) + 1}`; });
+  });
+  // a bond is named by its element pair; when a bond of that pair breaks AND one forms (H–O ... H–O), the atom that tells them apart is added
+  const pairOf = (d) => { let A = cfg.atoms[d.i].el, Bm = cfg.atoms[d.j].el, ai = d.i, bj = d.j; if (A !== 'H' && Bm === 'H' && ['F', 'Cl', 'Br', 'I', 'O', 'N', 'S'].includes(A)) { [A, Bm] = [Bm, A]; [ai, bj] = [bj, ai]; } return { A, Bm, ai, bj }; };
+  const pairs = diffs.map(pairOf);
+  diffs.forEach((d, k) => {
+    const { A, Bm, ai, bj } = pairs[k], { o0, o1 } = d;
+    const clash = pairs.some((q, m) => m !== k && q.A === A && q.Bm === Bm && (diffs[m].o0 === 0) !== (o0 === 0));
+    const named = [ai, bj].find((x) => nameOf[x] && nameOf[x] !== cfg.atoms[x].el);
+    const tail = clash && named != null ? nameOf[named] : '';
+    if (o0 === 0) out.formed.push({ text: `${A}${sym(o1)}${Bm}`, on: tail });
+    else if (o1 === 0) out.broken.push({ text: `${A}${sym(o0)}${Bm}`, on: tail });
+    else out.changed.push({ text: `${A}${sym(o0)}${Bm} becomes ${A}${sym(o1)}${Bm}`, lost: o1 < o0, o0, o1 });
+  });
+  moved.forEach((i) => {
+    const was = c0(i), now = c1(i);
+    out.charges.push(`${nameOf[i]} ${was === 0 ? 'becomes' : 'goes from ' + fmtCharge(was) + ' to'} ${fmtCharge(now)}`);
   });
   return out;
 }
@@ -159,10 +181,16 @@ const fmtCharge = (n) => (n === 0 ? 'neutral' : n > 0 ? 'positive (' + (n === 1 
 export function changeSentence(step) {
   const d = describeChanges(step);
   const parts = [];
-  if (d.broken.length) parts.push(`${d.broken.join(' and ')} ${d.broken.length > 1 ? 'bonds break' : 'bond breaks'}`);
+  // "H–Cl bond breaks", "C–Br and C–Br bonds form", or, when a bond of the same pair also forms, "the H–O bond on the positively charged O breaks"
+  const phrase = (list, verbs) => {
+    if (!list.length) return;
+    if (list.some((x) => x.on)) list.forEach((x) => parts.push(`the ${x.text} bond${x.on ? ' on ' + x.on : ''} ${verbs[0]}`));
+    else parts.push(`${list.map((x) => x.text).join(' and ')} ${list.length > 1 ? 'bonds' : 'bond'} ${list.length > 1 ? verbs[1] : verbs[0]}`);
+  };
+  phrase(d.broken, ['breaks', 'break']);
   d.changed.forEach((c) => parts.push(c.lost ? (c.o0 === 2 && c.o1 === 1 ? `${c.text}: its π pair is used` : `${c.text}: one pair of its electrons is used`) : c.text));
-  if (d.formed.length) parts.push(`${d.formed.join(' and ')} ${d.formed.length > 1 ? 'bonds form' : 'bond forms'}`);
-  let s = parts.join('; ');
+  phrase(d.formed, ['forms', 'form']);
+  let s = parts.join('; ').replace(/^the /, 'The ');
   if (d.charges.length) s += (s ? '. ' : '') + 'Charges: ' + d.charges.join(', ');
   return s;
 }
@@ -191,7 +219,7 @@ export function partialState(step, k) {
 export const WHY = {
   piToH: (donor, where = '') => `The π pair attacks ${/⁺/.test(donor) ? 'an' : 'the δ+'} H of ${donor} and forms a new C–H bond${where}.`,
   XLeaves: (X) => `The H–${X} bond pair leaves with ${X}, the more electronegative atom, so ${X} becomes ${X}⁻.`,
-  halideAttacks: (X, cation = 'positive') => `A lone pair on ${X}⁻ attacks the ${cation} carbon and becomes the new C–${X} bond.`,
+  halideAttacks: (X, cation = 'positive') => `A lone pair on ${X}⁻ attacks the ${cation} carbon, because opposite charges attract, and becomes the new C–${X} bond.`,
   MORE_H: ', on the carbon with more H, so the + lands on the other carbon',
   FEWER_H: ', on the carbon with fewer H, so the + lands on the less substituted carbon (minor path)'
 };

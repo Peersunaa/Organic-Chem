@@ -58,7 +58,7 @@ export const HUB_CARDS = [
         'A Lewis acid catalyst (FeBr₃, FeCl₃, AlCl₃) next to a benzene ring tells you: electrophilic aromatic substitution.',
         'Name the electrophile: Br⁺. FeBr₃ makes one Br of Br₂ electron-poor.',
         'Swap ONE ring H for Br. Keep the ring as it was. Do not add Br to the ring (no addition).',
-        'If the ring already carries a group, go to the director cards: they say ortho/para or meta.'
+        'If the ring already carries a group, go to the director cards ([[director-activating|activator]], [[director-halogen|halogen]], [[director-meta|deactivator]]): they say ortho/para or meta.'
       ]
     },
     caveman: {
@@ -68,7 +68,7 @@ export const HUB_CARDS = [
         'FeBr₃, FeCl₃, AlCl₃ plus ring: electrophilic aromatic substitution.',
         'Br⁺ electrophile. FeBr₃ make Br₂ poor.',
         'Swap ONE ring H for Br. Ring stay. No addition.',
-        'Group on ring: director cards say ortho/para or meta.'
+        'Group on ring: [[director-activating|director cards]] say ortho/para or meta.'
       ]
     },
     lesson: { id: '13', step: 's01' }, mech: 's06'
@@ -546,7 +546,7 @@ export const HUB_CARDS = [
     apply: {
       pattern: 'HBr (in ether) is added to 1-methylcyclohexene. Draw the major product.',
       steps: [
-        'Mark the two C=C carbons and count the alkyl groups on each.',
+        'Mark the two C=C carbons and count the alkyl groups on each. A neighbour that is part of a ring counts as an alkyl group too: in 1-methylcyclohexene one C=C carbon has CH₃ and a ring neighbour (two), the other has only a ring neighbour (one).',
         'H⁺ adds to the carbon with MORE H. That leaves the + on the more substituted carbon (3° is more stable than 2°, 2° than 1°).',
         'Br⁻ bonds to that carbon: Br ends up on the carbon with more alkyl groups.',
         'If both carbons have the same number of alkyl groups (pent-2-ene), expect a mixture of both products.',
@@ -557,7 +557,7 @@ export const HUB_CARDS = [
       what: 'H and X across C=C. H to carbon with more H. Markovnikov. X to more alkyl.',
       facts: { adds: 'H, Br/Cl', where: 'Markovnikov: H to more H', space: 'either' },
       steps: [
-        'Count alkyl on each C=C carbon.',
+        'Count alkyl on each C=C carbon. Ring neighbour counts. CH₃ + ring = two; other C one.',
         'H⁺ to carbon with MORE H. + on more substituted: 3° > 2° > 1°.',
         'Br⁻ go to + carbon. More alkyl.',
         'Same alkyl count (pent-2-ene): mixture of both.',
@@ -1073,9 +1073,10 @@ export const HUB_CARDS = [
       'Words first. The diene is the molecule with C=C–C=C. The dienophile is the C=C that joins it, and here it carries an electron-withdrawing group (C=O), a group that pulls electron density off the C=C.',
       'Diene: write CH₃–CH=CH–CH=CH₂ and number the four C=C carbons from the CH₃ end: C1 (has the CH₃), C2, C3, C4 (the =CH₂). So C1=C2–C3=C4.',
       'Dienophile, acrolein CH₂=CH–CHO: call its carbon with the CHO “a” and the CH₂ carbon “b”. So a=b.',
-      'Draw an empty hexagon and write the six carbons round it in this order: C1, C2, C3, C4, b, a. Join C4 to b and join a back to C1: these two single bonds are the new σ bonds.',
+      'Draw an empty hexagon and write the six carbons round it in this order: C1, C2, C3, C4, b, a. Join C4 to b and join a back to C1: these two single bonds are the new σ bonds. Why C4 to b, not C1 to b? The CH₃ on C1 pushes electron density along the diene to the C4 end, and the C=O pulls it off the CH₂ end (b), so electron-rich C4 bonds to electron-poor b.',
       'Redraw the double bonds: erase C1=C2 and C3=C4, draw ONE new C=C between C2 and C3, and make a=b a single bond.',
-      'Hang the groups on: CH₃ on C1, CHO on a. C1 and a are neighbours, so the groups sit on neighbouring ring carbons (the “1,2”, ortho-like, product): 2-methylcyclohex-3-ene-1-carbaldehyde.',
+      'Hang the groups on: CH₃ on C1, CHO on a. C1 and a are neighbours, so the groups sit on neighbouring ring carbons (the “1,2” product, called ortho-like because ortho means next-door): 2-methylcyclohex-3-ene-1-carbaldehyde.',
+      'Two words from the answer. C1 and a each now hold four different groups, so each is a stereocentre (a carbon with four different groups, which has a mirror-image form). Heating makes both mirror images in equal amounts: a racemate. The exam draws it flat. “Cis stays cis” means two groups on the same side of the dienophile C=C end up on the same face of the new ring.',
       'Check: 6 ring carbons, one C=C, and C₅H₈ + C₃H₄O = C₈H₁₂O, so no atom was lost.'
     ],
     caveman: {

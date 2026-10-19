@@ -208,6 +208,45 @@ export function lpPoints(atoms, bonds, i) {
   return lonePairAngles(bondAnglesAt(atoms, bonds, i), n).map((t) => ({ t, x: x + Math.cos(t) * (r + 9), y: y + Math.sin(t) * (r + 9) }));
 }
 
+/** Does a hydrogen at p point into the wedge between the atom's other bonds (towards the mean of their directions)? */
+function inward(p, g, nbr) {
+  const mx = nbr.reduce((t, a) => t + Math.cos(a), 0), my = nbr.reduce((t, a) => t + Math.sin(a), 0);
+  const m = Math.hypot(mx, my);
+  if (m < 0.35 * nbr.length) return false;                       // bonds all round the atom: there is no "inside"
+  return ((p.x - g.x) * mx + (p.y - g.y) * my) / m > 0.5;
+}
+/** `count` hydrogens on the side away from the atom's other bonds: one straight out, two at about 40 degrees either side of "out" (so the hydrogens of neighbouring ring carbons keep apart). */
+function outerH(g, nbr, count) {
+  const mx = nbr.reduce((t, a) => t + Math.cos(a), 0), my = nbr.reduce((t, a) => t + Math.sin(a), 0);
+  const out = Math.atan2(-my, -mx);
+  const spread = { 1: [0], 2: [-0.7, 0.7], 3: [-1.0, 0, 1.0] }[count] || Array.from({ length: count }, (_, i) => (i - (count - 1) / 2) * 0.9);
+  return spread.map((d) => ({ x: g.x + Math.cos(out + d), y: g.y + Math.sin(out + d) }));
+}
+/** Does a hydrogen drawn at p sit on top of (or too close to) another atom of its molecule? (distances in bond-length units; `skip` = its own heavy atom) */
+function clashes(p, atoms, base, skip, placed) {
+  const near = (q) => Math.hypot(q.x - p.x, q.y - p.y) < 0.8;
+  return atoms.slice(base).some((q, i) => base + i !== skip && near(q)) || placed.some(near);
+}
+/** The direction around heavy atom `gi` that is clear of every atom, far from its bonds, and as close as possible to the first choice. */
+function freeSpot(atoms, base, gi, nbr, forced, placed, first) {
+  const g = atoms[gi], taken = nbr.concat(forced, placed.map((q) => Math.atan2(q.y - g.y, q.x - g.x)));
+  const want = Math.atan2(first.y - g.y, first.x - g.x);
+  const dAng = (a, b) => { let d = Math.abs(a - b) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; };
+  let best = first, bestScore = -Infinity;
+  for (const minSep of [0.7, 0.45, 0.25]) {                      // about 40 degrees from the bonds if there is room, less in a really crowded spot
+    for (let i = 0; i < 72; i++) {
+      const t = (i * Math.PI) / 36, q = { x: g.x + Math.cos(t), y: g.y + Math.sin(t) };
+      const sep = taken.length ? Math.min(...taken.map((u) => dAng(t, u))) : Math.PI;
+      if (sep < minSep) continue;
+      const room = Math.min(...atoms.slice(base).map((o, j) => (base + j === gi ? 9 : Math.hypot(o.x - q.x, o.y - q.y))), ...placed.map((o) => Math.hypot(o.x - q.x, o.y - q.y)));
+      const score = Math.min(room, 0.9) * 10 - dAng(t, want) - (nbr.length >= 2 && inward(q, g, nbr) ? 30 : 0);   // clear of everything first, then closest to where it was going; never into the ring
+      if (score > bestScore) { bestScore = score; best = q; }
+    }
+    if (bestScore > 5) break;
+  }
+  return best;
+}
+
 /**
  * Build a scene from SMILES: parts = [{smiles, hAngles?: {heavyIdx: radians}}] laid out left to right.
  * Hydrogens are explicit atoms. Returns {atoms, bonds, maps} where maps[k] = {heavy: [sceneIdx], h: {heavyIdx: [sceneIdx]}}.
@@ -232,6 +271,10 @@ export function sceneFromSmiles(parts, gap = 1.9) {
       const forced = part.hAngles && part.hAngles[i] != null ? [part.hAngles[i]] : [];
       forced.forEach((t) => pts.push({ x: atoms[gi].x + Math.cos(t), y: atoms[gi].y + Math.sin(t) }));
       if (a.impH > forced.length) pts = pts.concat(hydrogenPositions(atoms[gi].x, atoms[gi].y, nbr.concat(forced), a.impH - forced.length));
+      // a ring carbon whose second hydrogen was put INSIDE the ring (it ties with the outside on spacing): place the hydrogens on the outer side
+      if (forced.length === 0 && nbr.length >= 2 && pts.some((q) => inward(q, atoms[gi], nbr))) pts = outerH(atoms[gi], nbr, a.impH);
+      // crowded molecules (tert-butyl, an oxonium next to a methyl ...): a hydrogen that lands on another atom is moved to the free direction nearest to its first choice
+      { const done = []; pts.forEach((p) => { done.push(clashes(p, atoms, base, gi, done) ? freeSpot(atoms, base, gi, nbr, forced, done, p) : p); }); pts = done; }
       map.h[i] = [];
       pts.forEach((p) => { atoms.push({ el: 'H', x: p.x, y: p.y, charge: 0 }); bonds.push({ a: gi, b: atoms.length - 1, order: 1 }); map.h[i].push(atoms.length - 1); });
     });

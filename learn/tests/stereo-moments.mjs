@@ -131,7 +131,7 @@ export async function stereoMoments({ ok, eq }) {
     ok(/\.st3-grid \{[^}]*repeat\(auto-fit, minmax\(260px, 1fr\)\)/.test(html) && /max-width: 460px\) \{[^@]*\.st3-grid \{ grid-template-columns: minmax\(0, 1fr\)/.test(html), 'two viewers sit side by side and stack on a phone');
     const css = html.slice(html.indexOf('/* what-if row, Caveman switch'), html.indexOf('</style>'));
     ok(css.length > 200 && !/#[0-9a-fA-F]{3,6}\b/.test(css), 'the new CSS uses the colour tokens only');
-    ok(/\.mp-wi-chip, \.mp-wi-back \{ min-height: 44px/.test(css) && /\.switch \{[^}]*min-height: 44px/.test(html), 'the what-if chips and the header switches are 44 px targets');
+    ok(/\.mp-wi-chip, \.mp-wi-back, \.mp-banner-back \{ min-height: 44px/.test(css) && /\.switch \{[^}]*min-height: 44px/.test(html), 'the what-if chips and the header switches are 44 px targets');
   }
   // the models the brief names, even if a moment is later dropped
   for (const id of ['methylcyclohexyl-cation', 'cis-2-3-epoxybutane', 'cis-cyclohexane-1-2-diol', 'trans-1-2-dibromocyclohexane', 'cis-1-2-dimethylcyclohexane', 'trans-1-2-dimethylcyclohexane', 'bromonium-cyclohexene']) ok(!!models[id], `models.js has ${id}`);

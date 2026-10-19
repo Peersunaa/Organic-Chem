@@ -5,7 +5,7 @@
 // For every figure: the file exists; it is well-formed XML (every tag opened and closed, attributes quoted, entities legal);
 // root is <svg> with viewBox "0 0 640 400"; size <= 60 KB; honours reduced motion (a `prefers-reduced-motion: reduce` rule);
 // uses only the allowed CSS variables (surface, ink, accent, electron, muted, line); no scripts, raster images or external
-// references; no text under 11px; the title and hint are printed inside the card; the index entry is complete.
+// references; no text under 16 viewBox units (readable when the figure is shown at 560 px wide on a phone); the title and hint are printed inside the card; the index entry is complete.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -109,9 +109,12 @@ export async function figures({ ok: okT, eq }) {
     ok(!/data:image|\.png|\.jpe?g|\.webp|\.gif/i.test(src), id, 'no raster images');
     ok(!/(?:href|src)\s*=\s*["'](?!#)/.test(src) && !/url\(\s*["']?(?!#)/.test(src.replace(/@import[^;]*;/g, '')), id, 'no external references (only #fragment urls)');
     ok(!/\son[a-z]+\s*=/i.test(src), id, 'no inline event handlers');
-    // text sizes: every font-size in CSS or attributes is >= 11px
+    // text sizes: every font-size in CSS or attributes is >= 16 viewBox units, and every <text> uses a class that sets one
     const sizes = [...src.matchAll(/font-size\s*[:=]\s*"?(\d+(?:\.\d+)?)(px)?/g)].map((m) => +m[1]);
-    ok(sizes.length > 0 && sizes.every((n) => n >= 11), id, 'text under 11px: ' + sizes.filter((n) => n < 11).join(','));
+    ok(sizes.length > 0 && sizes.every((n) => n >= 16), id, 'text under 16: ' + sizes.filter((n) => n < 16).join(','));
+    const sizeOf = Object.fromEntries([...src.matchAll(/\.(f\d+)\{font-size:(\d+)px\}/g)].map((m) => [m[1], +m[2]]));
+    const bare = [...src.matchAll(/<text\b([^>]*)>/g)].filter((m) => !(/class="([^"]*)"/.exec(m[1]) || [, ''])[1].split(/\s+/).some((c) => sizeOf[c] >= 16) && !/font-size/.test(m[1]));
+    ok(bare.length === 0, id, `${bare.length} <text> elements have no class with a size >= 16`);
     // card text: title and hint are inside the figure
     const esc = (t) => t.replace(/&/g, '&amp;');
     ok(src.includes('>' + esc(f.title) + '<'), id, 'title text not printed inside the card');
@@ -139,7 +142,19 @@ export async function figures({ ok: okT, eq }) {
   ok(/figureCard\(figId, \{ key: 'lesson-' \+ L\.id, open: true \}\)/.test(app) && /FIGURES\[k\]\.lesson === L\.id/.test(app), 'wiring', 'lessonView builds the figure card for the lesson that FIGURES maps (open on first visit)');
   const iPre = app.indexOf('recapSlot.append(prereq)'), iFig = app.indexOf('recapSlot.append(figure)'), iRecap = app.indexOf('recapSlot.append(rc)');
   ok(iPre > 0 && iFig > iPre && iRecap > iFig, 'wiring', 'the figure sits after the prerequisite card and before the last-step recap, above step 1 (recapSlot is above the step host)');
-  ok(/if \(idx === 0\)/.test(app.slice(iPre - 120, iPre + 20)), 'wiring', 'the figure card is only placed on the first step');
+  ok(/if \(idx === 0\)/.test(app.slice(iPre - 120, iPre + 20)), 'wiring', 'the prerequisite card is only placed on the first step');
+  ok(/step\.id === \(FIGURES\[figId\]\.beforeStep \|\| steps\[0\]\.id\)/.test(app), 'wiring', 'the figure card is shown above the step named by FIGURES[..].beforeStep (default: step 1)');
+  // beforeStep: a real step of the lesson, and not before the figure's own vocabulary has been introduced
+  const firstWith = (L, f) => L.steps.findIndex(f);
+  const EXPECT = { ch1: (L) => 0, ch2: (L) => firstWith(L, (s) => s.skill === 'pka-direction'), ch3: (L) => firstWith(L, (s) => s.skill === 'skeletal'), ch4: (L) => 0, ch5: (L) => firstWith(L, (s) => s.widget === 'mechanism-player'), ch6: (L) => firstWith(L, (s) => s.skill === 'rs') };
+  for (const id of ids) {
+    const L = LESSONS.find((l) => l.id === FIGURES[id].lesson);
+    const at = L ? L.steps.findIndex((st) => st.id === (FIGURES[id].beforeStep || L.steps[0].id)) : -1;
+    ok(at >= 0, id, `beforeStep ${FIGURES[id].beforeStep} is a step of lesson ${FIGURES[id].lesson}`);
+    ok(at === EXPECT[id](L), id, `the figure sits above step index ${EXPECT[id](L)} (${L && L.steps[EXPECT[id](L)] && L.steps[EXPECT[id](L)].id}), not ${at}`);
+  }
+  ok(/\.fig-frame > svg \{[^}]*width: 560px;[^}]*min-width: 560px/.test(html) && /max-width: 599px/.test(html) && /overflow-x: auto/.test(html) && /touch-action: pan-x pan-y/.test(html), 'wiring', 'below 600 px the figure is 560 px wide inside a sideways-panning frame');
+  ok(/fig-pan/.test(card) && /Drag to see more/.test(card), 'wiring', 'the narrow-screen "Drag to see more" hint is in the figure card');
   for (const id of ids) {
     const L = LESSONS.find((l) => l.id === FIGURES[id].lesson);
     ok(!!L, id, `lesson ${FIGURES[id].lesson} exists in LESSONS, so lessonView shows its figure`);
@@ -151,7 +166,7 @@ export async function figures({ ok: okT, eq }) {
   ok(/store\.getUi\(/.test(card) && /store\.setUi\(/.test(card), 'wiring', 'the open/closed state is remembered in the store');
   ok(/Draw it, step by step/.test(view) && /c\.draw/.test(view) && /hub-draw/.test(view) && /caveman\.draw/.test(view), 'wiring', 'hub-view renders `draw` as an ordered list titled "Draw it, step by step", caveman-aware');
   ok(HUB_CARDS.some((c) => Array.isArray(c.draw) && c.draw.length), 'wiring', 'at least one hub card has a draw list');
-  ok(/^<meta charset="utf-8">\s*<title>/.test(html), 'wiring', 'index.html declares utf-8 before the title');
+  ok(/^<meta charset="utf-8">(?:\s*<meta [^>]*>)*\s*<title>/.test(html), 'wiring', 'index.html declares utf-8 before the title');
   const gl = fs.readFileSync(path.join(learn, 'engine', 'glossary.js'), 'utf8');
   const mp = fs.readFileSync(path.join(learn, 'engine', 'widgets', 'mechanism-player.js'), 'utf8');
   ok(/\.gl-term::after\{[^}]*min-width:44px;min-height:44px/.test(gl) && /\.gl-term:focus-visible/.test(gl), 'wiring', 'glossary terms have a 44px hit area and a focus-visible ring');

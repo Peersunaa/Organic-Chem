@@ -220,10 +220,10 @@ export default arrange({
       prompt: 'Work backwards. The compound above is the major product when an alkene reacts with HCl in ether. Which alkene was it?',
       smiles: 'CC1(Cl)CCCCC1',
       options: [
-        opt('<mol smiles="CC1=CCCCC1"></mol>', true, 'Yes. HCl adds H to the CH carbon and Cl to the carbon with the CH₃, which is the compound shown.'),
-        opt('<mol smiles="C1=CCCCC1"></mol>', false, 'Cyclohexene has no CH₃. Its product, chlorocyclohexane, has no CH₃ either.'),
-        opt('<mol smiles="CCC(C)=C"></mol>', false, 'This is a chain, not a ring. Its product would be 2-chloro-2-methylbutane, not a ring.'),
-        opt('<mol smiles="CCCC=C"></mol>', false, 'Pent-1-ene has five carbons in a chain and gives 2-chloropentane. The target has a ring.')
+        opt('<mol smiles="CC1=CCCCC1" alt="1-methylcyclohexene"></mol>', true, 'Yes. HCl adds H to the CH carbon and Cl to the carbon with the CH₃, which is the compound shown.'),
+        opt('<mol smiles="C1=CCCCC1" alt="cyclohexene"></mol>', false, 'Cyclohexene has no CH₃. Its product, chlorocyclohexane, has no CH₃ either.'),
+        opt('<mol smiles="CCC(C)=C" alt="2-methylbut-1-ene"></mol>', false, 'This is a chain, not a ring. Its product would be 2-chloro-2-methylbutane, not a ring.'),
+        opt('<mol smiles="CCCC=C" alt="pent-1-ene"></mol>', false, 'Pent-1-ene has five carbons in a chain and gives 2-chloropentane. The target has a ring.')
       ],
       hints: ['Find the carbon that holds the Cl. The C=C must have been between that carbon and a neighbour.', 'Take away Cl and one H from a neighbouring carbon and restore the double bond. Then check that Markovnikov addition puts Cl back on the same carbon.'],
       worked: 'Remove Cl and an H from the adjacent ring carbon to get 1-methylcyclohexene. Check forwards: H goes to the CH carbon, Cl to the carbon with the CH₃, which gives the compound shown.'
@@ -233,10 +233,10 @@ export default arrange({
       prompt: 'One more. This alcohol is the product of acid-catalysed hydration (H₂O, H₂SO₄ catalyst) of an alkene. Pick the alkene that gives mainly THIS alcohol and nothing else.',
       smiles: 'CCCC(C)O',
       options: [
-        opt('<mol smiles="CCCC=C"></mol>', true, 'Yes. Pent-1-ene: H goes to the CH₂ end and OH to C2, the carbon with more alkyl groups. Only pentan-2-ol forms.'),
-        opt('<mol smiles="CCC=CC"></mol>', false, 'Pent-2-ene gives pentan-2-ol AND pentan-3-ol, because both C=C carbons are alike (both cations secondary). It does not give this alcohol alone.'),
-        opt('<mol smiles="CC=C"></mol>', false, 'Propene has only three carbons. It gives propan-2-ol.'),
-        opt('<mol smiles="C1=CCCCC1"></mol>', false, 'Cyclohexene has a ring and gives cyclohexanol. The target is a chain of five carbons.')
+        opt('<mol smiles="CCCC=C" alt="pent-1-ene"></mol>', true, 'Yes. Pent-1-ene: H goes to the CH₂ end and OH to C2, the carbon with more alkyl groups. Only pentan-2-ol forms.'),
+        opt('<mol smiles="CCC=CC" alt="pent-2-ene"></mol>', false, 'Pent-2-ene gives pentan-2-ol AND pentan-3-ol, because both C=C carbons are alike (both cations secondary). It does not give this alcohol alone.'),
+        opt('<mol smiles="CC=C" alt="propene"></mol>', false, 'Propene has only three carbons. It gives propan-2-ol.'),
+        opt('<mol smiles="C1=CCCCC1" alt="cyclohexene"></mol>', false, 'Cyclohexene has a ring and gives cyclohexanol. The target is a chain of five carbons.')
       ],
       hints: ['Locate the carbon that carries the OH. The C=C was between it and a neighbouring carbon, and there are two neighbours to consider.', 'Try each neighbour: one choice puts the OH where Markovnikov addition would put it and gives only this alcohol; the other choice gives a mixture.'],
       worked: 'The OH is on C2. The C=C could have been C1=C2 or C2=C3. Pent-1-ene (C1=C2) gives only the C2 alcohol by Markovnikov’s rule; pent-2-ene (C2=C3) gives a mixture of the C2 and C3 alcohols.'

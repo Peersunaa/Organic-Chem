@@ -65,6 +65,17 @@ export const GLOSSARY = [
   { id: 'hydrogenation', label: 'hydrogenation', forms: ['hydrogenation'], def: 'Adding H₂ across a multiple bond, usually with a metal catalyst such as Pd/C.' },
   { id: 'oxidation', label: 'oxidation', forms: ['oxidation', 'oxidations', 'oxidised', 'oxidized'], def: 'A change that adds C–O bonds or removes C–H bonds, so the carbon ends up with more bonds to O.' },
   { id: 'reduction', label: 'reduction', forms: ['reduction', 'reductions'], def: 'A change that adds C–H bonds or removes C–O bonds, so the carbon ends up with more bonds to H.' },
+  { id: 'catalyst', label: 'catalyst', forms: ['catalyst', 'catalysts'], def: 'A substance that speeds up a reaction and is given back unchanged at the end, so a small amount is enough.' },
+  { id: 'isomer', label: 'isomer', forms: ['isomer', 'isomers'], def: 'One of several different molecules that have the same atoms (the same formula) but join or arrange them differently.' },
+  { id: 'dienophile', label: 'dienophile', forms: ['dienophile', 'dienophiles'], def: 'The C=C partner that a conjugated diene joins in a Diels–Alder reaction, usually one that carries an electron-withdrawing group.' },
+  { id: 'oxonium', label: 'oxonium ion', forms: ['oxonium'], def: 'An oxygen with three bonds and a + charge, such as H₃O⁺ or R–OH₂⁺; it is a very good leaving group.' },
+  { id: 'bromonium', label: 'bromonium ion', forms: ['bromonium', 'chloronium', 'halonium'], def: 'A three-membered ring in which a positive Br (or Cl) bridges the two carbons of a former C=C.' },
+  { id: 'inductive', label: 'inductive effect', forms: ['inductive effect', 'inductive'], def: 'Pushing or pulling of electrons along σ bonds by a nearby atom or group: alkyl groups push, electronegative atoms pull.' },
+  { id: 'equilibrium', label: 'equilibrium', forms: ['equilibrium'], def: 'The balance reached when a reaction runs both ways at the same rate; the double arrow ⇌ shows it, and the favoured side holds more.' },
+  { id: 'ewg', label: 'electron-withdrawing group', forms: ['electron-withdrawing group', 'electron-withdrawing', 'withdrawing group'], def: 'A group, such as C=O, NO₂ or C≡N, that pulls electron density off the atoms it is attached to.' },
+  { id: 'kekule', label: 'Kekulé structure', forms: ['Kekulé', 'Kekule'], def: 'One of the two ways of drawing benzene with alternating double and single bonds; the real ring is a hybrid of both.' },
+  { id: 'solvent', label: 'solvent', forms: ['solvent'], def: 'The liquid, such as water or ether, in which a reaction is run; it is present in huge excess, so it can act as a reagent too.' },
+  { id: 'leavinggroup', label: 'leaving group', forms: ['leaving group', 'leaving groups'], def: 'An atom or group that departs with the bonding pair of electrons; a good one, such as Br⁻ or H₂O, is stable on its own.' },
   { id: 'tautomer', label: 'tautomer', forms: ['tautomer', 'tautomers'], def: 'Isomers that differ in where an H and a double bond sit and that swap quickly, such as an enol and its ketone.' }
 ];
 export const GLOSSARY_BY_ID = Object.fromEntries(GLOSSARY.map((g) => [g.id, g]));
