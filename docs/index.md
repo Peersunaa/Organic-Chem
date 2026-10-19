@@ -10,6 +10,13 @@ One line per page. A fresh session should read this first, then the page it need
 - `superpowers/specs/2026-10-19-reaction-hub-design.md`: why the reaction hub, drill and walkthrough exist; midterm scope by workbook section; what was deferred.
 - `superpowers/specs/2026-10-20-mechanism-player-design.md`: press-to-step player with per-arrow why lines, what-if branching, caveman mode, 3D stereo toggle; parallel build plan.
 
+- `superpowers/specs/2026-10-20-redesign-design.md`: the overnight product-grade pass: Track T (novice-proof teaching: glossary, recap cards, shuffled options, content fixes) and Track D (token system, widgets, six isometric chapter figures).
+
+## Reviews
+- `reviews/2026-10-20-novice-review.md`: first zero-background student test (grades 2.5–4) that drove Track T.
+- `reviews/2026-10-20-novice-review-2.md`: the re-test after the fixes.
+- `reviews/d1-*.png`, `d2-*.png`, `w-*.png`: before/after screenshots of the design waves.
+
 ## Plans and briefs
 - `superpowers/plans/2026-10-19-reaction-hub-plan.md`: the four-piece plan for the hub work and its done criteria.
 - `superpowers/plans/2026-10-19-hub-cards-b3.md`: the ten exam reactions the book skips, with verified SMILES and facts (Diels–Alder, Clemmensen, Birch, hydroborations, benzylic bromination, oxidations, amine in acid, desulfonation).
@@ -23,5 +30,6 @@ One line per page. A fresh session should read this first, then the page it need
 
 ## Backlog (post-midterm)
 - Caveman variants for lesson text (only hub, player and drill have them).
+- Hub search / jump list; richer drill feedback wording; a figure for chapters 2 and 3 on their lesson pages is placed, the hub shows only ch4/ch5.
 - Naming and isomer-relationship drills.
-- Whole-app visual redesign in its own session (impeccable skill + a reference site Peera names).
+- Visual redesign is done (waves D1–D3, 2026-10-20); next design step would be a reference-driven refinement once Peera names a site he likes.
