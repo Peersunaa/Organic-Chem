@@ -39,6 +39,7 @@ import { lesson13 } from './lesson13.mjs';
 import { lesson14 } from './lesson14.mjs';
 import { lesson15 } from './lesson15.mjs';
 import { lesson16 } from './lesson16.mjs';
+import { hub } from './hub.mjs';
 import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
 const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer']);
@@ -1168,6 +1169,9 @@ await lesson15({ ok, eq });
 
 // ---- Lesson 16: diastereomers, meso compounds and racemates (relationship()/isMeso() and the counts of stereoisomers vs Python RDKit EnumerateStereoisomers with inverted centres, cis/trans in 3D, planes of symmetry and Kabsch on solid meso models, resolution logic, hand-checked fixture given by name with OPSIN), stereo-grid, symmetry-plane, relationship-drill, resolution-flow, isomer-tree, `stereo-relationships` generator, lesson steps (tests/lesson16.mjs)
 await lesson16({ ok, eq });
+
+// ---- Reaction hub: every card has all its fields, every lesson/mechanism link resolves to a real step, every drawn molecule parses in RDKit (JS and Python), stereo read back in Python (stereocentres, meso/racemic, cis/trans on rings in 3D, E/Z), the card's product equals the engine's wherever an engine models the reagent, router and home-screen promises (tests/hub.mjs)
+await hub({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

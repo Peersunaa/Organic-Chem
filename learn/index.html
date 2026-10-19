@@ -506,6 +506,31 @@ button.sg-cell { cursor: pointer; touch-action: manipulation; } button.sg-cell:h
 .practice-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; } .practice-all summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
 .done-note { display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); } .done-note p { margin: 0; } .done-note .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 @media (max-width: 460px) { .spl .v3 { height: 220px; } .sg-head.side { font-size: .7rem; } .sg-rs { min-width: 42px; } }
+
+/* reaction hub */
+.side { display: grid; gap: 22px; min-width: 0; align-content: start; }
+.hub { display: grid; gap: 22px; min-width: 0; }
+.hub-filters { gap: 14px; }
+.hub-fgroup { display: grid; gap: 8px; min-width: 0; } .hub-fbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.hub-fbtns .btn { min-height: 44px; padding: 6px 14px; font-size: .9rem; }
+.hub-list { display: grid; gap: 28px; min-width: 0; } .hub-empty { padding: 14px 16px; border: 1px dashed var(--line-strong); border-radius: var(--r); }
+.hub-group { display: grid; gap: 14px; min-width: 0; } .hub-ghead { display: grid; gap: 2px; }
+.hub-card { display: grid; gap: 13px; min-width: 0; overflow-wrap: anywhere; }
+.hub-title { font: 700 1.15rem/1.25 var(--display); letter-spacing: -.01em; text-transform: none; color: var(--ink); text-wrap: balance; }
+.hub-part { display: grid; gap: 6px; min-width: 0; } .hub-part p { margin: 0; }
+.hub-label { font: 600 .75rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.hub-example { display: grid; gap: 4px; padding: 8px 6px; border-radius: 12px; background: var(--surface-2); min-width: 0; }
+.hub-example .eqn .mol { flex: 1 1 80px; max-width: 130px; } .hub-example .eqn .mol-svg { max-width: 130px; }
+.hub-rx, .hub-note { text-align: center; padding-inline: 8px; }
+.hub-facts { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.hub-chip { display: grid; grid-template-columns: 6.6rem minmax(0, 1fr); gap: 0 10px; align-items: baseline; border-radius: 12px; padding: 7px 10px; font: 400 .9rem/1.35 var(--body); color: var(--ink); background: var(--accent-soft); min-width: 0; }
+.hub-chip-k { font: 600 .68rem/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); } .hub-chip-v { font-weight: 600; } .hub-chip-n { grid-column: 2; color: var(--muted); font-size: .8rem; }
+.hub-apply { display: grid; gap: 8px; padding: 12px 14px; background: var(--surface-2); border-left: 3px solid var(--electron); border-radius: 4px 12px 12px 4px; min-width: 0; }
+.hub-pattern { font-weight: 600; font-size: .95rem; }
+.hub-steps-box summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; font-weight: 600; color: var(--accent); }
+.hub-steps { list-style: decimal; padding-left: 1.3rem; display: grid; gap: 6px; font-size: .93rem; } .hub-steps li::marker { color: var(--accent); font-weight: 700; }
+.hub-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; } .hub-links .chip { margin-left: auto; }
+@media (max-width: 460px) { .hub-example .eqn .mol { flex: 1 1 70px; max-width: 104px; } .hub-example .eqn .mol-svg { max-width: 104px; } .hub-links .btn { flex: 1 1 140px; } .hub-links .chip { margin-left: 0; } }
 </style>
 
 <div id="app" aria-live="off"><p class="muted" style="padding:24px 16px">Loading Orgo Learn…</p></div>

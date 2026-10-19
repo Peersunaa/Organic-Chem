@@ -5,6 +5,7 @@ import { generatorForSkill } from './engine/generators.js';
 import { renderStep, renderProblems, h, rich, setIupacMode } from './engine/steps.js';
 import { skillLabel } from './engine/skills.js';
 import { LESSONS, PLANNED } from './lessons/index.js';
+import { buildHub } from './hub-view.js';
 
 const app = document.getElementById('app');
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -102,7 +103,10 @@ function home() {
     ul.append(li);
   });
   lessons.append(ul);
-  mount(header(), hero, h('div', { class: 'cols' }, lessons, panel));
+  const rx = h('section', { class: 'panel', 'aria-labelledby': 'rx-h' }, h('h2', { id: 'rx-h' }, 'Reactions'),
+    h('p', { class: 'muted' }, 'Every reagent on one card: what it does, a worked example, three facts and how to answer the exam question.'),
+    h('a', { class: 'btn primary', href: '#reactions', id: 'open-reactions' }, 'Open the reaction cards'));
+  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, rx, panel)));
   const op = document.getElementById('open-practice');
   if (op) op.addEventListener('click', () => { const t = panel.querySelector('summary') || panel; panel.scrollIntoView?.({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); t.focus?.({ preventScroll: true }); });
 }
@@ -143,13 +147,18 @@ function recapCard(step) {
   return d;
 }
 
-function lessonView(L) {
+function lessonView(L, startId) {
   setDrawStyle(L.drawing || 'full');
   const steps = [...L.steps,
     { id: 'mastery', type: 'mastery', skill: 'mastery', mastery: L.mastery },
     { id: 'useit', type: 'useit', skill: 'useit', useIt: L.useIt }];
   const pr = store.getProgress(L.id);
   let idx = Math.max(0, Math.min(pr.idx || 0, steps.length - 1));
+  // #lesson-NN/sK (the reaction hub's links): open at step sK as a visit. Nothing is marked done and the saved resume point does not move.
+  const deepAt = startId ? steps.findIndex((s) => s.id === startId) : -1;
+  const deep = deepAt >= 0;
+  if (deep) idx = deepAt;
+  const resumeIdx = Math.max(0, Math.min(pr.idx || 0, steps.length - 1));
   const done = new Set(pr.done);
 
   const crumb = h('a', { class: 'back-home', href: '#home' }, '← All lessons');
@@ -175,7 +184,7 @@ function lessonView(L) {
     next.hidden = last;
     next.disabled = !done.has(steps[idx].id);
   };
-  const save = () => store.setProgress(L.id, { idx, done: [...done] });
+  const save = () => store.setProgress(L.id, { idx: deep ? resumeIdx : idx, done: [...done] });
 
   const ctxFor = (step) => ({
     lessonId: L.id,
@@ -221,14 +230,22 @@ function practice(skill) {
   chemP.then(() => { renderProblems({ count: 3, generator: generatorForSkill(skill), skill }, ctx, host); setIupacMode(store.getIupac()); });
 }
 
+// ---------------------------------------------------------------- Reaction hub
+function hub() {
+  setDrawStyle('skeletal');
+  mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Reactions'),
+    h('p', { class: 'lede' }, 'One card for each reagent. Read the three facts, look at the example, then use the steps on a question.')), buildHub(chemP));
+}
+
 // ---------------------------------------------------------------- Router
 function route() {
   const hash = location.hash.replace(/^#/, '');
   let m;
-  if ((m = /^lesson-(\d+)$/.exec(hash))) {
+  if ((m = /^lesson-(\d+)(?:\/(s\d+))?$/.exec(hash))) {
     const L = LESSONS.find((l) => l.id === m[1]);
-    if (L) return lessonView(L);
+    if (L) return lessonView(L, m[2]);
   }
+  if (hash === 'reactions') return hub();
   if ((m = /^practise-([a-z0-9-]+)$/.exec(hash))) return practice(m[1]);
   home();
 }
