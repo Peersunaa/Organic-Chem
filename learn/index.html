@@ -512,10 +512,12 @@ button.sg-cell { cursor: pointer; touch-action: manipulation; } button.sg-cell:h
 .hub { display: grid; gap: 22px; min-width: 0; }
 .hub-filters { gap: 14px; }
 .hub-fgroup { display: grid; gap: 8px; min-width: 0; } .hub-fbtns { display: flex; flex-wrap: wrap; gap: 8px; }
-.hub-fbtns .btn { min-height: 44px; padding: 6px 14px; font-size: .9rem; }
+.hub-fbtns .btn { min-height: 44px; padding: 6px 12px; font-size: .9rem; }
+.hub-fbtns .btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .hub-list { display: grid; gap: 28px; min-width: 0; } .hub-empty { padding: 14px 16px; border: 1px dashed var(--line-strong); border-radius: var(--r); }
 .hub-group { display: grid; gap: 14px; min-width: 0; } .hub-ghead { display: grid; gap: 2px; }
-.hub-card { display: grid; gap: 13px; min-width: 0; overflow-wrap: anywhere; }
+.hub-card { display: grid; gap: 14px; min-width: 0; overflow-wrap: anywhere; }
+.hub-part + .hub-part, .hub-card > .hub-links { padding-top: 14px; border-top: 1px solid var(--line); }
 .hub-title { font: 700 1.15rem/1.25 var(--display); letter-spacing: -.01em; text-transform: none; color: var(--ink); text-wrap: balance; }
 .hub-part { display: grid; gap: 6px; min-width: 0; } .hub-part p { margin: 0; }
 .hub-label { font: 600 .75rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
@@ -525,9 +527,12 @@ button.sg-cell { cursor: pointer; touch-action: manipulation; } button.sg-cell:h
 .hub-facts { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .hub-chip { display: grid; grid-template-columns: 6.6rem minmax(0, 1fr); gap: 0 10px; align-items: baseline; border-radius: 12px; padding: 7px 10px; font: 400 .9rem/1.35 var(--body); color: var(--ink); background: var(--accent-soft); min-width: 0; }
 .hub-chip-k { font: 600 .68rem/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); } .hub-chip-v { font-weight: 600; } .hub-chip-n { grid-column: 2; color: var(--muted); font-size: .8rem; }
-.hub-apply { display: grid; gap: 8px; padding: 12px 14px; background: var(--surface-2); border-left: 3px solid var(--electron); border-radius: 4px 12px 12px 4px; min-width: 0; }
-.hub-pattern { font-weight: 600; font-size: .95rem; }
-.hub-steps-box summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; font-weight: 600; color: var(--accent); }
+.hub-apply { display: grid; gap: 8px; padding: 12px 14px; background: var(--surface-2); border: 1px solid var(--line-strong); border-left: 3px solid var(--electron); border-radius: 4px 12px 12px 4px; min-width: 0; }
+.hub-pattern { font-weight: 600; font-size: 1rem; }
+.hub-steps-box summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--accent); list-style: none; }
+.hub-steps-box summary::-webkit-details-marker { display: none; }
+.hub-steps-box summary::before { content: ''; flex: none; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(-45deg); }
+.hub-steps-box[open] > summary::before { transform: translateY(-2px) rotate(45deg); }
 .hub-steps { list-style: decimal; padding-left: 1.3rem; display: grid; gap: 6px; font-size: .93rem; } .hub-steps li::marker { color: var(--accent); font-weight: 700; }
 .hub-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; } .hub-links .chip { margin-left: auto; }
 .hub-subgroup { display: grid; gap: 14px; min-width: 0; }
@@ -536,13 +541,16 @@ button.sg-cell { cursor: pointer; touch-action: manipulation; } button.sg-cell:h
 .hub-example2 { margin-top: 8px; }
 @media (max-width: 460px) { .hub-example .eqn .mol { flex: 1 1 70px; max-width: 104px; } .hub-example .eqn .mol-svg { max-width: 104px; } .hub-links .btn { flex: 1 1 140px; } .hub-links .chip { margin-left: 0; } }
 .rx-btns { display: flex; flex-wrap: wrap; gap: 8px; } .ws-drill { margin: 14px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; } .lhead #drill-predict { margin-top: 6px; }
+/* home panels + drill option cards (new screens, same card rhythm as the lessons) */
+.side .panel { padding: 16px; box-shadow: var(--shadow); }
+.opts.mols { grid-auto-rows: 1fr; } .opts.mols .opt { flex-direction: column; align-items: stretch; justify-content: center; padding: 10px 8px; min-height: 132px; }
 /* past papers */
-.pp { display: grid; gap: 22px; min-width: 0; } .pp-section { gap: 14px; } .pp-shead { display: grid; gap: 4px; } .pp-shead h2 { display: flex; align-items: baseline; gap: 10px; }
+.pp { display: grid; gap: 28px; min-width: 0; } .pp-section { gap: 14px; background: none; border: 0; padding: 0; } .pp-shead { display: grid; gap: 4px; } .pp-shead h2 { display: flex; align-items: baseline; gap: 10px; }
 .pp-list { display: grid; gap: 14px; min-width: 0; } .pp-item { display: grid; gap: 10px; min-width: 0; overflow-wrap: anywhere; }
 .pp-head { display: grid; gap: 6px; justify-items: start; } .pp-title { font: 700 1.05rem/1.3 var(--display); letter-spacing: -.01em; text-transform: none; color: var(--ink); text-wrap: balance; display: flex; align-items: baseline; gap: 8px; }
 .pp-id { font: 600 .75rem/1 var(--mono); letter-spacing: .06em; color: var(--accent); flex: none; } .pp-source { max-width: 100%; white-space: normal; }
-.pp-ask { margin: 0; font-weight: 600; font-size: .95rem; } .pp-trap { margin: 0; padding: 8px 12px; border-left: 3px solid var(--electron); background: var(--hint-soft); border-radius: 4px 10px 10px 4px; }
-.pp-steps { padding: 4px 14px 8px; background: var(--surface-2); border-left: 3px solid var(--electron); border-radius: 4px 12px 12px 4px; }
+.pp-ask { margin: 0; font-weight: 600; font-size: 1rem; } .pp-trap { margin: 0; padding: 8px 12px; border-left: 3px solid var(--electron); background: var(--hint-soft); border-radius: 4px 10px 10px 4px; }
+.pp-steps { padding: 0 14px 8px; background: var(--surface-2); border-left: 3px solid var(--electron); border-radius: 4px 12px 12px 4px; }
 .hub-target { outline: 2px solid var(--accent); outline-offset: 3px; scroll-margin-top: 12px; }
 @media (max-width: 460px) { .pp-links .btn { flex: 1 1 140px; } }
 </style>
