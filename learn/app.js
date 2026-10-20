@@ -2,6 +2,7 @@
 import { ready, setDrawStyle } from './engine/chem.js';
 import * as store from './engine/store.js';
 import { generatorForSkill } from './engine/generators.js';
+import { practiceConfig } from './engine/naming-custom.js';
 import { renderStep, renderProblems, h, rich, setIupacMode, closeMolTags } from './engine/steps.js';
 import { skillLabel } from './engine/skills.js';
 import { MODE_IDS, MODE_INFO, MODE_COUNTS, setModeCard } from './engine/generators-reaction-modes.js';
@@ -101,7 +102,7 @@ function home() {
     panel.append(list);
   }
   panel.append(h('p', { class: 'small ws-drill' }, h('a', { class: 'btn small ghost', href: '#practise-predict-product', id: 'ws-drill-predict' }, 'Drill: predict the product'), h('span', { class: 'muted' }, ' Mixed reactions, all from the reaction cards.')));
-  panel.append(h('p', { class: 'small ws-drill' }, h('a', { class: 'btn small ghost', href: '#practise-naming-levels', id: 'ws-drill-naming' }, 'Drill: naming by level'), h('span', { class: 'muted' }, ' Five levels, from alkanes to stereo names, plus a tricky set.')));
+  panel.append(h('p', { class: 'small ws-drill' }, h('a', { class: 'btn small ghost', href: '#practise-naming-levels', id: 'ws-drill-naming' }, 'Drill: naming by level'), h('span', { class: 'muted' }, ' Five level presets, from alkanes to stereo names, plus a tricky set, or build your own mix of settings.')));
   panel.append(h('p', { class: 'small ws-drill' }, h('a', { class: 'btn small ghost', href: '#practise-stereo-projections', id: 'ws-drill-projections' }, 'Drill: stereo across projections'), h('span', { class: 'muted' }, ' Fischer, Newman, wedge and named drawings: the same compound or not?')));
 
   if (courseDone) {
@@ -289,7 +290,8 @@ function practice(skill, cardId = null) {
     done: () => host.append(h('a', { class: 'btn primary', href: '#home' }, 'Back to home'))
   };
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: MODE_IDS.includes(skill) ? '#reactions-practice' : '#home' }, MODE_IDS.includes(skill) ? '← Reaction modes' : '← Home'), h('h1', { class: 'ltitle' }, 'Practise: ' + skillLabel(skill)), cardId && HUB_BY_ID[cardId] ? h('p', { class: 'muted small', id: 'practice-card' }, 'Only this reagent: ' + HUB_BY_ID[cardId].reagent) : null), card);
-  chemP.then(() => { renderProblems({ count: 3, generator: generatorForSkill(skill), skill }, ctx, host); setIupacMode(store.getIupac()); });
+  const pc = skill === 'naming-levels' ? practiceConfig() : { count: 3, timer: 0 };   // the naming drill's settings choose the count and the timer
+  chemP.then(() => { renderProblems({ count: pc.count, timer: pc.timer, generator: generatorForSkill(skill), skill }, ctx, host); setIupacMode(store.getIupac()); });
 }
 
 // ---------------------------------------------------------------- Reaction hub

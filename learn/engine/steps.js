@@ -5,6 +5,7 @@ import { WIDGETS } from './widgets/index.js';
 import { skillRule } from './skills.js';
 import { generate } from './generators.js';
 import { normName } from './naming.js';
+import { matchNameForms } from './generators-naming-levels.js';
 import { tAuto } from './voice.js';
 import { HUB_BY_ID } from './reaction-hub.js';
 import { svgWithLonePairs } from './lp-draw.js';
@@ -163,7 +164,10 @@ export function checkInput(step, raw) {
   if (step.name) {
     // IUPAC names: case, spaces, hyphens and brackets are ignored; any accepted style counts
     const got = normName(raw);
-    if ([step.answer].concat(step.accept || []).some((a) => normName(a) === got)) return { ok: true };
+    // the same molecule's name in every style (traditional, current, 1-methylethyl, propan-2-yl ...), each ordered by its own alphabet: no accept list needed
+    let forms = null;
+    if (step.smiles && step.noForms !== true) { try { forms = matchNameForms(step.smiles, raw, step.answer); } catch (e) { forms = null; } }
+    if ([step.answer].concat(step.accept || []).some((a) => normName(a) === got) || (forms && forms.ok)) return forms && forms.note ? { ok: true, note: forms.note } : { ok: true };
     const d = (step.diagnose || []).find((x) => normName(x.match) === got);
     const dyn = !d && step.diagnoseFn ? step.diagnoseFn(raw) : null;
     return { ok: false, diagnosis: d ? d.why : dyn || step.fallback || skillRule(step.skill) || 'Not quite. Check the rules and try again.' };
@@ -264,7 +268,7 @@ const RENDER = {
     const g = grader(step, ctx, host);
     const { form, inp } = inputRow((val, input, btn) => {
       const r = checkInput(step, val);
-      if (r.ok) { input.disabled = true; btn.disabled = true; g.right(step.confirm || 'Correct.'); }
+      if (r.ok) { input.disabled = true; btn.disabled = true; g.right((step.confirm || 'Correct.') + (r.note ? ` <span class="style-note">${r.note}</span>` : '')); }
       else if (r.empty || r.malformed) { host.querySelector('.fb').className = 'fb bad'; host.querySelector('.fb').textContent = r.diagnosis; input.focus(); }
       else { g.wrong(r.diagnosis); input.select(); }
     });
@@ -358,7 +362,10 @@ export function renderProblems(cfg, ctx, host) {
   const bar = h('p', { class: 'muted count' });
   host.insertBefore(bar, stage);
 
+  let tick = null;                                   // the per-question timer (cfg.timer seconds; the naming drill's settings choose it)
+  const stopTimer = () => { if (tick) { clearInterval(tick); tick = null; } };
   function show() {
+    stopTimer();
     bar.textContent = `Problem ${Math.min(got + 1, need)} of ${need}. Each one is generated fresh.`;
     stage.innerHTML = '';
     const p = generate(cfg.generator || 'lewis-basic', 1, { skill: cfg.skill || null })[0];
@@ -373,7 +380,7 @@ export function renderProblems(cfg, ctx, host) {
     const hints = h('div', { class: 'hints' });
     let wrong = 0, settled = false;
     const advance = (ok) => {
-      settled = true;
+      settled = true; stopTimer();
       const btn = h('button', { type: 'button', class: 'btn primary' }, ok ? (got + 1 >= need ? 'Finish' : 'Next problem') : 'Try another');
       btn.addEventListener('click', () => { if (ok) got++; if (got >= need) { bar.textContent = `All ${need} correct.`; stage.innerHTML = ''; stage.append(h('div', { class: 'fb ok' }, h('p', {}, 'Mastery check passed.'))); ctx.done(); } else show(); });
       card.append(btn); btn.focus();
@@ -400,17 +407,18 @@ export function renderProblems(cfg, ctx, host) {
         advance(false);
       }
     };
-    const onRight = () => {
+    const onRight = (note) => {
       if (wrong === 0) ctx.win(p.skill);
       fb.className = 'fb ok'; if (p.deriveHtml) { fb.textContent = ''; fb.append(rich('Correct. ' + p.deriveHtml, 'span')); } else fb.textContent = 'Correct. ' + p.derive;
+      if (note) fb.append(h('p', { class: 'style-note' }, note));
       hints.innerHTML = '';
       advance(true);
     };
     if (p.kind === 'input') {
       const { form, inp } = inputRow((val, input, btn) => {
         if (settled) return;
-        const r = checkInput({ answer: p.answer, accept: p.accept, name: p.name, diagnoseFn: p.diagnoseFn, diagnose: p.wrong, fallback: p.fallback || p.derive, skill: p.skill, formula: p.formula, tolerance: p.tolerance }, val);
-        if (r.ok) { input.disabled = true; btn.disabled = true; onRight(); }
+        const r = checkInput({ answer: p.answer, accept: p.accept, name: p.name, smiles: p.name ? p.smiles : undefined, noForms: p.noForms, diagnoseFn: p.diagnoseFn, diagnose: p.wrong, fallback: p.fallback || p.derive, skill: p.skill, formula: p.formula, tolerance: p.tolerance }, val);
+        if (r.ok) { input.disabled = true; btn.disabled = true; onRight(r.note); }
         else if (r.empty || r.malformed) { fb.className = 'fb bad'; fb.textContent = r.diagnosis; input.focus(); }
         else { onWrong(r.diagnosis); if (!settled) input.select(); else { input.disabled = true; btn.disabled = true; } }
       });
@@ -454,6 +462,26 @@ export function renderProblems(cfg, ctx, host) {
       WIDGETS['lewis-builder'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
     }
     card.append(fb, hints);
+    if (cfg.timer > 0) {
+      let left = cfg.timer;
+      const clock = h('p', { class: 'nl-timer', role: 'timer' });
+      const fmt = (n) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
+      const paint = () => { clock.textContent = `Time left ${fmt(left)}`; clock.classList.toggle('low', left <= 10); };
+      paint(); card.insertBefore(clock, fb);
+      tick = setInterval(() => {
+        if (settled || !card.isConnected) { stopTimer(); return; }   // answered, or the page moved on
+        left--; paint();
+        if (left <= 0) {
+          stopTimer(); clock.textContent = 'Time is up.';
+          ctx.mistake(p.skill, 'mastery', 'Time ran out on a naming question.');
+          fb.className = 'fb bad'; fb.textContent = 'Time is up. Here is the worked answer; the next one is a fresh problem.';
+          const ans = p.kind === 'input' ? `The answer is ${p.answer}. ` : p.kind === 'choice' ? `The answer is ${p.answer || ''}. ` : '';
+          hints.innerHTML = ''; hints.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), p.deriveHtml ? rich(ans + p.deriveHtml, 'span') : ans + (p.derive || '')));
+          card.querySelectorAll('input,button.opt').forEach((x) => { x.disabled = true; });
+          advance(false);
+        }
+      }, 1000);
+    }
   }
   show();
 }

@@ -19,7 +19,7 @@ import { generateRel, REL_SKILLS } from './generators-relationships.js';
 import { generateFischer, FISCHER_SKILLS } from './generators-fischer.js';
 import { generatePredict, PREDICT_SKILLS } from './generators-predict.js';
 import { generateStereoProjections, STEREO_PROJ_SKILLS } from './generators-stereo-projections.js';
-import { generateNamingLevels, NAMING_LEVEL_SKILLS } from './generators-naming-levels.js';
+import { generateNamingLevels, NAMING_LEVEL_SKILLS } from './naming-custom.js';   // the settings-driven drill (the five levels are its built-in presets)
 import { generateReactionModes, REACTION_MODE_SKILLS } from './generators-reaction-modes.js';
 
 export const POOL = ['CN', 'CC#N', 'OC=O', 'C[O-]', '[NH4+]', 'CCl', 'C=C', 'CC=O', 'CC(=O)O', 'COC', '[OH3+]', '[CH3+]', '[CH3-]', 'O=C=O'];
@@ -173,7 +173,7 @@ export function makeProblem(rng, task, smi) {
 const BY_SKILL = { 'lone-pairs': ['lp'], 'formal-charge': ['fc'], 'electron-count-total': ['total'], 'multiple-bonds': ['builder-multi'], 'octet': ['octet'], 'valence-electrons': ['valence'], 'bond-count': ['bonds'] };
 
 /** generate(generatorId, count, {skill, rng}) -> problems. Fresh random molecules each call. */
-export function generate(generatorId, count, { skill = null, rng = Math.random, level = null } = {}) {
+export function generate(generatorId, count, { skill = null, rng = Math.random, level = null, settings = null } = {}) {
   if (generatorId === 'shape-basic') return generateShape(count, { skill, rng });
   if (generatorId === 'acid-base') return generateAcid(count, { skill, rng });
   if (generatorId === 'skeletal-fg') return generateFg(count, { skill, rng });
@@ -192,7 +192,7 @@ export function generate(generatorId, count, { skill = null, rng = Math.random, 
   if (generatorId === 'fischer') return generateFischer(count, { skill, rng });
   if (generatorId === 'predict-product') return generatePredict(count, { skill, rng });
   if (generatorId === 'stereo-projections') return generateStereoProjections(count, { skill, rng });
-  if (generatorId === 'naming-levels') return generateNamingLevels(count, { skill, rng, level });
+  if (generatorId === 'naming-levels') return generateNamingLevels(count, { skill, rng, level, settings });
   if (REACTION_MODE_SKILLS.includes(generatorId)) return generateReactionModes(generatorId, count, { rng });
   const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : BASIC_TASKS;
   const out = [];

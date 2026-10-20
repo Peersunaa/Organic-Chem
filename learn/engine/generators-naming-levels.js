@@ -1,4 +1,7 @@
 // Practice generator "naming-levels" (skill `naming-levels`, route #practise-naming-levels): naming by level.
+// NOTE: since the settings panel (engine/naming-custom.js) the five levels below are its built-in PRESETS: this file still makes their problems exactly as before, and it
+// is also the namer (analyseMol / assemble), the wrong-name maker (wrongNames) and the question builders that the custom generator reuses. Every name is written in four
+// styles (new, old, sys, yl: see engine/name-forms.js), each alphabetised by its own spellings; matchNameForms() grades a typed name against all four.
 //   Level 1  straight and branched alkanes to C8, halides, ring or chain as the parent
 //   Level 2  several branches: alphabetical order, ties in the numbering, isopropyl / sec-butyl / tert-butyl / isobutyl, rings with several groups
 //   Level 3  alkenes, alkynes, dienes, cycloalkenes, E/Z, and the "longest chain must contain the C=C" trap
@@ -15,6 +18,7 @@ import { canon, setDrawStyle } from './chem.js';
 import { readGraph, ezInfo, tetraInfo } from './cip.js';
 import { subInfo, subFragment, SUB_IDS, normName, diagnoseTyped, diagnoseAlkene } from './naming.js';
 import { nameBothArene, buildArene, arene, SUB as ARENE_SUB } from './naming-arene.js';
+import { STYLES, formsOfId, treeOfId, fragmentOfComplex, COMPLEX_IDS, EXTRA_IDS, matchStyles, styleNote } from './name-forms.js';
 import { WIDGETS } from './widgets/index.js';
 import * as store from './store.js';
 
@@ -38,7 +42,7 @@ export const LEVEL_BLURBS = {
 const STEM = ['meth', 'eth', 'prop', 'but', 'pent', 'hex', 'hept', 'oct', 'non', 'dec', 'undec', 'dodec'];
 const MULT = { 2: 'di', 3: 'tri', 4: 'tetra', 5: 'penta', 6: 'hexa' };
 const BIS = { 2: 'bis', 3: 'tris', 4: 'tetrakis', 5: 'pentakis', 6: 'hexakis' };
-const MODES3 = ['new', 'old', 'sys'];
+const MODES3 = STYLES;   // new, old, sys, yl: every correctly ordered spelling (see name-forms.js)
 const cmpStr = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 function cmpNums(a, b) { for (let i = 0; i < Math.max(a.length, b.length); i++) { if (a[i] === undefined) return -1; if (b[i] === undefined) return 1; if (a[i] !== b[i]) return a[i] - b[i]; } return 0; }
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
@@ -53,22 +57,21 @@ const HALO = {
   fluoro: { sym: 'F', z: 9 }, chloro: { sym: 'Cl', z: 17 }, bromo: { sym: 'Br', z: 35 }, iodo: { sym: 'I', z: 53 }
 };
 const HALO_BY_Z = Object.fromEntries(Object.entries(HALO).map(([id, h]) => [h.z, id]));
-const SYS = { isopropyl: '1-methylethyl', 'sec-butyl': '1-methylpropyl', isobutyl: '2-methylpropyl', 'tert-butyl': '1,1-dimethylethyl' };
-const SYS_KEY = { isopropyl: 'methylethyl', 'sec-butyl': 'methylpropyl', isobutyl: 'methylpropyl', 'tert-butyl': 'dimethylethyl' };
-export function sinfo(id) {
-  if (id === 'ethenyl') return { new: 'ethenyl', old: 'vinyl', sys: 'ethenyl', key: { new: 'ethenyl', old: 'vinyl', sys: 'ethenyl' }, par: { new: false, old: false, sys: false }, size: 2, rooted: 2, halo: false };
-  if (HALO[id]) return { new: id, old: id, sys: id, key: { new: id, old: id, sys: id }, par: { new: false, old: false, sys: false }, size: 0, rooted: 0, halo: true };
+export function sinfo(id) {   // new / old / sys / yl spellings, alphabetical key and bracket flag for each
+  if (id === 'ethenyl') return { new: 'ethenyl', old: 'vinyl', sys: 'ethenyl', yl: 'ethenyl', key: { new: 'ethenyl', old: 'vinyl', sys: 'ethenyl', yl: 'ethenyl' }, par: { new: false, old: false, sys: false, yl: false }, size: 2, rooted: 2, halo: false };
+  if (HALO[id]) return { new: id, old: id, sys: id, yl: id, key: { new: id, old: id, sys: id, yl: id }, par: { new: false, old: false, sys: false, yl: false }, size: 0, rooted: 0, halo: true };
+  const f = formsOfId(id);
+  const tree = treeOfId(id);
   const b = subInfo(id);
-  return {
-    new: b.new, old: b.old, sys: SYS[id] || b.new,
-    key: { new: b.key.new, old: b.key.old, sys: SYS_KEY[id] || b.key.new },
-    par: { new: b.par.new, old: b.par.old, sys: id in SYS ? true : b.par.new },
-    size: b.size, rooted: b.rooted, halo: false
-  };
+  const size = b ? b.size : countTree(tree), rooted = b ? b.rooted : rootedOf(tree);
+  return { new: f.new, old: f.old, sys: f.sys, yl: f.yl, key: f.key, par: f.par, size, rooted, halo: false };
 }
+const countTree = (t) => 1 + t.reduce((n, k) => n + countTree(k), 0);
+const rootedOf = (t) => 1 + (t.length ? Math.max(...t.map(rootedOf)) : 0);
 const sigOfTree = (t) => '(' + t.map(sigOfTree).sort().join('') + ')';
 const BY_SIG = {};
 for (const id of SUB_IDS) BY_SIG[sigOfTree(subInfo(id).tree)] = id;
+for (const id of EXTRA_IDS) BY_SIG[sigOfTree(treeOfId(id))] = id;   // neopentyl, isopentyl
 
 /** How many carbons of the tree under w (coming from p) and what it is. Returns {id} or null when the branch is not one of the course's alkyl groups. */
 function branchOf(G, w, p) {
@@ -158,7 +161,7 @@ function scoreOf(subs, mode) {
 const cmpScore = (a, b) => cmpNums(a.locs, b.locs) || cmpNums(a.alpha, b.alpha);
 
 /** The prefix part of a name: "4-ethyl-2-methyl". opts.order: 'iupac' | 'reverse' | 'locant' | 'multiplier'; opts.noLoc drops the locants. */
-export function prefixText(subs, mode, opts = {}) {
+export function prefixText(subs, mode, opts = {}) {   // (sinfo(id)[mode] is the group's spelling in that style)
   const groups = {};
   subs.forEach((s) => { (groups[s.id] ||= []).push(s.loc); });
   const ids = Object.keys(groups);
@@ -414,7 +417,8 @@ export function analyseMol(smiles, mode = 'new', opts = {}) {
     halo: b.subs.some((s) => HALO[s.id]),
     nsubs: b.subs.length,
     trap: parentKind === 'chain' && multB.length > 0 && longest > parentSize,
-    chainTie, chainTieBroken
+    chainTie, chainTieBroken,
+    numbering: new Set(options.map((o) => assemble(mkPart(o), mode))).size > 1   // does the direction of numbering change the written name?
   };
   return {
     mode, kind: parentKind, parent, parentAtoms: b.path, mult: b.mult, type, subs: b.subs, stereo: b.stereo, pending: b.pending, ct,
@@ -423,6 +427,8 @@ export function analyseMol(smiles, mode = 'new', opts = {}) {
 }
 export function nameMol(smiles, mode = 'new') { const i = analyseMol(smiles, mode); return i ? i.name : null; }
 /** {new, old, sys} or null when any style cannot be written. */
+/** {new, old, sys, yl} names from a set of per-style analyses. */
+export const namesOf = (infos) => Object.fromEntries(MODES3.map((m) => [m, infos[m].name]));
 export function nameAll(smiles) {
   const out = {};
   for (const m of MODES3) { const n = nameMol(smiles, m); if (!n) return null; out[m] = n; }
@@ -434,7 +440,7 @@ export function nameAll(smiles) {
 //   acyclic: {n, subs:[{id,loc}], bonds:{loc:order}, ez:{loc:'E'|'Z' as "chain neighbours trans/cis"}, tags:{loc:'@'|'@@'}}
 //   ring   : {size, subs:[{id,loc,up?}], ene: loc | null}
 // ============================================================================================================
-export function fragOf(id) { if (HALO[id]) return HALO[id].sym; if (id === 'ethenyl') return 'C=C'; return subFragment(id); }
+export function fragOf(id) { if (HALO[id]) return HALO[id].sym; if (id === 'ethenyl') return 'C=C'; return subFragment(id) || fragmentOfComplex(id); }
 
 export function buildAcyclic(spec) {
   const n = spec.n; const per = Array.from({ length: n }, () => []);
@@ -506,7 +512,7 @@ export function literalSmiles(p) {
   const bonds = {}; p.mult.forEach((m) => { bonds[m] = p.type === 'ene' ? 2 : 3; });
   return buildAcyclic({ n: p.size, subs: p.subs, bonds });
 }
-const SWAPS = { methyl: ['ethyl'], ethyl: ['methyl', 'propyl'], propyl: ['isopropyl', 'ethyl'], isopropyl: ['propyl'], 'tert-butyl': ['isobutyl', 'sec-butyl'], 'sec-butyl': ['isobutyl', 'butyl'], isobutyl: ['sec-butyl'], butyl: ['sec-butyl', 'propyl'], chloro: ['bromo'], bromo: ['chloro', 'iodo'], fluoro: ['chloro'], iodo: ['bromo'] };
+const SWAPS = { methyl: ['ethyl'], ethyl: ['methyl', 'propyl'], propyl: ['isopropyl', 'ethyl'], isopropyl: ['propyl'], 'tert-butyl': ['isobutyl', 'sec-butyl'], 'sec-butyl': ['isobutyl', 'butyl'], isobutyl: ['sec-butyl'], butyl: ['sec-butyl', 'propyl'], chloro: ['bromo'], bromo: ['chloro', 'iodo'], fluoro: ['chloro'], iodo: ['bromo'], neopentyl: ['isopentyl', 'isobutyl'], isopentyl: ['neopentyl', 'isobutyl'] };
 const sw = (id) => SWAPS[id] || (/^cyclo\d+$/.test(id) ? [`cyclo${Number(id.slice(5)) + 1}`] : []);
 const dispName = (id, mode = 'new') => sinfo(id)[mode];
 const locsText = (a) => a.join(',');
@@ -517,10 +523,10 @@ const sortedLocs = (subs) => subs.map((s) => s.loc).sort((a, b) => a - b);
  * same = the wrong name still describes the SAME compound (wrong end of the chain, alphabetical order, shorter parent ...); otherwise a different compound
  * (or no compound at all). `same` is read off the structure the name literally says whenever that can be drawn.
  */
-export function wrongNames(smiles, infos) {
+export function wrongNames(smiles, infos, opts0 = {}) {
   infos = infos || modeInfos(smiles);
   if (!infos) return [];
-  const correct = { new: infos.new.name, old: infos.old.name, sys: infos.sys.name };
+  const correct = Object.fromEntries(MODES3.map((m) => [m, infos[m].name]));
   const I = infos.new;
   const hasStereo = I.stereo.length > 0 || !!I.ct;
   const out = []; const seen = new Set(MODES3.map((m) => normName(correct[m])));
@@ -669,7 +675,7 @@ export function wrongNames(smiles, infos) {
       }
     });
   }
-  for (const d of [-1, 1]) {
+  for (const d of opts0.extra ? [-1, 1, -2, 2] : [-1, 1]) {   // extra: unbranched molecules (pentane) have too few other mistakes for four options
     const size = L + d;
     if (size < (I.kind === 'ring' ? 3 : 2) || size > 10) continue;
     if (P.subs.some((s) => s.loc > size) || P.mult.some((m) => m > size - 1)) continue;
@@ -692,7 +698,7 @@ export function modeInfos(smiles) {
 // ============================================================================================================
 // Explanations: the walkthrough follows the lesson's numbered recipe (1 parent, 2 numbering, 3 branches, 4 alphabetical order, then stereo)
 // ============================================================================================================
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 /** `<name new old>` tag for a name pair (the page flips it with the New / Old IUPAC switch). */
 export function nameTag(pair) { return pair.new === pair.old ? esc(pair.new) : `<name new="${esc(pair.new)}" old="${esc(pair.old)}"></name>`; }
 const subTag = (id) => nameTag({ new: dispName(id, 'new'), old: dispName(id, 'old') });
@@ -972,7 +978,7 @@ function specL4(rng, kind0) {
 
 // ---- benzene derivatives (engine/naming-arene.js)
 const MONO = ['CH3', 'OH', 'NH2', 'OMe', 'Cl', 'Br', 'NO2', 'Et', 'CHO', 'COOH', 'CN', 'iPr'];
-function specArene(rng) {
+export function specArene(rng) {
   const kind = weighted(rng, [['mono', 25], ['di', 45], ['tri', 30]]);
   const pool = ['CH3', 'OH', 'NH2', 'Cl', 'Br', 'NO2', 'Et', 'CHO', 'COOH', 'F', 'I', 'CN'];
   if (kind === 'mono') return { groups: { 0: pick(rng, MONO) }, kind };
@@ -1008,9 +1014,9 @@ export function areneNames(smiles) {
   return { new: nb.new, old: nb.old, accept: [...acc] };
 }
 
-function areneProblemData(rng) {
-  for (let t = 0; t < 60; t++) {
-    const spec = specArene(rng);
+export function areneProblemData(rng, spec0) {
+  for (let t = 0; t < (spec0 ? 1 : 60); t++) {
+    const spec = spec0 || specArene(rng);
     const smiles = buildArene(spec.groups);
     const nm = areneNames(smiles);
     if (!nm) continue;
@@ -1023,7 +1029,7 @@ function areneProblemData(rng) {
       const s2 = buildArene(g); const n2 = nameBothArene(s2);
       if (!n2 || canon(s2) === canon(smiles) || seen.has(normName(n2.new)) || seen.has(normName(n2.old))) return;
       if (wrongs.some((w) => normName(w.name.new) === normName(n2.new) && normName(w.name.old) === normName(n2.old))) return;
-      wrongs.push({ name: { new: n2.new, old: n2.old, sys: n2.new }, rule, why, same: false });
+      wrongs.push({ name: { new: n2.new, old: n2.old, sys: n2.new, yl: n2.new }, rule, why, same: false, smiles: s2 });
     };
     const pos = keys.map(([p]) => Number(p));
     // move one non-first group to another position
@@ -1066,25 +1072,40 @@ function areneWalk(spec, nm, A) {
 export const BENZYL = [
   { smiles: 'ClCc1ccccc1', names: { new: '(chloromethyl)benzene', old: 'benzyl chloride' }, accept: ['(chloromethyl)benzene', 'benzyl chloride', 'chloromethylbenzene'],
     why: 'Benzyl is C₆H₅CH₂–: the ring plus one CH₂. The Cl is on that CH₂, not on the ring.',
-    wrong: [{ name: '2-chlorotoluene', old: 'o-chlorotoluene', why: 'In 2-chlorotoluene the Cl is on the RING next to the CH₃. In this molecule the Cl is on the CH₂ carbon, not on the ring.', same: false },
-      { name: 'chlorobenzene', why: 'Chlorobenzene has the Cl straight on the ring. Here a CH₂ sits between the ring and the Cl.', same: false },
-      { name: '(dichloromethyl)benzene', why: 'There is only one Cl on the CH₂ carbon, so the prefix is chloro, not dichloro.', same: false }] },
+    wrong: [{ smiles: 'Cc1ccccc1Cl', name: '2-chlorotoluene', old: 'o-chlorotoluene', why: 'In 2-chlorotoluene the Cl is on the RING next to the CH₃. In this molecule the Cl is on the CH₂ carbon, not on the ring.', same: false },
+      { smiles: 'Clc1ccccc1', name: 'chlorobenzene', why: 'Chlorobenzene has the Cl straight on the ring. Here a CH₂ sits between the ring and the Cl.', same: false },
+      { smiles: 'ClC(Cl)c1ccccc1', name: '(dichloromethyl)benzene', why: 'There is only one Cl on the CH₂ carbon, so the prefix is chloro, not dichloro.', same: false }] },
   { smiles: 'BrCc1ccccc1', names: { new: '(bromomethyl)benzene', old: 'benzyl bromide' }, accept: ['(bromomethyl)benzene', 'benzyl bromide', 'bromomethylbenzene'],
     why: 'Benzyl is C₆H₅CH₂– (ring plus a CH₂); phenyl is the ring alone, C₆H₅–.',
-    wrong: [{ name: 'bromobenzene', why: 'Bromobenzene has the Br straight on the ring. This molecule has a CH₂ between ring and Br.', same: false },
-      { name: '4-bromotoluene', old: 'p-bromotoluene', why: 'In 4-bromotoluene the Br is on the RING, para to the CH₃. Here the Br is on the CH₂ carbon.', same: false },
-      { name: '(bromomethyl)cyclohexane', why: 'The ring here is a benzene ring (aromatic), so the parent is benzene, not cyclohexane.', same: false }] },
+    wrong: [{ smiles: 'Brc1ccccc1', name: 'bromobenzene', why: 'Bromobenzene has the Br straight on the ring. This molecule has a CH₂ between ring and Br.', same: false },
+      { smiles: 'Cc1ccc(Br)cc1', name: '4-bromotoluene', old: 'p-bromotoluene', why: 'In 4-bromotoluene the Br is on the RING, para to the CH₃. Here the Br is on the CH₂ carbon.', same: false },
+      { smiles: 'BrCC1CCCCC1', name: '(bromomethyl)cyclohexane', why: 'The ring here is a benzene ring (aromatic), so the parent is benzene, not cyclohexane.', same: false }] },
   { smiles: 'OCc1ccccc1', names: { new: 'phenylmethanol', old: 'benzyl alcohol' }, accept: ['phenylmethanol', 'benzyl alcohol', 'benzylalcohol'],
     why: 'The OH is on the CH₂ carbon, so it is an alcohol (benzyl alcohol, phenylmethanol); put on the ring it would be a phenol.',
-    wrong: [{ name: 'phenol', why: 'Phenol has the OH straight on the ring. This molecule has a CH₂ between the ring and the OH.', same: false },
-      { name: '2-methylphenol', old: 'o-cresol', why: 'In 2-methylphenol the OH is on the ring. Here the OH is on the CH₂ carbon, so the CH₂ is part of an alcohol.', same: false },
-      { name: 'cyclohexylmethanol', why: 'The ring is a benzene ring, which is called phenyl as a group, not cyclohexyl.', same: false }] },
+    wrong: [{ smiles: 'Oc1ccccc1', name: 'phenol', why: 'Phenol has the OH straight on the ring. This molecule has a CH₂ between the ring and the OH.', same: false },
+      { smiles: 'Cc1ccccc1O', name: '2-methylphenol', old: 'o-cresol', why: 'In 2-methylphenol the OH is on the ring. Here the OH is on the CH₂ carbon, so the CH₂ is part of an alcohol.', same: false },
+      { smiles: 'OCC1CCCCC1', name: 'cyclohexylmethanol', why: 'The ring is a benzene ring, which is called phenyl as a group, not cyclohexyl.', same: false }] },
   { smiles: 'c1ccc(cc1)Cc1ccccc1', names: { new: 'diphenylmethane', old: 'diphenylmethane' }, accept: ['diphenylmethane', 'benzylbenzene'],
     why: 'Each C₆H₅– joined straight on is phenyl, and there are two of them on one CH₂ (methane). Benzyl would need its own CH₂.',
-    wrong: [{ name: 'biphenyl', why: 'Biphenyl is two rings joined directly, with no CH₂ between them. Here a CH₂ separates the rings.', same: false },
-      { name: 'dibenzylmethane', why: 'Benzyl is C₆H₅CH₂–, so dibenzylmethane would have two extra CH₂ groups. Here the rings are joined straight to the CH₂ (phenyl).', same: false },
-      { name: '1,2-diphenylethane', why: 'Ethane would mean two CH₂ groups between the rings. There is only one CH₂, so the parent is methane.', same: false }] }
+    wrong: [{ smiles: 'c1ccc(cc1)-c1ccccc1', name: 'biphenyl', why: 'Biphenyl is two rings joined directly, with no CH₂ between them. Here a CH₂ separates the rings.', same: false },
+      { smiles: 'c1ccc(cc1)CCCc1ccccc1', name: 'dibenzylmethane', why: 'Benzyl is C₆H₅CH₂–, so dibenzylmethane would have two extra CH₂ groups. Here the rings are joined straight to the CH₂ (phenyl).', same: false },
+      { smiles: 'c1ccc(cc1)CCc1ccccc1', name: '1,2-diphenylethane', why: 'Ethane would mean two CH₂ groups between the rings. There is only one CH₂, so the parent is methane.', same: false }] }
 ];
+
+/**
+ * A typed name checked against the correctly ordered name in EVERY style (new, old, systematic-bracketed, yl-locant), each with its own alphabetical order.
+ * Returns null when the namer cannot read the molecule, or when `answer` is not one of the molecule's own names (a step that shows one molecule and asks for
+ * another's name, such as "name the mirror image", must not be graded here). Otherwise { ok, styles:[...], note } where note says which style was used.
+ */
+export function matchNameForms(smiles, raw, answer) {
+  const infos = modeInfos(smiles);
+  if (!infos) return null;
+  const names = namesOf(infos);
+  if (answer !== undefined && !matchStyles(names, answer).ok) return null;
+  const m = matchStyles(names, raw);
+  const groups = [...new Set(infos.new.subs.map((s) => s.id).filter((id) => COMPLEX_IDS.includes(id)))];
+  return { ok: m.ok, styles: m.styles, names, note: m.ok ? styleNote(m.styles, groups) : '' };
+}
 
 // ============================================================================================================
 // Diagnosing a typed name
@@ -1190,20 +1211,21 @@ function hintsFor(infos, level) {
 }
 
 function baseProblem(level, smiles, infos, format, extra) {
-  return { skill: 'naming-levels', level, format, smiles, highlight: [], names: { new: infos.new.name, old: infos.old.name, sys: infos.sys.name }, visual: { widget: 'naming-levels-bar', config: { level } }, ...extra };
+  return { skill: 'naming-levels', level, format, smiles, highlight: [], names: namesOf(infos), visual: { widget: 'naming-levels-bar', config: { level } }, ...extra };
 }
 
-function typedProblem(rng, level, smiles, infos, tag) {
-  const cands = wrongNames(smiles, infos);
-  const names = { new: infos.new.name, old: infos.old.name, sys: infos.sys.name };
-  const mode = mode0();
+/** o = { mode: 'new'|'old' (the style of the expected answer), prompt, cands (wrong names already worked out) } (the custom generator passes these; the levels do not). */
+export function typedProblem(rng, level, smiles, infos, tag, o = {}) {
+  const cands = o.cands || wrongNames(smiles, infos);
+  const names = namesOf(infos);
+  const mode = o.mode || mode0();
   const answer = names[mode];
   const accept = [...new Set(Object.values(names))].filter((x) => x !== answer);
   const diag = [];
   cands.forEach((c) => MODES3.forEach((m) => { if (!diag.some((d) => normName(d.match) === normName(c.name[m]))) diag.push({ match: c.name[m], why: c.why }); }));
   const walk = walkthrough(infos);
   return baseProblem(level, smiles, infos, 'typed', {
-    kind: 'input', name: true, tag, prompt: `Name this compound. ${LEVEL_PROMPT[level]}`,
+    kind: 'input', name: true, tag, prompt: o.prompt || `Name this compound. ${LEVEL_PROMPT[level]}`,
     answer, accept, wrong: diag, wrongCands: cands,
     diagnoseFn: (raw) => genericDiagnose(smiles, infos, raw),
     fallback: 'That is not the name I get. ' + STEP_REMINDER,
@@ -1212,17 +1234,18 @@ function typedProblem(rng, level, smiles, infos, tag) {
   });
 }
 
-function optionsProblem(rng, level, smiles, infos, tag) {
-  const cands = wrongNames(smiles, infos);
+export function optionsProblem(rng, level, smiles, infos, tag, o = {}) {
+  const cands = o.cands || wrongNames(smiles, infos);
   if (cands.length < 3) return null;
-  const chosen = pickDistractors(rng, cands, level, 3);
+  const chosen = o.pick ? o.pick(cands) : pickDistractors(rng, cands, level, 3);
   if (chosen.length < 3) return null;
+  const mode = o.mode || mode0();
+  const view = (pair) => (o.fixed ? esc(pair[mode]) : nameTag(pair));   // a fixed style is shown as written; otherwise the New / Old switch flips it
   const correctPair = { new: infos.new.name, old: infos.old.name };
   const opts = shuffle(rng, [
-    { text: nameTag(correctPair), correct: true, why: shortWhy(infos), name: correctPair, rule: null, same: null },
-    ...chosen.map((c) => ({ text: nameTag(c.name), why: c.why, name: { new: c.name.new, old: c.name.old }, rule: c.rule, same: c.same }))
+    { text: view(correctPair), correct: true, why: shortWhy(infos), name: correctPair, rule: null, same: null },
+    ...chosen.map((c) => ({ text: view(c.name), why: c.why, name: { new: c.name.new, old: c.name.old }, rule: c.rule, same: c.same }))
   ]);
-  const mode = mode0();
   const walk = walkthrough(infos);
   return baseProblem(level, smiles, infos, 'options', {
     kind: 'choice', tag, prompt: 'Which name is correct for this compound? Only one follows every rule.',
@@ -1239,14 +1262,16 @@ function featuresOf(infos, tag) {
   return f;
 }
 
-function areneProblems(rng, level, format) {
-  const d = areneProblemData(rng);
+/** o = { spec, mode, fixed } as for typedProblem; spec = the benzene derivative to ask about (the custom generator picks it). */
+export function areneProblems(rng, level, format, o = {}) {
+  const d = areneProblemData(rng, o.spec);
   if (!d) return null;
   const walk = areneWalk(d.spec, d.names, d.A);
-  const mode = mode0();
+  const mode = o.mode || mode0();
+  const view = (pair) => (o.fixed ? esc(pair[mode]) : nameTag(pair));
   const answer = d.names[mode];
   const common = {
-    skill: 'naming-levels', level, smiles: d.smiles, highlight: [], names: { new: d.names.new, old: d.names.old, sys: d.names.new }, tag: 'arene', features: ['arene', d.spec.kind],
+    skill: 'naming-levels', level, smiles: d.smiles, highlight: [], names: { new: d.names.new, old: d.names.old, sys: d.names.new, yl: d.names.new }, tag: 'arene', features: ['arene', d.spec.kind],
     visual: { widget: 'naming-levels-bar', config: { level } }, derive: toPlain(walk), deriveHtml: walk,
     hints: ['Find the parent: a group such as OH, NH₂ or CH₃ can make a special parent (phenol, aniline, toluene) and is then C1; otherwise the parent is benzene. Then place the other groups.', d.spec.kind === 'di' ? 'Two groups: next to each other is ortho (1,2), one carbon between is meta (1,3), opposite is para (1,4). The traditional style writes o-, m-, p-; the current style writes the numbers.' : 'Number the ring for the lowest set of locants, then list the groups in alphabetical order (ignoring di-, tri-).']
   };
@@ -1259,8 +1284,8 @@ function areneProblems(rng, level, format) {
   }
   const chosen = shuffle(rng, d.wrongs).slice(0, 3);
   const correctPair = { new: d.names.new, old: d.names.old };
-  const opts = shuffle(rng, [{ text: nameTag(correctPair), correct: true, why: 'Yes: right parent, right positions, groups in alphabetical order.', name: correctPair, rule: null, same: null },
-    ...chosen.map((c) => ({ text: nameTag(c.name), why: c.why, name: { new: c.name.new, old: c.name.old }, rule: c.rule, same: false }))]);
+  const opts = shuffle(rng, [{ text: view(correctPair), correct: true, why: 'Yes: right parent, right positions, groups in alphabetical order.', name: correctPair, rule: null, same: null },
+    ...chosen.map((c) => ({ text: view(c.name), why: c.why, name: { new: c.name.new, old: c.name.old }, rule: c.rule, same: false }))]);
   return { ...common, format: 'options', kind: 'choice', prompt: 'Which name is correct for this benzene derivative?', options: opts, answer: correctPair[mode] };
 }
 
@@ -1270,7 +1295,7 @@ function specialProblem(rng, level) {
   const options = shuffle(rng, [{ text: nameTag({ new: e.names.new, old: e.names.old }), correct: true, why: `Yes. ${e.why}`, name: { new: e.names.new, old: e.names.old }, rule: null, same: null },
     ...e.wrong.map((w) => ({ text: nameTag({ new: w.name, old: w.old || w.name }), why: w.why, name: { new: w.name, old: w.old || w.name }, rule: 'benzyl-phenyl', same: !!w.same }))]);
   return {
-    skill: 'naming-levels', level, format: 'options', kind: 'choice', smiles: e.smiles, highlight: [], tag: 'benzyl', features: ['benzyl'], names: { new: e.names.new, old: e.names.old, sys: e.names.new },
+    skill: 'naming-levels', level, format: 'options', kind: 'choice', smiles: e.smiles, highlight: [], tag: 'benzyl', features: ['benzyl'], names: { new: e.names.new, old: e.names.old, sys: e.names.new, yl: e.names.new },
     visual: { widget: 'naming-levels-bar', config: { level } },
     prompt: 'Phenyl is the ring alone, C₆H₅–; benzyl is the ring plus a CH₂, C₆H₅CH₂–. Which name is correct for this compound?',
     options, answer: e.names[mode], derive: `${e.why} Name: ${e.names.new}${e.names.new !== e.names.old ? ` (traditional: ${e.names.old})` : ''}.`,
@@ -1439,9 +1464,9 @@ export const CURATED_IDS = CURATED.map((e) => e.id);
 let lastCurated = null;
 /** Names for a curated entry: from the namer (hydrocarbons, halides, rings, stereo), the arene engine, or written by hand. */
 export function curatedNames(e) {
-  if (e.names) return { new: e.names.new, old: e.names.old, sys: e.names.new, accept: e.accept || [e.names.new, e.names.old] };
-  if (e.fixed != null) { const b = BENZYL[e.fixed]; return { new: b.names.new, old: b.names.old, sys: b.names.new, accept: b.accept }; }
-  if (e.arene) { const a = areneNames(e.smiles); return a ? { ...a, sys: a.new } : null; }
+  if (e.names) return { new: e.names.new, old: e.names.old, sys: e.names.new, yl: e.names.new, accept: e.accept || [e.names.new, e.names.old] };
+  if (e.fixed != null) { const b = BENZYL[e.fixed]; return { new: b.names.new, old: b.names.old, sys: b.names.new, yl: b.names.new, accept: b.accept }; }
+  if (e.arene) { const a = areneNames(e.smiles); return a ? { ...a, sys: a.new, yl: a.new } : null; }
   const n = nameAll(e.smiles);
   return n ? { ...n, accept: [...new Set(Object.values(n))] } : null;
 }
@@ -1454,7 +1479,7 @@ export function makeCurated(rng, format, entryId) {
   const fmt = format || (e.typed ? 'typed' : 'options');
   const mode = mode0();
   // distractors: hand-written first, then extra mistakes the namer can make, to reach three
-  let wrongs = (e.wrong || (e.fixed != null ? BENZYL[e.fixed].wrong : [])).map((w) => ({ name: { new: w.name, old: w.old || w.name, sys: w.name }, rule: 'tricky', why: w.why, same: !!w.same }));
+  let wrongs = (e.wrong || (e.fixed != null ? BENZYL[e.fixed].wrong : [])).map((w) => ({ name: { new: w.name, old: w.old || w.name, sys: w.name, yl: w.name }, rule: 'tricky', why: w.why, same: !!w.same }));
   if (infos) {
     const auto = wrongNames(e.smiles, infos).filter((c) => !wrongs.some((w) => MODES3.some((m) => normName(w.name[m]) === normName(c.name[m]))));
     for (const c of shuffle(rng, auto)) { if (wrongs.length >= 6) break; wrongs.push({ ...c, rule: c.rule }); }
@@ -1463,7 +1488,7 @@ export function makeCurated(rng, format, entryId) {
   const deriveHtml = `${walk}<br><b>Why people slip:</b> ${esc(e.slip)}`;
   const common = {
     skill: 'naming-levels', level: 5, smiles: e.smiles, highlight: [], tag: 'tricky', entry: e.id, cat: e.cat, slip: e.slip, src: e.src,
-    names: { new: nm.new, old: nm.old, sys: nm.sys || nm.new }, features: ['tricky', e.cat], visual: { widget: 'naming-levels-bar', config: { level: 5 } },
+    names: { new: nm.new, old: nm.old, sys: nm.sys || nm.new, yl: nm.yl || nm.sys || nm.new }, features: ['tricky', e.cat], visual: { widget: 'naming-levels-bar', config: { level: 5 } },
     derive: toPlain(deriveHtml), deriveHtml,
     hints: [`This one is in the tricky set because of a common slip (${e.cat === 'parent' ? 'choosing the parent' : e.cat === 'numbering' ? 'numbering' : e.cat === 'alphabetical' ? 'alphabetical order' : e.cat === 'ring-chain' ? 'ring or chain' : e.cat === 'alkene' ? 'the multiple bond or E/Z' : e.cat === 'stereo' ? 'a stereo label' : e.cat === 'benzene' ? 'the benzene parent' : 'the principal group'}). Take the recipe slowly: parent, numbering, branches, alphabetical order, stereo.`,
       `The slip: ${e.slip}`]
@@ -1492,7 +1517,8 @@ export function makeCurated(rng, format, entryId) {
 // ============================================================================================================
 const LEVEL_KEY = 'naming-level';
 export function getLevel() { try { const v = Number(store.getUi(LEVEL_KEY)); return LEVELS.includes(v) ? v : 1; } catch (e) { return 1; } }
-export function setLevel(n) { try { store.setUi(LEVEL_KEY, LEVELS.includes(n) ? n : 1); } catch (e) { /* storage blocked: the page still works */ } }
+/** Choosing a level (the old API) switches the page to that built-in preset: any custom settings are dropped (engine/naming-custom.js reads `ui.naming`). */
+export function setLevel(n) { try { store.setUi(LEVEL_KEY, LEVELS.includes(n) ? n : 1); store.setUi('naming', null); } catch (e) { /* storage blocked: the page still works */ } }
 
 /** Markup of the level bar: five buttons plus the title and one line for the chosen level. Pure (tested without a DOM). */
 export function levelBarHtml(level) {
@@ -1524,7 +1550,7 @@ export const namingLevelsBar = {
     }
   }
 };
-WIDGETS['naming-levels-bar'] = namingLevelsBar;
+if (!WIDGETS['naming-levels-bar']) WIDGETS['naming-levels-bar'] = namingLevelsBar;   // engine/naming-custom.js replaces it with the settings card
 
 /** generate('naming-levels', count, {rng, level}) -> problems. The level comes from the argument or the remembered choice (store `ui.naming-level`). */
 export function generateNamingLevels(count, { skill = null, rng = Math.random, level = null } = {}) {
