@@ -15,6 +15,7 @@ export default {
   ],
   steps: [
     {
+      caveman: {"prompt":"HCl in water gives H₃O⁺ and Cl⁻. What did HCl hand to water?","reveal":"<b>Brønsted–Lowry acid</b> = proton (H⁺) donor; <b>base</b> = acceptor. HCl acid, water base. H⁺ = bare H nucleus.","options":[{"why":"Yes. H leaves without bonding pair. Pair stays on Cl: Cl⁻."},{"why":"H with its electron: Cl stays neutral. Cl⁻ has extra electron: kept old H–Cl pair."},{"why":"HCl has no oxygen. No HO⁻ to give."},{"why":"Reversed. Bonding electrons stay on Cl. H nucleus moves."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'conjugate-pairs',
       prompt: 'HCl gas dissolves in water and makes H₃O⁺ and Cl⁻. What did the HCl hand over to the water molecule?',
       reaction: { reactants: ['Cl', 'O'], products: ['[OH3+]', '[Cl-]'] },
@@ -27,10 +28,12 @@ export default {
       reveal: 'A <b>Brønsted–Lowry acid</b> is a proton (H⁺) donor and a <b>base</b> is a proton acceptor. HCl is the acid and water is the base. H⁺ is just a proton: an H nucleus with no electron.'
     },
     {
+      caveman: {"html":"<p>HCl loses H⁺: <b>Cl⁻</b> = <b>conjugate base</b>. Water gains H⁺: <b>H₃O⁺</b> = <b>conjugate acid</b>.</p><p>Differ by one H⁺: <b>HA</b>, <b>A⁻</b>.</p>"}, // CAVEMAN
       id: 's02', type: 'explain', skill: 'conjugate-pairs',
       html: '<p>After HCl gives up H⁺, what remains, <b>Cl⁻</b>, is the <b>conjugate base</b> of HCl. After water takes H⁺, the result, <b>H₃O⁺</b>, is the <b>conjugate acid</b> of water.</p><p>An acid and its conjugate base always differ by exactly one H⁺: <b>HA</b> and <b>A⁻</b>.</p>'
     },
     {
+      caveman: {"prompt":"NH₃ + H₂O ⇌ NH₄⁺ + HO⁻. Ammonia takes H⁺ from water. Conjugate acid?","worked":"NH₃ gains H⁺: base; NH₄⁺ conjugate acid. H₂O loses H⁺; HO⁻ conjugate base.","hints":["Find base first: gains H⁺.","Conjugate acid = base + H⁺."],"options":[{"why":"NH₃ is base (accepts H⁺). Conjugate acid = base + H⁺."},{"why":"Water is acid here: donates H⁺. Partner HO⁻ is conjugate base."},{"why":"Yes. NH₃ + H⁺ = NH₄⁺."},{"why":"HO⁻ = water after losing H⁺: conjugate base of water."}]}, // CAVEMAN
       id: 's03', type: 'choice', skill: 'conjugate-pairs',
       aside: '<p>The double arrow <b>⇌</b> means the reaction runs both ways and settles into a balance, an <b>equilibrium</b>, with both sides present. Here we read it left to right.</p>',
       prompt: 'NH₃ + H₂O ⇌ NH₄⁺ + HO⁻. Going left to right, ammonia takes an H⁺ from water. Which species is the conjugate acid?',
@@ -45,6 +48,7 @@ export default {
       worked: 'NH₃ gains H⁺, so NH₃ is the base and NH₄⁺ (NH₃ + H⁺) is its conjugate acid. Water loses H⁺: acid H₂O, conjugate base HO⁻.'
     },
     {
+      caveman: {"prompt":"CH₃OH + NH₂⁻ → CH₃O⁻ + NH₃ (NH₂⁻ = amide ion, a base; not amide group). Conjugate base of methanol?","worked":"Methanol acid. Minus H⁺ from O–H: CH₃O⁻ (methoxide). NH₂⁻ base; conjugate acid NH₃.","hints":["Conjugate base = acid − H⁺.","Acidic H on oxygen. Remove it. Keep three C–H."],"options":[{"why":"Yes. Methanol − H⁺ from O–H = methoxide, CH₃O⁻."},{"why":"Amide ion = base that took proton. Not methanol's product."},{"why":"Ammonia = conjugate acid of NH₂⁻ (plus H⁺). Other pair."},{"why":"H lost from carbon. Acidic H on oxygen: oxygen holds negative charge better."}]}, // CAVEMAN
       id: 's04', type: 'choice', skill: 'conjugate-pairs',
       prompt: 'Methanol gives its O–H proton to amide ion: CH₃OH + NH₂⁻ → CH₃O⁻ + NH₃ (NH₂⁻ is the amide ion, a base; do not confuse it with the amide group you meet later). Which structure is the conjugate base of methanol?',
       reaction: { reactants: ['CO', '[NH2-]'], products: ['C[O-]', 'N'] },
@@ -58,6 +62,7 @@ export default {
       worked: 'Methanol is the acid. Remove H⁺ from the O–H: CH₃O⁻ (methoxide) is its conjugate base. Amide ion is the base; its conjugate acid is NH₃.'
     },
     {
+      caveman: {"prompt":"pKa: HCl −7.0, acetic acid CH₃CO₂H 4.76. Stronger?","reveal":"Acid strength Ka. <b>pKa = −log Ka</b>. Strong acid: large Ka, <b>small or negative pKa</b>. (Log of 10⁻⁹ = −9: pKa 9.) Smaller pKa = stronger acid = weaker conjugate base.","options":[{"why":"Bigger pKa = weaker acid. Acetic acid holds H⁺ firmer."},{"why":"Yes. HCl gives up H⁺ almost fully. Lower pKa."}]}, // CAVEMAN
       id: 's05', type: 'predict', skill: 'pka-direction',
       prompt: 'HCl has pKa ' + M + '7.0 and acetic acid, CH₃CO₂H, has pKa 4.76. Which is the stronger acid?',
       derive: { quantity: 'strongerAcid', ids: ['hcl', 'acetic'] },
@@ -68,6 +73,7 @@ export default {
       reveal: 'The acid strength constant is Ka, and <b>pKa = ' + M + 'log Ka</b>. Strong acids have large Ka, so a <b>small or negative pKa</b>. (To take the log of a power of ten, read off the exponent: log 10⁻⁹ is −9, so Ka = 10⁻⁹ gives a pKa of 9.) Rule: smaller pKa = stronger acid = weaker conjugate base.'
     },
     {
+      caveman: {"prompt":"Weak acid Ka = 1 × 10⁻⁹. pKa?","worked":"log(1 × 10⁻⁹) = −9, so pKa = 9.","hints":["pKa = −log Ka. Log 10⁻⁹ = −9.","Put minus sign in front of −9."]}, // CAVEMAN
       id: 's06', type: 'input', skill: 'pka-direction',
       prompt: 'A weak acid has Ka = 1 × 10⁻⁹. What is its pKa?',
       answer: 9,
@@ -83,6 +89,7 @@ export default {
       worked: 'log(1 × 10⁻⁹) = ' + M + '9, so pKa = ' + M + '(' + M + '9) = 9.'
     },
     {
+      caveman: {"prompt":"Conjugate bases: Cl⁻ (HCl −7.0), CH₃CO₂⁻ (acetic acid 4.76), CN⁻ (HCN 9.31), HO⁻ (water 15.74). STRONGEST base?","worked":"Weakest acid = strongest conjugate base. Largest pKa: water 15.74: HO⁻.","hints":["Weaker acid = stronger conjugate base.","Largest pKa: its conjugate base strongest."],"options":[{"why":"Cl⁻ from strongest acid: weakest base. Barely wants H⁺."},{"why":"Acetic acid (4.76) beats HCN, water as acid: acetate weaker than CN⁻, HO⁻."},{"why":"HCN (9.31) weaker than acetic acid: CN⁻ beats acetate. Water (15.74) weaker."},{"why":"Yes. Water highest pKa (15.74): HO⁻ grips H⁺ hardest."}]}, // CAVEMAN
       id: 's07', type: 'choice', skill: 'pka-direction',
       prompt: 'Cl⁻, CH₃CO₂⁻ (acetate), CN⁻ (cyanide) and HO⁻ (hydroxide) are the conjugate bases of HCl (' + M + '7.0), acetic acid (4.76), HCN (9.31) and water (15.74). Which one is the STRONGEST base?',
       derive: { quantity: 'weakestAcid', ids: ['hcl', 'acetic', 'hcn', 'water'] },
@@ -96,6 +103,7 @@ export default {
       worked: 'The conjugate base of the weakest acid is the strongest base. The pKa values are ' + M + '7.0, 4.76, 9.31 and 15.74. The largest is water at 15.74, so HO⁻ is the strongest base.'
     },
     {
+      caveman: {"problem":"HO⁻ takes H⁺?<br><b>CH₃CO₂H + HO⁻ ⇌ CH₃CO₂⁻ + H₂O</b>","rule":"Equilibrium favours <b>weaker acid</b> (higher pKa): stronger acid gives up H⁺ more easily. Base removes H⁺ from acid with pKa <b>lower</b> than pKa of base's conjugate acid.","moves":[{"ask":"Which species on LEFT is acid?","then":"Right acid: H₂O (conjugate acid of HO⁻).","options":[{"why":"Yes."},{"why":"HO⁻ is base. No H⁺ to give. Wants one."}]},{"ask":"pKa of acetic acid?","options":[{"why":"Yes, 4.76."},{"why":"Water's pKa. Other side."},{"why":"HCN. Not in this reaction."}]},{"ask":"Acid on right: pKa of water?","options":[{"why":"Acetic acid pKa. Left side. Asked: water pKa."},{"why":"Yes, 15.74."},{"why":"That is ethanol. Water slightly stronger: 15.74."}]},{"ask":"Which acid weaker?","options":[{"why":"pKa 4.76 smaller: stronger acid."},{"why":"Yes. Larger pKa = weaker acid."}]},{"ask":"Equilibrium favours weaker acid. Which side?","options":[{"why":"Left has stronger acid. Strong acid gets used up."},{"why":"Yes. Right has water, weaker acid."}]},{"ask":"Does hydroxide take proton from acetic acid?","options":[{"why":"15.74 − 4.76 ≈ 11: each unit ×10. Right side hugely favoured."},{"why":"Acetic acid far stronger than water (4.76 vs 15.74). Water reluctant."},{"why":"Equal pKa = even split. Here ≈ 11 units apart."}]}]}, // CAVEMAN
       id: 's08', type: 'worked', skill: 'pka-direction',
       problem: 'Will hydroxide ion take a proton from acetic acid?<br><b>CH₃CO₂H + HO⁻ ⇌ CH₃CO₂⁻ + H₂O</b>',
       reaction: { reactants: ['CC(=O)O', '[OH-]'], products: ['CC(=O)[O-]', 'O'] },
@@ -154,6 +162,7 @@ export default {
       rule: 'Equilibrium favours the side with the <b>weaker acid</b> (higher pKa), because the stronger acid gives up its H⁺ more readily, so the mixture ends up mostly as the weaker acid. So a base removes H⁺ from any acid whose pKa is <b>lower</b> than the pKa of the base’s own conjugate acid.'
     },
     {
+      caveman: {"prompt":"HCN + CH₃CO₂⁻ ⇌ CN⁻ + CH₃CO₂H. Find two acids. Which side favoured?","worked":"Left HCN pKa 9.31. Right CH₃CO₂H 4.76. HCN weaker acid: left (reactants) favoured.","hints":["Acid on each side still carries H⁺. Negative ions = bases.","Favours weaker acid: higher pKa."]}, // CAVEMAN
       id: 's09', type: 'try', skill: 'pka-direction', widget: 'equilibrium-arrow',
       prompt: 'HCN and acetate ion: HCN + CH₃CO₂⁻ ⇌ CN⁻ + CH₃CO₂H. Locate the two acids, then say which side is favoured.',
       reaction: { reactants: ['C#N', 'CC(=O)[O-]'], products: ['[C-]#N', 'CC(=O)O'] },
@@ -163,6 +172,7 @@ export default {
       worked: 'Left acid: HCN, pKa 9.31. Right acid: CH₃CO₂H, pKa 4.76. The higher pKa belongs to HCN, the weaker acid, so the left side (the reactants) is favoured.'
     },
     {
+      caveman: {"prompt":"CH₃CH₂O⁻ ethoxide (ethanol's base, pKa 16.00) pulls H⁺ off which acid?","worked":"Base removes H⁺ from acid with smaller pKa than its conjugate acid (16.00). Only acetic acid (4.76).","hints":["Ethoxide conjugate acid = ethanol, pKa 16.00. Need stronger acid.","Stronger = pKa below 16.00. One fits."],"options":[{"why":"Acetone (19.3) weaker than ethanol (16.00). Favours ethoxide and acetone."},{"why":"Acetylene (25) weaker than ethanol (16.00). No H⁺ taken."},{"why":"Yes. 4.76 below 16.00: stronger acid. Ethoxide takes H⁺."},{"why":"Ammonia (≈ 36) far weaker. Needs stronger base: amide ion."}]}, // CAVEMAN
       id: 's10', type: 'choice', skill: 'pka-direction',
       prompt: 'Ethoxide, CH₃CH₂O⁻, is the conjugate base of ethanol (pKa 16.00). Which of these acids can it deprotonate (pull H⁺ off) to a large extent?',
       derive: { quantity: 'deprotonates', base: 'ethanol', ids: ['acetic', 'acetone', 'acetylene', 'ammonia'] },
@@ -176,6 +186,7 @@ export default {
       worked: 'A base removes H⁺ from any acid with a smaller pKa than its own conjugate acid. Ethoxide’s conjugate acid has pKa 16.00. Only acetic acid (4.76) is below that.'
     },
     {
+      caveman: {"prompt":"pKa: acetic acid 4.76, ethanol 16.00; both O–H. Why acetic acid stronger?","reveal":"More stable anion A⁻ = stronger acid HA. Acetate: charge on <b>two O atoms</b>; ethoxide: one. C–H next to C=O acidic too (acetone, pKa 19.3).","options":[{"why":"Yes. Acetate, CO₂⁻: both oxygens share charge. Anion more stable: H⁺ leaves easier."},{"why":"H count irrelevant. Anion stability after H⁺ leaves."},{"why":"Both lose H from oxygen. Surroundings differ."}]}, // CAVEMAN
       id: 's11', type: 'predict', skill: 'pka-direction',
       prompt: 'Acetic acid (pKa 4.76) and ethanol (16.00) both lose an H from an O–H group. Why is acetic acid so much stronger?',
       options: [
@@ -186,6 +197,7 @@ export default {
       reveal: 'The more stable the anion A⁻, the stronger the acid HA. Acetate spreads its charge over <b>two O atoms</b>; ethoxide has just one. C–H bonds next to a C=O are acidic too (acetone, pKa 19.3), because the C=O helps carry the charge.'
     },
     {
+      caveman: {"prompt":"CH₃NH₂ takes H⁺. Basic atom?","worked":"Only N has lone pair: bonds H⁺, CH₃NH₃⁺. Amines (N on carbon) = typical organic bases.","hints":["Lone pair bonds H⁺. Count: (valence − bonds) ÷ 2.","N: (5 − 3) ÷ 2 = 1. C: (4 − 4) ÷ 2 = 0."],"options":[{"why":"Yes. N: 5 valence, 3 in bonds: one lone pair for H⁺."},{"why":"Carbon: four bonds, no lone pair for H⁺."},{"why":"H has only bonding pair. Leaves as H⁺, cannot accept."}]}, // CAVEMAN
       id: 's12', type: 'choice', skill: 'conjugate-pairs',
       prompt: 'Methylamine, CH₃NH₂, can pick up an H⁺. Which atom is the basic site?',
       smiles: 'CN', highlight: [],
@@ -199,10 +211,12 @@ export default {
       worked: 'Only nitrogen has a lone pair. It uses it to bond to H⁺, giving CH₃NH₃⁺. This is why amines (compounds with N bonded to carbon, like methylamine) are the typical organic bases.'
     },
     {
+      caveman: {"html":"<p><b>Acids</b>: O–H (alcohols: ethanol 16.00; carboxylic acids: acetic acid 4.76), C–H beside C=O (acetone 19.3).</p><p><b>Bases</b>: lone pair, mostly amine N. Oxygen weak: H⁺ from strong acids only.</p>"}, // CAVEMAN
       id: 's13', type: 'explain', skill: 'pka-direction',
       html: '<p><b>Organic acids</b>: O–H groups (alcohols such as ethanol, 16.00; carboxylic acids such as acetic acid, 4.76) and C–H bonds next to C=O (acetone, 19.3).</p><p><b>Organic bases</b>: anything with a lone pair, mostly the N of amines (such as methylamine). Oxygen compounds are weak bases and take H⁺ only from strong acids.</p>'
     },
     {
+      caveman: {"prompt":"Water meets HCl. Curved arrow builds new O–H bond. Arrow STARTS where?","reveal":"<b>Curved arrow</b> = electrons moving. Starts at electrons (<b>lone pair</b>, <b>bond</b>), head at receiver. Pair to H: H⁺ goes too.","options":[{"why":"Arrows start at electrons, not H⁺. Proton has none."},{"why":"Yes. New O–H bond comes from O lone pair."},{"why":"Cl lone pairs do not build O–H. Cl matters later: H–Cl breaks."}]}, // CAVEMAN
       id: 's14', type: 'predict', skill: 'curved-arrows',
       prompt: 'Water meets HCl. A curved arrow will show the electrons that build the new O–H bond. Where does that arrow START?',
       options: [
@@ -213,6 +227,7 @@ export default {
       reveal: 'A <b>curved arrow</b> shows electrons moving. It starts at the electrons (a <b>lone pair</b> or a <b>bond</b>) and its head points at the atom that receives them. Here the pair moves to H, so the H⁺ moves with it.'
     },
     {
+      caveman: {"prompt":"Curved arrows: H₂O + HCl → H₃O⁺ + Cl⁻. Tap start electrons, then receiving atom.","worked":"Arrow 1: O lone pair to H of HCl. Arrow 2: H–Cl bond to Cl. H₃O⁺, Cl⁻.","hints":["Start with new bond: which electrons build O–H?","H holds 2 electrons: H–Cl must break. Start there, point to Cl."]}, // CAVEMAN
       id: 's15', type: 'try', skill: 'curved-arrows', widget: 'arrow-draw',
       prompt: 'Draw the curved arrows that turn H₂O + HCl into H₃O⁺ + Cl⁻. Tap the electrons the arrow starts from, then the atom that receives them.',
       reaction: { reactants: ['O', 'Cl'], products: ['[OH3+]', '[Cl-]'] },
@@ -234,6 +249,7 @@ export default {
       worked: 'Arrow 1: from a lone pair on O to the H of HCl. Arrow 2: from the H–Cl bond to Cl. The result is H₃O⁺ and Cl⁻.'
     },
     {
+      caveman: {"problem":"Oxygen gave pair to H⁺. Sort <b>Lewis bases</b> (donate pair), <b>Lewis acids</b> (accept).","rule":"<b>Lewis base</b>: donates pair (N, O, P). <b>Lewis acid</b>: accepts: H⁺, metal ions (Mg²⁺), octet-short B in BF₃, AlCl₃, FeBr₃, ZnCl₂.","moves":[{"ask":"Water gave lone pair to H⁺. Lewis term?","then":"H⁺ received pair: Lewis acid.","options":[{"why":"Acid accepts pair. Water donated."},{"why":"Yes. Lewis base donates pair."}]},{"ask":"NH₃: N has 3 bonds, one lone pair.","options":[{"why":"N has lone pair to give, full octet. No room to accept."},{"why":"Yes. N lone pair can be donated."}]},{"ask":"BF₃: boron 3 bonds, no lone pair, 6 electrons.","options":[{"why":"Yes. Boron two short of octet: accepts pair."},{"why":"Boron has no lone pair. Short of electrons: receives."}]},{"ask":"Mg²⁺: metal ion, outer electrons lost.","options":[{"why":"Yes. Positive metal ion: empty orbitals."},{"why":"Mg²⁺ lost outer electrons, 2+: no lone pair to donate."}]},{"ask":"CH₃CH₂OH: O two bonds, two lone pairs.","options":[{"why":"Oxygen has octet. No room to accept."},{"why":"Yes. O lone pairs donate: Lewis bases."}]}]}, // CAVEMAN
       id: 's16', type: 'worked', skill: 'lewis-acid-base',
       problem: 'In the last step oxygen donated an electron pair to H⁺. Sort these into <b>Lewis bases</b> (donate a pair) and <b>Lewis acids</b> (accept a pair).',
       moves: [
@@ -282,6 +298,7 @@ export default {
       rule: 'A <b>Lewis base</b> has a lone pair to donate (N, O, P). A <b>Lewis acid</b> accepts a pair: H⁺, metal ions such as Mg²⁺, and atoms short of an octet such as B in BF₃. AlCl₃, FeBr₃ and ZnCl₂ are Lewis acids too.'
     },
     {
+      caveman: {"prompt":"NH₃ + BF₃, no H⁺. Draw curved arrow: base donates, acid receives.","worked":"One arrow: N lone pair to B: N–B bond. H₃N–BF₃: N⁺, B⁻.","hints":["Which atom has lone pair? Which is short?","Arrow from N lone pair to B: becomes new N–B bond."]}, // CAVEMAN
       id: 's17', type: 'try', skill: 'curved-arrows', widget: 'arrow-draw',
       prompt: 'Ammonia reacts with BF₃, with no H⁺ involved. Draw the curved arrow: the base donates, the acid receives.',
       reaction: { reactants: ['N', 'B(F)(F)F'], products: ['[NH3+][B-](F)(F)F'] },

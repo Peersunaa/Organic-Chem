@@ -14,10 +14,11 @@ const mol = (s, l) => `<mol smiles="${s}" label="${l}"></mol>`;
 
 /** Move the correct option to a different place in each question (deterministic), so the right answer is not always first. */
 function arrange(lesson) {
-  const place = (opts, k) => { const i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); };
+  // the caveman copies of the options (st.caveman.options, in the same order as options) move together with the options they belong to
+  const place = (opts, k, cv) => { const n = opts.length, i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); if (cv && cv.length === n) { const [d] = cv.splice(i, 1); cv.splice(k % (cv.length + 1), 0, d); } };
   lesson.steps.forEach((st, n) => {
-    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length);
-    if (st.type === 'worked') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length));
+    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length, st.caveman && st.caveman.options);
+    if (st.type === 'worked') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length, st.caveman && st.caveman.moves && st.caveman.moves[k] && st.caveman.moves[k].options));
   });
   return lesson;
 }
@@ -34,6 +35,7 @@ export default arrange({
   ],
   steps: [
     {
+      caveman: {"prompt":"Lesson 02: carbon with two groups is sp. <b>But-2-yne</b>, CH₃–C≡C–CH₃ <mol smiles=\"CC#CC\" label=\"but-2-yne\"></mol>. Shape of four carbons?","reveal":"Two groups per triple-bond carbon: <b>sp</b>: C–C≡C–C <b>linear</b>. C≡C = one σ + two π at right angles. Check on 3D model next.","options":[{"why":"Yes. Each triple-bond carbon: two groups (other carbon, CH₃): sp, 180°."},{"why":"120° is sp² (three groups). These carbons have two: sp, not sp²."},{"why":"109.5° is sp³ (four groups). Triple-bond carbon joins just two atoms."},{"why":"Triple bond has no cis or trans: groups in a line. Cis, trans need bent C=C."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'hybridization',
       prompt: 'Lesson 02 told you that a carbon with two groups around it is sp-hybridized. Here is <b>but-2-yne</b>, CH₃–C≡C–CH₃ <mol smiles="CC#CC" label="but-2-yne"></mol>. What shape do you expect the four carbons to make?',
       options: [
@@ -45,6 +47,7 @@ export default arrange({
       reveal: 'Two groups on each triple-bond carbon means <b>sp</b>, so the C–C≡C–C unit is <b>linear</b>. The C≡C is one σ bond plus two π bonds at right angles to each other. Next you can check this on a real 3D model.'
     },
     {
+      caveman: {"prompt":"Left: 3D <b>but-2-yne</b>. Right: <b>(Z)-but-2-ene</b>, made from it later. Turn them: four carbons each. Which statement matches?","worked":"But-2-yne: C–C≡C 180° (sp): four carbons collinear. (Z)-but-2-ene: C–C=C near 120° (sp²), both CH₃ same side of double bond. Triple bond shorter.","hints":["Rotate left model, look along chain from side. Four carbons stay in line?","Right model: four carbons in a line? Both CH₃ same side of C=C, or opposite?"],"options":[{"why":"Yes. Alkyne sp carbons: line. Alkene sp² carbons: bend; cis = both CH₃ same side."},{"why":"Only alkyne straight. Alkene C–C=C near 120°: bent."},{"why":"Reverse: three pairs pull nuclei closer than two: triple bond shorter."},{"why":"Linear unit has no sides: one but-2-yne. Cis, trans only for bent C=C."}]}, // CAVEMAN
       id: 's02', type: 'choice', skill: 'hybridization',
       prompt: 'On the left is a solid model of <b>but-2-yne</b>; on the right is <b>(Z)-but-2-ene</b>, the alkene you will make from it later. Turn them and look at the four carbons of each. Which statement matches what you see?',
       visual: { widget: 'model3d', config: { mol: 'but-2-yne', compare: 'cis-but-2-ene', highlight: [0, 1, 2, 3] } },
@@ -58,10 +61,12 @@ export default arrange({
       worked: 'In but-2-yne each C–C≡C angle is 180° (sp carbons), so all four carbons are collinear. In (Z)-but-2-ene each C–C=C angle is near 120° (sp² carbons) and the two CH₃ groups are on the same side of the double bond. The triple bond is also the shorter bond.'
     },
     {
+      caveman: {"html":"<p><b>Alkynes</b>: C≡C = one σ (sp–sp) + two π. CₙH₂ₙ₋₂. <b>Terminal</b>: H on triple bond (R–C≡C–H); <b>internal</b>: none (R–C≡C–R′). Naming as Lesson 07: -yne, number from end nearer triple bond: <name new=\"pent-1-yne\" old=\"1-pentyne\"></name>.</p>"}, // CAVEMAN
       id: 's03', type: 'explain', skill: 'hybridization',
       html: '<p><b>Alkynes</b> contain a C≡C: one σ bond from sp–sp overlap plus two π bonds. The formula is CₙH₂ₙ₋₂. A <b>terminal</b> alkyne has an H on the triple bond (R–C≡C–H); an <b>internal</b> alkyne does not (R–C≡C–R′). Naming follows Lesson 07 with the ending -yne, numbering from the end nearer the triple bond: <name new="pent-1-yne" old="1-pentyne"></name>.</p>'
     },
     {
+      caveman: {"prompt":"Naming from Lesson 07 with triple bond. Name this alkyne, either IUPAC style; numbers and order count.","worked":"Five carbons: pent-. Triple bond at end carbon: number from there: C1≡C2. <name new=\"pent-1-yne\" old=\"1-pentyne\"></name>.","hints":["Longest chain with triple bond: stem (meth, eth, prop, but, pent …).","Number from end nearer triple bond; locant before -yne (new) or in front (old)."]}, // CAVEMAN
       id: 's04', type: 'input', skill: 'naming',
       prompt: 'Try the naming from Lesson 07 with a triple bond. Name this alkyne in either IUPAC style; spaces, capitals and hyphens do not matter, but numbers and order do.',
       smiles: 'CCCC#C',
@@ -78,6 +83,7 @@ export default arrange({
       worked: 'Five carbons in a row: pent-. The triple bond starts at the end carbon, so number from that end: C1≡C2. The name is <name new="pent-1-yne" old="1-pentyne"></name>.'
     },
     {
+      caveman: {"prompt":"<b>Propyne</b> + <b>one</b> equivalent HBr. H–Br adds across triple bond, as across C=C in Lesson 09. Major product?","reveal":"<b>Vinylic halide</b> (on the C=C): <b>2-bromopropene</b>. Markovnikov again: H to terminal carbon (has the H), Br to more substituted carbon.","options":[{"why":"Yes. H to carbon with H, Br to more substituted (Markovnikov). One equivalent stops at vinylic halide."},{"why":"Br on end carbon: anti-Markovnikov. H to carbon with H, Br to more alkyl groups."},{"why":"Two Br need two equivalents HBr."},{"why":"Br on each carbon: Br₂ product. H–Br adds H, Br."}]}, // CAVEMAN
       id: 's05', type: 'predict', skill: 'alkynes',
       prompt: '<b>Propyne</b> reacts with <b>one</b> equivalent of HBr (one HBr for each alkyne). H–Br adds across the triple bond, as it added across a C=C in Lesson 09. Which major product do you expect?',
       equation: { reactants: ['CC#C'], products: [], cond: 'HBr (1 equiv.)' },
@@ -90,6 +96,7 @@ export default arrange({
       reveal: 'The product is a <b>vinylic halide</b> (“vinylic” means on the C=C): <b>2-bromopropene</b>. The regiochemistry is Markovnikov again: H goes to the terminal carbon (the one with the H) and Br to the more substituted carbon.'
     },
     {
+      caveman: {"prompt":"Propyne + <b>two</b> equivalents HBr (excess). Major product?","reveal":"<b>Geminal dihalide</b> (both X on <i>same</i> carbon): <b>2,2-dibromopropane</b>. One equivalent stops at vinylic halide; excess goes on.","options":[{"why":"Yes. Second H–Br Markovnikov too: Br to carbon already with Br: both Br same carbon: geminal."},{"why":"Product of ONE equivalent. Two: vinylic halide C=C reacts with second H–Br."},{"why":"Br on different carbons. Second addition follows Markovnikov’s rule: Br to carbon already with one."},{"why":"Four Br need two equivalents Br₂. Two H–Br: two Br total."}]}, // CAVEMAN
       id: 's06', type: 'predict', skill: 'alkynes',
       prompt: 'Now give propyne an <b>excess</b> of HBr: <b>two</b> equivalents. The vinylic halide still has a C=C. What is the major product?',
       equation: { reactants: ['CC#C'], products: [], cond: 'HBr (2 equiv.)' },
@@ -102,6 +109,7 @@ export default arrange({
       reveal: 'Two equivalents give a <b>geminal dihalide</b> (<i>geminal</i> = both X on the <i>same</i> carbon): <b>2,2-dibromopropane</b>. One equivalent stops at the vinylic halide; an excess carries on to the dihalide.'
     },
     {
+      caveman: {"prompt":"<b>Mechanism</b>, propyne + one H–Br, two steps. <b>1:</b> C≡C π bond attacks H of H–Br, H–Br pair leaves with Br (which carbon bonds H?). <b>2:</b> Br⁻ attacks + carbon.","worked":"Step 1: C≡C π bond → H of H–Br (H to carbon with H); H–Br → Br. + on CH₃ carbon. Step 2: Br⁻ lone pair → + carbon: 2-bromopropene, Br on more substituted carbon.","hints":["Step 1: two arrows: triple bond π bond to H, H–Br bond to Br. First also asks which carbon bonds H. Step 2: one arrow, Br⁻ lone pair.","H to carbon with H (chain end): + on CH₃ carbon. Step 2: Br⁻ lone pair to that + carbon."]}, // CAVEMAN
       id: 's07', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'Draw the <b>mechanism</b> for propyne + one H–Br at book level, in two steps. <b>Step 1:</b> a π bond of the C≡C attacks the H of H–Br, and the H–Br pair leaves with Br (say which carbon bonds to H). <b>Step 2:</b> Br⁻ attacks the carbon that has the + charge.',
       reaction: { reactants: ['CC#C', 'Br'], products: ['C=C(C)Br'] },
@@ -111,6 +119,7 @@ export default arrange({
       worked: 'Step 1: the C≡C π bond → the H of H–Br (H bonds to the carbon with the H); the H–Br bond → Br. That leaves a + on the CH₃-bearing carbon. Step 2: a lone pair on Br⁻ → the + carbon. The product is 2-bromopropene, with Br on the more substituted carbon.'
     },
     {
+      caveman: {"prompt":"<b>Hex-1-yne</b> + <b>one</b> equivalent Br₂ in CH₂Cl₂. Br₂ adds <b>anti</b> (two Br opposite sides of new C=C). Product?","worked":"One equivalent: 1,2-dibromoalkene, C=C left. Anti: Br opposite sides: (E) isomer, as book's (E)-1,2-dibromobut-1-ene. Two equivalents: tetrabromide.","hints":["One equivalent Br₂ uses ONE π bond: C=C left. One Br per carbon.","Anti: Br opposite sides of C=C. Each drawing: same side or opposite?"],"options":[{"why":"Yes. One Br per carbon, opposite sides (anti). Br outranks other group: Br, Br opposite = E."},{"why":"Both Br SAME side. Halogens add anti: opposite sides."},{"why":"Four Br: two equivalents Br₂. One stops at dibromoalkene."},{"why":"No C=C left: two extra H. Br₂ adds two Br, uses one π bond."}]}, // CAVEMAN
       id: 's08', type: 'choice', skill: 'alkynes',
       prompt: '<b>Hex-1-yne</b> reacts with <b>one</b> equivalent of Br₂ in CH₂Cl₂. Br₂ adds across the triple bond with <b>anti</b> stereochemistry (the two Br atoms end up on opposite sides of the new C=C). Which product forms?',
       equation: { reactants: ['CCCCC#C'], products: [], cond: 'Br₂ (1 equiv.)' },
@@ -125,6 +134,7 @@ export default arrange({
       confirm: 'The book gives exactly this pattern for but-1-yne: anti addition of Br₂, (E)-1,2-dibromobut-1-ene. With 2 equivalents it carries on to the 1,1,2,2-tetrabromide.'
     },
     {
+      caveman: {"prompt":"<b>But-1-yne</b> + H₂O, H₂SO₄, HgSO₄. OH adds Markovnikov: first product <b>enol</b> (C=C–OH). Unstable: H shifts, O becomes C=O (tautomerises). Collectable product, where is C=O?","worked":"H to C1, OH to C2 (Markovnikov): CH₂=C(OH)CH₂CH₃. Enol tautomerises: H to C1, C=O at C2: CH₃–C(=O)–CH₂CH₃, butan-2-one.","hints":["Enol = C=C with OH on one carbon. O ends double bonded to same carbon; C=C lost.","Markovnikov: OH on more substituted C2. C=O on C2; C1 becomes CH₃."],"options":[{"why":"Yes. C=O on C2, carbon that had OH. Terminal alkyne: methyl ketone."},{"why":"Aldehyde needs OH on terminal carbon: anti-Markovnikov. Alkyne hydration puts OH, so C=O, on more substituted carbon."},{"why":"That is enol, first product. Enol, ketone interconvert fast, ketone favoured: not isolated."},{"why":"No oxygen here. Water adds H and OH: product keeps O."}]}, // CAVEMAN
       id: 's09', type: 'choice', skill: 'alkynes',
       prompt: '<b>But-1-yne</b> is hydrated with H₂O, H₂SO₄ and HgSO₄. OH adds in the Markovnikov sense, so the first product is the <b>enol</b> drawn here (C=C–OH). It does not stay that way: an H shifts and the O becomes double-bonded (it tautomerises). Which structure is the product you can actually collect, and where is its C=O?',
       equation: { reactants: ['C=C(O)CC'], products: [], cond: 'tautomerises' },
@@ -138,10 +148,12 @@ export default arrange({
       worked: 'Water adds H to C1 and OH to C2 (Markovnikov), giving CH₂=C(OH)CH₂CH₃. The enol tautomerises: the OH hydrogen moves to C1 and the O becomes double bonded to C2. The product is CH₃–C(=O)–CH₂CH₃, butan-2-one.'
     },
     {
+      caveman: {"html":"<p>Enol, ketone = tautomers: interconvert, equilibrium (⇌) strongly ketone: enols rarely isolated. OH adds Markovnikov: C=O on more substituted carbon. Terminal alkyne: methyl ketone; symmetrical internal: one ketone; unsymmetrical internal: mixture.</p>"}, // CAVEMAN
       id: 's10', type: 'explain', skill: 'alkynes',
       html: '<p><b>Enol and ketone</b> are <b>tautomers</b>: they interconvert rapidly, and the equilibrium (⇌) lies strongly on the ketone side, so enols are rarely isolated. Since OH adds Markovnikov, the C=O lands on the more substituted carbon. A terminal alkyne gives a <b>methyl ketone</b>, a symmetrical internal alkyne gives one ketone, and an unsymmetrical internal alkyne gives a <b>mixture</b> of the two possible ketones.</p>'
     },
     {
+      caveman: {"prompt":"Want <b>(Z)-but-2-ene</b> from <b>but-2-yne</b>. Both H same face of old triple bond; STOP at alkene. Which conditions?","worked":"H₂ over Pd/C (2 equivalents) takes triple bond to alkane. Lindlar stops at alkene; both H same face (syn): cis (Z)-but-2-ene.","hints":["Two catalysts add H₂. One goes to alkane. Which stops at alkene?","Syn addition: both H same face: alkyl groups same side: cis. Only Lindlar stops there."],"options":[{"why":"Yes. Lindlar: specially prepared palladium, stops at alkene. Both H same face (syn): CH₃ same side: cis (Z)."},{"why":"Pd/C goes all the way: both π bonds hydrogenated: butane, no C=C."},{"why":"Those hydrate alkyne to butan-2-one. No H₂: no alkene."},{"why":"Adds two Br across triple bond (anti): dibromoalkene, not alkene."}]}, // CAVEMAN
       id: 's11', type: 'choice', skill: 'alkynes',
       prompt: 'You want <b>(Z)-but-2-ene</b> (the model) from <b>but-2-yne</b>. Both H atoms must end up on the same face of the old triple bond, and the reaction must STOP at the alkene. Which conditions do that?',
       visual: { widget: 'model3d', config: { mol: 'cis-but-2-ene', highlight: [0, 1, 2, 3] } },
@@ -156,6 +168,7 @@ export default arrange({
       confirm: 'Lindlar: stops at the cis alkene. Pd/C with 2 equivalents of H₂: the alkane. Watch the catalyst, not just the H₂.'
     },
     {
+      caveman: {"prompt":"Acetylene, HC≡CH, pKa 25. <b>Sodium amide</b>, NaNH₂: NH₂⁻, conjugate base of ammonia (pKa ≈ 36). Does NH₂⁻ take H⁺ from acetylene? Tap acid each side, favoured side?","worked":"Left acid acetylene pKa 25; right ammonia pKa ≈ 36. Ammonia weaker acid: right (NH₃, acetylide anion) favoured.","hints":["Acid each side still has H⁺: acetylene left, ammonia right. Negative ions = bases.","Favours weaker acid, larger pKa. Compare 25 with ≈ 36."]}, // CAVEMAN
       id: 's12', type: 'try', skill: 'pka-direction', widget: 'equilibrium-arrow',
       prompt: 'A terminal alkyne has a weakly acidic C–H. In the Lesson 03 table acetylene, HC≡CH, has pKa 25. <b>Sodium amide</b>, NaNH₂, supplies the amide ion NH₂⁻, the conjugate base of ammonia (pKa ≈ 36). Does NH₂⁻ take the H⁺ from acetylene? Tap the acid on each side, then say which side is favoured.',
       reaction: { reactants: ['C#C', '[NH2-]'], products: ['C#[C-]', 'N'] },
@@ -165,6 +178,7 @@ export default arrange({
       worked: 'Left acid: acetylene, pKa 25. Right acid: ammonia, pKa ≈ 36. The larger pKa belongs to ammonia, the weaker acid, so the right side (NH₃ and the acetylide anion) is favoured.'
     },
     {
+      caveman: {"prompt":"<b>NaOH</b> instead. Hydroxide HO⁻, conjugate base of water (pKa 15.74). HO⁻ deprotonates acetylene? Two acids, which side wins. (Others: ethoxide, ethanol 16.00; cyanide, HCN 9.31; acetate, acetic acid 4.76. All below 25: too weak.)","worked":"Left acid acetylene, pKa 25. Right: water, 15.74. Acetylene weaker acid: left (acetylene, HO⁻) favoured. No acetylide anion.","hints":["Acetylene acid left; water acid right. Negative ions = bases.","Larger pKa, 25 or 15.74? Favours that weaker acid's side."]}, // CAVEMAN
       id: 's13', type: 'try', skill: 'pka-direction', widget: 'equilibrium-arrow',
       prompt: 'Now try <b>NaOH</b> instead. Hydroxide, HO⁻, is the conjugate base of water (pKa 15.74). Does HO⁻ deprotonate acetylene? Locate the two acids and decide which side wins. (Other bases are tested the same way, with the pKa of their conjugate acid from Lesson 03: ethoxide, from ethanol 16.00; cyanide, from HCN 9.31; acetate, from acetic acid 4.76. All are below 25, so all are too weak.)',
       reaction: { reactants: ['C#C', '[OH-]'], products: ['C#[C-]', 'O'] },
@@ -174,10 +188,12 @@ export default arrange({
       worked: 'Left acid: acetylene, pKa 25. Right acid: water, pKa 15.74. Acetylene has the larger pKa, so it is the weaker acid and the left side (acetylene and HO⁻) is favoured. HO⁻ does not form the acetylide anion.'
     },
     {
+      caveman: {"html":"<p>Terminal alkyne C–H pKa ≈ 25, alkene C–H ≈ 44; water 15.74, NH₃ ≈ 36. Weaker acid favoured: NH₂⁻ removes H, HO⁻ cannot. <b>Acetylide anion</b>: carbon lone pair: base, <b>nucleophile</b>: attacks alkyl halide.</p>"}, // CAVEMAN
       id: 's14', type: 'explain', skill: 'acetylides',
       html: '<p><b>Why NaNH₂ and not NaOH.</b> A terminal alkyne C–H has pKa ≈ 25, an alkene C–H ≈ 44. Water is 15.74 and NH₃ ≈ 36. The equilibrium favours the weaker acid, so NH₂⁻ removes the H and HO⁻ cannot. The <b>acetylide anion</b> has a lone pair on carbon, so it is both a base and a <b>nucleophile</b>: it can attack an alkyl halide.</p>'
     },
     {
+      caveman: {"prompt":"<b>Acetylene → propyne</b>. <b>1:</b> amide ion (NaNH₂) removes terminal H⁺. <b>2:</b> acetylide anion attacks carbon of CH₃–Br, C–Br pair leaves with Br. (Chapter 7: substitution; here just electron flow.)","worked":"Step 1: N lone pair → H; C–H → C (C⁻). Step 2: acetylide lone pair → carbon of CH₃Br; C–Br → Br. Propyne, Br⁻, NH₃.","hints":["Step 1: two arrows: N lone pair to H, C–H bond to carbon (lone pair). Step 2: two: acetylide lone pair to CH₃Br carbon, C–Br bond to Br.","Arrows start at electrons, point to destination. New bond to CH₃ carbon from acetylide lone pair; Br takes C–Br pair."]}, // CAVEMAN
       id: 's15', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'Draw the mechanism of <b>acetylene → propyne</b>. <b>Step 1:</b> the amide ion (from NaNH₂) removes the terminal H as H⁺. <b>Step 2:</b> the acetylide anion attacks the carbon of CH₃–Br and the C–Br bond pair leaves with Br. (The book studies this substitution in Chapter 7; for now it is just the electron flow, drawn as one step.)',
       reaction: { reactants: ['C#C', '[NH2-]', 'CBr'], products: ['CC#C', 'N', '[Br-]'] },
@@ -187,6 +203,7 @@ export default arrange({
       worked: 'Step 1: lone pair on N → H; C–H bond → C (now C⁻ with a lone pair). Step 2: lone pair on the acetylide carbon → the carbon of CH₃Br; the C–Br bond → Br. Products: propyne and Br⁻ (and NH₃ from step 1).'
     },
     {
+      caveman: {"prompt":"<b>4-Methylpent-2-yne</b>, CH₃–C≡C–CH(CH₃)₂ <mol smiles=\"CC#CC(C)C\" label=\"4-methylpent-2-yne\"></mol>: two ways on paper, new bond next to CH₃ or next to isopropyl. One route works. Which?","worked":"Cut at triple bond. Isopropyl side: (CH₃)₂CHBr, secondary: fails. Methyl side: CH₃Br, fine. Start from 3-methylbut-1-yne (has isopropyl), NaNH₂ for acetylide, add CH₃Br.","hints":["Halide must be primary or methyl, RCH₂X. Which possible halide is not?","Isopropyl cannot come from halide: part of starting alkyne. Only methyl left for halide."],"options":[{"why":"Yes. Acetylide attacks CH₃Br, methyl halide: works. Branched piece in alkyne, not halide."},{"why":"(CH₃)₂CHBr SECONDARY. Acetylide works only with primary (RCH₂X), methyl halides."},{"why":"Hydroxide too weak: water pKa (15.74) below alkyne (≈ 25): almost no acetylide."},{"why":"Wrong order: NaNH₂ FIRST. Alkyne ignores CH₃Br."}]}, // CAVEMAN
       id: 's16', type: 'choice', skill: 'acetylides',
       prompt: '<b>4-Methylpent-2-yne</b>, CH₃–C≡C–CH(CH₃)₂ <mol smiles="CC#CC(C)C" label="4-methylpent-2-yne"></mol>, can be built in two ways on paper, depending on which side of the C≡C the new bond is made (next to CH₃, or next to the isopropyl group). Only one route works. Which one?',
       options: [
@@ -200,6 +217,7 @@ export default arrange({
       confirm: 'Only primary (and methyl) halides: the acetylide has to attack the carbon from one side and that is easy only on a CH₃ or RCH₂ carbon. Put the branching in the alkyne instead.'
     },
     {
+      caveman: {"problem":"hexan-2-one <mol smiles=\"CCCCC(C)=O\" label=\"hexan-2-one\"></mol> from acetylene, any halide: synthesis, backwards.","rule":"Plan <b>backwards</b>: last step first (ketone: alkyne hydration giving ONE ketone; cis alkene: Lindlar), then skeleton: acetylide + <b>primary</b> alkyl halide. NaNH₂ before halide.","moves":[{"ask":"Methyl ketone, C=O on C2. Which alkyne hydrated (H₂O, H₂SO₄, HgSO₄) gives exactly it?","options":[{"why":"Yes. OH on more substituted C2, enol tautomerises: C=O on C2. Terminal alkyne: that one ketone."},{"why":"Hex-2-yne: OH on C2 or C3 equally: MIXTURE hexan-2-one, hexan-3-one."},{"why":"H₃O⁺ gives alkene alcohol (Lesson 09), not ketone."}]},{"ask":"Hex-1-yne = HC≡C–CH₂CH₂CH₂CH₃ from acetylene: which halide?","options":[{"why":"Yes. HC≡C⁻ + CH₃CH₂CH₂CH₂Br gives HC≡C–CH₂CH₂CH₂CH₃: 2 + 4 = 6 carbons."},{"why":"2-Bromobutane secondary: fails with acetylide. Also branched sec-butyl, not unbranched."},{"why":"CH₃Br adds one carbon: propyne. Halide must give four."}]},{"ask":"Which reagent sequence?","then":"Check: 2 C + butyl 4 C = 6 C, C=O on C2.","options":[{"why":"Yes. Acetylide, lengthen to hex-1-yne, hydrate to methyl ketone."},{"why":"Hydrating first uses up triple bond: no chain to build (acetylene gives no ketone)."},{"why":"Lindlar gives alkene: no acidic C–H, no acetylide, not ketone."}]}]}, // CAVEMAN
       id: 's17', type: 'worked', skill: 'synthesis',
       problem: 'Plan a synthesis of <b>hexan-2-one</b> <mol smiles="CCCCC(C)=O" label="hexan-2-one"></mol> from <b>acetylene</b> and any alkyl halide. Work backwards, one decision at a time.',
       moves: [
@@ -233,6 +251,7 @@ export default arrange({
       rule: 'Plan <b>backwards</b>: decide what the last step makes (a ketone needs hydration of an alkyne that gives ONE ketone; a cis alkene needs Lindlar), then build the carbon skeleton earlier with an acetylide and a <b>primary</b> alkyl halide. NaNH₂ always comes before the halide.'
     },
     {
+      caveman: {"prompt":"Make <b>(Z)-hex-2-ene</b> from <b>propyne</b>. Tap reagent cards, order them, <b>Run the plan</b>. Wrong card or order tells why.","worked":"(1) NaNH₂: acetylide anion. (2) CH₃CH₂CH₂Br: hex-2-yne. (3) H₂, Lindlar: (Z)-hex-2-ene. (CH₃)₂CHBr secondary, NaOH too weak, Pd/C: alkane, hydration: ketone.","hints":["Start from target: cis C=C from alkyne, H₂, Lindlar. Alkyne: triple bond C2–C3, six carbons. Propyne three.","Add three carbons at terminal carbon: acetylide (NaNH₂), PRIMARY three-carbon halide, then Lindlar."]}, // CAVEMAN
       id: 's18', type: 'try', skill: 'synthesis', widget: 'synthesis-planner',
       prompt: 'Your turn: make <b>(Z)-hex-2-ene</b> from <b>propyne</b>. Tap reagent cards to build the plan, put them in order, then press <b>Run the plan</b>. The plan is run on the real reaction rules, so a wrong card or a wrong order tells you why.',
       config: { start: 'CC#C', target: 'C/C=C\\CCC', deck: ['NaNH2', 'PrBr', 'H2_Lindlar', 'H2_Pd', 'iPrBr', 'NaOH', 'H2O_Hg'] },
@@ -241,6 +260,7 @@ export default arrange({
       worked: 'Order: (1) NaNH₂ turns propyne into its acetylide anion. (2) CH₃CH₂CH₂Br adds three carbons: hex-2-yne. (3) H₂ with the Lindlar catalyst gives (Z)-hex-2-ene. (CH₃)₂CHBr is secondary, NaOH is too weak, Pd/C goes to the alkane, and hydration gives a ketone.'
     },
     {
+      caveman: {"prompt":"Lab, alkynes. Pick alkyne and reagent, predict product BEFORE lab. Watch equivalents, C=O position, alkene geometry. Two right, two different alkynes.","worked":"Hex-1-yne + HBr (1): 2-bromohex-1-ene; (2): 2,2-dibromohexane; Br₂ (1): (E)-1,2-dibromohex-1-ene; H₂O/HgSO₄: hexan-2-one; H₂/Lindlar: hex-1-ene; H₂/Pd: hexane","hints":["First equivalents: 1 HX or X₂ stops at C=C; 2 use both π bonds. H₂: which catalyst. Water, HgSO₄: ketone.","Wrong geometry (Z where anti gives E), C=O at chain end, or wrong halogen count: other reaction. Match reagent to product groups."]}, // CAVEMAN
       id: 's19', type: 'try', skill: 'alkynes', widget: 'reaction-lab',
       prompt: 'Back to the lab, now with alkynes. Pick an alkyne and a reagent and predict the product BEFORE the lab shows it. Watch the number of equivalents, the position of the C=O, and the geometry of any alkene. Get two predictions right, using at least two different alkynes.',
       config: { need: 2, alkynes: ['propyne', 'but-1-yne', 'but-2-yne', 'hex-1-yne', 'hex-3-yne'], reagents: ['HBr_1', 'HBr_2', 'Br2_1', 'Br2_2', 'H2O_Hg', 'H2_Lindlar', 'H2_Pd'] },
@@ -249,6 +269,7 @@ export default arrange({
       worked: 'For example: hex-1-yne + HBr (1 equiv.) gives 2-bromohex-1-ene; + HBr (2 equiv.) gives 2,2-dibromohexane; + Br₂ (1 equiv.) gives (E)-1,2-dibromohex-1-ene; + water with HgSO₄ gives hexan-2-one; + H₂/Lindlar gives hex-1-ene; + H₂/Pd gives hexane.'
     },
     {
+      caveman: {"html":"<p>HX, X₂ add once (vinylic halide, anti dihalide) or twice (geminal dihalide, tetrahalide). H₂O, H₂SO₄, HgSO₄: enol, ketone. H₂/Pd/C: alkane; H₂/Lindlar: cis alkene. NaNH₂ deprotonates terminal alkyne; acetylide + primary alkyl halide: alkyne.</p>"}, // CAVEMAN
       id: 's20', type: 'explain', skill: 'alkynes',
       html: '<p><b>Recap.</b> HX and X₂ add once (vinylic halide; anti 1,2-dihalide) or twice (geminal dihalide; tetrahalide). H₂O with H₂SO₄ and HgSO₄ gives an enol, then a ketone. H₂/Pd/C gives the alkane, H₂/Lindlar the cis alkene. NaNH₂ deprotonates a terminal alkyne; the acetylide plus a <b>primary</b> alkyl halide builds a longer alkyne. Plan backwards: skeleton first, then the functional group.</p>'
     }

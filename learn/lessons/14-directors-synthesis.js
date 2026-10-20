@@ -13,10 +13,11 @@ const mol = (s, l) => `<mol smiles="${s}" label="${l}"></mol>`;       // closed 
 
 /** Move the correct option to a different place in each question (deterministic), so the right answer is not always first. */
 function arrange(lesson) {
-  const place = (opts, k) => { const i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); };
+  // the caveman copies of the options (st.caveman.options, in the same order as options) move together with the options they belong to
+  const place = (opts, k, cv) => { const n = opts.length, i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); if (cv && cv.length === n) { const [d] = cv.splice(i, 1); cv.splice(k % (cv.length + 1), 0, d); } };
   lesson.steps.forEach((st, n) => {
-    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length);
-    if (st.type === 'worked') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length));
+    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length, st.caveman && st.caveman.options);
+    if (st.type === 'worked') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length, st.caveman && st.caveman.moves && st.caveman.moves[k] && st.caveman.moves[k].options));
   });
   return lesson;
 }
@@ -39,6 +40,7 @@ export default arrange({
   ],
   steps: [
     {
+      caveman: {"prompt":"Toluene <mol smiles=\"Cc1ccccc1\" label=\"toluene\"></mol>: nitrated (HNO₃, H₂SO₄; electrophile NO₂⁺). C–H: two <b>ortho</b>, two <b>meta</b>, one <b>para</b> to CH₃. NO₂ goes where?","reveal":"<b>Ortho and para.</b> Group on ring decides how <i>fast</i> next substitution goes (vs benzene) and <i>where</i> new group lands. Three families. Sort some.","options":[{"why":"Yes. CH₃ steers NO₂ ortho and para; ring also reacts faster than benzene."},{"why":"Not observed. CH₃ sends new group ortho and para, not meta. (Some groups send meta: soon.)"},{"why":"Ratios if CH₃ had no influence (two ortho, two meta, one para C–H). It does: almost nothing meta."},{"why":"NO₂⁺ attacked by π electrons of RING, not CH₃ C–H bonds: substitution on ring."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'directors',
       prompt: `Toluene ${mol('Cc1ccccc1', 'toluene')} has a CH₃ group on the ring. It is nitrated with HNO₃ and H₂SO₄ (the electrophile is NO₂⁺). The ring has three kinds of C–H: two <b>ortho</b>, two <b>meta</b> and one <b>para</b> to the CH₃. Where does the NO₂ go?`,
       options: [
@@ -50,6 +52,7 @@ export default arrange({
       reveal: '<b>Ortho and para.</b> Whatever group is already on the ring decides two things: how <i>fast</i> the next substitution goes (compared with benzene) and <i>where</i> the new group lands. There are only three families of groups. Sort some of them yourself.'
     },
     {
+      caveman: {"prompt":"Sort eight groups into three bins. <b>Giving</b> electrons to ring <b>activates</b>; <b>pulling</b> out <b>deactivates</b>. Wrong bin explained.","worked":"Activator, ortho/para: –NH₂, –OR, alkyl. Deactivator, ortho/para: –Cl (halogen). Deactivator, meta: –NO₂, –C≡N, –CHO, –CO₂H. Lone pair or alkyl: activator; δ+ atom: deactivator, meta; halogen excepted","hints":["Atom on ring: lone pair (N or O) shared with ring: –NH₂, –OR activate. Alkyl pushes electrons in. δ+ atom (N of –NO₂, C of –C≡N, carbonyl C of –CHO, –CO₂H) pulls out: deactivate, direct meta.","Exception: halogen. Electronegative: deactivates, yet directs ortho/para. Other deactivators direct meta; no activator directs meta."]}, // CAVEMAN
       id: 's02', type: 'try', skill: 'directors', widget: 'director-sort',
       prompt: 'Sort these eight groups into the three bins. A group that <b>gives</b> electrons to the ring <b>activates</b> it; a group that <b>pulls</b> electrons out <b>deactivates</b> it. A wrong bin is explained, so a guess costs nothing.',
       config: { groups: ['NH2', 'OR', 'alkyl', 'Cl', 'NO2', 'CN', 'CHO', 'COOH'] },
@@ -58,10 +61,12 @@ export default arrange({
       worked: 'Activator, ortho/para: –NH₂, –OR, alkyl. Deactivator, ortho/para: –Cl (the halogens). Deactivator, meta: –NO₂, –C≡N, –CHO, –CO₂H. Rule of thumb: a lone pair on the ring atom or an alkyl group means activator and ortho/para; a δ+ atom on the ring means deactivator and meta; the halogens are the one exception.'
     },
     {
+      caveman: {}, // CAVEMAN
       id: 's03', type: 'explain', skill: 'directors',
       html: '<p><b>The map (McMurry Figure 5.6).</b> Activators, ortho/para: –NH₂, –NHR, –NR₂, –OH, –OR, –NHCOR, alkyl, –C₆H₅. Deactivators, ortho/para: –F, –Cl, –Br, –I. Deactivators, meta: –NO₂, –C≡N, –SO₃H, –CHO, –COR, –CO₂H, –CO₂R, –NR₃⁺. There are <b>no meta-directing activators</b>. In nitration an –OH ring reacts about 1000 times faster than benzene and an –NO₂ ring more than ten million times slower. Why? Look at the carbocation.</p>'
     },
     {
+      caveman: {"prompt":"Why CH₃ sends E⁺ ortho and para? Carbocation: E⁺ (drawn Br) attacks carbon <b>para</b> to CH₃ of toluene. Draw curved arrows: all ring resonance forms. Pick <b>special form</b>: + on carbon carrying CH₃.","worked":"Three forms: + on two carbons next to sp³ carbon, and carbon opposite. In para attack opposite carbon carries CH₃: special form: + on carbon with electron-donating group.","hints":["Arrows start at electrons: C=C π bond next to C⁺, then single bond between. + moves to other end. Repeat until no new form.","sp³ carbon (Br, H) never holds +. After three ring forms, look at carbon carrying CH₃: in exactly one form it has +."]}, // CAVEMAN
       id: 's04', type: 'try', skill: 'directors', widget: 'resonance-drawer',
       prompt: 'Why does CH₃ send E⁺ ortho and para? Below is the carbocation made when an electrophile E⁺ (drawn as Br) attacks the carbon <b>para</b> to the CH₃ of toluene. Draw curved arrows to find all its ring resonance forms. Then pick the <b>special form</b>: the one where the + sits on the carbon that carries the CH₃.',
       config: {
@@ -73,6 +78,7 @@ export default arrange({
       worked: 'Three forms: the + sits on the two ring carbons next to the sp³ carbon, and on the carbon opposite it. For para attack the carbon opposite the sp³ carbon is the one that carries the CH₃. That form is the special one: the + is on the carbon that holds an electron-donating group.'
     },
     {
+      caveman: {"prompt":"Nitrobenzene. E⁺ attacks carbon <b>ortho</b> to NO₂. Find ring resonance forms (NO₂'s own not asked). Pick form with + on carbon carrying NO₂.","worked":"Three ring forms: + on two carbons next to sp³, and opposite. In ortho attack one carbon next to sp³ carries NO₂. Form with + there is bad: next to δ+ nitrogen.","hints":["Arrows start at ring C=C π bond next to C⁺, end on single bond between. Repeat until no new form (three).","Carbon carrying NO₂ in each form. In one it has +."]}, // CAVEMAN
       id: 's05', type: 'try', skill: 'directors', widget: 'resonance-drawer',
       prompt: 'Now nitrobenzene. E⁺ attacks the carbon <b>ortho</b> to the NO₂. Find the ring resonance forms (the NO₂ group’s own resonance is not asked for). Then pick the form that puts the + on the carbon that carries the NO₂ group.',
       config: {
@@ -84,6 +90,7 @@ export default arrange({
       worked: 'Three ring forms again: the + on the two carbons next to the sp³ carbon and on the carbon opposite it. For ortho attack, one of the carbons next to the sp³ carbon is the one that carries the NO₂. The form with the + on that carbon is the bad one, because it sits next to the δ+ nitrogen.'
     },
     {
+      caveman: {"worked":"Attack at C3: C3 sp³. + on C2, C4, C6. Group carbon C1: no form has + there. For ortho attack (C2): + on C1, C3, C5; para attack (C4): C3, C5, C1: C1 appears.","hints":["Number from group carbon (1). Meta attack at carbon 3 (sp³). Which carbons hold +?","+ on carbons next to sp³ (2, 4) and opposite (6). Group carbon 1: not on list."],"options":[{"why":"Yes. Special form needs + on group carbon; meta attack cannot. No extra stabilised form with CH₃, no bad form with NO₂."},{"why":"Only ortho and para attack put + on group carbon. Check forms: + always on carbon with only H."},{"why":"Donor or withdrawer does not change where + sits. Count: neither ring has + on group carbon in meta attack."},{"why":"sp³ carbon holds no +; + moves two bonds. In meta attack none is group carbon."}], get prompt() { const t = attackAt('Cc1ccccc1', 'meta'), n = attackAt('O=[N+]([O-])c1ccccc1', 'meta'); return `<b>meta</b> attack, both rings: toluene, nitrobenzene ring forms. Six forms: how many put + on carbon with the group?<br>${formTags(t, 'toluene, meta attack')}<br>${formTags(n, 'nitrobenzene, meta attack')}`; } }, // CAVEMAN
       id: 's06', type: 'choice', skill: 'directors',
       get prompt() {
         const t = attackAt('Cc1ccccc1', 'meta'), n = attackAt('O=[N+]([O-])c1ccccc1', 'meta');
@@ -100,6 +107,7 @@ export default arrange({
       confirm: 'So the result is general. For an ortho or para attack one form puts the + on the carbon that carries the group: a donor (CH₃, lone pair) makes that form extra stable, so ortho/para win; a δ+ atom (NO₂) makes it very unstable, so meta wins by avoiding it.'
     },
     {
+      caveman: {"worked":"Rate: Cl withdraws through σ bond (inductive): less reactive. Position: ortho, para attack: one form + on Cl-bearing carbon, Cl lone pair shares it. Meta: no such form. Halogens deactivating yet ortho/para directing.","hints":["Two facts: rate (slower), position (ortho/para). Different Cl effects.","Cl more electronegative: withdraws through σ bond. Cl has lone pairs: last form shows what lone pair does for +."],"options":[{"why":"Yes. Inductive withdrawal (through σ bond): deactivating; lone-pair donation helps only ortho, para carbocations: ortho/para."},{"why":"Lone-pair donation real, but helps only ortho, para attack. Ring 30 times slower than benzene: σ-bond withdrawal wins on rate."},{"why":"Ring atom is Cl: more electronegative than carbon: δ−, lone pairs. –NO₂: δ+ nitrogen, no lone pair."},{"why":"Size irrelevant: meta carbons no more crowded than para. Directing effect: lone pair donation in carbocation."}], get prompt() { const a = attackAt('Clc1ccccc1', 'ortho'); return `Chlorobenzene: nitration about 30 times <b>slower</b>, yet ortho, para products. Ortho attack forms (last: + on Cl).<br>${formTags(a, 'chlorobenzene, ortho attack')} ${mol(a.donor, 'extra form: + on Cl')}<br>What explains <b>both</b>?`; } }, // CAVEMAN
       id: 's07', type: 'choice', skill: 'directors',
       get prompt() {
         const a = attackAt('Clc1ccccc1', 'ortho');
@@ -116,6 +124,7 @@ export default arrange({
       confirm: 'The halogens are the paradox of Figure 5.6: electron-withdrawing by induction (deactivating) and electron-donating by resonance (ortho/para directing).'
     },
     {
+      caveman: {"prompt":"Predict where electrophile goes. Tap <b>every</b> carbon getting new group. Fifth ring: methyl, nitro: groups agree, no conflict.","worked":"Phenol: –OH ortho/para: two ortho, para carbons. Nitrobenzene, acetophenone: meta directors: two meta carbons. Chlorobenzene: halogens ortho/para. p-Nitrotoluene: both send E⁺ next to CH₃ (meta to NO₂).","hints":["Group's bin first. Ortho/para: E⁺ to two carbons next to group, and opposite. Meta: two carbons one further.","Tap equivalent carbons too: two ortho, two meta, one para. p-Nitrotoluene: carbons ortho to CH₃ AND meta to NO₂."]}, // CAVEMAN
       id: 's08', type: 'try', skill: 'directors', widget: 'ring-position',
       prompt: 'Predict where the electrophile goes. For each ring, tap <b>every</b> carbon that will carry the new group. The fifth ring has two groups (a methyl and a nitro group): when the groups agree, there is no conflict.',
       config: { attack: ['Oc1ccccc1', 'O=[N+]([O-])c1ccccc1', 'Clc1ccccc1', 'CC(=O)c1ccccc1', 'Cc1ccc(cc1)[N+](=O)[O-]'] },
@@ -124,6 +133,7 @@ export default arrange({
       worked: 'Phenol: –OH is an ortho/para director, so the two ortho carbons and the para carbon. Nitrobenzene and acetophenone: meta directors, so the two meta carbons. Chlorobenzene: the halogens direct ortho/para. p-Nitrotoluene: the carbons next to the CH₃ are meta to the NO₂, so both groups send E⁺ to those two carbons.'
     },
     {
+      caveman: {"prompt":"Lab: pick ring, reagent; predict product <b>or products</b> BEFORE lab (ortho/para director: two isomers). Some combinations fail: lab says why. Three right.","hints":["Group on ring, its bin: ortho/para director: TWO products (one answer); meta director: ONE.","Wrong answers: other bin's product, one of two isomers, or two new groups. Lab refuses combination: read why."]}, // CAVEMAN
       id: 's09', type: 'try', skill: 'directors', widget: 'reaction-lab',
       prompt: 'Back in the lab with substituted rings. Pick a ring and a reagent, and predict the product <b>or products</b> BEFORE the lab shows them (an ortho/para director gives two isomers, drawn together). Some combinations do not work, and the lab says why. Get three predictions right.',
       config: { need: 3, subst: { arenes: ['toluene', 'phenol', 'chlorobenzene', 'bromobenzene', 'nitrobenzene', 'benzoic-acid', 'acetophenone', 'benzonitrile', 'aniline'], reagents: ['bromination', 'chlorination', 'nitration', 'sulfonation', 'acetylation', 'methylation'] } },
@@ -132,6 +142,7 @@ export default arrange({
       worked: 'For example: toluene + Br₂/FeBr₃ gives o- and p-bromotoluene; nitrobenzene + Cl₂/FeCl₃ gives m-chloronitrobenzene; bromobenzene + HNO₃/H₂SO₄ gives o- and p-bromonitrobenzene; benzoic acid + HNO₃/H₂SO₄ gives m-nitrobenzoic acid. Nitrobenzene + CH₃Cl/AlCl₃ gives nothing, because the ring is too deactivated.'
     },
     {
+      caveman: {"prompt":"Ring resists KMnO₄; side chain does not. Propylbenzene <mol smiles=\"CCCc1ccccc1\" label=\"propylbenzene\"></mol> + KMnO₄, water, heated: aromatic product?","worked":"Propylbenzene benzylic carbon CH₂: has H. KMnO₄ oxidises chain to –CO₂H on ring carbon; other two carbons lost: benzoic acid. Ring untouched.","hints":["Ring not oxidised: look at alkyl group. Benzylic carbon (bonded to ring): has H?","Alkyl with benzylic H becomes –CO₂H on same ring carbon, any length (butylbenzene: benzoic acid)."],"options":[{"why":"Yes. KMnO₄ attacks benzylic C–H (carbon on ring), oxidises whole alkyl group to –CO₂H, any length. Rest lost."},{"why":"That oxidises far end. KMnO₄ attacks benzylic position, next to ring: carboxylic acid there."},{"why":"Not stopping at ketone: KMnO₄ takes benzylic carbon to carboxylic acid, cleaves rest."},{"why":"No H on benzylic carbon: no reaction. Here two: KMnO₄ oxidises."}]}, // CAVEMAN
       id: 's10', type: 'choice', skill: 'side-chains',
       prompt: `A benzene ring resists strong oxidants such as KMnO₄, but a side chain on it does not. Propylbenzene ${mol('CCCc1ccccc1', 'propylbenzene')} is heated with KMnO₄ in water. What is the aromatic product?`,
       options: [
@@ -145,6 +156,7 @@ export default arrange({
       confirm: 'Alkylbenzene to benzoic acid. That makes KMnO₄ useful in synthesis: it turns an ortho/para-directing CH₃ into a meta-directing –CO₂H.'
     },
     {
+      caveman: {"prompt":"tert-Butylbenzene <mol smiles=\"CC(C)(C)c1ccccc1\" label=\"tert-butylbenzene\"></mol> + KMnO₄, water, heated: what happens?","worked":"Benzylic carbon of tert-butyl, –C(CH₃)₃: ring, three CH₃: four bonds, no H. KMnO₄ cannot attack absent benzylic C–H: tert-butylbenzene recovered. (A flaw in a book synthesis problem.)","hints":["KMnO₄ needs what? Check carbon on ring in tert-butyl.","Draw tert-butyl: carbon, three CH₃, on ring. Count H."],"options":[{"why":"Yes. Oxidation starts at benzylic C–H. tert-Butyl benzylic carbon: three CH₃, ring, no H. Ring not attacked either."},{"why":"The trap. Benzoic acid needs benzylic H. tert-Butyl has none."},{"why":"KMnO₄ does not oxidise ring (aromatic stability): nothing else to attack."},{"why":"Needs CH₃ of tert-butyl oxidised. KMnO₄ attacks benzylic C–H: none: not attacked."}]}, // CAVEMAN
       id: 's11', type: 'choice', skill: 'side-chains',
       prompt: `Is every alkyl group oxidised? tert-Butylbenzene ${mol('CC(C)(C)c1ccccc1', 'tert-butylbenzene')} is heated with KMnO₄ in water. What happens?`,
       options: [
@@ -158,6 +170,7 @@ export default arrange({
       confirm: 'Rule: KMnO₄ oxidises an alkyl group only if its benzylic carbon has at least one H. tert-Butyl is the classic exception.'
     },
     {
+      caveman: {"prompt":"H₂ + Pd/C, ordinary pressure, adds to ordinary C=C. Styrene <mol smiles=\"C=Cc1ccccc1\" label=\"styrene\"></mol> (C=C on ring), H₂ and Pd/C, 1 atm. Product?","worked":"Vinyl C=C hydrogenated to CH₂–CH₃: ethylbenzene. Ring untouched under mild conditions. H₂, Pt, high pressure: ring too (benzene → cyclohexane).","hints":["Two kinds of C=C in styrene. Ordinary alkene? Aromatic ring, so stable?","Mild (Pd/C, 1 atm): ordinary C=C only. Ring: Pt (or Rh), high pressure, high temperature."],"options":[{"why":"Yes. Outside C=C hydrogenated; ring survives: harder to reduce."},{"why":"Reduces ring too. Ring needs Pt (or Rh), high pressure and temperature (book: o-xylene at 130 atm)."},{"why":"Reverse: ordinary C=C reacts easily; ring does not."},{"why":"C=C outside ring ordinary alkene: hydrogenated easily."}]}, // CAVEMAN
       id: 's12', type: 'choice', skill: 'side-chains',
       prompt: `Hydrogen with a Pd/C catalyst at ordinary pressure adds to ordinary C=C bonds. Styrene ${mol('C=Cc1ccccc1', 'styrene')} (a C=C on a benzene ring) is shaken with H₂ and Pd/C at 1 atm. What is the product?`,
       options: [
@@ -171,6 +184,7 @@ export default arrange({
       confirm: 'Selective reduction: C=C outside the ring first, the ring only under forcing conditions (H₂, Pt, high pressure). Benzene itself is reduced to cyclohexane only that way.'
     },
     {
+      caveman: {"prompt":"Aromatic rings with non-carbon atom: heterocycles. <b>Pyridine</b>: ring N replaces one CH. Six ring atoms sp², one p orbital each, up and down; N lone pair <i>outward</i> in plane, not π system. π electrons in pyridine ring?","worked":"Three π bonds × 2 = 6 π electrons, one per sp² ring atom. N lone pair in plane (sp²). Six, cyclic, conjugated: aromatic.","hints":["Three double bonds: each one π bond, 2 electrons. Count double bonds.","Or: one π electron per six sp² ring atoms. N lone pair in plane: not counted."]}, // CAVEMAN
       id: 's13', type: 'input', skill: 'directors',
       prompt: 'Aromatic rings are not always benzene: some contain an atom other than carbon (these are heterocycles). <b>Pyridine</b> has a ring N in place of one CH. Each of the six ring atoms is sp² and has one p orbital pointing up and down; the N lone pair points <i>outward</i> in the plane of the ring, not into the π system. How many π electrons does the ring of pyridine have?',
       smiles: 'c1ccncc1',
@@ -186,6 +200,7 @@ export default arrange({
       confirm: 'Six π electrons, one from each ring atom. Pyrimidine (two ring N) counts the same way.'
     },
     {
+      caveman: {"prompt":"<b>Pyrrole</b>: five-membered ring, two C=C, one N–H; lone pair in p orbital parallel to carbon p. π electrons?","worked":"Four carbons one π electron each (4). N–H nitrogen: lone pair in p orbital joins ring (2). 4 + 2 = 6: aromatic. Imidazole same: N–H lone pair plus one electron on other four ring atoms.","hints":["Two C=C π bonds first: 4. Then N–H nitrogen lone pair in p orbital adds?","Four carbons × 1 + 2 from N lone pair = ?"]}, // CAVEMAN
       id: 's14', type: 'input', skill: 'directors',
       prompt: '<b>Pyrrole</b> has a five-membered ring: four CH carbons in two C=C bonds, and an N–H. The N–H lone pair sits in a p orbital, parallel to the p orbitals of the carbons. How many π electrons does pyrrole have?',
       smiles: 'c1cc[nH]c1',
@@ -201,6 +216,7 @@ export default arrange({
       confirm: `Six again. Pyridine and pyrimidine: one π electron on each of the six ring atoms. Pyrrole and imidazole: one on each of four ring atoms plus the N–H lone pair. Naphthalene (two fused benzene rings) is a polycyclic aromatic hydrocarbon. ${mol('c1ccncc1', 'pyridine')} ${mol('c1cncnc1', 'pyrimidine')} ${mol('c1cc[nH]c1', 'pyrrole')} ${mol('c1c[nH]cn1', 'imidazole')} ${mol('c1ccc2ccccc2c1', 'naphthalene')}`
     },
     {
+      caveman: {"prompt":"<b>Make m-bromonitrobenzene from benzene.</b> Step order decides isomer. Tap cards into order, run plan: real directing rules.","worked":"Step 1: HNO₃, H₂SO₄: nitrobenzene. Step 2: Br₂, FeBr₃: m-bromonitrobenzene: –NO₂ meta director. Reversed: Br sends NO₂ ortho, para.","hints":["Backward. Br, NO₂ meta (1,3). Which is meta director?","Group on FIRST decides where second goes. Meta director first: next group meta."]}, // CAVEMAN
       id: 's15', type: 'try', skill: 'aromatic-synthesis', widget: 'synthesis-planner',
       prompt: 'Now put it together. <b>Make m-bromonitrobenzene from benzene.</b> The order of the two steps decides which isomer you get. Tap the cards into order and run the plan: it runs on the real directing rules.',
       config: { start: BZ, target: 'Brc1cccc(c1)[N+](=O)[O-]', deck: ['Br2_FeBr3', 'HNO3_H2SO4', 'Cl2_FeCl3', 'SO3_H2SO4', 'MeCl_AlCl3', 'Fe_H3O'], directors: true },
@@ -209,6 +225,7 @@ export default arrange({
       worked: 'Step 1: HNO₃, H₂SO₄ turns benzene into nitrobenzene. Step 2: Br₂, FeBr₃ on nitrobenzene gives m-bromonitrobenzene, because –NO₂ is a meta director. Reversed, the bromine on the ring sends NO₂ ortho and para.'
     },
     {
+      caveman: {"prompt":"<b>Make p-bromonitrobenzene from benzene.</b> Same groups, now <i>para</i>. Which first? (ortho, para separable.)","worked":"Step 1: Br₂, FeBr₃: bromobenzene. Step 2: HNO₃, H₂SO₄: o-, p-bromonitrobenzene; para separated. NO₂ first: meta isomer.","hints":["Backward: groups para (1,4). Which is ortho/para director?","Ortho/para director first. Next group ortho, para to it; separate isomers."]}, // CAVEMAN
       id: 's16', type: 'try', skill: 'aromatic-synthesis', widget: 'synthesis-planner',
       prompt: '<b>Make p-bromonitrobenzene from benzene.</b> The same two groups, but now they must end up <i>para</i>. Which goes on first? (Assume ortho and para isomers can be separated.)',
       config: { start: BZ, target: 'Brc1ccc(cc1)[N+](=O)[O-]', deck: ['Br2_FeBr3', 'HNO3_H2SO4', 'Cl2_FeCl3', 'SO3_H2SO4', 'MeCl_AlCl3', 'Fe_H3O'], directors: true },
@@ -217,6 +234,7 @@ export default arrange({
       worked: 'Step 1: Br₂, FeBr₃ on benzene gives bromobenzene. Step 2: HNO₃, H₂SO₄ on bromobenzene gives o- and p-bromonitrobenzene; the para isomer is separated. The order NO₂ first would give the meta isomer.'
     },
     {
+      caveman: {"prompt":"<b>Make m-chlorobenzoic acid from toluene.</b> One step changes a director: KMnO₄ on CH₃.","worked":"Step 1: KMnO₄, H₂O: benzoic acid. Step 2: Cl₂, FeCl₃: Cl meta to –CO₂H. Other order: Cl goes ortho, para of CH₃: o-, p-chlorobenzoic acid.","hints":["Cl, CO₂H meta. Which meta director; which reaction makes it from CH₃?","meta director first. KMnO₄: CH₃ to –CO₂H."]}, // CAVEMAN
       id: 's17', type: 'try', skill: 'aromatic-synthesis', widget: 'synthesis-planner',
       prompt: '<b>Make m-chlorobenzoic acid from toluene.</b> Two steps again, but one of them changes a director: remember what KMnO₄ does to a CH₃ group.',
       config: { start: 'Cc1ccccc1', target: 'OC(=O)c1cccc(Cl)c1', deck: ['Cl2_FeCl3', 'KMnO4_H2O', 'HNO3_H2SO4', 'Br2_FeBr3', 'Fe_H3O'], directors: true },
@@ -225,6 +243,7 @@ export default arrange({
       worked: 'Step 1: KMnO₄, H₂O turns toluene into benzoic acid. Step 2: Cl₂, FeCl₃ puts Cl meta to the –CO₂H: m-chlorobenzoic acid. In the other order the CH₃ sends Cl ortho and para, and oxidation then gives o- and p-chlorobenzoic acid.'
     },
     {
+      caveman: {"prompt":"<b>Make m-nitroacetophenone from benzene.</b> Order puzzle: Friedel–Crafts fails on rings with –NO₂, –C≡N, –SO₃H, –COR.","worked":"Step 1: CH₃COCl, AlCl₃: acetophenone. Step 2: HNO₃, H₂SO₄: NO₂ meta to acetyl. Reverse fails: no acylation of nitrobenzene.","hints":["Both meta directors: either first for position. But one reaction cannot run on ring with other group. Which?","Acylation fails on ring with –NO₂: acylate first."]}, // CAVEMAN
       id: 's18', type: 'try', skill: 'aromatic-synthesis', widget: 'synthesis-planner',
       prompt: '<b>Make m-nitroacetophenone from benzene.</b> Another order puzzle, with a second rule hiding in it: Friedel–Crafts reactions fail on a ring that already carries –NO₂, –C≡N, –SO₃H or –COR.',
       config: { start: BZ, target: 'CC(=O)c1cccc(c1)[N+](=O)[O-]', deck: ['HNO3_H2SO4', 'AcCl_AlCl3', 'Br2_FeBr3', 'MeCl_AlCl3', 'Fe_H3O'], directors: true },
@@ -233,6 +252,7 @@ export default arrange({
       worked: 'Step 1: CH₃COCl, AlCl₃ on benzene gives acetophenone. Step 2: HNO₃, H₂SO₄ puts NO₂ meta to the acetyl group. The other order fails at the first step (acylation of nitrobenzene does not work).'
     },
     {
+      caveman: {"problem":"Backward plan: p-bromobenzoic acid <mol smiles=\"OC(=O)c1ccc(Br)cc1\" label=\"p-bromobenzoic acid\"></mol>.","rule":"<b>Backward</b>: each group meta or ortho/para? Which step made it? Step must run on ring as it is. p-Bromobenzoic acid = benzene → CH₃Cl, AlCl₃ → Br₂, FeBr₃ → KMnO₄.","moves":[{"ask":"Br, CO₂H para. Brominate benzoic acid?","options":[{"why":"Yes. Gives m-bromobenzoic acid: wrong isomer."},{"why":"Para only for ortho/para directors; meta director sends meta."},{"why":"More catalyst: orientation set by group on ring."}]},{"ask":"Where could –CO₂H come from, Br para?","then":"Precursor: p-bromotoluene.","options":[{"why":"Yes. KMnO₄: CH₃ to –CO₂H; Br already para."},{"why":"That route failed: meta isomer."},{"why":"m-bromotoluene: CH₃ meta to Br. Needs para."}]},{"ask":"p-Bromotoluene from toluene?","options":[{"why":"Yes. o-, p-bromotoluene, separated. (Book: bromobenzene + CH₃Cl, AlCl₃ works: Br ortho/para director.)"},{"why":"Ortho equally good (two ortho carbons): both isomers form, separate."},{"why":"Wrong order: –CO₂H first, meta director."}]},{"ask":"Toluene from benzene?","then":"Backward: product ← p-bromotoluene ← toluene ← benzene.","options":[{"why":"Yes. Benzene not deactivated: alkylation works, first."},{"why":"FeBr₃ makes Br⁺, not CH₃⁺. Alkylation: alkyl halide, AlCl₃."},{"why":"KMnO₄: CH₃ to CO₂H; adds none."}]}]}, // CAVEMAN
       id: 's19', type: 'worked', skill: 'aromatic-synthesis',
       problem: `Work backward to plan <b>p-bromobenzoic acid</b> ${mol('OC(=O)c1ccc(Br)cc1', 'p-bromobenzoic acid')} from benzene. Pick each move.`,
       moves: [
@@ -276,6 +296,7 @@ export default arrange({
       rule: 'Work <b>backward</b> from the target: look at each group (is it meta or ortho/para?), ask which step could have made it, and check that every step runs on the ring as it is at that moment. Order matters: p-bromobenzoic acid = benzene → CH₃Cl, AlCl₃ → Br₂, FeBr₃ → KMnO₄.'
     },
     {
+      caveman: {"prompt":"<b>Exam.</b> Plan synthesis of <b>p-nitrobenzoic acid</b> from benzene. Order matters; some reactions fail on some rings. ortho, para separable.","worked":"Step 1: CH₃Cl, AlCl₃: toluene (alkylation first). Step 2: HNO₃, H₂SO₄: o-, p-nitrotoluene; keep para. Step 3: KMnO₄: CH₃ to –CO₂H: p-nitrobenzoic acid. Oxidising first: NO₂ meta.","hints":["Backward. NO₂, CO₂H para: add NO₂ while ortho/para director on ring. –CO₂H from where?","CO₂H from CH₃ (KMnO₄); CH₃ from benzene (CH₃Cl, AlCl₃)."]}, // CAVEMAN
       id: 's20', type: 'try', skill: 'aromatic-synthesis', widget: 'synthesis-planner',
       prompt: '<b>Exam style.</b> Plan the synthesis of <b>p-nitrobenzoic acid</b> from benzene. Use only what you have learned: the order of the steps matters, and some reactions cannot be run on some rings. Assume ortho and para isomers can be separated.',
       config: { start: BZ, target: 'OC(=O)c1ccc(cc1)[N+](=O)[O-]', deck: ['MeCl_AlCl3', 'HNO3_H2SO4', 'KMnO4_H2O', 'Br2_FeBr3', 'AcCl_AlCl3', 'Fe_H3O'], directors: true },

@@ -34,10 +34,11 @@ const sceneOf = (c, extra = {}) => ({ widget: 'arrow-draw', config: { atoms: c.a
 
 /** Move the correct option to a different place in each question (deterministic), so the right answer is not always first. */
 function arrange(lesson) {
-  const place = (opts, k) => { const i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); };
+  // the caveman copies of the options (st.caveman.options, in the same order as options) move together with the options they belong to
+  const place = (opts, k, cv) => { const n = opts.length, i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); if (cv && cv.length === n) { const [d] = cv.splice(i, 1); cv.splice(k % (cv.length + 1), 0, d); } };
   lesson.steps.forEach((st, n) => {
-    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length);
-    if (st.type === 'worked' && st.id !== 's02') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length));
+    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length, st.caveman && st.caveman.options);
+    if (st.type === 'worked' && st.id !== 's02') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length, st.caveman && st.caveman.moves && st.caveman.moves[k] && st.caveman.moves[k].options));
   });
   return lesson;
 }
@@ -54,6 +55,7 @@ export default arrange({
   ],
   steps: [
     {
+      caveman: {"prompt":"Ethylene + HCl give chloroethane. Count molecules. What happened?","reveal":"<b>Addition</b>. Four kinds: addition (2 reactants → 1 product), elimination (1 → 2), substitution (2 swap parts → 2), rearrangement (1 → 1 isomer).","options":[{"why":"Yes. C₂H₄ + HCl → C₂H₅Cl: all atoms in one product."},{"why":"That is one left, two right. Here reverse: two become one."},{"why":"Swap needs two products. Here one."},{"why":"Rearrangement starts from ONE molecule. Here two go in."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'reaction-types',
       prompt: 'Ethylene and HCl react to give chloroethane. Count the molecules on each side of the arrow. What has happened?',
       equation: { reactants: ['C=C', 'Cl'], products: ['CCCl'] },
@@ -67,6 +69,7 @@ export default arrange({
       reveal: 'This is an <b>addition</b>. There are four broad kinds of reaction: <b>addition</b> (2 reactants → 1 product), <b>elimination</b> (1 reactant → 2 products), <b>substitution</b> (2 reactants swap parts → 2 products) and <b>rearrangement</b> (1 reactant → 1 isomer).'
     },
     {
+      caveman: {"problem":"Classify four reactions. Count reactants, products; one to one: compare formulas.","rule":"Addition: 2 → 1. Elimination: 1 → 2 (H₂O or HCl off). Substitution: 2 → 2. Rearrangement: 1 → 1, same formula.","moves":[{"ask":"Ethanol loses water, acid catalyst. Reaction kind?","options":[{"why":"Addition: ONE product. Here: 1 reactant, 2 products."},{"why":"Yes. 1 → 2 (CH₃CH₂OH → CH₂=CH₂ + H₂O)."},{"why":"Substitution: two reactants, two products. Here: 1 reactant, 2 products."},{"why":"Rearrangement: ONE reactant, ONE product. Here: 1 reactant, 2 products."}]},{"ask":"Hydroxide + bromomethane. Reaction kind?","options":[{"why":"Addition: ONE product. Here: 2 reactants, 2 products."},{"why":"Elimination: ONE reactant splits in two. Here: 2 reactants, 2 products."},{"why":"Yes. 2 → 2 (CH₃Br + HO⁻ → CH₃OH + Br⁻): parts swapped."},{"why":"Rearrangement: ONE reactant, ONE product. Here: 2 reactants, 2 products."}]},{"ask":"Cyclohexene + HCl. Reaction kind?","options":[{"why":"Yes. 2 → 1 (C₆H₁₀ + HCl → C₆H₁₁Cl): joined, nothing left over."},{"why":"Elimination: ONE reactant splits in two. Here: 2 reactants, 1 product."},{"why":"Substitution: two reactants, two products. Here: 2 reactants, 1 product."},{"why":"Rearrangement: ONE reactant, ONE product. Here: 2 reactants, 1 product."}]},{"ask":"But-1-ene, acid catalyst, becomes but-2-ene. Reaction kind?","options":[{"why":"Addition: product holds atoms of both reactants. Here: 1 reactant, 1 product."},{"why":"Elimination: ONE reactant splits in two. Here: 1 reactant, 1 product."},{"why":"Substitution: two reactants, two products. Here: 1 reactant, 1 product."},{"why":"Yes. 1 → 1 (CH₂=CHCH₂CH₃ → CH₃CH=CHCH₃): same formula, atoms reorganized into isomer."}]}]}, // CAVEMAN
       id: 's02', type: 'worked', skill: 'reaction-types',
       problem: 'Classify these four reactions. Count the reactants and products; when it is one reactant to one product, compare the formulas.',
       moves: [
@@ -78,6 +81,7 @@ export default arrange({
       rule: '<b>Addition</b>: 2 → 1, nothing left over. <b>Elimination</b>: 1 → 2, a small molecule such as H₂O or HCl comes off. <b>Substitution</b>: 2 → 2, parts swapped. <b>Rearrangement</b>: 1 → 1, same formula, new structure.'
     },
     {
+      caveman: {"prompt":"Bond A–B: two electrons. Light breaks it: each atom keeps ONE. Which arrows?","reveal":"Even split = <b>homolytic</b> cleavage (fishhook arrows): <b>radicals</b>, neutral, unpaired electron. Both electrons to one atom = <b>heterolytic</b> (full arrow): ions. First kind: radical reactions; second: <b>polar</b>, far more common.","options":[{"why":"Yes. Fishhook arrow moves ONE electron: one each to A, B."},{"why":"Full-headed arrow moves a PAIR. Both electrons land on B, A gets none."},{"why":"Each full arrow carries two electrons: four total. Bond has two."}]}, // CAVEMAN
       id: 's03', type: 'predict', skill: 'mechanism',
       prompt: 'In a <b>mechanism</b> we follow the electrons. A covalent bond A–B holds two electrons. Light breaks it so that each atom keeps ONE of them. Which arrows show that?',
       aside: '<p><b>Arrow legend.</b> A full-headed arrow moves a <b>pair</b> of electrons (two electrons). A half-headed “fishhook” arrow moves <b>one</b> electron.</p>',
@@ -89,6 +93,7 @@ export default arrange({
       reveal: 'Splitting the pair evenly is <b>homolytic</b> cleavage (fishhook arrows). It makes <b>radicals</b>, neutral species with an unpaired electron. Giving both electrons to one atom is <b>heterolytic</b> cleavage (a full arrow), and it makes ions. Reactions of the first kind are radical reactions, the second kind <b>polar</b> reactions, and polar reactions are by far the more common.'
     },
     {
+      caveman: {"prompt":"H–Cl breaks polar in water: one atom keeps BOTH electrons. Forms?","worked":"Pair goes to more electronegative Cl (3.0): fourth lone pair, Cl⁻. H left empty: H⁺.","hints":["Polar break: one fragment both electrons, other empty orbital.","Electronegativity: H 2.1, Cl 3.0. Stronger pull keeps pair."],"options":[{"why":"Yes. Cl more electronegative (3.0 vs 2.1): keeps pair. H⁺ and Cl⁻."},{"why":"Reversed. Pair stays on more electronegative Cl (3.0), not H (2.1)."},{"why":"Homolytic break, fishhook arrows, radicals. Polar break: one atom takes both."},{"why":"Electrons do not vanish. Pair stays; charge conserved."}]}, // CAVEMAN
       id: 's04', type: 'choice', skill: 'mechanism',
       prompt: 'In water the H–Cl bond breaks in the polar way: BOTH bonding electrons stay with one atom. What forms?',
       options: [
@@ -101,6 +106,7 @@ export default arrange({
       worked: 'The bond pair goes to the more electronegative atom, Cl (3.0). Cl ends up with a fourth lone pair and a negative charge (Cl⁻); H is left with no electrons (H⁺).'
     },
     {
+      caveman: {"prompt":"Nucleophiles donate a pair. Tap the donating atom in each molecule.","worked":"O in H₂O (two lone pairs, δ−), N in NH₃ (one lone pair), Br⁻ (four lone pairs, negative), either ethylene carbon (π electrons above and below).","hints":["Nucleophile: lone pair, π bond or negative charge.","H₂O: O. NH₃: N. Br⁻: ion. Ethylene: either C=C carbon: double bond is source."]}, // CAVEMAN
       id: 's05', type: 'try', skill: 'nuc-elec', widget: 'site-picker',
       aside: '<p>From Lesson 01: oxygen in water has <b>two</b> lone pairs, nitrogen in ammonia has <b>one</b>, and the Br⁻ ion has <b>four</b>. A C=C bond also holds electrons that can be donated.</p>',
       prompt: 'Polar reactions pair an electron-rich site with an electron-poor one. Nucleophiles donate a pair of electrons. For each molecule, tap the atom that would donate it.',
@@ -110,6 +116,7 @@ export default arrange({
       worked: 'Tap O in H₂O (two lone pairs, δ−), N in NH₃ (one lone pair), the Br⁻ ion (four lone pairs and a negative charge), and either carbon of ethylene (the π electrons sit above and below the molecule where reagents can reach them).'
     },
     {
+      caveman: {"prompt":"Electrophiles accept a pair. Tap receiver in each molecule.","worked":"H in H–Br (Br more electronegative), C⁺ of CH₃CH₂⁺ (six electrons), B in BF₃ (six), acetone C=O carbon (δ+).","hints":["Electrophile electron-poor: positive, δ+, or under eight electrons.","H–Br: H (δ+). CH₃CH₂⁺: positive C. BF₃: B. Acetone: carbonyl C."]}, // CAVEMAN
       id: 's06', type: 'try', skill: 'nuc-elec', widget: 'site-picker',
       prompt: 'Electrophiles accept a pair of electrons. For each molecule, tap the atom that would receive one.',
       config: { items: [{ id: 'hbr', role: 'elec' }, { id: 'ethylcation', role: 'elec' }, { id: 'bf3', role: 'elec' }, { id: 'acetone', role: 'elec' }] },
@@ -118,10 +125,12 @@ export default arrange({
       worked: 'Tap H in H–Br (bonded to the more electronegative Br), the positively charged carbon of CH₃CH₂⁺ (six electrons), B in BF₃ (six electrons), and the C=O carbon of acetone (δ+ because oxygen pulls on it).'
     },
     {
+      caveman: {"html":"<p>Nucleophile: electron-rich (lone pair, π bond, negative charge), donates pair. Electrophile: electron-poor (+ or δ+, short of octet), accepts pair. Pair moves nucleophile to electrophile.</p><p>Lewis base = nucleophile; Lewis acid = electrophile. Water: lone pair from O, H⁺ from H: both.</p>"}, // CAVEMAN
       id: 's07', type: 'explain', skill: 'nuc-elec',
       html: '<p>A <b>nucleophile</b> (“nucleus-loving”) is electron-rich: a lone pair, a π bond or a negative charge. It donates a pair. An <b>electrophile</b> is electron-poor: a + or δ+ atom, or an atom short of an octet. It accepts a pair. In a polar reaction the pair moves from nucleophile to electrophile.</p><p>Lewis bases act as nucleophiles and Lewis acids as electrophiles. Neutral molecules can be both: water donates a lone pair from O, but donates H⁺ from H.</p>'
     },
     {
+      caveman: {"problem":"Curved arrow = where an electron pair goes. Three students broke a rule: find each.","rule":"Arrow starts at electrons (lone pair, bond; never H⁺), ends at atom or bond, nucleophile to electrophile. Charge conserved; no octet breaking (H: two). Gaining a bond = losing another.","moves":[{"ask":"NH₃ picks up H⁺. Arrow started on H⁺. Wrong?","options":[{"why":"Yes. H⁺ is bare proton, no electrons. Start on N lone pair, end on H⁺."},{"why":"H⁺ lost its only electron. Lone pair makes hydride H⁻, different."},{"why":"Page direction irrelevant. Arrow starts at electrons, ends at receiver."},{"why":"N in NH₃ has one lone pair: right start."}]},{"ask":"HO⁻ attacks chloromethane. One arrow, this product. Wrong?","options":[{"why":"Yes. Carbon max eight electrons. O bonds C: C–Cl pair leaves as Cl⁻."},{"why":"O lone pair right start: makes O–C bond. Trouble is at carbon."},{"why":"Hydroxide is a good nucleophile. Problem: five bonds on carbon."},{"why":"O ends neutral (two bonds, two lone pairs). Problem: carbon has too many bonds."}]},{"ask":"HO⁻ + HCl. Arrows right; products H₂O and Cl. Wrong?","options":[{"why":"Yes. Charge conserved each step. Cl gains pair as fourth lone pair: Cl⁻, total −1."},{"why":"Two arrows suffice: lone pair forms O–H, H–Cl pair moves to Cl."},{"why":"O made one bond but began negative: ends neutral H₂O. H₃O⁺ wrong charge."},{"why":"Cl has one bond here; five breaks octet. Error: missing negative charge."}]}]}, // CAVEMAN
       id: 's08', type: 'worked', skill: 'curved-arrows',
       problem: 'A curved arrow shows where an <b>electron pair</b> goes. Three students each broke a rule. Look at each wrong mechanism and say what is wrong.',
       moves: [
@@ -163,6 +172,7 @@ export default arrange({
       rule: 'Curved-arrow rules: an arrow <b>starts at electrons</b> (a lone pair or a bond, never at H⁺), <b>ends at an atom or bond</b>, and runs from the nucleophile to the electrophile. <b>Charge is conserved</b>, and <b>no atom may go over an octet</b> (H: two electrons). A full atom that gains a bond must lose another.'
     },
     {
+      caveman: {"prompt":"HCl + ethylene: π electrons exposed, H δ+. FIRST arrow starts where?","reveal":"π bond (nucleophile) to H (electrophile). H holds two electrons: C–H forms, H–Cl breaks: <b>second arrow</b> pair to Cl. Carbocation + Cl⁻.","options":[{"why":"Yes. Alkene nucleophile, H electrophilic end: arrow from π bond to H."},{"why":"H–Cl pair moves, but to Cl, more electronegative. To carbon would give five bonds."},{"why":"Cl is electron-rich end, but its lone pairs do not make new bond. Alkene is nucleophile."}]}, // CAVEMAN
       id: 's09', type: 'predict', skill: 'mechanism',
       prompt: 'HCl meets ethylene. The C=C π electrons are exposed, and the H of HCl is δ+. Where does the FIRST curved arrow start?',
       equation: { reactants: ['C=C', 'Cl'], products: [] },
@@ -174,6 +184,7 @@ export default arrange({
       reveal: 'Nucleophile (the π bond) to electrophile (H). But H can hold only two electrons, so as the new C–H bond forms, the H–Cl bond must break: a <b>second arrow</b> sends its pair onto Cl. The result is a carbocation and Cl⁻.'
     },
     {
+      caveman: {"prompt":"Draw whole mechanism of HCl adding to ethylene. Arrows for each step; right: watch electrons move.","worked":"Step 1: arrow C=C to H; arrow H–Cl to Cl: CH₃CH₂⁺, Cl⁻. Step 2: arrow Cl⁻ lone pair to C⁺: CH₃CH₂Cl.","hints":["Step 1: two arrows (H full: bond breaks). Step 2: one.","Step 1: C=C → H, H–Cl → Cl. Step 2: Cl⁻ lone pair → C⁺."]}, // CAVEMAN
       id: 's10', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'Now draw the whole mechanism of HCl adding to ethylene. Draw the arrows for each step; when you are right, watch the electrons move and the structures change.',
       reaction: { reactants: MECH['hcl-ethylene'].reactants, products: MECH['hcl-ethylene'].products },
@@ -183,6 +194,7 @@ export default arrange({
       worked: 'Step 1: arrow from the C=C bond to the H of HCl, and arrow from the H–Cl bond to Cl. That gives CH₃CH₂⁺ and Cl⁻. Step 2: arrow from a lone pair on Cl⁻ to the positive carbon, giving CH₃CH₂Cl.'
     },
     {
+      caveman: {"prompt":"Energy diagram of that reaction. Transition state = peak top (unstable, cannot be isolated); reaction intermediate = real, short-lived, in valley between peaks. Find them.","worked":"Transition states: maxima B, D. Intermediate: valley C, carbocation (CH₃CH₂⁺, Cl⁻): made step 1, used step 2.","hints":["Peak = highest point of step. Valley between peaks = real species.","Transition states: peaks B, D. Intermediate: valley C."]}, // CAVEMAN
       id: 's11', type: 'try', skill: 'energy-diagram', widget: 'energy-diagram',
       prompt: 'This energy diagram is for the reaction you just drew. The curve climbs and falls twice. A <b>transition state</b> is the top of a peak (an unstable in-between arrangement that cannot be isolated); a <b>reaction intermediate</b> is a real but short-lived species in a valley between two peaks. Find them.',
       config: { levels: HCL_ETHYLENE_LEVELS, mode: 'tasks', tasks: ['ts', 'intermediate'], caption: 'Illustrative energies, not measured values.' },
@@ -191,6 +203,7 @@ export default arrange({
       worked: 'Transition states are the energy maxima, B and D. The intermediate is the minimum between them, C: the carbocation (CH₃CH₂⁺ with Cl⁻), which forms in step 1 and is used up in step 2.'
     },
     {
+      caveman: {"prompt":"Energies in kJ/mol. Eact (activation energy) = climb from step start to peak; ΔH = overall change, reactants to products; rate-determining step = slowest. Read diagram.","worked":"Eact step 1 = 120 − 50 = 70 kJ/mol. ΔH = 10 − 50 = −40 kJ/mol: exothermic. Highest peak B: step 1 rate-determining.","hints":["Eact: from step's start level UP to peak. ΔH: first and last level only.","Step 1: A to B. ΔH: A to E (lower: negative). Slow step: highest peak B."]}, // CAVEMAN
       id: 's12', type: 'try', skill: 'energy-diagram', widget: 'energy-diagram',
       prompt: 'Same reaction, now with the energies written in (kJ/mol). <b>Eact</b> (activation energy) is the climb from where a step starts up to its peak; <b>ΔH</b> is the overall energy change from reactants to products; the <b>rate-determining step</b> is the slowest step. Read the diagram.',
       config: { levels: HCL_ETHYLENE_LEVELS, mode: 'tasks', tasks: ['eact:1', 'dh', 'dhsign', 'rds'], showValues: true, reveal: true, caption: 'Illustrative energies, not measured values.' },
@@ -199,6 +212,7 @@ export default arrange({
       worked: 'Eact of step 1 = B − A = 120 − 50 = 70 kJ/mol. ΔH = E − A = 10 − 50 = −40 kJ/mol, so energy is released (exothermic). The highest transition state is B, so step 1 is the rate-determining step.'
     },
     {
+      caveman: {"prompt":"Step 1 Eact = 70 kJ/mol, step 2 Eact = 15 kJ/mol. Which is right?","worked":"Large Eact: few molecules reach transition state: slow. Step 1 (70) slower than step 2 (15): step 1 rate-determining.","hints":["Hikers crossing a pass: high pass, few get over.","Compare Eact 70 and 15. Smaller barrier: faster step."],"options":[{"why":"Yes. Small Eact: most collisions reach transition state. Step 1 slow, rate-determining."},{"why":"Order irrelevant. Barrier height counts: step 1 larger Eact: slower."},{"why":"Opposite. Bigger barrier: fewer molecules over: slower."},{"why":"Each step own barrier, own rate. Overall = slowest step."}]}, // CAVEMAN
       id: 's13', type: 'choice', skill: 'energy-diagram',
       prompt: 'In the diagram, step 1 has Eact = 70 kJ/mol and step 2 has Eact = 15 kJ/mol. Which statement is right?',
       visual: { widget: 'energy-diagram', config: { levels: HCL_ETHYLENE_LEVELS, mode: 'view', showValues: true } },
@@ -212,6 +226,7 @@ export default arrange({
       worked: 'A large activation energy means few molecules have enough energy to reach the transition state, so the step is slow. Step 1 (70 kJ/mol) is slower than step 2 (15 kJ/mol), which is why step 1 is the rate-determining step.'
     },
     {
+      caveman: {"prompt":"Eact 70, ΔH −40 kJ/mol. Add catalyst. What changes?","reveal":"Catalyst: alternative mechanism, lower activation energy. Regenerated: no net change. Same reactants, products: ΔH, equilibrium unchanged. Enzymes = biological catalysts.","options":[{"why":"Yes. Different pathway, lower barrier. Same start and end: ΔH unchanged."},{"why":"Catalyst cannot change where reaction ends. Same molecules: ΔH, equilibrium unchanged."},{"why":"Only barrier changes. ΔH depends on reactants and products alone."},{"why":"Used constantly in lab, industry (Pd adds H₂ across C=C). Enzymes: biological."}]}, // CAVEMAN
       id: 's14', type: 'predict', skill: 'energy-diagram',
       prompt: 'A reaction has Eact = 70 kJ/mol and ΔH = −40 kJ/mol. A chemist adds a catalyst. What changes?',
       options: [
@@ -223,6 +238,7 @@ export default arrange({
       reveal: 'A <b>catalyst</b> speeds a reaction by providing an alternative mechanism with a lower activation energy. It takes part, but is regenerated, so there is no net change in it. The reactants and products are the same, so <b>ΔH</b> and the equilibrium stay put. Enzymes are biological catalysts.'
     },
     {
+      caveman: {"prompt":"Add catalyst: drag transition state down. Try products handle too. Check.","worked":"Drag transition state 120 to 90, products stay 10: Eact 70 to 40 kJ/mol, ΔH stays −40.","hints":["Only peak top should move.","Leave products. Drag transition state down 15+ kJ/mol, Check."]}, // CAVEMAN
       id: 's15', type: 'try', skill: 'energy-diagram', widget: 'energy-diagram',
       prompt: 'Add a catalyst yourself. Drag the transition state down to lower the barrier. The products handle is there too: see what happens if you move it, then press Check.',
       config: { levels: CATALYST_LEVELS, mode: 'catalyst', catalyst: { minDrop: 15 }, caption: 'Illustrative energies, not measured values.' },
@@ -231,6 +247,7 @@ export default arrange({
       worked: 'Drag the transition state handle down (say from 120 to 90) and leave the products at 10. Eact falls from 70 to 40 kJ/mol while ΔH stays −40 kJ/mol.'
     },
     {
+      caveman: {"problem":"Product, mechanism: <b>HBr + ethylene</b> (like HCl), then <b>but-2-ene</b>.","rule":"Symmetric alkene + H–X: π bond attacks H (H–X pair to X), then X⁻ attacks carbocation. Addition product.","moves":[{"ask":"HBr + ethylene: nucleophile?","options":[{"why":"Yes. As with HCl: exposed π electrons."},{"why":"H is δ+, electron-poor: electrophile."}]},{"ask":"What does step 1 give?","options":[{"why":"Yes. π bond forms C–H, H–Br pair to Br. Carbon that lost π share: +."},{"why":"Br just left as Br⁻. Bonds to carbon in step 2."},{"why":"Radicals come from fishhook arrows. Full arrow moves a PAIR to Br: Br⁻, carbon +."}]},{"ask":"Step 2: final product?","options":[{"why":"Yes. Br⁻ lone pair attacks positive carbon: new C–Br."},{"why":"Br⁻ attacks carbocation: Br in product."},{"why":"Only one HBr adds: one H, one Br."}]},{"ask":"CH₃CH=CHCH₃: how many carbocations?","options":[{"why":"Yes. Same cation CH₃CH₂CH⁺CH₃: one product."},{"why":"C=C carbons equivalent by symmetry: each H and CH₃. Identical cation."},{"why":"π bond exposed above and below plane: same as ethylene."}]},{"ask":"Product of but-2-ene + HBr?","options":[{"why":"Yes. Br⁻ attacks positive C2: addition product."},{"why":"Positive carbon is C2, not chain end. Br⁻ bonds there."},{"why":"Only one HBr adds: one H, one Br."},{"why":"C=C gone in addition: both carbons single bonds. This keeps double bond."}]}]}, // CAVEMAN
       id: 's16', type: 'worked', skill: 'mechanism',
       problem: 'Predict the product and the mechanism of <b>HBr + ethylene</b> by analogy with HCl, then do the same for <b>but-2-ene</b>.',
       moves: [
@@ -282,6 +299,7 @@ export default arrange({
       rule: 'Any symmetric alkene plus H–X follows the same two steps: the π bond attacks H (the H–X pair goes to X), then X⁻ attacks the carbocation. The result is an <b>addition</b> product.'
     },
     {
+      caveman: {"prompt":"Check prediction. Play each step: HBr adding to <name new=\"but-2-ene\" old=\"2-butene\"></name>.","worked":"Step 1: π bond to H, H–Br pair to Br: CH₃CH₂CH⁺CH₃, Br⁻. Step 2: Br⁻ attacks C⁺: 2-bromobutane.","hints":["Press “Play the electron flow” in each step.","Step 1 ends: carbocation, Br⁻. Step 2 joins them."]}, // CAVEMAN
       id: 's17', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'Check your prediction. Press play for each step and watch the mechanism of HBr adding to <name new="but-2-ene" old="2-butene"></name>.',
       reaction: { reactants: MECH['hbr-butene'].reactants, products: MECH['hbr-butene'].products },

@@ -6,9 +6,26 @@ import { skillRule } from './skills.js';
 import { generate } from './generators.js';
 import { normName } from './naming.js';
 import { matchNameForms } from './generators-naming-levels.js';
-import { tAuto } from './voice.js';
+import { t, tAuto } from './voice.js';
 import { HUB_BY_ID } from './reaction-hub.js';
 import { svgWithLonePairs } from './lp-draw.js';
+
+// ---- caveman voice for lesson text. A lesson step may carry `caveman: { prompt, problem, html, reveal, rule, worked, trap, hints: [..], options: [{ why }, ..], moves: [{ ask, then, options: [{ why }, ..] }, ..] }`
+//      (terse copies of the step's own fields, arrays in the same order as the lesson data). Each helper gives the caveman copy when the switch is on AND the step has one, else the normal text,
+//      so lessons without a caveman object keep working. Answers (option text, answer, accept, smiles) are never swapped.
+/** step[key] in the current voice (key: prompt, problem, html, reveal, rule, worked, trap). */
+export function cvSay(step, key) { return t(step[key], step.caveman && step.caveman[key]); }
+/** The i-th hint. */
+export function sayHint(step, i) { const hs = (step.hints || []); return t(hs[i], step.caveman && step.caveman.hints && step.caveman.hints[i]); }
+/** The `why` of option object `o` of the step (found by identity, so a shuffled display order still reads the right line). */
+export function sayWhy(step, o) { const i = (step.options || []).indexOf(o); return t(o.why, step.caveman && step.caveman.options && step.caveman.options[i] && step.caveman.options[i].why); }
+/** Move k of a worked step: field 'ask' or 'then'. */
+export function sayMove(step, k, field) { const mv = (step.moves || [])[k] || {}; return t(mv[field], step.caveman && step.caveman.moves && step.caveman.moves[k] && step.caveman.moves[k][field]); }
+/** The `why` of option object `o` inside move k of a worked step. */
+export function sayMoveWhy(step, k, o) {
+  const i = ((step.moves || [])[k] || { options: [] }).options.indexOf(o), c = step.caveman && step.caveman.moves && step.caveman.moves[k];
+  return t(o.why, c && c.options && c.options[i] && c.options[i].why);
+}
 
 /** An unclosed <mol ...> (or <molpair ...>) swallows the text after it when parsed as HTML; close any that are left open. Pure. */
 export function closeMolTags(html) {
@@ -126,16 +143,17 @@ function grader(step, ctx, host) {
   const say = (kind, html) => { fb.className = 'fb ' + kind; fb.innerHTML = ''; fb.append(rich(html, 'p')); };
   return {
     get wrongCount() { return wrong; },
-    wrong(diagnosis) {
+    // `shown`: the text to display when it differs from the diagnosis that is logged (the caveman copy of an option's why)
+    wrong(diagnosis, shown) {
       wrong++;
       ctx.mistake(step.skill, step.id, diagnosis);
-      say('bad', diagnosis);
+      say('bad', shown != null ? shown : diagnosis);
       hints.innerHTML = '';
       const hs = step.hints || [];
-      if (wrong >= 1 && hs[0]) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 1 '), hs[0]));
-      if (wrong >= 2 && hs[1]) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 2 '), hs[1]));
+      if (wrong >= 1 && hs[0]) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 1 '), sayHint(step, 0)));
+      if (wrong >= 2 && hs[1]) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 2 '), sayHint(step, 1)));
       if (wrong >= 3 && step.worked) {
-        hints.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), rich(step.worked, 'span')));
+        hints.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), rich(cvSay(step, 'worked'), 'span')));
         ctx.done();
       }
       return wrong;
@@ -191,7 +209,7 @@ function inputRow(onSubmit, placeholder = 'Your answer') {
 }
 
 function addPrompt(host, step) {
-  host.append(rich(step.prompt, 'h2', 'prompt'));
+  host.append(rich(cvSay(step, 'prompt'), 'h2', 'prompt'));
   if (step.aside) host.append(rich(step.aside, 'div', 'gl-aside'));   // a legend, table or reminder the question needs (lesson data field `aside`)
   if (step.figures) host.append(h('div', { class: 'pair figs' }, step.figures.map((f) => molFigure(f.smiles, f.label || '', { highlight: f.highlight || [] }))));
   else if (step.smiles && step.both) host.append(molPair(step.smiles, '', { highlight: step.highlight || [] }));
@@ -223,7 +241,7 @@ function mountVisual(host, visual) {
 
 const RENDER = {
   explain(step, ctx, host) {
-    host.append(h('div', { class: 'explain' }, rich(step.html)));
+    host.append(h('div', { class: 'explain' }, rich(cvSay(step, 'html'))));
     if (step.visual) mountVisual(host, step.visual);
     ctx.done();
   },
@@ -239,8 +257,8 @@ const RENDER = {
       b.addEventListener('click', () => {
         [...list.children].forEach((x, i) => { x.disabled = true; if (shown[i].correct) x.classList.add('good'); });
         if (!o.correct) { b.classList.add('bad'); ctx.mistake(step.skill, step.id, o.why); }
-        const fb = h('div', { class: 'fb ' + (o.correct ? 'ok' : 'bad'), 'aria-live': 'polite' }, rich(o.why, 'p'));
-        out.append(fb, h('div', { class: 'reveal' }, h('b', {}, 'So here is the idea. '), rich(step.reveal, 'span')));
+        const fb = h('div', { class: 'fb ' + (o.correct ? 'ok' : 'bad'), 'aria-live': 'polite' }, rich(sayWhy(step, o), 'p'));
+        out.append(fb, h('div', { class: 'reveal' }, h('b', {}, 'So here is the idea. '), rich(cvSay(step, 'reveal'), 'span')));
         ctx.done();
       });
       list.append(b);
@@ -255,8 +273,8 @@ const RENDER = {
     orderedOptions(step, ctx.lessonId, ctx.attempt).forEach((o) => {
       const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.label || '', { ...(o.raw ? { raw: true, showCharge: true } : {}), ...(o.lp ? { lp: true } : {}), ...(o.alt ? { alt: o.alt } : {}) }) : rich(o.text, 'span'));
       b.addEventListener('click', () => {
-        if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); g.right(o.why); }
-        else { b.classList.add('bad'); b.disabled = true; g.wrong(o.why); }
+        if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); g.right(sayWhy(step, o)); }
+        else { b.classList.add('bad'); b.disabled = true; g.wrong(o.why, sayWhy(step, o)); }
       });
       list.append(b);
     });
@@ -289,20 +307,20 @@ const RENDER = {
 
   worked(step, ctx, host) {
     host.append(h('p', { class: 'eyebrow' }, 'Worked example'));
-    host.append(rich(step.problem, 'h2', 'prompt'));
+    host.append(rich(cvSay(step, 'problem'), 'h2', 'prompt'));
     if (step.smiles) host.append(molFigure(step.smiles, '', { highlight: step.highlight || [] }));
     const wrap = h('div', { class: 'moves' });
     host.append(wrap);
     let k = 0;
     const next = () => {
       if (k >= step.moves.length) {
-        if (step.rule) wrap.append(h('div', { class: 'rule' }, h('b', {}, 'The rule '), rich(step.rule, 'span')));
+        if (step.rule) wrap.append(h('div', { class: 'rule' }, h('b', {}, 'The rule '), rich(cvSay(step, 'rule'), 'span')));
         ctx.done();
         return;
       }
-      const mv = step.moves[k++];
+      const mi = k, mv = step.moves[k++];
       const card = h('div', { class: 'move' });
-      card.append(rich(mv.ask, 'p', 'ask'));
+      card.append(rich(sayMove(step, mi, 'ask'), 'p', 'ask'));
       if (mv.equation) card.append(equationRow(mv.equation));
       if (mv.visual) mountVisual(card, mv.visual);
       const opts = h('div', { class: 'opts', role: 'group' });
@@ -314,13 +332,13 @@ const RENDER = {
             [...opts.children].forEach((x) => { x.disabled = true; });
             b.classList.add('good');
             fb.className = 'fb ok'; fb.innerHTML = '';
-            fb.append(rich(o.why + (mv.then ? ' ' + mv.then : ''), 'p'));
+            fb.append(rich(sayMoveWhy(step, mi, o) + (mv.then ? ' ' + sayMove(step, mi, 'then') : ''), 'p'));
             if (mv.figure) fb.append(molFigure(mv.figure.smiles, mv.figure.label || '', { style: mv.figure.drawing, highlight: mv.figure.highlight || [], showCharge: !!mv.figure.showCharge }));
             next();
           } else {
             b.classList.add('bad'); b.disabled = true;
             ctx.mistake(step.skill, step.id, o.why);
-            fb.className = 'fb bad'; fb.innerHTML = ''; fb.append(rich(o.why, 'p'));
+            fb.className = 'fb bad'; fb.innerHTML = ''; fb.append(rich(sayMoveWhy(step, mi, o), 'p'));
           }
         });
         opts.append(b);

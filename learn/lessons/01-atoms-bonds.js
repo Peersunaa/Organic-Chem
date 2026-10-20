@@ -12,6 +12,7 @@ export default {
   ],
   steps: [
     {
+      caveman: {"prompt":"Neutral molecule. Carbon make how many bonds?","reveal":"Carbon: 4 valence electrons, wants 8 (octet). Each bond shares a pair: 4 bonds.","options":[{"why":"That oxygen (8 − 6 = 2). Carbon 4 valence, need 4 bonds."},{"why":"That nitrogen (8 − 5 = 3). Carbon 4 valence, need 4 bonds."},{"why":"Yes. Four bonds."},{"why":"Carbon share only 4 electrons. 6 bonds = 12 electrons."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'bond-count',
       prompt: 'In a stable neutral molecule, how many bonds does carbon usually make?',
       derive: { element: 'C', quantity: 'bonds', value: 4 },
@@ -24,6 +25,7 @@ export default {
       reveal: 'Carbon has 4 valence (outer) electrons and wants 8 around it (an octet). Each bond shares one more pair, so it makes 4 bonds.'
     },
     {
+      caveman: {"prompt":"Carbon: 6 electrons, 1s² 2s² 2p². First number = shell (2 = outer). How many valence electrons?","worked":"1s² inner shell. Outer: 2s² + 2p² = 4 valence.","hints":["Outer shell? 2s, 2p = shell 2.","Add only shell 2: 2s² and 2p²."]}, // CAVEMAN
       id: 's02', type: 'input', skill: 'valence-electrons',
       prompt: 'Carbon has 6 electrons, written 1s² 2s² 2p²: the first number is the shell (1 is closest to the nucleus, 2 is the outer shell here). How many are valence (outer-shell) electrons?',
       answer: 4,
@@ -38,6 +40,7 @@ export default {
       worked: 'The 1s² pair is the inner shell. The outer shell holds 2s² + 2p² = 4 valence electrons.'
     },
     {
+      caveman: {"prompt":"Type valence electrons for each atom.","worked":"H 1, C 4, N 5, O 6, F 7, Cl 7. F, Cl: same group.","hints":["Use group number.","Drop leading 1: group 14 = 4, group 17 = 7."]}, // CAVEMAN
       id: 's03', type: 'try', skill: 'valence-electrons', widget: 'valence-strip',
       prompt: 'Type the number of valence electrons for each atom.',
       aside: '<table class="gl-vt"><caption>A mini periodic table: the group number is on top</caption><thead><tr><th scope="col">1</th><th scope="col">14</th><th scope="col">15</th><th scope="col">16</th><th scope="col">17</th></tr></thead><tbody><tr><td>H</td><td>C</td><td>N</td><td>O</td><td>F</td></tr><tr><td class="gl-gap"></td><td class="gl-gap"></td><td class="gl-gap"></td><td class="gl-gap"></td><td>Cl</td></tr></tbody></table><p><b>Rule:</b> for these atoms, valence electrons = the last digit of the group number (group 14 gives 4). The small number printed on each box below is the atom’s atomic number, a different count: ignore it.</p>',
@@ -47,10 +50,12 @@ export default {
       worked: 'H 1, C 4, N 5, O 6, F 7, Cl 7. Same group, same count: F and Cl are both halogens.'
     },
     {
+      caveman: {"html":"<p>Want 8 electrons (octet). H wants 2.</p><p>Bond = shared pair. Bonds = 8 − valence (H: 2 − 1). <b>HONC</b>: H 1, O 2, N 3, C 4.</p><p><b>Lone pairs</b>: N 1, O 2, halogens (F, Cl, Br, I) 3.</p>"}, // CAVEMAN
       id: 's04', type: 'explain', skill: 'bond-count',
       html: '<p>Atoms are happiest with 8 electrons around them (an octet). Hydrogen only wants 2.</p><p>One bond is one shared pair, so bonds needed = 8 − valence electrons (H: 2 − 1). That gives <b>HONC</b>: H 1, O 2, N 3, C 4.</p><p>Electrons left over sit as <b>lone pairs</b>: N has 1, O has 2, halogens (F, Cl, Br, I) have 3.</p>'
     },
     {
+      caveman: {"prompt":"Water. Oxygen has how many lone pairs?","reveal":"O keeps 4 of 6 as 2 lone pairs: 2 + 2 pairs = 8.","options":[{"why":"O has 6 valence, uses 2 in bonds. Other 4 stay."},{"why":"6 − 2 = 4 electrons = 2 pairs."},{"why":"Yes. 2 lone pairs."},{"why":"3 pairs + 2 bonds = 10 electrons. Over octet."}]}, // CAVEMAN
       id: 's05', type: 'predict', skill: 'lone-pairs',
       prompt: 'In water, how many lone pairs does oxygen have?',
       derive: { smiles: 'O', atom: 0, quantity: 'lp', value: 2 },
@@ -63,6 +68,7 @@ export default {
       reveal: 'O keeps 4 of its 6 valence electrons as 2 lone pairs; 2 bonds + 2 lone pairs = 8.'
     },
     {
+      caveman: {"prompt":"Water. Tap oxygen, add lone pairs.","worked":"2 O–H = 4. Needs 4 more: 2 pairs.","hints":["Each bond = 2 electrons. Count.","O wants 8. How many more electrons? Pairs?"]}, // CAVEMAN
       id: 's06', type: 'try', skill: 'lone-pairs', widget: 'lewis-builder',
       prompt: 'Water. Tap the oxygen and add its lone pairs.',
       config: {
@@ -76,6 +82,7 @@ export default {
       worked: 'Two O–H bonds give 4 electrons. Oxygen needs 4 more: 2 lone pairs.'
     },
     {
+      caveman: {"prompt":"Ammonia, NH₃. Add lone pairs.","worked":"3 bonds = 6 electrons. Need 2 more: 1 lone pair.","hints":["Three N–H bonds = 6 electrons.","N needs 8. Missing = how many pairs?"]}, // CAVEMAN
       id: 's07', type: 'try', skill: 'lone-pairs', widget: 'lewis-builder',
       prompt: 'Ammonia, NH₃. Add the lone pairs.',
       config: {
@@ -89,6 +96,7 @@ export default {
       worked: 'Three bonds = 6 electrons. N needs 2 more: 1 lone pair.'
     },
     {
+      caveman: {"prompt":"Rotate. Water linear or bent?","reveal":"4 electron groups on O (2 bonds + 2 lone pairs): tetrahedron corners. Atoms only: looks bent.","options":[{"why":"2 lone pairs take space, push O–H bonds together."},{"why":"Yes. Water bent."}]}, // CAVEMAN
       id: 's08', type: 'predict', skill: 'lone-pairs',
       prompt: 'Rotate the model. Is water straight (linear) or bent?',
       visual: { widget: 'model3d', config: { mol: 'water' } },
@@ -99,6 +107,7 @@ export default {
       reveal: '4 electron groups around O (2 bonds + 2 lone pairs) point to the corners of a tetrahedron (a triangular pyramid); you only see the atoms, so the shape looks bent.'
     },
     {
+      caveman: {"prompt":"Formaldehyde, H₂C=O. Make C=O double. Add oxygen lone pairs.","worked":"Tap C–O once: double. O has 2 bonds, needs 2 lone pairs.","hints":["Carbon needs four bonds. Count.","O has spare electrons. Second pair fixes both."]}, // CAVEMAN
       id: 's09', type: 'try', skill: 'multiple-bonds', widget: 'lewis-builder',
       prompt: 'Formaldehyde, H₂C=O. Every bond starts single. Make the C=O bond double and give oxygen its lone pairs.',
       config: {
@@ -113,6 +122,7 @@ export default {
       worked: 'Tap the C–O bond once to make it double. Then oxygen has 2 bonds and needs 2 lone pairs.'
     },
     {
+      caveman: {"prompt":"HCN, H–C≡N. Make C–N triple. Add nitrogen lone pair.","worked":"C≡N triple: carbon 4 bonds. N: 3 bonds + 1 lone pair = 8.","hints":["Carbon has 1 bond to H. Needs four.","N makes 3 bonds. C–N triple. Electrons left for N?"]}, // CAVEMAN
       id: 's10', type: 'try', skill: 'multiple-bonds', widget: 'lewis-builder',
       prompt: 'Hydrogen cyanide, H–C≡N. Tap the C–N bond until it is triple, then add nitrogen’s lone pair.',
       config: {
@@ -126,6 +136,7 @@ export default {
       worked: 'H–C is single; C≡N is triple, so carbon has 4 bonds. Nitrogen has 3 bonds (6 electrons) plus 1 lone pair = 8.'
     },
     {
+      caveman: {"prompt":"Valence electrons in CH₂O?","worked":"C 4 + H 1 + H 1 + O 6 = 12 valence electrons.","hints":["Atoms: one C, two H, one O.","C 4, each H 1, O 6. Add."]}, // CAVEMAN
       id: 's11', type: 'input', skill: 'electron-count-total',
       prompt: 'How many valence electrons in total does formaldehyde, CH₂O, have?',
       aside: '<p>Add up every atom’s valence electrons. For an <b>ion</b>, a + charge means one electron was lost, so subtract 1 per + charge; a − charge means one extra, so add 1. Example: H₃O⁺ = 6 + 3 − 1 = 8.</p>',
@@ -142,6 +153,7 @@ export default {
       worked: 'C 4 + H 1 + H 1 + O 6 = 12 valence electrons.'
     },
     {
+      caveman: {"problem":"Formal charge on O in hydronium (water + H⁺). FC = valence electrons − electrons owned here (lone-pair electrons + half bonding electrons): <mol smiles=\"[OH3+]\" label=\"H₃O⁺\"></mol>","rule":"FC = valence e⁻ − lone-pair e⁻ − number of bonds","moves":[{"ask":"Neutral O valence electrons?","then":"Neutral O: 6.","options":[{"why":"Yes. Oxygen group 16."},{"why":"8 is octet O wants. Not valence electrons."},{"why":"That only inner 1s². Outer shell 6."}]},{"ask":"In H₃O⁺, O: 3 bonds, 1 lone pair. Owned electrons?","then":"O owns 5.","options":[{"why":"Yes. Shared pair split: one per bond."},{"why":"Bond electrons shared: half each."},{"why":"Forgot bonds. O owns half of each shared pair too."}]},{"ask":"FC = normal − owned = 6 − 5 = ?","then":"O carries +1.","options":[{"why":"Yes. +1."},{"why":"Owns fewer than normal = positive."},{"why":"0 means O owns 6. It owns 5."}]}]}, // CAVEMAN
       id: 's12', type: 'worked', skill: 'formal-charge',
       problem: 'Find the formal charge on oxygen in hydronium (a water molecule that has picked up an H⁺). Formal charge = the electrons the atom normally owns (its valence electrons) minus the electrons it owns here (its lone-pair electrons plus half of its bonding electrons): <mol smiles="[OH3+]" label="H₃O⁺"></mol>',
       moves: [
@@ -176,6 +188,7 @@ export default {
       rule: 'FC = valence e⁻ − lone-pair e⁻ − number of bonds'
     },
     {
+      caveman: {"prompt":"NH₄⁺: N has 4 bonds, 0 lone pairs. FC on N?","worked":"FC = 5 − 0 − 4 = +1.","hints":["Nitrogen: 5 valence electrons.","FC = 5 − 0 − 4."]}, // CAVEMAN
       id: 's13', type: 'input', skill: 'formal-charge',
       prompt: 'Ammonium, NH₄⁺: N has 4 bonds and 0 lone pairs. Formal charge on N?',
       answer: 1, accept: ['+1', '1'],
@@ -190,6 +203,7 @@ export default {
       worked: 'FC = 5 − 0 − 4 = +1.'
     },
     {
+      caveman: {"prompt":"OH⁻: O has 1 bond, 3 lone pairs. FC on O?","worked":"FC = 6 − 6 − 1 = −1.","hints":["O: 6 valence. Three lone pairs = ? electrons.","FC = 6 − 6 − 1."]}, // CAVEMAN
       id: 's14', type: 'input', skill: 'formal-charge',
       prompt: 'Hydroxide, OH⁻: O has 1 bond and 3 lone pairs. Formal charge on O?',
       answer: -1, accept: ['-1', '−1'],
@@ -204,6 +218,7 @@ export default {
       worked: 'FC = 6 − 6 − 1 = −1.'
     },
     {
+      caveman: {"prompt":"Which is carbocation?","worked":"[CH₃]⁺: 4 − 0 − 3 = +1. Others −1 and 0.","hints":["FC each carbon: 4 − lone-pair electrons − bonds.","+ charge = carbon owns fewer than 4."],"options":[{"why":"3 bonds, no lone pair: 4 − 0 − 3 = +1."},{"why":"Lone pair: 4 − 2 − 3 = −1. Carbanion."},{"why":"4 − 0 − 4 = 0. Neutral. Carbocation: 3 bonds, no lone pair."}]}, // CAVEMAN
       id: 's15', type: 'choice', skill: 'formal-charge',
       prompt: 'Which one is a carbocation (a carbon with a + formal charge)?',
       options: [
@@ -215,6 +230,7 @@ export default {
       worked: '[CH₃]⁺: 4 − 0 − 3 = +1. The others give −1 and 0.'
     },
     {
+      caveman: {"prompt":"CH₃O⁻. Add oxygen lone pairs. Set formal charge.","worked":"1 bond + 3 lone pairs = 8. O owns 7, one extra: −1.","hints":["O has 1 bond. Pairs to finish octet?","Compare what O owns with normal 6."]}, // CAVEMAN
       id: 's16', type: 'try', skill: 'formal-charge', widget: 'lewis-builder',
       prompt: 'Methoxide, CH₃O⁻. Give oxygen the right lone pairs and set its formal charge.',
       config: {
@@ -230,6 +246,7 @@ export default {
       worked: 'One bond + 3 lone pairs gives 8 electrons. O owns 6 + 1 = 7, one more than normal, so its charge is −1.'
     },
     {
+      caveman: {"prompt":"Which formula cannot be stable neutral molecule?","reveal":"CH₅ needs 5 bonds: 10 electrons. Breaks octet.","options":[{"why":"Right. No five bonds on carbon."},{"why":"C 4 bonds. CH₄ has four C–H. Fine."},{"why":"N 3 bonds, 1 lone pair. NH₃ stable."},{"why":"C 4 bonds, O 2. Fine."}]}, // CAVEMAN
       id: 's17', type: 'predict', skill: 'octet',
       prompt: 'Which formula can’t exist as a stable neutral molecule?',
       options: [

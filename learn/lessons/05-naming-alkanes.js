@@ -17,6 +17,7 @@ export default {
   ],
   steps: [
     {
+      caveman: {"prompt":"Both: four C, ten H, single bonds. A and B same molecule?","reveal":"Same formula, different connections: <b>constitutional isomers</b>. A butane; B isobutane (2-methylpropane). C₅H₁₂ has three, C₆H₁₄ five.","options":[{"why":"Bending never changes who bonds to whom. A: each carbon at most two C neighbours. B: middle carbon has three. Two molecules."},{"why":"Yes. Both C₄H₁₀. A unbranched; B has carbon with three C neighbours."},{"why":"Count: both ten H. Same formula: that is the point."},{"why":"Formula counts atoms only, not connections. Different connections = different molecules."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'naming',
       prompt: 'Both drawings are four carbons and ten hydrogens joined by single bonds. Are A and B the same molecule?',
       figures: [{ smiles: 'CCCC', label: 'A' }, { smiles: 'CC(C)C', label: 'B' }],
@@ -29,6 +30,7 @@ export default {
       reveal: 'Molecules with the same formula but a different order of connection are <b>constitutional isomers</b>. A is butane; B is isobutane (2-methylpropane). The number of alkane isomers climbs with size: three for C₅H₁₂, five for C₆H₁₄.'
     },
     {
+      caveman: {"prompt":"Real 3D butane and isobutane. Rotate. Structural difference?","worked":"Butane: max two C neighbours. Isobutane: carbon with three (branch). Same formula, different connections: constitutional isomers.","hints":["Count carbon neighbours of central carbons.","Find isobutane carbon with three C."],"options":[{"why":"Yes. Isobutane: central carbon holds three CH₃ and one H. Butane unbranched."},{"why":"Both C₄H₁₀: ten H each. Count them."},{"why":"Alkane bonds all single, both molecules."},{"why":"Both: four single bonds per carbon, tetrahedral. Neither flat."}]}, // CAVEMAN
       id: 's02', type: 'choice', skill: 'naming',
       prompt: 'Here are real 3D models of butane and isobutane. Rotate them. What is the structural difference?',
       visual: { widget: 'model3d', config: { mol: 'butane', compare: 'isobutane' } },
@@ -43,10 +45,12 @@ export default {
       confirm: 'Same atoms, different connections: constitutional isomers.'
     },
     {
+      caveman: {}, // CAVEMAN
       id: 's03', type: 'explain', skill: 'naming',
       html: '<p><b>Alkanes</b> have only C–C and C–H single bonds: C<sub>n</sub>H<sub>2n+2</sub>. A ring takes away two H: <b>cycloalkanes</b> are C<sub>n</sub>H<sub>2n</sub>.</p><p>Roots by carbon count: <b>meth</b> 1, <b>eth</b> 2, <b>prop</b> 3, <b>but</b> 4, <b>pent</b> 5, <b>hex</b> 6, <b>hept</b> 7, <b>oct</b> 8, <b>non</b> 9, <b>dec</b> 10, plus <b>-ane</b>. A ring adds <b>cyclo-</b> in front.</p>'
     },
     {
+      caveman: {"prompt":"7-carbon straight-chain alkane. Molecular formula (like C4H8O; subscripts or plain digits fine)?","worked":"2n + 2 = 16: C₇H₁₆. 2 CH₃ + 5 CH₂ = 16 H.","hints":["Open-chain alkane CₙH₂ₙ₊₂, n = 7.","Draw: two CH₃ ends, five CH₂ between."]}, // CAVEMAN
       id: 's04', type: 'input', skill: 'naming',
       prompt: 'A straight-chain alkane has 7 carbons joined by single bonds. Write its molecular formula (type it like C4H8O; subscripts or plain digits are both fine).',
       smiles: 'CCCCCCC',
@@ -62,6 +66,7 @@ export default {
       worked: '2n + 2 = 2 × 7 + 2 = 16, so C₇H₁₆. By parts: 2 CH₃ (6 H) + 5 CH₂ (10 H) = 16 H.'
     },
     {
+      caveman: {"prompt":"Name of this straight-chain alkane?","worked":"Zig-zag has 9 carbons: non-: nonane.","hints":["Count carbons: each corner and line end.","meth, eth, prop, but, pent, hex, hept, oct, non."],"options":[{"why":"Octane has eight. Recount corners and ends: nine."},{"why":"Yes. Nine: non- + -ane."},{"why":"Decane has ten. Chain has one fewer."},{"why":"Heptane has seven. Chain is two longer."}]}, // CAVEMAN
       id: 's05', type: 'choice', skill: 'naming',
       prompt: 'What is the name of this straight-chain alkane?',
       smiles: 'CCCCCCCCC',
@@ -76,6 +81,7 @@ export default {
       confirm: 'Nine carbons: nonane.'
     },
     {
+      caveman: {"prompt":"Propane: eight H: six on two end CH₃, two on middle CH₂. Remove one H: attach group elsewhere. How many different three-carbon groups?","reveal":"End carbon: <b>propyl</b>. Middle carbon: <b><name new=\"propan-2-yl\" old=\"isopropyl\"></name></b>. <b>Alkyl groups</b>: butane, isobutane give four more.","options":[{"why":"End and middle carbons are different places. End attachment ≠ middle attachment."},{"why":"Yes. Six end H equal: one group. Two middle H equal: second."},{"why":"Two end carbons equivalent by symmetry: same group."},{"why":"Eight = H count, not group count. Many equivalent by symmetry."}]}, // CAVEMAN
       id: 's06', type: 'predict', skill: 'naming',
       prompt: 'Propane, drawn here, has eight hydrogens: six on the two end CH₃ groups and two on the middle CH₂. Remove one H and use that spot to attach the group to something else. How many different three-carbon groups can you make?',
       smiles: 'CCC',
@@ -88,10 +94,12 @@ export default {
       reveal: 'Attached through an end carbon, the group is <b>propyl</b>. Attached through the middle carbon, it is <b><name new="propan-2-yl" old="isopropyl"></name></b>. Groups made this way are <b>alkyl groups</b>, and butane and isobutane give four more.'
     },
     {
+      caveman: {}, // CAVEMAN
       id: 's07', type: 'explain', skill: 'naming',
       html: '<p>Alkyl groups: –CH₃ methyl · –CH₂CH₃ ethyl · –CH₂CH₂CH₃ propyl · –CH(CH₃)₂ <name new="propan-2-yl" old="isopropyl"></name> · –CH₂CH₂CH₂CH₃ butyl · –CH(CH₃)CH₂CH₃ <name new="butan-2-yl" old="sec-butyl"></name> · –CH₂CH(CH₃)₂ <name new="2-methylpropyl" old="isobutyl"></name> · –C(CH₃)₃ tert-butyl (both styles).</p>'
     },
     {
+      caveman: {"prompt":"Flip <b>New / Old IUPAC</b> switch: <name new=\"2-methyl-4-(propan-2-yl)heptane\" old=\"4-isopropyl-2-methylheptane\"></name>. What changes?","worked":"Old: 4-isopropyl-2-methylheptane. New: 2-methyl-4-(propan-2-yl)heptane. Isopropyl now propan-2-yl: under p, not i: methyl first.","hints":["Flip header switch. Compare names.","Which word changes? Where does methyl sit?"],"options":[{"why":"Yes. Isopropyl filed under i, propan-2-yl under p: methyl moves ahead. Same molecule, different wording."},{"why":"Both names = same structure. Wording differs. Course accepts either style."},{"why":"Parent heptane both. Branch names differ."},{"why":"Flip again. Isopropyl, sec-butyl, isobutyl have new forms; methyl, ethyl, propyl, butyl, tert-butyl unchanged."}]}, // CAVEMAN
       id: 's08', type: 'choice', skill: 'naming',
       prompt: 'Flip the <b>New / Old IUPAC</b> switch at the top of the page and watch the name: <name new="2-methyl-4-(propan-2-yl)heptane" old="4-isopropyl-2-methylheptane"></name>. What changes between the two styles?',
       smiles: S15,
@@ -106,6 +114,7 @@ export default {
       confirm: 'Same molecule, two spellings. Isopropyl, sec-butyl and isobutyl have new-style names; methyl, ethyl, propyl, butyl and tert-butyl read the same in both.'
     },
     {
+      caveman: {"prompt":"By C neighbours: primary (1°), secondary (2°), tertiary (3°), quaternary (4°). 2,2,4-trimethylpentane: highlighted?","worked":"Four carbons (3 CH₃, CH₂): quaternary.","hints":["Count lines to carbons. H does not count.","Count: 1 primary … 4 quaternary."],"options":[{"why":"Primary = one carbon. Highlighted touches four: count lines."},{"why":"Secondary = two carbons. This has four."},{"why":"Tertiary = three. This has a fourth: three methyls and chain."},{"why":"Yes. Three methyls + chain carbon = four C, no H."}]}, // CAVEMAN
       id: 's09', type: 'choice', skill: 'naming',
       prompt: 'Carbons are classed by how many other carbons they are bonded to: primary (1°), secondary (2°), tertiary (3°) or quaternary (4°). In 2,2,4-trimethylpentane, which class is the highlighted carbon?',
       smiles: 'CC(C)(C)CC(C)C', highlight: [1],
@@ -120,6 +129,7 @@ export default {
       confirm: 'Four carbon neighbours: quaternary (4°).'
     },
     {
+      caveman: {"prompt":"First: longest chain (may bend). Trace on 4-ethyl-2-methylhexane.","worked":"From CH₃ on CH(CH₃) fork: that CH, CH₂, CH carrying ethyl, out one two-carbon arm: 6 carbons. Left: methyl, ethyl branches.","hints":["Start at CH₃ end, walk carbon to carbon. Chain can bend.","Try both arms: most carbons wins."]}, // CAVEMAN
       id: 's10', type: 'try', skill: 'naming', widget: 'chain-tracer',
       prompt: 'Now the naming itself. The first job is to find the longest continuous chain, which may bend. Trace it on 4-ethyl-2-methylhexane.',
       config: { smiles: 'CC(C)CC(CC)CC', task: 'trace' },
@@ -128,6 +138,7 @@ export default {
       worked: 'Start at a CH₃ on the CH(CH₃) fork, go through that CH, the CH₂ and the CH that carries the ethyl, then out along one of its two-carbon arms. That is 6 carbons. What is left over is a methyl branch and an ethyl branch.'
     },
     {
+      caveman: {"prompt":"Several chains tie (five carbons). Trace parent of 3-ethyl-2-methylpentane.","worked":"From CH₃ of CH(CH₃)₂ end via CH, CH, ethyl: 5 carbons, 2 branches (methyl, ethyl). Via both ethyls: 5 carbons, 1 branch (<name new=\"propan-2-yl\" old=\"isopropyl\"></name>). More branches wins.","hints":["Find every five-carbon path.","Tie: pick chain leaving more branches."]}, // CAVEMAN
       id: 's11', type: 'try', skill: 'naming', widget: 'chain-tracer',
       prompt: 'Several chains here tie for longest (five carbons). Trace the one that should be the parent of 3-ethyl-2-methylpentane.',
       config: { smiles: 'CC(C)C(CC)CC', task: 'trace' },
@@ -136,6 +147,7 @@ export default {
       worked: 'The path from a CH₃ of the CH(CH₃)₂ end, through the CH and the CH, and out along an ethyl has 5 carbons and leaves 2 branches (a methyl and an ethyl). The path through both ethyls also has 5 carbons but leaves only 1 branch (a <name new="propan-2-yl" old="isopropyl"></name>). More branches wins.'
     },
     {
+      caveman: {"prompt":"Numbering. 4-ethyl-2-methylhexane parent outlined. Tap C1.","worked":"Methyl end: methyl C2, ethyl C4. Other end: ethyl C3, methyl C5. Lower first number (2 vs 3) from methyl end: C1.","hints":["C1 is one chain end. Which is nearer first branch?","One end: branches 2, 4. Other: 3, 5. Pick lower first number."]}, // CAVEMAN
       id: 's12', type: 'try', skill: 'naming', widget: 'chain-tracer',
       prompt: 'Next the numbering. The parent chain of 4-ethyl-2-methylhexane is outlined. Tap the carbon that should be C1.',
       config: { smiles: 'CC(C)CC(CC)CC', task: 'number' },
@@ -144,10 +156,12 @@ export default {
       worked: 'From the end nearer the methyl: methyl on C2, ethyl on C4. From the other end: ethyl on C3, methyl on C5. The first number is lower from the methyl end (2 against 3), so that end is C1.'
     },
     {
+      caveman: {"html":"1 Parent: longest chain; tie: more branches. Ring parent if carbons ≥ chain.<br>2 Number for lowest numbers; tie: first alphabetical branch lower.<br>3 Branches: di-, tri- for repeats.<br>4 Alphabetical (ignore di-, tri-, sec-, tert-; not iso). Commas between numbers, hyphens elsewhere, one word."}, // CAVEMAN
       id: 's13', type: 'explain', skill: 'naming',
       html: '<p><b>Recipe.</b> 1 Parent: longest chain, bending allowed; a tie goes to the chain with more branches. A ring is the parent if it has at least as many carbons as the biggest chain.</p><p>2 Number from the end giving the lowest numbers; on a tie, the branch first alphabetically gets the lower one.</p><p>3 Name the branches; di-, tri- count repeats.</p><p>4 Alphabetical order, ignoring di-, tri-, sec-, tert- (not iso). Commas between numbers, hyphens elsewhere, one word.</p>'
     },
     {
+      caveman: {"problem":"Worked: name this alkane. Pick each move.","rule":"Longest chain; lowest numbers; branches alphabetical (ignore di-, tri-); one word.","moves":[{"ask":"Parent: carbons in longest continuous chain?","then":"Parent: heptane.","options":[{"why":"Yes. Ethyl branch end, through carbon with two methyls, to far end: seven."},{"why":"One short. Go through crowded carbon, recount."},{"why":"11 counts branches. Parent = single longest unbroken chain."}]},{"ask":"Which end gives first branch lower number?","then":"Locants (position numbers): 3, 4, 4.","options":[{"why":"Yes. From ethyl end: branches on 3, 4, 4."},{"why":"Other end: first branch C4, then 4, 5. 4 above 3: wrong end."},{"why":"It does: 3, 4, 4 vs 4, 4, 5. First difference: 3 beats 4."}]},{"ask":"Branches with numbers. Which list right?","then":"Two methyls: 4,4-dimethyl.","options":[{"why":"Yes: ethyl on C3, two methyls on C4."},{"why":"Two methyls on C4 (four bonds: two chain, two methyl)."},{"why":"Branch on C3: two carbons: ethyl."}]},{"ask":"Alphabetical order. Which first?","then":"Ethyl first.","options":[{"why":"Yes. di- ignored: dimethyl filed under m."},{"why":"di- ignored. Dimethyl under m, after e."},{"why":"Size irrelevant. Alphabetical."}]},{"ask":"Full name?","then":"Done.","options":[{"why":"Yes. Commas, hyphens, alphabetical, parent last, one word."},{"why":"Alphabetical: ethyl before dimethyl."},{"why":"Repeats combine: 4,4-dimethyl."},{"why":"Each prefix keeps own numbers in front, hyphens."}]}]}, // CAVEMAN
       id: 's14', type: 'worked', skill: 'naming',
       problem: 'Worked example: give the IUPAC name of this alkane. You choose each move.',
       smiles: 'CCC(CC)C(C)(C)CCC',
@@ -203,6 +217,7 @@ export default {
       rule: 'Longest chain, then lowest numbers from the nearer end, then name the branches, order them alphabetically (ignoring di-, tri-) and write one word.'
     },
     {
+      caveman: {"prompt":"Name this alkane, either IUPAC style. Numbers and order count.","worked":"Heptane; methyl C2, isopropyl C4. Old: 4-isopropyl-2-methylheptane (i, m). New: 2-methyl-4-(propan-2-yl)heptane (m, p).","hints":["Parent: 7-carbon chain. Number from nearer end.","One methyl; other three carbons via middle (isopropyl, propan-2-yl). Alphabetize by that name."]}, // CAVEMAN
       id: 's15', type: 'input', skill: 'naming',
       prompt: 'Name this alkane. Type it in either IUPAC style. Spaces, capitals and hyphens do not matter, but numbers and order do.',
       smiles: S15,
@@ -221,6 +236,7 @@ export default {
       worked: 'Heptane, methyl on C2 and isopropyl on C4. Traditional style: 4-isopropyl-2-methylheptane (i before m). New style: 2-methyl-4-(propan-2-yl)heptane (m before p, parentheses round the branch).'
     },
     {
+      caveman: {"prompt":"Which structure is <name new=\"4-ethyl-2,3-dimethylhexane\" old=\"4-ethyl-2,3-dimethylhexane\"></name>?","worked":"Hexane: six carbons. Two methyls on C2, C3, ethyl C4. Ten carbons: B.","hints":["Draw six-carbon parent. Number it.","Methyl C2, methyl C3, ethyl C4. Then find drawing's longest chain."],"options":[{"why":"C4 has methyl, not ethyl. Nine carbons; name needs ten."},{"why":"Yes: hexane, methyls C2, C3, ethyl C4 (ten carbons)."},{"why":"Ethyl on C3, methyls on C2, C4 here. Name: ethyl C4, methyls C2, C3."},{"why":"Parent here seven carbons (CH₂CH₃ extends chain), not hexane."}]}, // CAVEMAN
       id: 's16', type: 'choice', skill: 'naming',
       prompt: 'Which structure is <name new="4-ethyl-2,3-dimethylhexane" old="4-ethyl-2,3-dimethylhexane"></name>?',
       options: [
@@ -234,6 +250,7 @@ export default {
       confirm: 'Parent, then branches, then numbers: B fits the name.'
     },
     {
+      caveman: {"prompt":"Rings. Ring can be parent or branch. Tap parent: ring (any ring carbon) or chain.","worked":"Ring 5 C, chain 3. Ring larger: parent cyclopentane; chain = propyl.","hints":["Count carbons in ring and chain.","Bigger is parent. Equal: ring is parent."]}, // CAVEMAN
       id: 's17', type: 'try', skill: 'naming', widget: 'chain-tracer',
       prompt: 'Rings now. A ring can be the parent or a branch. Tap the parent of this molecule: the whole ring (any ring carbon) or the chain.',
       config: { smiles: 'CCCC1CCCC1', task: 'parent' },
@@ -242,6 +259,7 @@ export default {
       worked: 'Ring: 5 carbons. Chain: 3 carbons. The ring is larger, so it is the parent (cyclopentane) and the chain is a propyl branch.'
     },
     {
+      caveman: {"prompt":"Name this cycloalkane. Lowest numbers; tie: first alphabetical branch gets 1.","worked":"Ethyl, methyl one carbon apart: 1,3 either way; ethyl gets 1 (alphabetical): 1-ethyl-3-methylcyclopentane.","hints":["Five-carbon ring: cyclopentane. Number from a branch.","Lowest numbers. Tie: ethyl (e) before methyl (m) gets 1."]}, // CAVEMAN
       id: 's18', type: 'input', skill: 'naming',
       prompt: 'Name this cycloalkane. Number the ring so the numbers are lowest; if that is a tie, the branch first in alphabetical order gets 1.',
       smiles: S18,

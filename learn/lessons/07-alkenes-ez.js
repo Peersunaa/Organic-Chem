@@ -20,6 +20,7 @@ export default {
   ],
   steps: [
     {
+      caveman: {"prompt":"Hexane (left) C₆H₁₄. Right: six-carbon chain, one C=C, no rings. How many H?","reveal":"Fewer H than alkane = unsaturated. Alkene (C=C, no ring): C<sub>n</sub>H<sub>2n</sub>; alkyne: C<sub>n</sub>H<sub>2n−2</sub>. Ethylene C₂H₄, propylene C₃H₆, acetylene C₂H₂.","options":[{"why":"Yes. Second bond: each carbon lost one H: 14 − 2 = 12."},{"why":"Hexane itself, all single bonds. C=C uses up one H place: fewer H."},{"why":"Two too few. Each extra bond (second bond or ring) removes two H. Only one extra bond here."},{"why":"Stable neutral hydrocarbon: even H count here. C₆H₁₃ = hexyl group, open bond."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'naming',
       prompt: 'Hexane (left) is C₆H₁₄. The right-hand molecule is a six-carbon chain with one C=C double bond in it and no rings. How many hydrogens does it have?',
       figures: [{ smiles: 'CCCCCC', label: 'hexane, C₆H₁₄' }, { smiles: 'CCC=CCC', label: 'a six-carbon alkene' }],
@@ -32,6 +33,7 @@ export default {
       reveal: 'Fewer hydrogens per carbon than the alkane means the molecule is <b>unsaturated</b>. An alkene (one C=C, no rings) is C<sub>n</sub>H<sub>2n</sub>; an alkyne (one C≡C) is C<sub>n</sub>H<sub>2n−2</sub>. Common names: ethylene (C₂H₄), propylene (C₃H₆), acetylene (C₂H₂).'
     },
     {
+      caveman: {"prompt":"3D <name new=\"cis-but-2-ene\" old=\"cis-2-butene\"></name> (left), <name new=\"trans-but-2-ene\" old=\"trans-2-butene\"></name> (right). Rotate. Twist about C=C into the other, breaking no bond?","worked":"Models differ only in CH₃ position about double bond. Swapping = rotate half molecule about C=C axis: p orbitals misalign, π bond breaks (about 350 kJ/mol). Not at room temperature: different compounds.","hints":["Same four heavy atoms, same order, different positions in space.","Double bond = σ + π. Twist 90°: what happens to p-orbital sideways overlap?"],"options":[{"why":"Yes. Same atoms, same bonds; CH₃ same side in one, opposite in other. Only way across: twisted C=C, pulls π bond apart."},{"why":"Single (σ) bond rotates: head-on overlap kept, about 12 kJ/mol. Double bond has π (sideways p overlap): twist ruins it."},{"why":"π bond worth about 350 kJ/mol. Not available at ordinary temperature. Separate compounds, bottled apart."},{"why":"Size irrelevant. Even tiny groups: twisting C=C breaks π bond."}]}, // CAVEMAN
       id: 's02', type: 'choice', skill: 'sigma-pi',
       prompt: 'Here are real 3D models of <name new="cis-but-2-ene" old="cis-2-butene"></name> (left) and <name new="trans-but-2-ene" old="trans-2-butene"></name> (right). Rotate them. Could you turn one into the other just by twisting around the C=C bond, without breaking any bond?',
       visual: { widget: 'model3d', config: { mol: 'cis-but-2-ene', compare: 'trans-but-2-ene', highlight: [1, 2] } },
@@ -46,10 +48,12 @@ export default {
       confirm: 'Same atoms, same bonds, different arrangement in space, and no rotation about C=C: cis and trans are different compounds.'
     },
     {
+      caveman: {"html":"<p>C=C = one σ bond (sp² head-on) + one π bond (two p sideways, above and below plane). Carbons and four attached atoms planar, about 120°.</p><p>Turn one end 90°: π overlap breaks, ~350 kJ/mol vs ~12 for C–C single. Groups stay put.</p>"}, // CAVEMAN
       id: 's03', type: 'explain', skill: 'sigma-pi',
       html: '<p>A C=C is one <b>σ bond</b> (sp² orbitals overlapping head-on) plus one <b>π bond</b> (two p orbitals overlapping sideways, above and below the plane). The two carbons and the four atoms on them lie in one plane, with about 120° angles.</p><p>Turning one end by 90° breaks the π overlap: about <b>350 kJ/mol</b>, against about 12 for a C–C single bond. So the groups stay where they are.</p>'
     },
     {
+      caveman: {"prompt":"Which ONE alkene exists as two compounds differing only in side of groups?","worked":"C: left carbon H, CH₃ (different), right H, CH₂CH₃ (different). A: one carbon two CH₃. B: one carbon two H. D: both two CH₃. Only C passes.","hints":["One carbon at a time: two different groups? H counts as group.","Two different groups on BOTH carbons. Identical pair: one geometry."],"options":[{"why":"Right carbon has two identical groups (two CH₃). Swap gives same molecule: one geometry."},{"why":"=CH₂ carbon has two H, identical. Swap changes nothing."},{"why":"Yes. One carbon H and CH₃, other H and CH₂CH₃. Both carbons two different groups: same or opposite sides."},{"why":"Both carbons carry two identical CH₃. No new compound."}]}, // CAVEMAN
       id: 's04', type: 'choice', skill: 'ez',
       prompt: 'Only some alkenes come as a cis/trans pair. Which ONE of these can exist as two different compounds that differ only in which side the groups are on?',
       options: [
@@ -63,6 +67,7 @@ export default {
       confirm: 'Cis/trans needs two different groups on each double-bond carbon.'
     },
     {
+      caveman: {"prompt":"<name new=\"cis-but-2-ene\" old=\"cis-2-butene\"></name>: two CH₃ same side. <name new=\"trans-but-2-ene\" old=\"trans-2-butene\"></name>: opposite sides. More stable (lower energy)?","reveal":"Same-side crowding = <b>steric strain</b>: trans usually more stable. Cis, trans differ in energy, melting point, more.","options":[{"why":"Yes. Same-side groups get in each other's way: higher energy."},{"why":"Alkyl groups do not attract. Forced close, they repel: electron clouds overlap."},{"why":"Same bonds, not same energy. Crowding changes energy."}]}, // CAVEMAN
       id: 's05', type: 'predict', skill: 'ez',
       prompt: 'In <name new="cis-but-2-ene" old="cis-2-butene"></name> the two CH₃ groups are on the same side of the double bond; in <name new="trans-but-2-ene" old="trans-2-butene"></name> they are on opposite sides. Which do you expect to be the more stable isomer (lower in energy)?',
       figures: [{ smiles: 'C/C=C\\C', label: 'cis' }, { smiles: 'C/C=C/C', label: 'trans' }],
@@ -74,10 +79,12 @@ export default {
       reveal: 'Crowding on the same side is called <b>steric strain</b>, so the trans isomer is usually the more stable one. Cis and trans are different compounds, so they differ in energy, melting point and more.'
     },
     {
+      caveman: {"html":"<p>Cis/trans needs one H per carbon. Otherwise E/Z: rank two groups per double-bond carbon (CIP rules). Higher-ranked same side = Z; opposite = E.</p><p>Rule 1: atoms directly on carbon; higher atomic number wins: Br &gt; Cl &gt; S &gt; O &gt; N &gt; C &gt; H.</p>"}, // CAVEMAN
       id: 's06', type: 'explain', skill: 'ez',
       html: '<p>Cis/trans only works for an alkene with one H on each carbon. For anything else use <b>E/Z</b>: on each double-bond carbon <b>rank the two groups</b> (CIP rules, the standard ranking rules). Higher-ranked groups on the <b>same</b> side = <b>Z</b> (zusammen); on <b>opposite</b> sides = <b>E</b> (entgegen).</p><p><b>Rule 1:</b> look at the atoms directly on the carbon; higher atomic number (more protons) wins: Br &gt; Cl &gt; S &gt; O &gt; N &gt; C &gt; H.</p>'
     },
     {
+      caveman: {"prompt":"Rule 1. Tap higher-ranked group per carbon. E or Z?","worked":"Left carbon: CH₃ (C, 6) beats H (1). Right: Cl (17) beats CH₃ (6). CH₃ and Cl both below double bond: same side: Z.","hints":["Compare attached atoms. Higher atomic number wins; H last.","Cl beats C on one carbon, C beats H on other. Winners same side or opposite?"]}, // CAVEMAN
       id: 's07', type: 'try', skill: 'ez', widget: 'cip-ranker',
       prompt: 'Try rule 1. Tap the higher-ranked group on each double-bond carbon, then choose E or Z.',
       config: { smiles: 'C/C=C(/C)Cl' },
@@ -86,6 +93,7 @@ export default {
       worked: 'Left carbon: CH₃ (C, 6) beats H (1). Right carbon: Cl (17) beats CH₃ (6). The CH₃ and the Cl are both drawn below the double bond, so the higher-ranked groups are on the same side: Z.'
     },
     {
+      caveman: {"prompt":"–CH₂OH or –CH(CH₃)₂ on this carbon. Both start with C: rule 1 ties. Higher rank?","reveal":"Rule 2: compare sets of attached atoms, highest first; stop at first difference. Not a sum: –CH₂OH (O,H,H) beats –CH(CH₃)₂ (C,C,H). Tie: go further out.","options":[{"why":"Adding up is the trap. Compare attached atoms in order, highest first, stop at first difference."},{"why":"Yes. Sets highest first: O vs C: O wins at once. Other positions not checked."},{"why":"No tie. (O,H,H) vs (C,C,H) differ at first position."},{"why":"Length irrelevant. Attached atoms, in order."}]}, // CAVEMAN
       id: 's08', type: 'predict', skill: 'ez',
       prompt: 'On this carbon the choice is between –CH₂OH and –CH(CH₃)₂. Both start with a carbon, so rule 1 ties. Which group would you rank higher?',
       smiles: 'CC=C(CO)C(C)C',
@@ -98,6 +106,7 @@ export default {
       reveal: '<b>Rule 2:</b> when the first atoms tie, compare the <b>sets</b> of atoms attached to them, highest first, and stop at the first difference. It is not a sum: –CH₂OH (O,H,H) beats –CH(CH₃)₂ (C,C,H), and –CH₂Br beats –C(CH₃)₃. If the sets tie too, go one atom further out.'
     },
     {
+      caveman: {"prompt":"Rule 2. Tap higher-ranked group per carbon, choose E or Z. Stuck: <b>Go one atom further</b> shows table.","worked":"Left: CH₃ beats H. Right: –CH₂OH (O,H,H) beats –CH(CH₃)₂ (C,C,H) at first position. CH₃ below, CH₂OH above: opposite: E.","hints":["Right carbon: write –CH₂OH, –CH(CH₃)₂ as sets of atoms on first carbon.","Highest atoms first: O vs C. Do not add."]}, // CAVEMAN
       id: 's09', type: 'try', skill: 'ez', widget: 'cip-ranker',
       prompt: 'Now apply rule 2. Tap the higher-ranked group on each carbon, then choose E or Z. If you are stuck, press <b>Go one atom further</b> to see the attached atoms as a table.',
       config: { smiles: 'C/C=C(/CO)C(C)C' },
@@ -106,6 +115,7 @@ export default {
       worked: 'Left carbon: CH₃ beats H. Right carbon: –CH₂OH is (O,H,H) and –CH(CH₃)₂ is (C,C,H); O beats C at the first position, so –CH₂OH is higher. CH₃ is drawn below and CH₂OH above the double bond: opposite sides, so E.'
     },
     {
+      caveman: {"prompt":"–CH=CH₂ (vinyl) or –CH₂CH₃ (ethyl), both start with C. Higher?","reveal":"Rule 3: multiple bond = duplicate atoms. –CH=CH₂ = (C, C, H); C=O = (O, O) on carbon; C≡C = (C, C, C). Compare sets as rule 2.","options":[{"why":"Yes. Double bond = two single bonds: first vinyl carbon holds far carbon twice."},{"why":"H lowest-ranked: more H never helps. Ethyl (C,H,H); vinyl duplicated (C,C,H)."},{"why":"No tie: (C,C,H) vs (C,H,H) differ at second position."},{"why":"Bond strength not a ranking rule. Duplicate far-end atom, compare sets."}]}, // CAVEMAN
       id: 's10', type: 'predict', skill: 'ez',
       prompt: 'On one carbon the choice is between –CH=CH₂ (vinyl) and –CH₂CH₃ (ethyl). Both start with a carbon. Which group ranks higher?',
       figures: [{ smiles: 'C=CC(CC)=CC', label: 'the groups sit on C3' }],
@@ -118,6 +128,7 @@ export default {
       reveal: '<b>Rule 3:</b> a multiple bond counts as extra single bonds to duplicate atoms. –CH=CH₂ counts as (C, C, H); C=O counts as (O, O) on the carbon; C≡C gives (C, C, C). Then compare the sets as in rule 2.'
     },
     {
+      caveman: {"prompt":"Rule 3. Tap higher-ranked group per double-bond carbon of this diene (middle C=C). E or Z?","worked":"Left: vinyl duplicated (C,C,H) beats ethyl (C,H,H) at second position. Right: CH₃ beats H. Vinyl and CH₃ same side: Z.","hints":["Left carbon both start with C. Vinyl (C, C, H) by duplication; ethyl (C, H, H).","Compare sets in order: C vs C ties, C vs H decides."]}, // CAVEMAN
       id: 's11', type: 'try', skill: 'ez', widget: 'cip-ranker',
       prompt: 'Apply rule 3. Tap the higher-ranked group on each double-bond carbon of this diene (a molecule with two C=C; look at the C=C in the middle), then choose E or Z.',
       config: { smiles: 'C=C/C(CC)=C\\C', bond: [2, 5] },
@@ -126,6 +137,7 @@ export default {
       worked: 'Left carbon: vinyl, duplicated, is (C,C,H); ethyl is (C,H,H). The second position decides, so vinyl is higher. Right carbon: CH₃ beats H. Vinyl and CH₃ are both drawn on the same side of the C=C: Z.'
     },
     {
+      caveman: {"prompt":"Names. Alkene, 7-carbon chain not containing double bond. Parent carbon count?","reveal":"Parent = <b>longest chain with multiple bond</b>, even if longer chain exists. Pentene with propyl on C2.","options":[{"why":"Parent must contain C=C. 7-carbon chain misses =CH₂: cannot be parent."},{"why":"Yes. =CH₂, middle C, one propyl arm = 5. Other propyl: branch."},{"why":"Parent runs through double bond (=CH₂ and next carbon), as far as possible."},{"why":"No 6-carbon chain contains double bond: from =CH₂ five at most."}]}, // CAVEMAN
       id: 's12', type: 'predict', skill: 'naming',
       prompt: 'Now names. This alkene has a 7-carbon chain, but the double bond is not in it. Which carbon count belongs to the parent of its name?',
       smiles: 'C=C(CCC)CCC',
@@ -138,10 +150,12 @@ export default {
       reveal: 'The parent is the <b>longest chain that contains the multiple bond</b>, even when a longer chain exists elsewhere. This one is a pentene with a propyl group on C2.'
     },
     {
+      caveman: {"html":"1 Longest chain with C=C (-ene; C≡C -yne). 2 Number from end nearer multiple bond (tie: first branch). 3 Locant: <name new=\"but-2-ene\" old=\"2-butene\"></name>, <name new=\"buta-1,3-diene\" old=\"1,3-butadiene\"></name>, <name new=\"pent-1-yne\" old=\"1-pentyne\"></name>. 4 Branches alphabetical, (E)/(Z) first.<br>Cycloalkene: C1=C2, then lowest numbers for branches."}, // CAVEMAN
       id: 's13', type: 'explain', skill: 'naming',
       html: '<p><b>Alkene recipe.</b> 1 Parent: longest chain containing the C=C (<b>-ene</b>; C≡C is <b>-yne</b>). 2 Number from the end nearer the multiple bond (on a tie, nearer the first branch). 3 Add the locant (position number): <name new="but-2-ene" old="2-butene"></name>, <name new="buta-1,3-diene" old="1,3-butadiene"></name>, <name new="pent-1-yne" old="1-pentyne"></name>. 4 Branches alphabetically, then <b>(E)</b> or <b>(Z)</b> first.</p><p>A cycloalkene is numbered C1=C2, then to give branches the lowest numbers.</p>'
     },
     {
+      caveman: {"problem":"Worked: name this alkene, with E or Z. Pick each move.","rule":"Longest chain with C=C; lowest numbers (multiple bond first); rank groups for E/Z; name: (E/Z), branches, parent, locant.","moves":[{"ask":"Parent: carbons in longest chain containing double bond?","then":"Parent: hexene.","options":[{"why":"Yes. Six-carbon chain; other carbon = methyl branch."},{"why":"Seven counts every carbon. CH₃ on double bond is branch."},{"why":"Chain continues both sides of double bond."}]},{"ask":"Number chain. Where is double bond? Which end start?","then":"Parent <name new=\"hex-3-ene\" old=\"3-hexene\"></name>, methyl on C3.","options":[{"why":"Yes. Double bond mid: 3 from either end. Tie: first branch lower: 3 from left, 4 from right."},{"why":"From right double bond still 3, methyl 4. Tie on double bond: branch gets lower number, 3."},{"why":"Recount: two carbons before double bond: starts C3."}]},{"ask":"E or Z? Rank groups on C3 and C4. Higher-ranked groups are…","then":"Geometry E.","options":[{"why":"Yes. C3: ethyl (C,H,H) beats methyl (H,H,H); C4: ethyl beats H. Ethyls opposite sides: E."},{"why":"Look again: ethyls opposite sides, not same."},{"why":"Methyl loses to ethyl: (H,H,H) vs (C,H,H)."}]},{"ask":"Name: (E or Z), branch, parent with locant.","then":"Flip New/Old IUPAC switch: locant moves.","options":[{"why":"Yes. Stereo label first in brackets, branch with number, parent. New style: locant before -ene; old: before parent."},{"why":"Geometry is E: higher-ranked groups (ethyl C3, ethyl C4) opposite sides; Z needs same."},{"why":"Right parent; geometry fixed (different groups per carbon): needs (E)."},{"why":"Methyl needs lower number: 3."}]}]}, // CAVEMAN
       id: 's14', type: 'worked', skill: 'naming',
       problem: 'Worked example: give the IUPAC name of this alkene, including E or Z. You choose each move.',
       smiles: S_WORKED,
@@ -188,6 +202,7 @@ export default {
       rule: 'Longest chain containing the C=C; number so the multiple bond (then the first branch) gets the lowest number; rank the groups on each carbon for E/Z; write (E/Z), branches, parent with its locant.'
     },
     {
+      caveman: {"prompt":"Name this alkene with E or Z, either IUPAC style; numbers, order count. (Two C=C: -diene, <name new=\"hexa-1,3-diene\" old=\"1,3-hexadiene\"></name>; both E/Z: both letters, <name new=\"(2Z,4E)-octa-2,4-diene\" old=\"(2Z,4E)-2,4-octadiene\"></name>.)","worked":"Five-carbon chain; double bond C2, methyl C3. C2: CH₃ beats H. C3: ethyl beats methyl. Opposite: E. <name new=\"(E)-3-methylpent-2-ene\" old=\"(E)-3-methyl-2-pentene\"></name>","hints":["Longest chain with double bond; lowest number to it; then methyl.","E or Z: rank two groups per carbon. Winners same side: Z; opposite: E."]}, // CAVEMAN
       id: 's15', type: 'input', skill: 'naming',
       prompt: 'Name this alkene, including E or Z. Type it in either IUPAC style; spaces, capitals and hyphens do not matter, but numbers and order do. (With two C=C the ending is -diene, <name new="hexa-1,3-diene" old="1,3-hexadiene"></name>; if both bonds can be E/Z give both letters, <name new="(2Z,4E)-octa-2,4-diene" old="(2Z,4E)-2,4-octadiene"></name>.)',
       smiles: S_TYPED,
@@ -205,6 +220,7 @@ export default {
       worked: 'Five-carbon chain through the double bond; number so the double bond is at C2 and the methyl on C3. C2: CH₃ beats H. C3: ethyl beats methyl. They are on opposite sides: E. The name is <name new="(E)-3-methylpent-2-ene" old="(E)-3-methyl-2-pentene"></name>.'
     },
     {
+      caveman: {"prompt":"Rings. Cycloalkene: double bond C1=C2, ring numbered to give substituent lowest number. Which name fits?","worked":"Double-bond carbons C1, C2; C2 next to methyl-bearing carbon. Methyl carbon C3: 3-methylcyclohexene. Other direction: C6.","hints":["Double-bond carbons C1, C2. Which is C1 for lowest methyl number?","Methyl carbon next to double-bond carbon. Count 1, 2, 3: where?"],"options":[{"why":"Yes. C1=C2 double bond; from C2 methyl carbon is C3."},{"why":"Number for lower number. Other way round ring: C6; from other double-bond carbon: C3."},{"why":"Different molecule: methyl on double-bond carbon. Here methyl one carbon from double bond."},{"why":"Methyl could sit on several carbons: name needs number."}]}, // CAVEMAN
       id: 's16', type: 'choice', skill: 'naming',
       prompt: 'Rings now. In a cycloalkene the double bond is C1=C2, and the ring is then numbered in the direction that gives the substituent the lowest number. Which name fits this molecule?',
       smiles: S_RING,
@@ -219,6 +235,7 @@ export default {
       confirm: 'Cycloalkene: the double bond is C1=C2 (so it needs no number), then number for the lowest substituent numbers.'
     },
     {
+      caveman: {"prompt":"Name this alkyne. Same rules, -yne for -ene. Either style.","worked":"Five carbons: pentyne. From left: triple bond C2, methyl C4; from right: C3, methyl C2. Multiple bond lowest: <name new=\"4-methylpent-2-yne\" old=\"4-methyl-2-pentyne\"></name>.","hints":["Longest chain with triple bond: 5 carbons. Number from nearer end.","Triple-bond locant next to -yne (traditional: before parent), add methyl with number."]}, // CAVEMAN
       id: 's17', type: 'input', skill: 'naming',
       prompt: 'Name this alkyne. The same rules apply, with -yne in place of -ene. Type it in either IUPAC style.',
       smiles: S_ALKYNE,
@@ -236,6 +253,7 @@ export default {
       worked: 'Five carbons: pentyne. Numbering from the left puts the triple bond at C2 and the methyl on C4; from the right it would be at C3 with the methyl on C2. The multiple bond gets the lowest number, so the name is <name new="4-methylpent-2-yne" old="4-methyl-2-pentyne"></name>.'
     },
     {
+      caveman: {"prompt":"Common names. Ethylene C₂H₄, acetylene C₂H₂. Alkene groups: <b>vinyl</b> –CH=CH₂, <b>allyl</b> –CH₂–CH=CH₂. Which molecule has allyl?","worked":"Allyl = –CH₂–CH=CH₂. A: Cl on CH₂ before CH=CH₂. B: Cl on double bond (vinyl).","hints":["Allyl: three carbons: CH₂ on molecule, then CH=CH₂.","Find CH₂ (single bonds) joining Cl to C=C."],"options":[{"why":"Yes. CH₂=CH–CH₂– = allyl: allyl chloride."},{"why":"Cl on double-bond carbon: vinyl (–CH=CH₂), like vinyl chloride."},{"why":"Cl carbon is =CH–, CH₃ at other end. No –CH₂–CH=CH₂ unit."},{"why":"No double bond: propyl chloride."}]}, // CAVEMAN
       id: 's18', type: 'choice', skill: 'naming',
       prompt: 'A few names are used everywhere. Ethylene is C₂H₄ and acetylene is C₂H₂. Two groups are named for alkenes too: <b>vinyl</b> is –CH=CH₂ and <b>allyl</b> is –CH₂–CH=CH₂. Which molecule contains an allyl group?',
       options: [

@@ -12,10 +12,11 @@ const mols = (list) => list.map(([s, l]) => `<mol smiles="${s}" label="${l}"></m
 
 /** Move the correct option to a different place in each question (deterministic), so the right answer is not always first. */
 function arrange(lesson) {
-  const place = (opts, k) => { const i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); };
+  // the caveman copies of the options (st.caveman.options, in the same order as options) move together with the options they belong to
+  const place = (opts, k, cv) => { const n = opts.length, i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); if (cv && cv.length === n) { const [d] = cv.splice(i, 1); cv.splice(k % (cv.length + 1), 0, d); } };
   lesson.steps.forEach((st, n) => {
-    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length);
-    if (st.type === 'worked') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length));
+    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length, st.caveman && st.caveman.options);
+    if (st.type === 'worked') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length, st.caveman && st.caveman.moves && st.caveman.moves[k] && st.caveman.moves[k].options));
   });
   return lesson;
 }
@@ -32,6 +33,7 @@ export default arrange({
   ],
   steps: [
     {
+      caveman: {"prompt":"Two <b>primary</b> carbocations (C⁺ one carbon neighbour): <b>allyl cation</b> <mol smiles=\"[CH2+]C=C\" label=\"allyl cation, CH₂=CH–CH₂⁺\"></mol> and <b>propyl cation</b> <mol smiles=\"[CH2+]CC\" label=\"propyl cation, CH₃CH₂CH₂⁺\"></mol>. Lesson 09: which more stable, why?","reveal":"<b>Allyl cation</b> much more stable. Empty p orbital overlaps next π bond: + shared by two end carbons. Next: draw exactly how.","options":[{"why":"Yes. Charge shared by two atoms steadier. Sharing = resonance."},{"why":"Lesson 09 compared alkyl group counts on C⁺. Here both primary. C=C beside C⁺ does far more than alkyl group."},{"why":"Neighbour count is only part. Allyl cation: π bond next to C⁺, π electrons reach empty orbital: much more stable."},{"why":"Pulling density AWAY from positive carbon destabilises. Real reason: π electrons shared with empty orbital."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'resonance',
       prompt: 'Two carbocations are both <b>primary</b>: the C⁺ has just one carbon neighbour. One is the <b>allyl cation</b> <mol smiles="[CH2+]C=C" label="allyl cation, CH₂=CH–CH₂⁺"></mol>, the other the <b>propyl cation</b> <mol smiles="[CH2+]CC" label="propyl cation, CH₃CH₂CH₂⁺"></mol>. From Lesson 09, which do you expect to be more stable, and why?',
       options: [
@@ -43,6 +45,7 @@ export default arrange({
       reveal: 'The <b>allyl cation</b> is much more stable. Its empty p orbital overlaps the π bond next to it, so the + charge is not stuck on one carbon: it is shared by the two end carbons. Next you will draw exactly how.'
     },
     {
+      caveman: {"prompt":"Allyl cation: C⁺ has <b>empty p orbital</b> beside C=C. Where can π electrons go to help C⁺? Draw curved arrow (electrons start to destination), Check. Only electrons move.","worked":"One arrow: C=C π bond to C–C single bond beside C⁺. Single becomes double; far carbon loses π share: new C⁺. Same atoms, same σ bonds, same +1 charge.","hints":["Arrows start at electrons: tap C=C π bond first.","Pair ends between middle carbon and old C⁺: tap that single bond. Check."]}, // CAVEMAN
       id: 's02', type: 'try', skill: 'resonance', widget: 'resonance-drawer',
       prompt: 'Here is the allyl cation with every atom drawn. Its C⁺ has an <b>empty p orbital</b> next to a C=C. Where could the π electrons of the C=C go to help the C⁺? Draw the curved arrow (it starts at electrons and points to where they end up), then press Check. Atoms never move, only electrons.',
       config: { start: '[CH2+]C=C', name: 'allyl cation' },
@@ -51,10 +54,12 @@ export default arrange({
       worked: 'One arrow: from the C=C π bond to the C–C single bond next to the C⁺. That single bond becomes a double bond, and the carbon at the far end loses its share of the π pair, so it becomes the new C⁺. Same atoms, same σ bonds, same +1 charge.'
     },
     {
+      caveman: {"html":"<p><b>Resonance forms.</b> Neither drawing real alone. Real ion = <b>resonance hybrid</b>: each end carbon half the + (δ+), both C–C bonds between single and double. Join with ↔. Charge over more atoms steadies: allylic cations (+ next to C=C) beat ordinary.</p>"}, // CAVEMAN
       id: 's03', type: 'explain', skill: 'resonance',
       html: '<p><b>Resonance forms.</b> Neither drawing of the allyl cation is real alone. The ion has one fixed structure, a <b>resonance hybrid</b> of both: each end carbon holds half the + charge (δ+) and both C–C bonds lie between single and double. We join the drawings with a double-headed arrow, ↔. Spreading charge over more atoms steadies it, so allylic cations (the + next to a C=C) beat ordinary ones.</p>'
     },
     {
+      caveman: {"prompt":"Lesson 03: <b>acetate ion</b>. One O drawn C=O, other C–O⁻. Find other resonance form. <b>Two</b> arrows (lone pair, π bond). Check when drawn.","worked":"Arrow 1: O⁻ lone pair → C–O bond (becomes C=O). Arrow 2: C=O π bond → other oxygen (O⁻, third lone pair). Carbon four bonds, charge −1, no atom moved.","hints":["First arrow starts at O⁻ lone pair (dots), aims at O–C bond.","Second arrow: C=O π bond to that oxygen: takes π pair from carbon (else five bonds)."]}, // CAVEMAN
       id: 's04', type: 'try', skill: 'resonance', widget: 'resonance-drawer',
       prompt: 'Back to Lesson 03: the <b>acetate ion</b>. One oxygen is drawn with C=O, the other with C–O⁻. Find its other resonance form. This one needs <b>two</b> arrows (one from a lone pair, one from a π bond). Press Check when both are drawn.',
       config: { start: 'CC(=O)[O-]', name: 'acetate ion' },
@@ -63,6 +68,7 @@ export default arrange({
       worked: 'Arrow 1: lone pair on the O⁻ → the C–O bond (it becomes C=O). Arrow 2: the C=O π bond → onto the other oxygen (it becomes O⁻ with a third lone pair). The carbon still has four bonds, the total charge is still −1, and no atom moved.'
     },
     {
+      caveman: {"prompt":"Only one is a <b>valid</b> resonance form of acetate ion. Other three break a rule. Which?","worked":"Form: same atoms places, same total charge, valid Lewis. A swaps which O has double bond and −. B moved H; C: carbon five bonds; D lost −.","hints":["Compare with acetate: atoms same places? total charge same? octets kept (carbon: four bonds max)?","B: H on different atom. C: carbon five bonds. D: different charge. Valid form moved lone pair and π pair."],"options":[{"why":"Yes. Same atoms joined same way, charge −1, every octet kept. Only lone pair and π pair moved."},{"why":"H moved from carbon to oxygen: different molecule, not resonance. Atoms and σ bonds never move."},{"why":"Carbon five bonds (ten electrons). Never more than four: invalid."},{"why":"No − charge: neutral, unpaired electron on O. Resonance forms keep total charge (−1): only electrons move, none added or removed."}]}, // CAVEMAN
       id: 's05', type: 'choice', skill: 'resonance',
       prompt: 'Only one of these is a <b>valid</b> resonance form of the acetate ion shown above. The other three break a rule of resonance. Which one is valid?',
       smiles: 'CC(=O)[O-]',
@@ -76,6 +82,7 @@ export default arrange({
       worked: 'A resonance form must keep every atom where it was, keep the same total charge, and be a valid Lewis structure. Option A swaps which oxygen carries the double bond and the − charge. Option B moved an H, C gives carbon five bonds, and D lost the − charge.'
     },
     {
+      caveman: {"prompt":"<b>Benzyl cation</b>: CH₂⁺ on benzene ring. Find <b>all four</b> resonance forms: slide ring π bond toward C⁺, repeat. Press a form to start from it. (Ring bond shifts count once.)","worked":"Form 1: + on CH₂. Arrow: nearest ring π bond to CH₂–ring bond: + on ortho carbon (form 2). Next: para (form 3). Next: other ortho (form 4). Four carbons share +.","hints":["Start with ring bond nearest CH₂⁺: arrow from that π bond to ring–CH₂ bond: C=C there, + into ring.","From form with + in ring: arrow from π bond next to new C⁺. Round ring: ortho, para, second ortho. The meta carbons never get it."]}, // CAVEMAN
       id: 's06', type: 'try', skill: 'resonance', widget: 'resonance-drawer',
       prompt: 'The <b>benzyl cation</b> has a CH₂⁺ next to a benzene ring. Its empty p orbital overlaps the ring’s π bonds. Find <b>all four</b> resonance forms: slide a ring π bond toward the C⁺, then keep going. Press a form in the row to start from it. (Two drawings that differ only in which ring bonds are double count as one.)',
       config: { start: '[CH2+]C1=CC=CC=C1', fold: true, name: 'benzyl cation' },
@@ -84,6 +91,7 @@ export default arrange({
       worked: 'Form 1: + on CH₂. Arrow from the nearest ring π bond to the CH₂–ring bond: + moves to an ortho carbon (form 2). Next arrow from the π bond beyond it: + on the para carbon (form 3). Next: + on the other ortho carbon (form 4). Four carbons share the charge.'
     },
     {
+      caveman: {"prompt":"<b>Pentadienyl cation</b> <mol smiles=\"[CH2+]C=CC=C\" label=\"CH₂⁺–CH=CH–CH=CH₂\"></mol>: C⁺ at end of two conjugated C=C. Resonance forms, counting shown?","worked":"Form 1: + on C1. Slide C2=C3 π: + on C3 (form 2). Slide C4=C5 π: + on C5 (form 3). C2, C4 cannot carry +. Three forms, charge on three carbons: more forms, more stable.","hints":["Slide first π bond toward C⁺. Repeat from new structure. Stop at repeats.","+ lands on every second carbon: end, middle, other end."]}, // CAVEMAN
       id: 's07', type: 'input', skill: 'resonance',
       prompt: 'Count the forms. The <b>pentadienyl cation</b> <mol smiles="[CH2+]C=CC=C" label="CH₂⁺–CH=CH–CH=CH₂"></mol> has a C⁺ at the end of two conjugated C=C bonds. How many resonance forms does it have, counting the one shown?',
       answer: 3, resonanceCount: { start: '[CH2+]C=CC=C' },
@@ -95,6 +103,7 @@ export default arrange({
       worked: 'Form 1: + on C1. Slide the C2=C3 π bond over: + on C3 (form 2). Slide the C4=C5 π bond over: + on C5 (form 3). Carbons 2 and 4 cannot carry the charge. So there are three forms, and the charge is shared by three carbons: the more forms, the more stable the ion.'
     },
     {
+      caveman: {"prompt":"Glimpse of Lesson 13. <b>Benzene</b>, C₆H₆, three double bonds. <b>Three</b> arrows, each double bond to next single bond, same direction. Result?","worked":"Three arrows, each C=C to following C–C. Double becomes single, single double: other Kekulé form, all atoms in place, no charge.","hints":["Each arrow: double bond (π pair) to next single bond, one direction round ring.","Tap double bond, then single bond clockwise next. Repeat for other two, Check."]}, // CAVEMAN
       id: 's08', type: 'try', skill: 'resonance', widget: 'resonance-drawer',
       prompt: 'A glimpse of Lesson 13. <b>Benzene</b>, C₆H₆, is drawn here with three double bonds. Draw <b>three</b> arrows, each from a double bond to the single bond next to it, all going the same way around the ring. What do you get?',
       config: { start: 'C1=CC=CC=C1', name: 'benzene' },
@@ -103,10 +112,12 @@ export default arrange({
       worked: 'Three arrows, each from a C=C bond to the C–C bond after it in the same direction. Every double bond becomes single and every single bond becomes double: the other Kekulé form, with all atoms in place and no charge anywhere.'
     },
     {
+      caveman: {"html":"<p><b>Ground rules.</b> Forms imaginary; real species = hybrid, more stable. Only π electrons, lone pairs move; never atoms, σ bonds. Valid Lewis structure, same charge, no five-bond carbon. Pattern: p orbital or lone pair beside π bond (cations, anions, enolates, nitro, amides).</p>"}, // CAVEMAN
       id: 's09', type: 'explain', skill: 'resonance',
       html: '<p><b>The ground rules.</b> Forms are imaginary; the real species is the hybrid, more stable than any form. Only π electrons and lone pairs move; atoms and σ bonds never do (moving an H gives a different molecule). Every form is a valid Lewis structure with the same total charge and no carbon with five bonds. The pattern: a p orbital or lone pair next to a π bond (cations, anions, enolates, nitro, amides). More forms means more stability.</p>'
     },
     {
+      caveman: {"prompt":"3D <b>buta-1,3-diene</b>, simplest <b>conjugated diene</b>: alternating double, single (C=C–C=C). Turn it. Four highlighted carbons: what, why matter?","worked":"Model = s-trans conformer (C=C opposite across C2–C3, about 180°), four carbons one plane. Each sp², one p perpendicular: four parallel p overlap in row: π electrons shared over all four.","hints":["Look along chain from side. All four in one sheet?","Count p orbitals: one per sp² carbon, perpendicular. All parallel: overlap in row."],"options":[{"why":"Yes. Each sp² with p orbital; flat: four p parallel, overlap whole chain. π electrons not stuck in two double bonds. C2–C3 stays single, some double-bond character."},{"why":"Not twisted: one plane. Twisted p could not overlap; these can."},{"why":"C2–C3 still single: one σ bond, only some double-bond character. Two π bonds total."},{"why":"All sp²: three groups, one p orbital. C2, C3 have p orbitals like C1, C4."}]}, // CAVEMAN
       id: 's10', type: 'choice', skill: 'dienes',
       prompt: 'This is a solid 3D model of <b>buta-1,3-diene</b>, the simplest <b>conjugated diene</b>: double bonds alternating with a single bond (C=C–C=C). Turn it around. What do you notice about the four highlighted carbons, and why does it matter?',
       visual: { widget: 'model3d', config: { mol: 'buta-1-3-diene', highlight: [0, 1, 2, 3], labels: { 0: 'C1', 1: 'C2', 2: 'C3', 3: 'C4' } } },
@@ -120,6 +131,7 @@ export default arrange({
       worked: 'The model is the s-trans conformer (the two C=C bonds point in opposite directions across C2–C3, a twist of about 180°) and all four carbons lie in one plane. Each is sp², so each has one p orbital perpendicular to that plane, and the four parallel p orbitals overlap in a row: the π electrons are shared over all four carbons.'
     },
     {
+      caveman: {"prompt":"<b>One equivalent of HBr</b> (one HBr per diene) added to buta-1,3-diene. Lesson 09: one Markovnikov product per C=C. How many different bromides?","reveal":"Two: <b>3-bromobut-1-ene</b> (<b>1,2-addition</b>: H C1, Br C2) and <b>1-bromobut-2-ene</b> (<b>1,4-addition</b>: H C1, Br C4, C=C now C2=C3). Cause: allylic cation, H⁺ on C1, + shared.","options":[{"why":"Half the answer. Cation + shared by two carbons: Br⁻ attacks either."},{"why":"Yes. First: expected Markovnikov product. Second: C=C moved to C2=C3, H and Br on C1, C4."},{"why":"H⁺ adds only to end carbon: only stable cation. Inner carbons: unstable cation: no product."},{"why":"Conjugated diene still alkene: π electrons attack H⁺. Conjugation changes what happens next."}]}, // CAVEMAN
       id: 's11', type: 'predict', skill: 'dienes',
       prompt: 'Now the chemistry. <b>One equivalent of HBr</b> (one HBr molecule for each diene molecule) is added to buta-1,3-diene. Lesson 09 would give one Markovnikov product for each C=C. How many different bromides do you expect from this diene?',
       equation: { reactants: ['C=CC=C'], products: [], cond: 'HBr (1 equiv.)' },
@@ -132,6 +144,7 @@ export default arrange({
       reveal: 'Two products form: <b>3-bromobut-1-ene</b> (<b>1,2-addition</b>, H on C1 and Br on C2) and <b>1-bromobut-2-ene</b> (<b>1,4-addition</b>, H on C1 and Br on C4, with the C=C now between C2 and C3). The reason is an allylic carbocation: H⁺ adds to C1 and the + charge is shared.'
     },
     {
+      caveman: {"prompt":"H⁺ adds to C1 or C2 of buta-1,3-diene. Which carbocation?","worked":"H⁺ to C1: + on C2 beside C3=C4: allylic secondary cation (CH₃–CH⁺–CH=CH₂ ↔ CH₃–CH=CH–CH₂⁺). H⁺ on C2: plain primary cation, no resonance: far higher energy.","hints":["Where does + end in each cation? Next to C=C: empty p overlaps π bond?","+ beside other C=C: allylic, two resonance forms. Other: none: far less stable."],"options":[{"why":"Yes. + on C2 beside remaining C=C: allylic, secondary, two resonance forms. Forms faster: more stable."},{"why":"H⁺ to inner carbon: + on end carbon C1, NOT next to C=C. Primary, no resonance: far less stable: not formed."},{"why":"π electrons attack H of HBr, as alkene in Lesson 09."}]}, // CAVEMAN
       id: 's12', type: 'choice', skill: 'dienes',
       prompt: 'H⁺ can add to C1 or to C2 of buta-1,3-diene. Which carbocation does the reaction go through?',
       equation: { reactants: ['C=CC=C'], products: [], cond: 'H⁺ (from HBr)' },
@@ -144,6 +157,7 @@ export default arrange({
       worked: 'H⁺ adds to the END carbon C1. That leaves the + on C2, next to the C3=C4 π bond: an allylic secondary cation (CH₃–CH⁺–CH=CH₂ ↔ CH₃–CH=CH–CH₂⁺). H⁺ on C2 would leave a plain primary cation on C1 with no resonance, which is much higher in energy.'
     },
     {
+      caveman: {"prompt":"Draw <b>1,4 route</b>. <b>1</b>: π bond attacks H of H–Br (which carbon?), H–Br leaves with Br. <b>2</b>: π bond beside C⁺ slides (one arrow). <b>3</b>: Br⁻ attacks far C⁺.","worked":"Step 1: π bond (C1=C2) → H, H–Br → Br: C2 becomes C⁺. Step 2: π bond (C3=C4) → C2–C3: C4 becomes C⁺. Step 3: Br⁻ lone pair → C4: 1-bromobut-2-ene.","hints":["Step 1: two arrows: C=C π bond to H, H–Br to Br. END carbon bonds H. Step 2: one arrow, C=C bond to single bond beside C⁺. Step 3: one arrow, Br⁻ lone pair to C⁺.","Step 2: arrow from C=C π bond to C–C single bond between C⁺ and that C=C. Then + on far carbon: Br⁻ attacks there in step 3."]}, // CAVEMAN
       id: 's13', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'Draw the mechanism of the <b>1,4 route</b>, in three steps. <b>1</b>: a C=C π bond attacks the H of H–Br (say which carbon bonds to H); the H–Br pair leaves with Br. <b>2</b>: the resonance step: the π bond next to the C⁺ slides over (one arrow). <b>3</b>: Br⁻ attacks the C⁺ at the far end.',
       reaction: { reactants: ['C=CC=C', 'Br'], products: ['CC=CCBr'] },
@@ -153,6 +167,7 @@ export default arrange({
       worked: 'Step 1: π bond (C1=C2) → H, H–Br bond → Br; H bonds to C1 and C2 becomes C⁺. Step 2: π bond (C3=C4) → the C2–C3 bond; C2=C3 forms and C4 becomes C⁺ (the other resonance form). Step 3: lone pair on Br⁻ → C4. The product is 1-bromobut-2-ene.'
     },
     {
+      caveman: {"prompt":"Same allylic cation gives <b>1,2 product</b>. Step 1 shown; draw step 2: Br⁻ attacks carbon carrying + as first drawn.","worked":"Br⁻ lone pair → C⁺ (C2, bears CH₃): C–Br at C2, C=C stays C3=C4: 3-bromobut-1-ene (1,2-addition). Attack at C4: 1-bromobut-2-ene (1,4).","hints":["One arrow: Br⁻ lone pair to carbon holding + in structure shown.","Tap Br⁻ lone pair, then carbon marked +: C2, next to CH₃."]}, // CAVEMAN
       id: 's14', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'The same allylic cation also gives the <b>1,2 product</b>. Watch step 1 (you drew it), then draw step 2 yourself: this time Br⁻ attacks the carbon that carries the + charge in the cation as first drawn.',
       reaction: { reactants: ['C=CC=C', 'Br'], products: ['C=CC(C)Br'] },
@@ -162,6 +177,7 @@ export default arrange({
       worked: 'A lone pair on Br⁻ → the C⁺ carbon (C2, which bears the CH₃). The new C–Br bond forms at C2 and the C=C stays at C3=C4: 3-bromobut-1-ene, the 1,2-addition product. Attack at C4 instead gives 1-bromobut-2-ene, the 1,4-product.'
     },
     {
+      caveman: {"prompt":"<b>Isoprene</b> (2-methylbuta-1,3-diene) + one equivalent HCl: H⁺ to C1: allylic cation, <b>tertiary</b> end (C2, CH₃), <b>primary</b> end (C4). Cl⁻ either end. Products?","worked":"CH₂=CH–C⁺(CH₃)₂ ↔ ⁺CH₂–CH=C(CH₃)₂. Cl⁻ tertiary end: 3-chloro-3-methylbut-1-ene (1,2); primary end: 1-chloro-3-methylbut-2-ene (1,4).","hints":["H⁺ on C1. Write cation and resonance form: where can + sit? Cl⁻ attacks both.","Attack at C2: Cl on carbon with CH₃ (1,2). Attack at C4: Cl on CH₂ end, C=C to C2=C3 (1,4). Both form."],"options":[{"why":"Yes. Cl⁻ at C2 (1,2, tertiary) or C4 (1,4, C=C to C2=C3). Both share +."},{"why":"Only 1,2-product (Cl on tertiary carbon). Primary end shares + too: Cl⁻ attacks: 1,4-product forms."},{"why":"Only 1,4-product. Cl⁻ also attacks tertiary C2 (much of +): 1,2-product forms too."},{"why":"Needs H⁺ on inner C2: non-allylic primary cation on C1: far less stable: no product."}]}, // CAVEMAN
       id: 's15', type: 'choice', skill: 'dienes',
       prompt: '<b>Isoprene</b> (2-methylbuta-1,3-diene) reacts with one equivalent of HCl. H⁺ adds to C1 and gives an allylic cation with a <b>tertiary</b> end (C2, bonded to CH₃) and a <b>primary</b> end (C4). Cl⁻ can attack either end. Which set of products forms?',
       equation: { reactants: ['C=C(C)C=C'], products: [], cond: 'HCl (1 equiv.)' },
@@ -175,6 +191,7 @@ export default arrange({
       worked: 'H⁺ adds to C1, which gives the cation CH₂=CH–C⁺(CH₃)₂ ↔ ⁺CH₂–CH=C(CH₃)₂. Cl⁻ attacks the tertiary end to give 3-chloro-3-methylbut-1-ene (1,2), or the primary end to give 1-chloro-3-methylbut-2-ene (1,4). Both form.'
     },
     {
+      caveman: {"prompt":"<b>Cyclohexa-1,3-diene</b> + one equivalent HBr. H⁺ to one diene end; + shared by two ring carbons (allylic cation ends). How many products?","worked":"H⁺ to ring C1: + on C2 and C4 (resonance). Br at C2 or C4: same compound, 3-bromocyclohexene. 1,2- and 1,4-addition meet at one product.","hints":["Allylic cation: H⁺ on one ring end carbon, + on next carbon, shared with carbon two further round. Br on each.","The two bromides: same molecule here: Br next to remaining C=C in both."],"options":[{"why":"Yes. Either end of allylic cation gives 3-bromocyclohexene: 1,2 and 1,4 same compound here: one product."},{"why":"Needs H⁺ on inner diene carbon: non-allylic cation. Not formed: allylic much more stable."},{"why":"Halogen added is the acid's. HBr: Br, not Cl."},{"why":"Starting diene. One π bond used up."}]}, // CAVEMAN
       id: 's16', type: 'choice', skill: 'dienes',
       prompt: '<b>Cyclohexa-1,3-diene</b> reacts with one equivalent of HBr. H⁺ adds to one end of the diene, and the + charge is shared by two ring carbons (the two ends of the allylic cation). How many different products form?',
       equation: { reactants: ['C1=CC=CCC1'], products: [], cond: 'HBr (1 equiv.)' },
@@ -188,6 +205,7 @@ export default arrange({
       worked: 'H⁺ adds to C1 of the ring; the cation has its + on C2 and C4 (resonance). Br at C2 gives a ring with Br on a carbon beside the C=C; Br at C4 gives exactly the same compound, 3-bromocyclohexene. 1,2- and 1,4-addition meet at one product.'
     },
     {
+      caveman: {"prompt":"Three are resonance forms of <b>hepta-2,4,6-trien-1-yl cation</b> above (C⁺ at chain end). Which <b>NOT</b> valid?","worked":"Valid: same atoms, same +1 charge, no carbon over four bonds. A, B, D put + on carbons 3, 5, 7. C: one carbon two double bonds plus H (five bonds), no + charge: NOT a resonance form.","hints":["Each option: same atoms, charge +1, no carbon over four bonds. Count bonds.","Valid forms: + on different chain carbon. One option: carbon two double bonds and H, no charge."],"options":[{"why":"Valid: + moved two carbons along by sliding one π bond. Same atoms, same +1."},{"why":"Valid: + moved on again, next π bond slid. Only π electrons moved."},{"why":"Odd one out. Middle carbon of first three: two double bonds and H: five bonds, never. Also lost + charge. Invalid Lewis structure: not resonance."},{"why":"Valid: + on far end carbon, three π bonds slid one place. Same atoms, charge."}]}, // CAVEMAN
       id: 's17', type: 'choice', skill: 'resonance',
       prompt: 'Three of these structures are resonance forms of the <b>hepta-2,4,6-trien-1-yl cation</b> shown above: a C⁺ at the end of three conjugated C=C bonds. Which one is <b>NOT</b> a valid resonance form?',
       smiles: '[CH2+]C=CC=CC=C',
@@ -201,6 +219,7 @@ export default arrange({
       worked: 'Valid forms keep the same atoms and the same +1 charge, and every carbon has at most four bonds. Options A, B and D put the + on carbons 3, 5 and 7. Option C gives one carbon two double bonds plus an H (five bonds) and has no + charge, so it is the one that is NOT a resonance form.'
     },
     {
+      caveman: {"problem":"Major product: <b>penta-1,3-diene + HCl</b> (1 equivalent).","rule":"H⁺ on <b>end carbon giving better allylic cation</b> (ends more substituted). Resonance form: halide on <b>each</b> carbon sharing +. Products differ?","moves":[{"ask":"H⁺ adds to END carbon: =CH₂ (C1) or CH(CH₃)= (C4). Better cation?","options":[{"why":"Yes. CH₃–CH⁺–CH=CH–CH₃ ↔ CH₃–CH=CH–CH⁺–CH₃: both secondary."},{"why":"Also allylic, but + on primary CH₂ end in resonance form. H on C1 better: both ends secondary."},{"why":"H⁺ on inner carbon: cation not beside C=C, no resonance. Far less stable than allylic."}]},{"ask":"Cation vs its resonance form?","options":[{"why":"Yes. Slide π bond: same structure from other end. Symmetrical, + shared equally."},{"why":"Not primary: + moves C2 to C4, also bonded to CH₃: both secondary. Drawings identical."}]},{"ask":"Cl⁻ attacks C2 or C4. How many different products?","options":[{"why":"Yes. Symmetrical: same molecule, CH₃–CHCl–CH=CH–CH₃."},{"why":"Usually two. Here ends equivalent: C2 and C4 attack give same molecule: one product."}]},{"ask":"Product?","options":[{"why":"Yes. 4-chloropent-2-ene (pent-3-en-2-yl chloride)."},{"why":"No C=C next to Cl carbon. From non-allylic cation: does not form."},{"why":"1,2-product from less stable allylic cation (H on C4, + on C3, C1, one end primary). H on C1 better: not major."}]}]}, // CAVEMAN
       id: 's18', type: 'worked', skill: 'dienes',
       problem: 'Predict the major product of <b>penta-1,3-diene + HCl</b> (1 equivalent) one decision at a time.',
       smiles: 'CC=CC=C',
@@ -239,6 +258,7 @@ export default arrange({
       rule: 'Put H⁺ on the <b>end carbon that gives the better allylic cation</b> (the one whose two ends are more substituted). Draw its resonance form, put the halide on <b>each</b> carbon that shares the + charge, and check whether the two products are really different.'
     },
     {
+      caveman: {"prompt":"Lab. Pick diene and acid, predict products BEFORE answer: choose set with both 1,2- and 1,4-addition product, unless same compound. Two right, two different dienes.","worked":"Buta-1,3-diene + HBr: 3-bromobut-1-ene (1,2), 1-bromobut-2-ene (1,4). Cyclohexa-1,3-diene + HBr: only 3-bromocyclohexene. Isoprene + HCl: 1,2 and 1,4.","hints":["Allylic cation first: H⁺ on end carbon, + on neighbour and far end carbon. Halide of the acid on each.","Answer with one product misses other end; halide on carbon not sharing +: non-forming cation. Check halogen matches acid."]}, // CAVEMAN
       id: 's19', type: 'try', skill: 'dienes', widget: 'reaction-lab',
       prompt: 'Your turn in the lab. Pick a diene and an acid, then predict the products BEFORE the lab shows the answer: choose the set that includes both the 1,2- and the 1,4-addition product, unless they are the same compound. Get two predictions right, using at least two different dienes.',
       config: { need: 2, dienes: ['buta-1,3-diene', 'cyclohexa-1,3-diene', '2-methylbuta-1,3-diene'], reagents: ['HCl', 'HBr', 'HI'] },
@@ -247,6 +267,7 @@ export default arrange({
       worked: 'For example: buta-1,3-diene + HBr gives 3-bromobut-1-ene (1,2) and 1-bromobut-2-ene (1,4); cyclohexa-1,3-diene + HBr gives only 3-bromocyclohexene (both routes meet); isoprene + HCl gives 3-chloro-3-methylbut-1-ene and 1-chloro-3-methylbut-2-ene.'
     },
     {
+      caveman: {"html":"<p>Conjugated diene: four coplanar sp² carbons, overlapping p orbitals. HX adds H⁺ to end carbon: <b>allylic cation</b>, + on two carbons (two resonance forms). Halide attacks either: <b>1,2-</b> and <b>1,4-addition</b>. Resonance steadies cation: faster.</p>"}, // CAVEMAN
       id: 's20', type: 'explain', skill: 'dienes',
       html: '<p><b>Recap.</b> A conjugated diene has four coplanar (in one plane) sp² carbons with overlapping p orbitals. HX adds H⁺ to an end carbon, making an <b>allylic cation</b> whose + charge is shared by two carbons (two resonance forms). The halide attacks either one: <b>1,2-</b> and <b>1,4-addition</b> products, a mixture. Resonance steadies the cation, so it forms faster than a non-allylic one.</p>'
     }

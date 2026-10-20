@@ -18,6 +18,7 @@ export default {
   ],
   steps: [
     {
+      caveman: {"prompt":"So far ONE chirality center: two forms (R, S). Threonine, amino acid, has TWO centers, C2, C3. Stereoisomers expected?","reveal":"<b>n</b> centers: up to <b>2ⁿ</b> stereoisomers. Threonine, n = 2: up to 4. Some molecules fewer; why soon.","options":[{"why":"Yes. Each center R or S independently: R,R; R,S; S,R; S,S: 2 × 2 = 2² = 4."},{"why":"Two = one molecule + mirror image. Each center changes alone: more combinations."},{"why":"Three needs two combinations the same compound. Happens for some (soon), not here: threonine's centers carry different groups."},{"why":"Choices multiply, not add: 2 × 2 = 4, not 6."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'stereo-relationships',
       prompt: 'Until now each molecule had ONE chirality center, so it came in two forms (R and S). Threonine, an amino acid, has TWO chirality centers, C2 and C3. How many stereoisomers do you expect it to have?',
       smiles: 'CC(O)C(N)C(=O)O',
@@ -30,6 +31,7 @@ export default {
       reveal: 'A molecule with <b>n</b> chirality centers can have up to <b>2ⁿ</b> stereoisomers. Threonine has n = 2, so up to 4. “Up to”: some molecules have fewer, and you will see why.'
     },
     {
+      caveman: {"prompt":"All four threonine stereoisomers (<name new=\"2-amino-3-hydroxybutanoic acid\" old=\"2-amino-3-hydroxybutanoic acid\"></name>) drawn. Give R or S at C2, C3. Link pairs: tap two drawings: <b>enantiomers</b>, <b>diastereomers</b>, same compound.","worked":"Drawings: (2R,3R), (2S,3S), (2R,3S), (2S,3R). (2R,3R)/(2S,3S) differ at both: enantiomers; so (2R,3S)/(2S,3R). Other pairs, e.g. (2R,3R)/(2R,3S): one center: diastereomers. 2 enantiomer pairs, 4 diastereomer pairs.","hints":["Enantiomer = mirror image: label reversed at both centers. Compare labels.","Opposite at both: enantiomers. Opposite at one: not mirror image: diastereomer."]}, // CAVEMAN
       id: 's02', type: 'try', skill: 'stereo-relationships', widget: 'stereo-grid',
       prompt: 'All four stereoisomers of threonine (<name new="2-amino-3-hydroxybutanoic acid" old="2-amino-3-hydroxybutanoic acid"></name>) are drawn below. First give each drawing its R or S at C2 and at C3. Then link the pairs: tap two drawings and say whether they are <b>enantiomers</b>, <b>diastereomers</b> or the same compound.',
       config: { entry: 'threonine' },
@@ -38,10 +40,12 @@ export default {
       worked: 'The four drawings are (2R,3R), (2S,3S), (2R,3S) and (2S,3R). (2R,3R) and (2S,3S) differ at both centers: enantiomers. (2R,3S) and (2S,3R) also differ at both: enantiomers. Every other pair, for example (2R,3R) and (2R,3S), differs at only one center: diastereomers. That is 2 enantiomer pairs and 4 diastereomer pairs, all four compounds different.'
     },
     {
+      caveman: {"html":"<p><b>Enantiomers</b>: opposite at every center ((2R,3R), (2S,3S)). <b>Diastereomers</b>: not mirror images, same at some centers, opposite at others ((2R,3R), (2R,3S)). Enantiomers share properties except rotation sign. Diastereomers: different properties (melting point). Only (2S,3R) natural.</p>"}, // CAVEMAN
       id: 's03', type: 'explain', skill: 'stereo-relationships',
       html: '<p><b>Enantiomers</b> are opposite at <i>every</i> chirality center, like (2R,3R) and (2S,3S). <b>Diastereomers</b> are stereoisomers that are <i>not</i> mirror images: the same at some centers, opposite at others, like (2R,3R) and (2R,3S).</p><p>Enantiomers share all physical properties except the sign of rotation. Diastereomers are different compounds with different properties, such as melting point and solubility. Only (2S,3R) of the four is the amino acid found in nature.</p>'
     },
     {
+      caveman: {"prompt":"Natural threonine (2S,3R). Which is <b>diastereomer</b>?","worked":"D: constitutional isomer. C: same compound written backwards. A (2R,3S): opposite at both: enantiomer. B (2S,3S): one: diastereomer.","hints":["Diastereomer: same connectivity, not mirror. Exclude different connectivity.","Compare centers with (2S,3R): opposite at both: mirror image; same: same compound; one: diastereomer."],"options":[{"why":"A: opposite at both, (2R,3S): enantiomer, not diastereomer."},{"why":"B (2S,3S): same at C2, opposite at C3. Stereoisomer, not mirror image: diastereomer."},{"why":"C written from other end, both centers unchanged: natural threonine. Same compound."},{"why":"D: OH on different carbon: constitutional isomer."}]}, // CAVEMAN
       id: 's04', type: 'choice', skill: 'stereo-relationships',
       prompt: 'Natural threonine is (2S,3R), drawn on the left. Which of the other drawings is a <b>diastereomer</b> of it?',
       figures: [{ smiles: 'C[C@@H](O)[C@H](N)C(=O)O', label: 'natural threonine (2S,3R)' }],
@@ -56,6 +60,7 @@ export default {
       confirm: 'A diastereomer keeps the same connectivity, is a different compound, and is not a mirror image: here, opposite at one center only.'
     },
     {
+      caveman: {"prompt":"Tartaric acid, HO₂C–CH(OH)–CH(OH)–CO₂H, Pasteur's compound, two centers (C2, C3). By 2ⁿ rule, stereoisomers?","reveal":"<b>Three</b> stereoisomers: (2R,3R), (2S,3S), one more. 3D models: all have different mirror image?","options":[{"why":"Yes, surprise. 2² = 4 only upper limit: two combinations same compound. Next steps show why."},{"why":"Good guess (2² = 4), but maximum. Two ends alike: two combinations same compound."},{"why":"Two = one mirror-image pair. Also third form, not in a pair."},{"why":"(+), (−) tartaric acids Pasteur separated: more than one."}]}, // CAVEMAN
       id: 's05', type: 'predict', skill: 'meso',
       prompt: 'Tartaric acid, HO₂C–CH(OH)–CH(OH)–CO₂H, the compound Pasteur studied, also has two chirality centers (C2 and C3). Following the 2ⁿ rule, how many stereoisomers does it have?',
       smiles: 'O=C(O)C(O)C(O)C(=O)O',
@@ -68,6 +73,7 @@ export default {
       reveal: 'Tartaric acid has <b>three</b> stereoisomers: (2R,3R), (2S,3S) and one more. Test them with 3D models: do they all have a mirror image that is a different molecule?'
     },
     {
+      caveman: {"prompt":"Two tartaric acid models, each with mirror image: (2R,3S), (2R,3R). Press <b>Try to superimpose</b>: chiral or achiral? ((2R,3S) eclipsed: symmetry easy to see. Turning about C2–C3 keeps compound.)","worked":"Computer tries every turn of mirror image. (2R,3R): some atoms stay off partners: chiral. (2R,3S): every atom lands: mirror image same molecule: achiral despite two chirality centers.","hints":["Press “Try to superimpose”: all atoms land on partners?","One model: every atom lands (average distance about 0). Own mirror image: achiral."]}, // CAVEMAN
       id: 's06', type: 'try', skill: 'meso', widget: 'mirror-pair',
       prompt: 'Two models of tartaric acid, each next to its true mirror image: (2R,3S) and (2R,3R). Press <b>Try to superimpose</b> for each, then decide: chiral or achiral? (The (2R,3S) model is shown with its two halves eclipsed, so its symmetry is easy to see. Turning about C2–C3 does not change which compound it is.)',
       config: { models: ['meso-tartaric', 'rr-tartaric'], titles: { 'meso-tartaric': '(2R,3S)-tartaric acid', 'rr-tartaric': '(2R,3R)-tartaric acid' } },
@@ -76,6 +82,7 @@ export default {
       worked: 'The computer tries every allowed turn of the mirror image. For (2R,3R)-tartaric acid some atoms always stay off their partners, so it is chiral. For (2R,3S)-tartaric acid every atom lands on a partner, so the mirror image is the same molecule. That makes it achiral despite its two chirality centers.'
     },
     {
+      caveman: {"prompt":"Why (2R,3S) achiral? <b>Plane of symmetry</b>. Find it: choose direction, slide, <b>Reflect</b>. Every atom lands on identical atom.","worked":"Mirror plane swaps two halves. Halves linked by C2–C3 bond: plane across that bond, perpendicular, halfway. Reflection sends every atom of one half onto matching atom of other.","hints":["Two centers opposite configurations: mirror partners. Where must mirror stand to swap?","Plane facing along C2–C3 bond (“Across the C–C bond”), slide to middle; Reflect; every atom has partner?"]}, // CAVEMAN
       id: 's07', type: 'try', skill: 'meso', widget: 'symmetry-plane',
       prompt: 'Why is (2R,3S) achiral? Because it has a <b>plane of symmetry</b>. Find it on each model: choose which way the plane faces, slide it, and press <b>Reflect</b>. Every atom must land on an identical atom.',
       config: { rounds: [{ model: 'meso-dibromobutane', kind: 'find', titles: { 'meso-dibromobutane': '(2R,3S)-2,3-dibromobutane' } }, { model: 'meso-tartaric', kind: 'find', titles: { 'meso-tartaric': '(2R,3S)-tartaric acid' } }] },
@@ -84,6 +91,7 @@ export default {
       worked: 'A mirror plane has to swap the two halves of the molecule. The halves are linked by the C2–C3 bond, so the plane stands across that bond, perpendicular to it, halfway between C2 and C3. Reflecting through it sends every atom of one half onto the matching atom of the other.'
     },
     {
+      caveman: {"prompt":"(2R,3R)-tartaric acid. Any plane maps molecule onto itself?","worked":"Reflecting across middle of C2–C3 turns R center into S; other center also R: atoms do not match. Bisector plane of every identical-atom pair: none works. No plane of symmetry: chiral.","hints":["Plane across C2–C3 bond, slide to middle. Atoms?","“Try every possible plane”. None works: chiral."]}, // CAVEMAN
       id: 's08', type: 'try', skill: 'meso', widget: 'symmetry-plane',
       prompt: 'Now (2R,3R)-tartaric acid. Try planes the same way: does any plane map this molecule onto itself?',
       config: { rounds: [{ model: 'rr-tartaric', kind: 'none', titles: { 'rr-tartaric': '(2R,3R)-tartaric acid' } }] },
@@ -92,10 +100,12 @@ export default {
       worked: 'Reflecting the molecule across the middle of C2–C3 would turn the R center into an S center, but the other center is also R, so the atoms do not land on matching atoms. The computer also tried the bisector plane of every pair of identical atoms: none works. No plane of symmetry means chiral.'
     },
     {
+      caveman: {"html":"<p><b>Meso compound</b>: centers and plane of symmetry: own mirror image: achiral, optically inactive. Tartaric acid: (2R,3S) = (2S,3R): (+), (−), <b>meso</b>: three.</p><p>Meso needs matching halves: 2,3-dibromobutane yes; 2-bromo-3-chlorobutane no. Plane may pass through an atom (2,4-dibromopentane); cis-1,2 ring, like groups: meso.</p>"}, // CAVEMAN
       id: 's09', type: 'explain', skill: 'meso',
       html: '<p>A <b>meso compound</b> has chirality centers <i>and</i> a plane of symmetry. It is identical to its own mirror image, so it is achiral and optically inactive. For tartaric acid, (2R,3S) and (2S,3R) are the <i>same</i> compound: <b>(+)</b>, <b>(−)</b> and <b>meso</b> make three stereoisomers.</p><p>A meso form needs two matching halves. 2,3-Dibromobutane has one; 2-bromo-3-chlorobutane does not, because the two ends differ. The plane can pass through an atom between centers (2,4-dibromopentane); a cis-1,2 ring with like groups is meso.</p>'
     },
     {
+      caveman: {"prompt":"20 °C: (+)-, (−)-tartaric acid melt 168–170 °C, dissolve 139 g per 100 mL water. Meso: melts 146–148 °C, dissolves 125 g per 100 mL. Why meso differs?","worked":"(+), (−) mirror images: equal melting points, solubilities. meso: diastereomer, separate compound: both differ.","hints":["(+)- and (−)-tartaric acid: relationship? Either and meso?","Enantiomers same; diastereomers different."],"options":[{"why":"Yes. Enantiomers identical in ordinary tests; diastereomers different compounds."},{"why":"All three C₄H₆O₆. Stereoisomers share formula, bonding."},{"why":"50:50 mixture = racemate. The meso form: ONE compound, halves cancel."},{"why":"The meso form achiral. Different melting point: different compound, diastereomer."}]}, // CAVEMAN
       id: 's10', type: 'choice', skill: 'meso',
       prompt: 'Measured at 20 °C: (+)- and (−)-tartaric acid both melt at 168–170 °C and dissolve 139 g per 100 mL of water. Meso-tartaric acid melts at 146–148 °C and dissolves 125 g per 100 mL. Why does the meso form differ when (+) and (−) match?',
       options: [
@@ -109,6 +119,7 @@ export default {
       confirm: 'Enantiomers match in everything except the sign of rotation; a diastereomer, meso forms included, is a different compound with different properties.'
     },
     {
+      caveman: {"problem":"2,3-Dibromobutane, CH₃CHBrCHBrCH₃: how many stereoisomers, which meso?","rule":"n centers: up to 2ⁿ. Write combinations, merge same compounds. meso when halves alike: plane of symmetry.","moves":[{"ask":"Chirality centers?","then":"n = 2.","options":[{"why":"Yes. C2: H, Br, CH₃, CHBrCH₃; C3 same."},{"why":"CH₃ never center (three identical H). Only C2, C3."},{"why":"C2, C3 each four different groups: two."}]},{"ask":"Combinations of R and S?","then":"All four drawings.","options":[{"why":"Yes: each of 2 centers R or S."},{"why":"Each CENTER factor 2, two centers: 2² = 4."},{"why":"Choices multiply: each C2 option with each C3 option. 2 + 2 and 2 × 2 both 4 by coincidence; three centers: 8, not 6."}]},{"ask":"(2R,3S) vs (2S,3R): relationship?","then":"That compound: meso.","options":[{"why":"Yes. Two ends alike: reversing both centers swaps halves: own mirror image."},{"why":"Opposite at both: mirror images, but also identical: plane of symmetry. Superimposable mirror image is not enantiomer."},{"why":"Diastereomers differ. These interconvert by rotation: one compound."}]},{"ask":"Different stereoisomers?","options":[{"why":"Yes: one enantiomer pair plus meso. Meso is diastereomer of each."},{"why":"2ⁿ is maximum. Two combinations same meso compound: three."},{"why":"meso: third stereoisomer, no mirror image of (2R,3R), (2S,3S)."}]}]}, // CAVEMAN
       id: 's11', type: 'worked', skill: 'meso',
       problem: 'Worked example: how many stereoisomers does 2,3-dibromobutane, CH₃CHBrCHBrCH₃, have, and which one is meso? You choose each move.',
       smiles: 'CC(Br)C(Br)C',
@@ -153,6 +164,7 @@ export default {
       rule: 'n chirality centers give up to 2ⁿ stereoisomers. Write the combinations, then merge any that are the same compound. A meso form appears when the two halves of the molecule are alike, so a plane of symmetry exists.'
     },
     {
+      caveman: {"prompt":"2-Bromo-3-chlorobutane stereoisomers? (Same compound counts once.)","worked":"n = 2: up to 4. meso needs plane swapping C2, C3: C2 Br, C3 Cl: halves differ. All four different: 4 stereoisomers, two enantiomer pairs.","hints":["Two centers, C2, C3. Combinations of R and S?","Any combination same as another? meso needs plane between C2, C3: sides alike?"]}, // CAVEMAN
       id: 's12', type: 'input', skill: 'meso',
       prompt: 'How many stereoisomers does 2-bromo-3-chlorobutane have? (Two drawings of the same compound count once.)',
       smiles: 'CC(Br)C(Cl)C',
@@ -167,6 +179,7 @@ export default {
       worked: 'n = 2, so up to 2² = 4. A meso compound would need a plane of symmetry swapping C2 and C3, but C2 carries Br and C3 carries Cl, so the halves are different. All four are different compounds: 4 stereoisomers, in two enantiomer pairs.'
     },
     {
+      caveman: {"prompt":"Six pairs: same, enantiomers, diastereomers, or constitutional isomers?","worked":"Pair 1: identical (one turned). 2: opposite at both: enantiomers. 3: opposite at one: diastereomers. 4: OH on different carbons: constitutional. 5: meso and mirror drawing: identical. 6: cis, trans ring: diastereomers.","hints":["Connectivity first: same bond order? If not: constitutional isomers.","Compare centers. Plane of symmetry: own mirror image: drawing and “mirror image” same."]}, // CAVEMAN
       id: 's13', type: 'try', skill: 'stereo-relationships', widget: 'relationship-drill',
       prompt: 'Six pairs of drawn molecules. For each pair choose: the same compound, enantiomers, diastereomers or constitutional isomers.',
       config: {
@@ -184,6 +197,7 @@ export default {
       worked: 'Pair 1: the same atoms and centers, one drawing turned: identical. Pair 2: opposite at both centers: enantiomers. Pair 3: opposite at only one center: diastereomers. Pair 4: the OH groups sit on different carbons: constitutional isomers. Pair 5: a meso compound and its mirror image drawing: identical. Pair 6: cis and trans on a ring: diastereomers.'
     },
     {
+      caveman: {"prompt":"1.00 g (+)-tartaric acid + 1.00 g (−)-tartaric acid in 10.0 mL, 1.00 dm tube. Pure (+): [α]D = +12. Observed rotation of 50:50 mixture, degrees?","worked":"Each enantiomer c = 0.100 g/mL. (+): +12 × 1.00 × 0.100 = +1.2°; (−): −1.2°. Total 0°.","hints":["Each enantiomer alone: [α]D × l × c, c = 1.00 g ÷ 10.0 mL.","Enantiomers turn light equally, oppositely. Add with signs."]}, // CAVEMAN
       id: 's14', type: 'input', skill: 'racemates',
       prompt: 'Pasteur’s starting material was optically inactive. Suppose a solution holds 1.00 g of (+)-tartaric acid and 1.00 g of (−)-tartaric acid in 10.0 mL, in a 1.00 dm tube. The pure (+) form has [α]D = +12. What is the observed rotation of this 50:50 mixture, in degrees?',
       answer: 0,
@@ -197,10 +211,12 @@ export default {
       worked: 'Each enantiomer: c = 1.00 g ÷ 10.0 mL = 0.100 g/mL. The (+) form gives +12 × 1.00 × 0.100 = +1.2°, the (−) form gives −1.2°. Total: +1.2 + (−1.2) = 0°.'
     },
     {
+      caveman: {"html":"<p><b>Racemic mixture</b> (racemate), (±): 50:50 enantiomers, rotations cancel. <b>Meso compound</b>: one compound, optically inactive: own plane of symmetry. Both 0°, not same. Racemate resolvable (separated) into enantiomers; meso cannot be split.</p>"}, // CAVEMAN
       id: 's15', type: 'explain', skill: 'racemates',
       html: '<p>A <b>racemic mixture</b> (racemate), (±), is a 50:50 mixture of two enantiomers: two compounds, each optically active, whose rotations cancel. A <b>meso compound</b> is one compound that is optically inactive because of its own plane of symmetry.</p><p>Both read 0°, but they are not the same thing. A racemate can be resolved (separated) into its two enantiomers; a meso compound cannot be split.</p>'
     },
     {
+      caveman: {"prompt":"Enantiomers: identical properties. Separate racemate how? Racemic <b>acid</b> trick: reagent, salts, separate, recover acids.","worked":"Racemic acid + pure (R)-amine: (R)-acid·(R)-amine, (S)-acid·(R)-amine salts: diastereomers, different solubilities. Crystallize one, add HCl: pure (R)-, (S)-acids.","hints":["Need reagent making two products NOT mirror images. Which kind?","Hands in glove: left, right fit differently. Chiral single-enantiomer amine = glove."]}, // CAVEMAN
       id: 's16', type: 'try', skill: 'racemates', widget: 'resolution-flow',
       prompt: 'Enantiomers have identical properties, so how can a racemate be separated? Work through the standard trick for a racemic <b>acid</b>: choose the reagent, find the salts, separate them, and get the acids back.',
       config: {},
@@ -209,6 +225,7 @@ export default {
       worked: 'Racemic acid + pure (R)-amine gives the (R)-acid·(R)-amine salt and the (S)-acid·(R)-amine salt. They are the same at the amine center and opposite at the acid center: diastereomers, with different solubilities. Crystallize one out, then add HCl to each salt to free the pure (R)- and (S)-acids.'
     },
     {
+      caveman: {"prompt":"Every isomer kind on one chart. Walk flowchart per pair.","worked":"<name new=\"butan-1-ol\" old=\"1-butanol\"></name>, <name new=\"butan-2-ol\" old=\"2-butanol\"></name>: same formula, different connectivity, OH elsewhere: positional isomers. Two threonines opposite at both: enantiomers. cis-, trans-1,2-dimethylcyclohexane: same connectivity, cis meso, not mirror of trans: diastereomers.","hints":["Top first: count atoms, trace bonds. Stereoisomers share formula, connectivity.","Stereoisomers: lay one on other? If not, mirror image (opposite at EVERY center)?"]}, // CAVEMAN
       id: 's17', type: 'try', skill: 'stereo-relationships', widget: 'isomer-tree',
       prompt: 'Now put every kind of isomer on one chart. Walk the flowchart for each pair by answering its questions in order.',
       config: {
@@ -223,6 +240,7 @@ export default {
       worked: '<name new="butan-1-ol" old="1-butanol"></name> and <name new="butan-2-ol" old="2-butanol"></name>: same formula, different connectivity, and the same skeleton with the OH in a different place: positional isomers. The two threonines are opposite at both centers: enantiomers. cis- and trans-1,2-dimethylcyclohexane: same connectivity, different compounds, and the cis isomer is meso, so it is not the mirror image of trans: diastereomers.'
     },
     {
+      caveman: {"prompt":"Enantiomers: same melting point, boiling point, solubility. Yet (S)-ibuprofen relieves pain; (R) not. Why?","reveal":"Receptors, enzymes chiral: treat enantiomers differently: (+)-limonene smells of oranges, (−)-limonene of pine; only (S)-ibuprofen relieves pain. Many drugs now single enantiomer.","options":[{"why":"Yes. Chiral receptor = handed environment: one enantiomer fits, mirror image not, like hand in glove."},{"why":"Enantiomers: same formulas, connectivity. Only 3D differs."},{"why":"Enantiomers dissolve equally in water. Difference only in chiral environment."},{"why":"Enantiomers same mass. Differ: interaction with chiral molecules."}]}, // CAVEMAN
       id: 's18', type: 'predict', skill: 'chirality',
       prompt: 'Enantiomers have the same melting point, boiling point and solubility. Yet (S)-ibuprofen relieves pain while its mirror image, (R)-ibuprofen, does not. What is the most likely reason?',
       smiles: 'CC(C)Cc1ccc(cc1)[C@H](C)C(=O)O',
@@ -235,6 +253,7 @@ export default {
       reveal: 'Biological receptors and enzymes are chiral, so they usually treat the two enantiomers of a molecule differently: (+)-limonene smells of oranges and (−)-limonene of pine trees, and only (S)-ibuprofen is the active pain reliever. Many drugs are now made as a single enantiomer.'
     },
     {
+      caveman: {"prompt":"Midterm review, Lesson 10: Br₂ + cyclopentene: 1,2-dibromocyclopentane, two centers. Label four combinations, link pairs. Some may be same.","worked":"Four: (1R,2R), (1S,2S), (1R,2S), (1S,2R). (1R,2R), (1S,2S) opposite at both: enantiomers (trans). (1R,2S), (1S,2R) opposite at both, but plane of symmetry: same meso (cis). Other pairs: diastereomers.","hints":["Label centers: opposite at both (mirror images), same at both, or different at one?","Cis: Br same face at both centers. Halves alike: plane of symmetry: (1R,2S), (1S,2R) same."]}, // CAVEMAN
       id: 's19', type: 'try', skill: 'stereo-relationships', widget: 'stereo-grid',
       prompt: 'Midterm review, from Lesson 10: Br₂ adds to cyclopentene to give 1,2-dibromocyclopentane, which has two chirality centers. Label the four combinations and link the pairs. Some of them may turn out to be the same compound.',
       config: { entry: 'dibromocyclopentane12', anchor: true },
@@ -243,6 +262,7 @@ export default {
       worked: 'The four combinations are (1R,2R), (1S,2S), (1R,2S) and (1S,2R). (1R,2R) and (1S,2S) are opposite at both centers: enantiomers (trans). (1R,2S) and (1S,2R) are opposite at both centers too, but the ring has a plane of symmetry, so they are the same meso compound (cis). Every other pair is a diastereomer pair.'
     },
     {
+      caveman: {"problem":"Br₂ + cyclopentene gives? Use Lesson 10 (anti addition, bromonium ion) and this lesson.","rule":"Anti Br₂ addition: trans-1,2-dibromocyclopentane, chiral, racemate (0°). Cis would be meso: diastereomer.","moves":[{"ask":"Br₂ adds ANTI. Ring product cis or trans?","options":[{"why":"Yes. Bromonium blocks one face; bromide attacks other."},{"why":"Cis = SAME face: syn. Br₂ adds anti."}]},{"ask":"trans-1,2-dibromocyclopentane chiral?","options":[{"why":"Yes. C–Br bonds opposite faces: no symmetry plane."},{"why":"cis is meso. Trans: plane swapping halves also swaps faces: not symmetry plane."}]},{"ask":"Bromonium opens from either face equally (nothing chiral). Flask contains?","options":[{"why":"Yes. Each enantiomer equally: rotations cancel."},{"why":"No chiral reagent: no face preference: both enantiomers equally."},{"why":"meso = cis. Anti gives trans, chiral."}]},{"ask":"cis-1,2-dibromocyclopentane would be?","options":[{"why":"Yes. syn addition: this achiral compound, not racemate."},{"why":"Racemic mixture needs two enantiomers. Cis: own mirror image."}]},{"ask":"cis and trans products related how?","options":[{"why":"meso: diastereomer of trans enantiomers."},{"why":"Cis meso: own mirror image: cannot mirror trans."},{"why":"Same connectivity: each carbon Br in same positions. Differ only in 3D."}]}]}, // CAVEMAN
       id: 's20', type: 'worked', skill: 'meso',
       problem: 'Midterm review: what do you get when Br₂ adds to cyclopentene? Use Lesson 10 (the anti addition through a bromonium ion) and this lesson. You choose each move.',
           moves: [
@@ -288,6 +308,7 @@ export default {
       rule: 'Anti addition of Br₂ to cyclopentene gives trans-1,2-dibromocyclopentane, a chiral compound made as a racemate (0° rotation). The cis isomer would be meso. Cis and trans are diastereomers.'
     },
     {
+      caveman: {"prompt":"One chirality center drawn as cross: <b>Fischer projection</b>. Center where lines cross. Flat cross cannot show 3D: rule: vertical bonds one way, horizontal other. Which way?","reveal":"<b>Horizontal bonds toward you</b>, <b>vertical bonds away</b>. Cross = code for real tetrahedral carbon.","options":[{"why":"Yes. Bow tie: side loops toward you, top and bottom back."},{"why":"Reverse. Convention fixed: horizontal toward, vertical away."},{"why":"Carbon with four groups tetrahedral: bonds not in one plane. Cross = code for 3D."}]}, // CAVEMAN
       id: 's21', type: 'predict', skill: 'fischer',
       prompt: 'Chemists often draw a molecule with one chirality center as a cross, called a <b>Fischer projection</b>. The center is where the lines cross. A flat cross cannot show 3D by itself, so it uses a rule: the vertical bonds go one way and the horizontal bonds go the other. Which way?',
       visual: { widget: 'fischer-quiz', config: { mode: 'view', entry: 'glyceraldehyde', xSide: 'right', caption: 'glyceraldehyde' } },
@@ -299,11 +320,13 @@ export default {
       reveal: 'In a Fischer projection the <b>horizontal bonds point toward you</b> and the <b>vertical bonds point away from you</b>. The cross is a code for a real tetrahedral carbon, seen from the front.'
     },
     {
+      caveman: {"html":"<p><b>Fischer projection</b>: stereocenter where lines cross. <b>Vertical</b> bonds back. <b>Horizontal</b> bonds toward you.</p><p>Chain vertical, most oxidized carbon (C1: CHO, CO₂H) top.</p>"}, // CAVEMAN
       id: 's22', type: 'explain', skill: 'fischer',
       html: '<p>In a <b>Fischer projection</b> the stereocenter is where the lines cross. <b>Vertical</b> bonds point back, away from you. <b>Horizontal</b> bonds point toward you.</p><p>The carbon chain runs vertically, with the most oxidized carbon (C1, such as CHO or CO₂H) at the top. Here is the same drawing with the depth marked in.</p>',
       visual: { widget: 'fischer-quiz', config: { mode: 'view', entry: 'glyceraldehyde', xSide: 'right', depth: true, caption: 'glyceraldehyde' } }
     },
     {
+      caveman: {"problem":"Glyceraldehyde Fischer projection: CHO top, CH₂OH bottom, OH right, H left. Center R or S? You choose each move.","rule":"Rank four groups. Lowest on vertical bond (back): read 1 → 2 → 3 as drawn. On horizontal (toward you): reverse.","moves":[{"ask":"CIP-rank four groups, highest first?","options":[{"why":"Yes. O beats C: OH first, H last. Carbons tie: CHO (O, O, H) beats CH₂OH (O, H, H)."},{"why":"First atom decides. O (8) beats C (6): OH number 1."},{"why":"Carbons tie at first atom: compare attached. C=O counts O twice: CHO (O, O, H) beats CH₂OH (O, H, H)."},{"why":"H always last: lowest atomic number."}]},{"ask":"Which bond holds lowest H, which way?","options":[{"why":"Yes. H left: left, right bonds horizontal: toward you. Opposite of R/S view: reverse reading."},{"why":"Horizontal toward you. Vertical away."},{"why":"H left: left, right horizontal, not vertical."}]},{"ask":"Read 1 → 2 → 3: OH (right), CHO (top), CH₂OH (bottom). Which way?","options":[{"why":"Yes. Right to top: clock hand 3 back to 12, round left to bottom."},{"why":"Clock hand 12 to 3 clockwise. 3 to 12 (right to top): counterclockwise."}]},{"ask":"H toward you: seen turn reversed. Configuration?","then":"(R)-glyceraldehyde, also D-glyceraldehyde.","options":[{"why":"Yes. Counterclockwise reversed: clockwise: R."},{"why":"Counterclockwise = S only if H away. H toward you: reverse."}]}]}, // CAVEMAN
       id: 's23', type: 'worked', skill: 'fischer',
       problem: 'Glyceraldehyde is drawn as a Fischer projection: CHO at the top, CH₂OH at the bottom, OH on the right and H on the left. Is its chirality center R or S? You choose each move.',
       moves: [
@@ -346,10 +369,12 @@ export default {
       rule: 'Rank the four groups. If the lowest-priority group is on a vertical bond (pointing back), read 1 → 2 → 3 as drawn. If it is on a horizontal bond (pointing toward you), reverse what you read.'
     },
     {
+      caveman: {"html":"<p>Fischer R or S: rank four groups, follow 1 → 2 → 3.</p><p>Lowest on <b>vertical</b> (back): as drawn: clockwise R, counterclockwise S.</p><p>Lowest on <b>horizontal</b> (toward you): reverse: clockwise S, counterclockwise R.</p>"}, // CAVEMAN
       id: 's24', type: 'explain', skill: 'fischer',
       html: '<p>To read R or S from a Fischer projection, rank the four groups and follow 1 → 2 → 3 on the page.</p><p>Lowest-priority group on a <b>vertical</b> bond (pointing back): read it as drawn. Clockwise is R, counterclockwise is S.</p><p>Lowest-priority group on a <b>horizontal</b> bond (pointing toward you): reverse it. Clockwise is S, counterclockwise is R.</p>'
     },
     {
+      caveman: {"prompt":"Practice. Each Fischer projection fresh. Rank, read 1 → 2 → 3, watch H's bond.","worked":"Rank, note H. Read 1 → 2 → 3 as drawn. H vertical: reading is answer (clockwise R). H horizontal: reverse (clockwise S).","hints":["Rank first: higher atomic number wins at first atom; tie: compare attached. H last.","Vertical away: read as is. Horizontal toward you: H on one: reverse."]}, // CAVEMAN
       id: 's25', type: 'try', skill: 'fischer', widget: 'fischer-quiz',
       prompt: 'Practice. Each Fischer projection below is generated fresh. Rank the groups, read 1 → 2 → 3, and watch which bond holds the H.',
       config: { plan: ['rs-h', 'rs-v', 'rs-h'] },
@@ -358,6 +383,7 @@ export default {
       worked: 'Rank the groups and note where H sits. Read 1 → 2 → 3 as drawn on the page (clockwise or counterclockwise). If H is on a vertical bond, that reading is the answer (clockwise is R). If H is on a horizontal bond, reverse it (clockwise is S).'
     },
     {
+      caveman: {"prompt":"A = lactic acid. B: OH, H traded places. B same molecule as A?","reveal":"One swap of two groups: <b>enantiomer</b>. Second swap: original.","options":[{"why":"Yes. Swapping two groups at stereocenter reverses configuration: swap trick, Lesson 15."},{"why":"Swapping moves groups to different places in space: mirror image, not same."},{"why":"Same groups on same carbon: connectivity unchanged. Only 3D changed."}]}, // CAVEMAN
       id: 's26', type: 'predict', skill: 'fischer',
       prompt: 'Projection A is lactic acid. In B, the OH and H groups have traded places. Is B the same molecule as A?',
       visual: { widget: 'fischer-quiz', config: { mode: 'view', figures: [{ entry: 'lactic acid', xSide: 'right', caption: 'A' }, { entry: 'lactic acid', xSide: 'left', caption: 'B' }] } },
@@ -369,10 +395,12 @@ export default {
       reveal: 'One swap of two groups gives the <b>enantiomer</b>. A second swap of another pair gives back the original molecule.'
     },
     {
+      caveman: {"html":"<p>Some moves keep same molecule.</p><p><b>Same:</b> turn 180° in page plane, or swap two pairs.</p><p><b>Enantiomer:</b> turn 90° in page plane, or swap two groups once.</p>"}, // CAVEMAN
       id: 's27', type: 'explain', skill: 'fischer',
       html: '<p>You may turn or swap groups in a Fischer projection, but only some moves keep the same molecule.</p><p><b>Same molecule:</b> turn the whole projection 180° in the plane of the page, or swap two pairs of groups.</p><p><b>Enantiomer:</b> turn it 90° in the plane of the page, or swap any two groups once.</p>'
     },
     {
+      caveman: {"prompt":"One more, fresh. Fischer projection changed: still same molecule?","worked":"Count: one swap: enantiomer. Two swaps: same. 180° turn in page: same. 90° turn: enantiomer.","hints":["One swap: mirror image; second pair: back. Count swaps.","180° turn in page: back bonds stay back: same. 90° turn: no."]}, // CAVEMAN
       id: 's28', type: 'try', skill: 'fischer', widget: 'fischer-quiz',
       prompt: 'One more, generated fresh. A Fischer projection is changed: decide whether it is still the same molecule.',
       config: { plan: ['manip'] },

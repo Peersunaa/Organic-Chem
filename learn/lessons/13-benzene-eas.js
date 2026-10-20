@@ -12,10 +12,11 @@ const mol = (s, l) => `<mol smiles="${s}" label="${l}"></mol>`;
 
 /** Move the correct option to a different place in each question (deterministic), so the right answer is not always first. */
 function arrange(lesson) {
-  const place = (opts, k) => { const i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); };
+  // the caveman copies of the options (st.caveman.options, in the same order as options) move together with the options they belong to
+  const place = (opts, k, cv) => { const n = opts.length, i = opts.findIndex((o) => o.correct); const [c] = opts.splice(i, 1); opts.splice(k % (opts.length + 1), 0, c); if (cv && cv.length === n) { const [d] = cv.splice(i, 1); cv.splice(k % (cv.length + 1), 0, d); } };
   lesson.steps.forEach((st, n) => {
-    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length);
-    if (st.type === 'worked') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length));
+    if (st.options && (st.type === 'predict' || st.type === 'choice')) place(st.options, n % st.options.length, st.caveman && st.caveman.options);
+    if (st.type === 'worked') st.moves.forEach((m, k) => place(m.options, (n + k) % m.options.length, st.caveman && st.caveman.moves && st.caveman.moves[k] && st.caveman.moves[k].options));
   });
   return lesson;
 }
@@ -40,6 +41,7 @@ export default arrange({
   ],
   steps: [
     {
+      caveman: {"prompt":"Cyclohexene + Br₂ at once: addition product 1,2-dibromocyclohexane. Benzene, C₆H₆ <mol smiles=\"c1ccccc1\" label=\"benzene\"></mol>, ring with three C=C, + Br₂ and little FeBr₃. Expect?","reveal":"Benzene <b>substitutes</b>: C₆H₆ + Br₂ → C₆H₅Br + HBr (FeBr₃ catalyst). No addition. Why? Next: ring's special feature.","options":[{"why":"Yes. Ring keeps six π electrons, one H replaced by Br. Not ordinary alkene."},{"why":"Predicted by \"three C=C\", not observed. Adding Br₂ destroys ring stability: benzene substitutes."},{"why":"Not three separate double bonds. π electrons shared round ring: far less reactive: no Br₂ addition."},{"why":"Benzene reacts: Br₂ + FeBr₃ gives bromobenzene. Br₂ alone: none at room temperature. Not inert."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'eas',
       prompt: `Cyclohexene reacts with Br₂ at once and gives the addition product 1,2-dibromocyclohexane. Benzene, C₆H₆ ${mol('c1ccccc1', 'benzene')}, is drawn as a ring with three C=C. It is mixed with Br₂ and a little FeBr₃ catalyst. What do you expect?`,
       options: [
@@ -51,6 +53,7 @@ export default arrange({
       reveal: 'Benzene <b>substitutes</b>: C₆H₆ + Br₂ → C₆H₅Br + HBr, with FeBr₃ as catalyst. It does not add like cyclohexene. Next: what is special about the ring that makes it behave this way?'
     },
     {
+      caveman: {"prompt":"3D <b>benzene</b>. Turn it, press <b>Show the π cloud</b>. Which matches?","worked":"Ring carbons sp², flat (120°). p orbitals overlap equally with both neighbours: six π electrons shared. Every C–C 139 pm, between single (154 pm) and double (134 pm).","hints":["Look edge-on: all twelve atoms in one plane? Compare six C–C bonds.","One carbon: two carbons, one H: three groups: sp² (Lesson 02). Leftover p up and down."],"options":[{"why":"Yes. Six sp² carbons (120°), p orbitals up and down: π electrons shared by whole ring."},{"why":"Cyclohexane puckers: sp³. Benzene carbons sp²: flat, six equal bonds."},{"why":"Line drawing looks so; measured bonds all 139 pm. No plain single or double."},{"why":"Carbon three bonded atoms (two ring C, one H): sp²; fourth p forms π cloud."}]}, // CAVEMAN
       id: 's02', type: 'choice', skill: 'hybridization',
       prompt: 'Here is a solid model of <b>benzene</b>. Turn it, and press <b>Show the π cloud</b>. Which statement matches what you see?',
       visual: { widget: 'model3d', config: { mol: 'benzene', pi: true, highlight: [0, 1, 2, 3, 4, 5] } },
@@ -64,6 +67,7 @@ export default arrange({
       worked: 'Each ring carbon has three neighbours, so it is sp² and flat (120°). The remaining p orbital on each carbon overlaps equally with both neighbours, so the six π electrons are shared round the ring. Every C–C is 139 pm, between a single (154 pm) and a double (134 pm) bond.'
     },
     {
+      caveman: {"prompt":"Benzene's three C=C could sit in two places. Slide π electrons: curved arrows to <b>other</b> Kekulé drawing, then Check.","worked":"Three arrows, same direction: each C=C π bond to next single bond. Double ↔ single. Atoms stay: resonance; hybrid six equal bonds.","hints":["Arrows start at electrons. Tap C=C π bond, then next single bond. Do all three.","Each arrow: double bond to next single bond, all clockwise or all anticlockwise. Check when three drawn."]}, // CAVEMAN
       id: 's03', type: 'try', skill: 'resonance', widget: 'resonance-drawer',
       prompt: 'Chemists draw benzene with three C=C, but the double bonds could sit in two places. Slide the π electrons round the ring: draw the curved arrows that turn this drawing into the <b>other</b> Kekulé drawing (the other way of placing the three double bonds), then press Check.',
       config: { start: 'C1=CC=CC=C1', name: 'benzene' },
@@ -72,10 +76,12 @@ export default arrange({
       worked: 'Three arrows, all in the same direction round the ring: each C=C π bond moves to the single bond next to it. Every double bond becomes single and every single becomes double. The atoms do not move, so this is resonance, and the hybrid has six equal bonds.'
     },
     {
+      caveman: {"html":"<div style=\"text-align:center\"><svg viewBox=\"0 0 150 130\" role=\"img\" aria-label=\"A hexagon with a circle inside it: the symbol for the six pi electrons shared round the benzene ring\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linejoin=\"round\" style=\"width:150px;height:auto\"><polygon points=\"75,12 125,40 125,96 75,124 25,96 25,40\"/><circle cx=\"75\" cy=\"68\" r=\"27\" stroke-dasharray=\"6 4\"/></svg><div style=\"font-size:.8125rem\">circle = six π electrons shared round ring</div></div><p><b>1. Aromatic:</b> flat, six equal C–C bonds.</p><p><b>2. Stable:</b> resonance (two Kekulé hybrid) beats alkene.</p><p><b>3. Substitutes:</b> Br₂ addition wrecks ring, FeBr₃ helps Br₂ replace one H.</p><p><b>4. Name:</b> ring as group is <b>aryl</b>, Ar–.</p>"}, // CAVEMAN
       id: 's04', type: 'explain', skill: 'eas',
       html: '<div style="text-align:center"><svg viewBox="0 0 150 130" role="img" aria-label="A hexagon with a circle inside it: the symbol for the six pi electrons shared round the benzene ring" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" style="width:150px;height:auto"><polygon points="75,12 125,40 125,96 75,124 25,96 25,40"/><circle cx="75" cy="68" r="27" stroke-dasharray="6 4"/></svg><div style="font-size:.8125rem">circle = six π electrons shared by the whole ring</div></div><p><b>1. Aromatic.</b> Six π electrons are shared by the whole ring: flat, six equal C–C bonds.</p><p><b>2. Stable.</b> That sharing (resonance, the hybrid of two Kekulé drawings) makes benzene far more stable than an alkene.</p><p><b>3. So it substitutes.</b> Adding Br₂ would wreck the ring, so FeBr₃ helps Br₂ replace one H instead.</p><p><b>4. Name.</b> The ring as a group is <b>aryl</b>, Ar–.</p>'
     },
     {
+      caveman: {"prompt":"Benzene + Br₂, same first step, then fork: solid loses H⁺ (<b>substitution</b>), dashed adds Br⁻ (<b>addition</b>). Which right?","worked":"Shared slow first step: resonance-stabilised carbocation, less stable than benzene. H⁺ leaves (ring back, below start) or Br⁻ adds (ring lost, above start). Only substitution favourable.","hints":["Where does each curve end vs start at left? Which is downhill?","Which product keeps benzene ring? Resonance stability kept only by H⁺ loss."],"options":[{"why":"Yes. Addition gives up ring's resonance stability: unfavourable. Substitution keeps it: downhill."},{"why":"New bonds, but losing aromatic stability costs more: dashed ends above start."},{"why":"Same intermediate, not same product energy. Lose H⁺ or add Br⁻ decides if ring restored."},{"why":"HBr release does not raise energy. Deciding: substitution product aromatic again."}]}, // CAVEMAN
       id: 's05', type: 'choice', skill: 'energy-diagram',
       prompt: 'The diagram follows benzene + Br₂ through the same slow first step. Then it forks: the solid curve loses H⁺ (<b>substitution</b>), the dashed curve would add Br⁻ (<b>addition</b>). Which statement is right?',
       visual: { widget: 'energy-diagram', config: { levels: SUBST, label: 'substitution (the ring is restored)', overlay: { levels: ADD, label: 'addition (the ring is lost)' }, mode: 'view', caption: 'Illustrative energies, not measured values.' } },
@@ -89,6 +95,7 @@ export default arrange({
       worked: 'Both curves share the slow first step, which makes a resonance-stabilised carbocation that is much less stable than benzene itself. Then H⁺ can leave (the ring returns, energy falls below the start) or Br⁻ can add (the ring is lost, the product stays above the start). Only substitution is favourable.'
     },
     {
+      caveman: {"prompt":"First two bromination steps. <b>1:</b> FeBr₃ (Lewis acid) accepts pair from Br₂: Br⁺ (<b>electrophile</b>, electron-poor) + FeBr₄⁻. Which electrons move? <b>2:</b> ring attacks Br⁺: C–Br bond.","worked":"Step 1: Br₂ lone pair → Fe; Br–Br → that Br: Br⁺, FeBr₄⁻. Step 2: ring C=C π bond → Br⁺: C–Br. Carbon that lost π partner carries +.","hints":["Step 1: two arrows; step 2: one. Which Br₂ atom gives lone pair to Fe? Where does Br–Br pair go? Step 2: ring is nucleophile.","Step 1: Br₂ lone pair → Fe, Br–Br bond → same Br. Step 2: ring C=C π bond (any of three) → Br⁺: π electrons make new C–Br bond."]}, // CAVEMAN
       id: 's06', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'Now draw the first two steps of the bromination yourself. <b>Step 1:</b> FeBr₃ is a Lewis acid, so it accepts an electron pair from Br₂ and leaves one Br as Br⁺ (an <b>electrophile</b>: electron-poor) and FeBr₄⁻. Decide which electrons move where. <b>Step 2:</b> the ring attacks the Br⁺ to make a C–Br bond.',
       config: { get mech() { return mechanismPart(easMechanism('Br2'), 0, 2); }, modes: ['draw', 'draw'], drawing: 'skeletal' },
@@ -97,6 +104,7 @@ export default arrange({
       worked: 'Step 1: lone pair on one Br of Br₂ → Fe; Br–Br bond → onto that Br. Result: Br⁺ and FeBr₄⁻. Step 2: one ring C=C π bond → the Br⁺, making a new C–Br bond. The carbon that lost its π partner is the one that now carries the + charge.'
     },
     {
+      caveman: {"prompt":"Carbocation from step 2: one sp³ carbon (Br, H), + on neighbouring carbon. + not stuck. Slide ring π electrons toward C⁺ with curved arrows, find <b>every</b> resonance form.","worked":"Arrow 1: π bond next to C⁺ → single bond between: + two carbons round ring (opposite sp³ carbon). Arrow 2: + to other carbon next to sp³. Three forms; sp³ carbon cannot hold +.","hints":["Tap C=C π bond NEXT to C⁺, then single bond between. + moves to far end of that C=C.","sp³ carbon never involved: five sp² carbons share +, every second carbon (two next to sp³, one opposite)."]}, // CAVEMAN
       id: 's07', type: 'try', skill: 'resonance', widget: 'resonance-drawer',
       prompt: 'The carbocation from step 2 is drawn below: one sp³ carbon (with Br and H) and a + on a neighbouring carbon. That + is not stuck. Slide the ring π electrons toward the C⁺ with curved arrows to move the + charge, and keep going until you have found <b>every</b> resonance form.',
       config: { get start() { return predictEAS(BENZENE, 'Br2').sigma; }, name: 'carbocation intermediate' },
@@ -105,6 +113,7 @@ export default arrange({
       worked: 'Arrow 1: the π bond next to the C⁺ → the single bond between them. The + moves two carbons round the ring (to the carbon opposite the sp³ carbon). Arrow 2 from there moves it again, to the other carbon next to the sp³ carbon. Three forms in all; the sp³ carbon cannot hold the +.'
     },
     {
+      caveman: {"prompt":"Last step: FeBr₄⁻ base. Three arrows: remove H⁺ from sp³ carbon, restore ring, return FeBr₃ (catalyst). Where do pairs start, end?","worked":"Arrow 1: FeBr₄⁻ Br lone pair → H. Arrow 2: C–H → neighbouring C–C (C=C, + gone). Arrow 3: Fe–Br → Br. Bromobenzene, HBr, FeBr₃.","hints":["Three arrows. Base needs pair for H: which FeBr₄⁻ electrons? C–H electrons go where (ring π bonds)? Fe–Br pair ends where?","(a) Br lone pair of FeBr₄⁻ → H on sp³ carbon; (b) C–H bond → bond between sp³ carbon and C⁺ carbon; (c) Fe–Br bond → Br. Ring restored when C–H electrons make double bond to C⁺ carbon. (c) bookkeeping: Br that took H⁺ leaves as HBr."]}, // CAVEMAN
       id: 's08', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'Last step: FeBr₄⁻ acts as the base. Draw three arrows that take the H⁺ off the sp³ carbon, restore the aromatic ring, and hand FeBr₃ back (it is a catalyst). Work out where each pair of electrons starts and ends.',
       config: { get mech() { return mechanismPart(easMechanism('Br2'), 2, 3); }, modes: ['draw'], drawing: 'skeletal' },
@@ -113,6 +122,7 @@ export default arrange({
       worked: 'Arrow 1: lone pair on Br (of FeBr₄⁻) → H. Arrow 2: C–H bond → into the neighbouring C–C bond (it becomes C=C and the + disappears). Arrow 3: Fe–Br bond → onto Br. Products: bromobenzene, HBr and FeBr₃.'
     },
     {
+      caveman: {"problem":"Needs an <b>electrophile</b>: positive, electron-poor, attacked by ring π electrons. Name it per reagent.","rule":"Electrophile <b>positive</b>: X⁺ (X₂ + FeX₃), I⁺ (I₂ + oxidant), NO₂⁺ (HNO₃ + H₂SO₄), HSO₃⁺ (SO₃ + H₂SO₄), R⁺ (RCl + AlCl₃), RC≡O⁺ (RCOCl + AlCl₃).","moves":[{"ask":"<b>HNO₃, H₂SO₄</b> (nitration). Electrophile?","then":"Nitration: –NO₂ on ring.","options":[{"why":"Yes. HNO₃ + 2 H₂SO₄ → NO₂⁺ + H₃O⁺ + 2 HSO₄⁻."},{"why":"Negative: electron-rich like ring. Needs electron-poor partner. HSO₄⁻ takes H⁺ at end."},{"why":"H₃O⁺ by-product. Ring group is NO₂: electrophile has N."}]},{"ask":"<b>SO₃, H₂SO₄</b> (sulfonation). Electrophile?","then":"Sulfonation: –SO₃H on ring.","options":[{"why":"Yes. SO₃ + H₂SO₄ → HSO₃⁺ + HSO₄⁻."},{"why":"Negative ion left behind. Electrophile must be positive; group on ring is SO₃H."},{"why":"H⁺ attack just puts H where H is. Substituted group –SO₃H: electrophile carries S."}]},{"ask":"<b>Cl₂ with FeCl₃</b> (chlorination). Electrophile?","then":"Iodination same: I₂ and oxidant make I⁺.","options":[{"why":"Yes. As bromination: Lewis acid makes one Cl of Cl₂ electron-poor."},{"why":"Cl⁻ nucleophile: ring does not attack. Leaving partner (FeCl₄⁻)."},{"why":"FeCl₄⁻ negative: base removing H⁺ at end. Electrophile: positive partner."}]},{"ask":"<b>CH₃CH₂Cl, AlCl₃</b>: electrophile?","then":"Only alkyl halides (aryl, vinylic: no carbocation).","options":[{"why":"Yes. R–Cl + AlCl₃ → R⁺ + AlCl₄⁻. Ring attacks positive carbon."},{"why":"Leftover anion: base at end. Electrophile: carbocation."},{"why":"Cl⁻ electron-rich. Ring needs electron-poor."}]},{"ask":"<b>CH₃COCl, AlCl₃</b>: electrophile?","then":"Acylation: acyl group, RC=O, on ring.","options":[{"why":"Yes. C–Cl electrons make C≡O. Ring attacks acyl carbon: ketone."},{"why":"Acyl carbon keeps oxygen: aryl ketone Ar–CO–CH₃, not methylated ring."},{"why":"Cl leaves as AlCl₄⁻. Ring does not attack it."}]}]}, // CAVEMAN
       id: 's09', type: 'worked', skill: 'eas',
       problem: 'Every reaction of this kind needs an <b>electrophile</b>: an electron-poor species (positive) that the ring’s π electrons can attack. Name it for each reagent, one at a time.',
       moves: [
@@ -170,6 +180,7 @@ export default arrange({
       rule: 'The electrophile is always a <b>positive, electron-poor</b> species made from the reagent mixture: X⁺ (X₂ + FeX₃), I⁺ (I₂ + oxidant), NO₂⁺ (HNO₃ + H₂SO₄), HSO₃⁺ (SO₃ + H₂SO₄), R⁺ (RCl + AlCl₃) or RC≡O⁺ (RCOCl + AlCl₃). The ring attacks it, then H⁺ leaves.'
     },
     {
+      caveman: {"prompt":"Benzene + <b>concentrated nitric acid, sulfuric acid</b>. Monosubstituted product?","worked":"HNO₃ + H₂SO₄: NO₂⁺. π electrons attack N: carbocation; HSO₄⁻ removes H⁺: aromatic. Nitrobenzene, C₆H₅NO₂.","hints":["Electrophile from HNO₃, H₂SO₄: NO₂⁺. Ring attacks, H⁺ leaves.","ONE ring H replaced by –NO₂, ring aromatic. One new group, no lost C=C."],"options":[{"why":"Yes. NO₂⁺ replaces one H. Nitrobenzene reduces to aniline."},{"why":"NO₂ and OH adding across C=C: destroys aromatic ring. Benzene substitutes."},{"why":"Alkylated ring: alkyl halide, AlCl₃. HNO₃, H₂SO₄ make NO₂⁺: –NO₂ on ring."},{"why":"Two new groups. One NO₂⁺ replaces one H; question asks monosubstituted. (Second group: Lesson 14.)"}]}, // CAVEMAN
       id: 's10', type: 'choice', skill: 'eas',
       prompt: 'Benzene is treated with a mixture of <b>concentrated nitric acid and sulfuric acid</b>. Which monosubstituted product forms?',
       equation: { reactants: [BENZENE], products: [], cond: 'HNO₃, H₂SO₄' },
@@ -184,6 +195,7 @@ export default arrange({
       confirm: 'Nitrobenzene: NO₂⁺ replaces one H. Nitration is useful because the –NO₂ can be reduced to –NH₂ (next step).'
     },
     {
+      caveman: {"prompt":"Aromatic amines from benzene, <b>two steps</b>. Make <b>aniline</b>: tap reagent cards, order, <b>Run the plan</b>. Wrong card or order tells why.","worked":"Step 1: HNO₃, H₂SO₄: nitrobenzene. Step 2: Fe (or Sn, SnCl₂), H₃O⁺, then HO⁻: –NO₂ to –NH₂: aniline. Reduction first fails; other cards other groups.","hints":["Aniline = benzene –NH₂. No reagent adds –NH₂ directly. Which ring group reduces to it?","Nitro, –NO₂, reduced to –NH₂ by Fe (or Sn, SnCl₂), H₃O⁺. Nitro first, reduce second."]}, // CAVEMAN
       id: 's11', type: 'try', skill: 'synthesis', widget: 'synthesis-planner',
       prompt: 'Aromatic amines are made from benzene in <b>two steps</b>. Make <b>aniline</b> from benzene: tap reagent cards into order, then press <b>Run the plan</b>. The plan is run on the real reaction rules, so a wrong card or order tells you why.',
       config: { start: BENZENE, target: 'Nc1ccccc1', deck: ['HNO3_H2SO4', 'Fe_H3O', 'Br2_FeBr3', 'SO3_H2SO4', 'MeCl_AlCl3', 'AcCl_AlCl3'] },
@@ -192,6 +204,7 @@ export default arrange({
       worked: 'Step 1: HNO₃, H₂SO₄ turns benzene into nitrobenzene. Step 2: Fe (or Sn, SnCl₂), H₃O⁺, then HO⁻ reduces –NO₂ to –NH₂, giving aniline. Reduction first would fail (no nitro group yet), and the other cards put different groups on the ring.'
     },
     {
+      caveman: {"prompt":"Friedel–Crafts limits. <b>Only one</b> of four works. Which?","worked":"Chlorobenzene (aryl), vinyl chloride (vinylic): no cation. Nitro ring deactivated. Only benzene + alkyl chloride: CH₃CH₂Cl, AlCl₃: ethylbenzene.","hints":["Each option: ALKYL halide (Cl on saturated carbon)? Ring free of deactivating groups (make it far less reactive)?","Aryl, vinylic halides: no carbocations. Rings with –NO₂, –C≡N, –SO₃H, –COR too unreactive."],"options":[{"why":"Yes. AlCl₃ makes CH₃CH₂⁺, ring attacks: ethylbenzene."},{"why":"Alkyl halides only. Chlorobenzene: aryl halide, no carbocation."},{"why":"Vinylic halide: Cl on C=C carbon. AlCl₃ cannot pull it off."},{"why":"Ring has –NO₂: far less reactive. Friedel–Crafts fails with –NO₂, –C≡N, –SO₃H, –COR (acyl, C=O)."}]}, // CAVEMAN
       id: 's12', type: 'choice', skill: 'eas',
       prompt: 'Friedel–Crafts reactions have limits. <b>Only one</b> of these four reactions works. Which?',
       options: [
@@ -205,6 +218,7 @@ export default arrange({
       confirm: 'Friedel–Crafts needs an alkyl (or acyl) halide and a ring that is not deactivated by –NO₂, –C≡N, –SO₃H or –COR.'
     },
     {
+      caveman: {"prompt":"Disubstituted rings: <b>ortho</b> (next to), <b>meta</b> (one between), <b>para</b> (opposite). From CH₃ of toluene (methylbenzene): tap ortho, meta, para carbons.","worked":"Number from CH₃ carbon as 1. Ortho = 2, 6; meta = 3, 5; para = 4. Two ortho equivalent, two meta; one para.","hints":["CH₃ carbon outlined = start. ortho: its two ring neighbours.","Meta: one carbon between. Para: across, three bonds from CH₃ carbon."]}, // CAVEMAN
       id: 's13', type: 'try', skill: 'aromatic-naming', widget: 'ring-position',
       prompt: 'Rings with two groups are named by how far apart the groups are: <b>ortho</b> (next to it), <b>meta</b> (one carbon between), <b>para</b> (opposite). Start from the CH₃ of toluene (methylbenzene). Tap the ring carbons that are ortho, then meta, then para to it.',
       config: { smiles: 'Cc1ccccc1', tasks: ['ortho', 'meta', 'para'] },
@@ -213,6 +227,7 @@ export default arrange({
       worked: 'Number the ring from the CH₃ carbon as 1. Ortho = carbons 2 and 6, meta = carbons 3 and 5, para = carbon 4. The two ortho carbons are equivalent, as are the two meta carbons; there is only one para carbon.'
     },
     {
+      caveman: {"prompt":"Name this disubstituted benzene. Numbers or <b>o-, m-, p-</b>. Parents: aniline (NH₂ = C1), toluene (CH₃), phenol (OH), benzoic acid (CO₂H), benzaldehyde (CHO), benzonitrile (C≡N), benzenesulfonic acid (SO₃H). Senior is parent: CO₂H, SO₃H, C≡N, CHO, OH, NH₂ (HO–C₆H₄–CHO: hydroxybenzaldehyde, not formylphenol).","worked":"Cl on carbon opposite NH₂ carbon: para (1,4). NH₂ makes parent aniline, that carbon C1: <name new=\"4-chloroaniline\" old=\"p-chloroaniline\"></name>.","hints":["NH₂ to Cl carbon: ortho (1,2), meta (1,3), para (1,4)?","Parent aniline (NH₂ = C1). Position of Cl, chloro, aniline: p-chloroaniline, or 4-chloroaniline."]}, // CAVEMAN
       id: 's14', type: 'input', skill: 'aromatic-naming',
       prompt: 'Name this disubstituted benzene. Either style is accepted: numbers or <b>o-, m-, p-</b>. Aniline (benzene with an NH₂) is the parent, so its NH₂ is carbon 1; other special parents work the same way: toluene (CH₃), phenol (OH), benzoic acid (CO₂H), benzaldehyde (CHO), benzonitrile (C≡N), benzenesulfonic acid (SO₃H). If two groups could both be the parent, the more senior one wins: CO₂H, then SO₃H, C≡N, CHO, OH, NH₂ (so HO–C₆H₄–CHO is a hydroxybenzaldehyde, not a formylphenol). Spaces, capitals and hyphens do not matter.',
       smiles: 'Nc1ccc(Cl)cc1', name: true,
@@ -231,6 +246,7 @@ export default arrange({
       worked: 'The Cl is on the carbon directly opposite the NH₂ carbon: a para (1,4) relationship. NH₂ makes the parent aniline with that carbon as C1, so the name is <name new="4-chloroaniline" old="p-chloroaniline"></name>.'
     },
     {
+      caveman: {"prompt":"<b>Three or more</b> groups: number each, C1 gives lowest numbers; tie: first <b>alphabetical</b> group gets lower number. Name it.","worked":"Three groups one carbon apart: 1,3,5 any numbering. Tie by alphabet: Br (bromo) gets 1. Two CH₃: 3 and 5, dimethyl: <name new=\"1-bromo-3,5-dimethylbenzene\" old=\"1-bromo-3,5-dimethylbenzene\"></name>.","hints":["Number either direction from any group: lowest set for three groups like this? Same both directions?","1,3,5 either way: use alphabet: bromo (b) before methyl (m). Substituents alphabetical, di- ignored."],"options":[{"why":"Yes. 1, 3, 5 lowest either way: alphabet breaks tie: bromo before methyl: Br C1."},{"why":"1,3,5 right, but tie: first alphabetical (bromo) gets 1."},{"why":"1,3,5 right, bromo first alphabetically: Br is 1, methyls 3 and 5."},{"why":"List alphabetically (bromo before methyl); lowest number to first named."}]}, // CAVEMAN
       id: 's15', type: 'choice', skill: 'aromatic-naming',
       prompt: 'With <b>three or more</b> groups, give each a number: C1 is chosen so that the numbers are as low as possible, and when there is a tie the group that comes first <b>alphabetically</b> gets the lower number. Name this compound.',
       smiles: 'Cc1cc(C)cc(Br)c1',
@@ -244,6 +260,7 @@ export default arrange({
       worked: 'The three groups are spaced one carbon apart round the ring, so the locants are 1,3,5 in every numbering. The tie is broken alphabetically: Br (bromo) gets 1. The two CH₃ groups are 3 and 5, written dimethyl: <name new="1-bromo-3,5-dimethylbenzene" old="1-bromo-3,5-dimethylbenzene"></name>.'
     },
     {
+      caveman: {"prompt":"Ring as <b>group</b>. Highlighted part of benzyl chloride, C₆H₅CH₂–: name?","worked":"C₆H₅ plus CH₂ bonded to Cl: C₆H₅CH₂– = benzyl. Without CH₂: phenyl, C₆H₅–. Aryl (Ar): general term for aromatic ring group.","hints":["Highlighted: six ring carbons, five H, one more carbon. A CH₂ on ring?","Phenyl C₆H₅–. Benzyl C₆H₅CH₂–. Aryl (Ar): any aromatic substituent."],"options":[{"why":"Yes. Benzyl = C₆H₅CH₂–: ring plus one CH₂."},{"why":"Phenyl = ring alone, C₆H₅–. This group has CH₂ too."},{"why":"Aryl = general name, aromatic group joined directly (Ar–). Here CH₂ between: benzyl."},{"why":"Toluene = whole molecule, C₆H₅CH₃. Not C₆H₅CH₂–."}]}, // CAVEMAN
       id: 's16', type: 'choice', skill: 'aromatic-naming',
       prompt: 'A benzene ring can also be a <b>group</b> on another molecule. The highlighted part of benzyl chloride, C₆H₅CH₂–, has its own name. Which?',
       smiles: 'ClCc1ccccc1', highlight: [1, 2, 3, 4, 5, 6, 7],
@@ -257,6 +274,7 @@ export default arrange({
       worked: 'The group is C₆H₅ plus a CH₂ that carries the bond to Cl: C₆H₅CH₂–, called benzyl. Without the CH₂ it would be phenyl, C₆H₅–, the ring alone. Aryl (Ar) is the general term for an aromatic ring group.'
     },
     {
+      caveman: {"problem":"Plan <b>acetophenone</b> <mol smiles=\"CC(=O)c1ccccc1\" label=\"acetophenone\"></mol> from benzene. Each move.","rule":"Friedel–Crafts <b>acylation</b>: RCOCl + AlCl₃ → acylium RC≡O⁺ → H⁺ lost → <b>aryl ketone</b> (CH₃COCl: acetophenone; CH₃CH₂COCl: 1-phenylpropan-1-one). Acylation, alkylation both fail on rings with –NO₂, –C≡N, –SO₃H, –COR.","moves":[{"ask":"Acetophenone: C(=O)CH₃ on ring. Which reagents add acyl?","options":[{"why":"Yes. Acid chloride + AlCl₃: aryl ketone."},{"why":"Alkylation: ethyl group, ethylbenzene, no C=O."},{"why":"Makes NO₂⁺: –NO₂ on ring."}]},{"ask":"What does AlCl₃ do to CH₃COCl?","options":[{"why":"Yes. AlCl₃ accepts lone pair from Cl: C–Cl electrons become C≡O."},{"why":"AlCl₃: six electrons: ACCEPTS pair."},{"why":"Polar: pairs move, ions, not radicals."}]},{"ask":"π electrons attack acylium carbon. Next intermediate?","options":[{"why":"Yes. As in bromination: three resonance forms, ring not aromatic."},{"why":"Ring must first lose H⁺. After attack ring carries +."},{"why":"Ring donated electrons: short of electrons: carbocation, not carbanion."}]},{"ask":"How is ring aromatic again?","then":"Acetophenone: benzene with acyl group.","options":[{"why":"Yes. C–H electrons into ring. AlCl₃ regenerated."},{"why":"That is addition: ring non-aromatic. Benzene substitutes: loses H⁺."},{"why":"COCH₃ stays. Leaving group: H on sp³ carbon, as H⁺."}]}]}, // CAVEMAN
       id: 's17', type: 'worked', skill: 'eas',
       problem: `Plan and explain how to make <b>acetophenone</b> ${mol('CC(=O)c1ccccc1', 'acetophenone')} from benzene. Decide each move.`,
       moves: [
@@ -298,6 +316,7 @@ export default arrange({
       rule: 'Friedel–Crafts <b>acylation</b>: RCOCl + AlCl₃ → the acylium ion RC≡O⁺ → ring attack → carbocation intermediate → loss of H⁺ → an <b>aryl ketone</b> (CH₃COCl gives acetophenone; CH₃CH₂COCl gives 1-phenylpropan-1-one, a propanone chain with the ring on C1). Alkylation uses R–Cl and gives R–Ar. Both fail on rings with –NO₂, –C≡N, –SO₃H or –COR.'
     },
     {
+      caveman: {"prompt":"Lab, benzene. Pick reagent, predict product BEFORE lab. Watch substitution (not addition), and which group each electrophile puts on. Two right, two different reagents.","hints":["Name electrophile from reagents, then group it puts on. Alkyl halide, AlCl₃: ALKYL; acid chloride, AlCl₃: ACYL (C=O).","Right answer: aromatic, ONE new group. Lost C=O, no ring, or two groups: other reaction."]}, // CAVEMAN
       id: 's18', type: 'try', skill: 'eas', widget: 'reaction-lab',
       prompt: 'Back to the lab, now with benzene. Pick a reagent and predict the product BEFORE the lab shows it. Watch for substitution (not addition), and for which group each electrophile puts on the ring. Get two predictions right, using at least two different reagents.',
       config: { need: 2, eas: ['bromination', 'chlorination', 'iodination', 'nitration', 'sulfonation', 'methylation', 'ethylation', 'isopropylation', 'tert-butylation', 'acetylation', 'propanoylation'] },
@@ -306,6 +325,7 @@ export default arrange({
       worked: 'For example: Br₂/FeBr₃ gives bromobenzene; HNO₃/H₂SO₄ gives nitrobenzene; SO₃/H₂SO₄ gives benzenesulfonic acid; CH₃CH₂Cl/AlCl₃ gives ethylbenzene; CH₃COCl/AlCl₃ gives acetophenone (an aryl ketone).'
     },
     {
+      caveman: {"html":"<p>Benzene: six delocalised π electrons: substitutes, not adds. Electrophile (Br⁺, Cl⁺, I⁺, NO₂⁺, HSO₃⁺, R⁺, RC≡O⁺) attacked by ring (slow); carbocation + over three carbons; base removes H⁺ (fast). NO₂ to NH₂: Fe, Sn or SnCl₂, H₃O⁺.</p>"}, // CAVEMAN
       id: 's19', type: 'explain', skill: 'eas',
       html: '<p><b>Recap.</b> Benzene is a flat hybrid with six delocalised π electrons, so it substitutes instead of adding. An electrophile (Br⁺, Cl⁺, I⁺, NO₂⁺, HSO₃⁺, R⁺ or RC≡O⁺) is attacked by the ring (slow); the carbocation shares its + over three carbons; a base removes H⁺ (fast). NO₂ reduces to NH₂ with Fe, Sn or SnCl₂ and H₃O⁺. Next lesson: what a group already on the ring does.</p>'
     }

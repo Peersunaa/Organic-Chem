@@ -17,6 +17,7 @@ export default {
   ],
   steps: [
     {
+      caveman: {"prompt":"Real 3D ethane: two CH₃ joined by single C–C. Hold one CH₃, twist other about bond. What happens?","reveal":"Turning about single bond gives <b>conformations</b>; molecules = <b>conformers</b>. Unlike constitutional isomers, usually not isolable: swap too fast.","options":[{"why":"Single bond = head-on overlap on line between carbons. Turning keeps overlap. Nothing breaks."},{"why":"Head-on overlap same from every side: ends turn freely. Only H positions change."},{"why":"Yes. Overlap, so bond, same at every angle. Same molecule, new arrangement."},{"why":"Double bond needs sideways (π) overlap, two fewer H. Twisting keeps bond count."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'conformations',
       prompt: 'This is a real 3D model of ethane: two CH₃ groups joined by a single C–C bond. Suppose you hold one CH₃ still and twist the other about that bond. What happens?',
       visual: { widget: 'model3d', config: { mol: 'ethane' } },
@@ -29,6 +30,7 @@ export default {
       reveal: 'The different arrangements you get by turning about a single bond are called <b>conformations</b>, and the molecules are <b>conformers</b>. Unlike constitutional isomers, conformers usually cannot be isolated, because they swap places too quickly.'
     },
     {
+      caveman: {"prompt":"Turn rear CH₃ with slider (or drag Newman circle: view down C–C bond, front carbon centre, rear carbon circle). Lock two: six C–H bonds <b>far apart</b>, then <b>close together</b>.","worked":"Far: rear bond halfway between front bonds (60°, 180°, 300°). Close: rear bond behind front bond (0°, 120°, 240°).","hints":["Newman circle, far apart: six bonds evenly spaced, 60° apart.","Crowded: each rear bond hidden behind front bond: three lines."]}, // CAVEMAN
       id: 's02', type: 'try', skill: 'conformations',
       prompt: 'Turn the rear CH₃ with the slider (or drag around the Newman circle, a view looking straight down the C–C bond: front carbon in the centre, rear carbon as the circle). Lock two arrangements: first the one where the six C–H bonds are as <b>far apart</b> as possible, then the one where they are as <b>close together</b> as possible.',
       widget: 'newman-rotator',
@@ -38,10 +40,12 @@ export default {
       confirm: 'You found both extremes. The 3D model and the Newman circle moved together because they are the same coordinates.'
     },
     {
+      caveman: {"html":"<p><b>Newman projection</b>: look down C–C. Front carbon = centre, three bonds meet; rear carbon = circle, bonds start at edge. <b>Sawhorse</b>: same bond from angle.</p><p><b>Staggered</b> (far apart), <b>eclipsed</b> (lined up).</p>"}, // CAVEMAN
       id: 's03', type: 'explain', skill: 'conformations',
       html: '<p>A <b>Newman projection</b> looks straight down the C–C bond: the front carbon is the centre where three bonds meet, the rear carbon is the circle, and its bonds start at the edge. A <b>sawhorse</b> drawing shows the same bond from an angle.</p><p>Your two finds are <b>staggered</b> (bonds as far apart as possible) and <b>eclipsed</b> (bonds lined up).</p>'
     },
     {
+      caveman: {"prompt":"Energy on. Turn full circle, watch curve marker. Eclipsed higher than staggered by how many kJ/mol (kilojoules per mole, energy unit)?","worked":"Staggered 0 kJ/mol, eclipsed peak 12 kJ/mol: barrier 12 kJ/mol.","hints":["Highest curve point, vertical axis.","Lowest is 0: barrier = peak value."]}, // CAVEMAN
       id: 's04', type: 'input', skill: 'conformations',
       prompt: 'The energy is switched on now. Turn through a full circle and watch the marker on the curve. By how many kJ/mol (kilojoules per mole, a unit of energy) is the eclipsed arrangement higher in energy than the staggered one?',
       visual: { widget: 'newman-rotator', config: { mol: 'ethane', need: [], energy: true, pill: true, start: 25 } },
@@ -56,6 +60,7 @@ export default {
       confirm: 'The barrier to rotation in ethane is 12 kJ/mol.'
     },
     {
+      caveman: {"prompt":"Eclipsed ethane: three C–H on front carbon, each in line with rear: three eclipsed H–H pairs. Whole 12 kJ/mol from three pairs equally: kJ/mol per pair?","worked":"12 kJ/mol ÷ 3 = 4.0 kJ/mol per eclipsed H–H pair.","hints":["12 kJ/mol split across 3 equal pairs.","12 ÷ 3 = ?"]}, // CAVEMAN
       id: 's05', type: 'input', skill: 'conformations',
       prompt: 'In eclipsed ethane there are three C–H bonds on the front carbon, each directly in line with one on the rear carbon: three eclipsed H–H pairs. If the whole 12 kJ/mol comes from those three pairs equally, how many kJ/mol does one eclipsed H–H pair cost?',
       answer: 4, accept: ['4.0'],
@@ -69,6 +74,7 @@ export default {
       confirm: 'About 4.0 kJ/mol each. This extra energy of an eclipsed arrangement is called torsional strain.'
     },
     {
+      caveman: {"prompt":"Swap one H for Br: bromoethane (CH₂Br carbon in front, Br a front bond). Energy curve on. Lock highest-energy arrangement. Peak higher or lower than ethane's 12?","worked":"Peak (eclipsed, Br behind rear H) about 15 kJ/mol, above 12. H–Br costs more than H–H.","hints":["Follow marker up to peak.","At peak each rear bond behind front bond; one rear H behind Br."]}, // CAVEMAN
       id: 's06', type: 'try', skill: 'conformations',
       prompt: 'Now swap one H for a bromine: this is bromoethane (the CH₂Br carbon is in front, its Br is one of the front bonds). The energy curve is on. Find and lock the highest-energy arrangement, then note whether its peak is higher or lower than ethane’s 12.',
       widget: 'newman-rotator',
@@ -78,6 +84,7 @@ export default {
       confirm: 'The peak is 15 kJ/mol. Bromine is larger than hydrogen, so an H–Br eclipsing interaction costs more than an H–H one.'
     },
     {
+      caveman: {"prompt":"12 kJ/mol barrier: ethane keeps turning at room temperature. Share of molecules near staggered at any instant?","reveal":"About 99% near staggered, 1% near eclipsed. Same for propane, butane, larger alkanes: neighbouring-carbon bonds prefer staggered.","options":[{"why":"Not equal. Eclipsed 12 kJ/mol higher: molecules favour lower energy."},{"why":"Yes. Staggered so much lower: nearly all near it."},{"why":"Reversed: high-energy eclipsed is rare."},{"why":"At room temperature 12 kJ/mol reachable: molecules pass eclipsed, rarely. Groups keep turning."}]}, // CAVEMAN
       id: 's07', type: 'predict', skill: 'conformations',
       prompt: 'A 12 kJ/mol barrier is low enough that ethane molecules keep turning at room temperature. At any one instant, roughly what share of ethane molecules are close to the staggered arrangement?',
       options: [
@@ -89,6 +96,7 @@ export default {
       reveal: 'About 99% of ethane molecules are near staggered at any instant and only about 1% near eclipsed. The same is true of propane, butane and every larger alkane: bonds on neighbouring carbons prefer to be staggered.'
     },
     {
+      caveman: {"prompt":"Ethane turns freely. Two 1,2-dimethylcyclopropanes: methyls same face, or opposite faces. Convert one to other by turning about C–C, breaking nothing?","reveal":"Two faces: same (cis) or opposite (trans). <b>Stereoisomers</b>: same connections, different arrangement in space. Separate, isolable, unlike conformers.","options":[{"why":"In ring, turning drags ring along, stretches bonds until ring breaks. Ring holds each group on fixed face."},{"why":"Right. No free rotation in ring: no interconversion without breaking bonds."},{"why":"Different compounds, different properties. No rotation converts."},{"why":"Gentle heating speeds only twisting. Swapping faces needs bond breaking."}]}, // CAVEMAN
       id: 's08', type: 'predict', skill: 'chairs',
       prompt: 'Ethane’s ends turn freely. Now look at two 1,2-dimethylcyclopropanes: the methyls on the same face of the ring, or on opposite faces. Could you convert one into the other just by turning about a C–C bond, without breaking anything?',
       visual: { widget: 'model3d', config: { mol: 'cis-dmcp', compare: 'trans-dmcp' } },
@@ -101,6 +109,7 @@ export default {
       reveal: 'A ring has two faces, so substituents can be on the same face (<b>cis</b>) or opposite faces (<b>trans</b>). These are <b>stereoisomers</b>: the same connections, a different arrangement in space. They are separate, isolable compounds, unlike conformers.'
     },
     {
+      caveman: {"prompt":"Wedge toward you, dash away. Which name matches?","worked":"One wedge, one dash: opposite faces: trans. Carbons 1 and 4: trans-1-chloro-4-methylcyclohexane.","hints":["Decide face of each group: wedge or dash.","Count ring carbons between groups: two each side = 1,4."],"options":[{"why":"Cis needs same face (two wedges or two dashes). Here wedge and dash: opposite faces."},{"why":"Yes. Wedge and dash: opposite faces, trans. Carbons 1 and 4."},{"why":"Groups on 1 and 4: two ring carbons between on each side. 1,3 leaves one on one side."},{"why":"Face right (opposite), positions wrong: 1 and 4, two ring carbons between each side."}]}, // CAVEMAN
       id: 's09', type: 'choice', skill: 'chairs',
       prompt: 'In a flat ring drawing a wedge comes toward you and a dash goes away. Which name matches this drawing?',
       smiles: 'C[C@H]1CC[C@H](Cl)CC1',
@@ -115,6 +124,7 @@ export default {
       confirm: 'Opposite faces, 1,4: trans-1-chloro-4-methylcyclohexane.'
     },
     {
+      caveman: {"prompt":"Three carbons: always flat triangle. 3D cyclopropane. Carbon likes angles near 109.5°. Effect on energy and reactivity?","reveal":"Cyclopropane flat, 60° C–C–C: <b>angle strain</b> raises energy. Six C–H eclipsed, as in eclipsed ethane. Cyclobutane, cyclopentane pucker slightly to ease it.","options":[{"why":"Bending angle costs energy. Here 60°, about half of 109.5°."},{"why":"Yes. 60° far from 109.5°: angle strain, more reactive."},{"why":"Rigid is not stable. Forced 60° angles cause strain."},{"why":"Three points always in a plane: no puckering. All C–C–C 60°."}]}, // CAVEMAN
       id: 's10', type: 'predict', skill: 'chairs',
       prompt: 'Three carbons always form a flat triangle. Here is cyclopropane as a 3D model. Carbon likes bond angles near 109.5°. What do you expect the ring to do to the molecule’s energy and reactivity?',
       visual: { widget: 'model3d', config: { mol: 'cyclopropane' } },
@@ -127,6 +137,7 @@ export default {
       reveal: 'Cyclopropane is flat with 60° C–C–C angles, so its energy is raised by <b>angle strain</b>. Its six C–H bonds are also all eclipsed with their neighbours, as in eclipsed ethane. Cyclobutane and cyclopentane pucker a little to ease that eclipsing.'
     },
     {
+      caveman: {"prompt":"Cyclohexane not flat: 3D “chair”. Dashed line = ring axis. Tap hydrogens as asked.","worked":"Six H parallel to dashed axis (three up, three down, alternating). Other six point outward around rim, near mean plane.","hints":["Dashed line vertical. Find hydrogens parallel to it.","Other six point out sideways, away from dashed line."]}, // CAVEMAN
       id: 's11', type: 'try', skill: 'chairs',
       prompt: 'Cyclohexane does not lie flat: this solid 3D model is its “chair” shape. The dashed line is the ring’s axis. Tap hydrogens on the model as asked.',
       widget: 'chair-flip',
@@ -136,10 +147,12 @@ export default {
       confirm: 'Two kinds of hydrogen: six parallel to the axis and six around the rim.'
     },
     {
+      caveman: {"html":"<p>Chair: almost no strain (C–C–C near 111°, C–H staggered).</p><p><b>Axial</b>: parallel to ring axis, alternating up, down. <b>Equatorial</b>: outward around rim, tilted opposite to axial. Each carbon has one of each.</p>"}, // CAVEMAN
       id: 's12', type: 'explain', skill: 'chairs',
       html: '<p>The chair has almost no strain: C–C–C angles near 111° and every neighbouring C–H staggered.</p><p><b>Axial</b> bonds run parallel to the ring axis, one on each carbon, alternating up, down, up, down. <b>Equatorial</b> bonds point outward around the ring’s rim, tilted slightly the opposite way to the axial bond on the same carbon. Each carbon has one of each.</p>'
     },
     {
+      caveman: {"prompt":"Methylcyclohexane. Circled CH₃ axial or equatorial? Press Flip (<b>ring flip</b>: chair becomes other), decide again.","worked":"First chair: methyl outward around rim: equatorial. After flip: parallel to axis: axial. Same face: “up stays up”, axial and equatorial swap.","hints":["Methyl bond parallel to dashed axis = axial.","Equatorial: around rim, nearly level with ring plane."]}, // CAVEMAN
       id: 's13', type: 'try', skill: 'chairs',
       prompt: 'This is methylcyclohexane. Decide whether the circled CH₃ is axial or equatorial in this chair. Then press Flip (a <b>ring flip</b>: the chair turns into the other chair) and decide again.',
       widget: 'chair-flip',
@@ -149,6 +162,7 @@ export default {
       confirm: 'A ring flip swaps axial and equatorial at every carbon, but each group stays on its own face.'
     },
     {
+      caveman: {"prompt":"Two chairs: same methylcyclohexane before and after ring flip. Methyl circled; red dashes = contacts. Which chair more stable?","reveal":"Equatorial chair more stable by 7.6 kJ/mol: about 95% equatorial. Axial chair: methyl crowds axial H on carbons 3 and 5: <b>1,3-diaxial interaction</b> = <b>steric strain</b>.","options":[{"why":"Chair 1: methyl axial. Points same way as axial H two carbons away (red dashes): too close."},{"why":"Yes. Methyl equatorial, around rim; nothing points back."},{"why":"Same molecule, different energy. Flip changes positions; axial more crowded."},{"why":"Energy belongs to atom arrangement, not viewing angle. Contacts stay."}]}, // CAVEMAN
       id: 's14', type: 'predict', skill: 'chairs',
       prompt: 'The two chairs are the same molecule, methylcyclohexane, before and after a ring flip. The methyl is circled; red dashes mark contacts between it and other atoms. Which chair do you expect to be more stable?',
       visual: { widget: 'chair-flip', config: { mode: 'sidebyside', model: 'methylcyclohexane', order: ['b', 'a'], titles: ['Chair 1', 'Chair 2'] } },
@@ -161,6 +175,7 @@ export default {
       reveal: 'The equatorial chair is more stable by 7.6 kJ/mol, so about 95% of methylcyclohexane molecules have the methyl equatorial at any instant. In the axial chair the methyl crowds the axial hydrogens on carbons 3 and 5 on its side: a <b>1,3-diaxial interaction</b>, which is <b>steric strain</b>.'
     },
     {
+      caveman: {"prompt":"tert-Butyl, C(CH₃)₃, bulkier, replaces CH₃. Methylcyclohexane: 95% equatorial. tert-Butylcyclohexane?","reveal":"Substituent always more stable equatorial. Axial strain grows with size. tert-Butyl so large: <b>locked</b> equatorial.","options":[{"why":"Reversed: axial crowded. Bigger group, more strain."},{"why":"Whole group bumps axial H: bigger group, more strain."},{"why":"Yes. Axial strain grows with size: tert-butyl's axial chair almost never populated."},{"why":"Can, common. Sits equatorial."}]}, // CAVEMAN
       id: 's15', type: 'predict', skill: 'chairs',
       prompt: 'Replace the CH₃ by tert-butyl, C(CH₃)₃, a much bulkier group, and keep the same ring. Compared with methylcyclohexane’s 95% equatorial, how strongly does tert-butylcyclohexane prefer the equatorial chair?',
       options: [
@@ -172,6 +187,7 @@ export default {
       reveal: 'A substituent is always more stable equatorial, and the steric strain of putting it axial grows with its size. A tert-butyl group is so large that it is, in practice, <b>locked</b> equatorial.'
     },
     {
+      caveman: {"prompt":"Six dimethylcyclohexanes. Each: flip ring, read line. Both CH₃ equatorial in one chair?","worked":"Both equatorial: trans-1,2; cis-1,3; trans-1,4 (diequatorial/diaxial). cis-1,2; trans-1,3; cis-1,4: CH₃ axial + equatorial.","hints":["Flip each model: find chair with both CH₃ equatorial.","None with both equatorial: no. Flip swaps both carbons: axial/equatorial pair stays."]}, // CAVEMAN
       id: 's16', type: 'try', skill: 'chairs',
       prompt: 'Six dimethylcyclohexanes are listed. For each one, flip the ring and read the line under the model. Can both CH₃ groups be equatorial in the same chair?',
       widget: 'chair-flip',
@@ -181,10 +197,12 @@ export default {
       confirm: 'You mapped all six. Notice the pattern in which ones can be diequatorial.'
     },
     {
+      caveman: {"html":"<p>Both equatorial: trans-1,2, cis-1,3, trans-1,4: more stable isomer. Others: bigger group equatorial.</p><p>Size: H &lt; F &lt; Cl &lt; OH &lt; Me &lt; Et &lt; iPr &lt; tBu (Me methyl, Et ethyl, iPr isopropyl, tBu tert-butyl).</p>"}, // CAVEMAN
       id: 's17', type: 'explain', skill: 'chairs',
       html: '<p>Both groups can sit equatorial in <b>trans-1,2</b>, <b>cis-1,3</b> and <b>trans-1,4</b> isomers, and that isomer is the more stable one. In the others one group must be axial, so the <b>bigger</b> group takes the equatorial spot.</p><p>Size order: H &lt; F &lt; Cl &lt; OH &lt; Me &lt; Et &lt; iPr &lt; tBu (Me methyl, Et ethyl, iPr isopropyl, tBu tert-butyl).</p>'
     },
     {
+      caveman: {"problem":"Stable chair, <b>trans-1,4-dimethylcyclohexane</b>?","rule":"Cis or trans? Does pattern (1,2 / 1,3 / 1,4) allow both equatorial? Pick that chair; else bigger group equatorial.","moves":[{"ask":"Methyls same face or opposite?","options":[{"why":"Yes. Wedge and dash: trans."},{"why":"Cis: two wedges or two dashes. Styles differ."}]},{"ask":"Carbons 1 and 4: what do two axial bonds do?","options":[{"why":"Yes. Axial alternate up and down; 1 and 4 opposite sides: trans-1,4 gives diaxial and diequatorial chairs."},{"why":"Axial bonds on 1 and 4 point opposite: trans pair both axial or both equatorial."}]},{"ask":"Which chair more stable?","options":[{"why":"Yes. Both equatorial: no 1,3-diaxial contacts. Diaxial: each methyl two, about twice 7.6 kJ/mol."},{"why":"Axial crowded: two axial methyls = most 1,3-diaxial strain."}]}]}, // CAVEMAN
       id: 's18', type: 'worked', skill: 'chairs',
       problem: 'Find the most stable chair of <b>trans-1,4-dimethylcyclohexane</b>. Choose each move.',
       smiles: 'C[C@H]1CC[C@H](C)CC1',

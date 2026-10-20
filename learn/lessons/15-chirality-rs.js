@@ -14,6 +14,7 @@ export default {
   ],
   steps: [
     {
+      caveman: {"prompt":"Right hand up to mirror: reflection looks like which hand? Can reflected copy lie exactly on real right hand, palms same way?","reveal":"Not superimposable on mirror image = <b>chiral</b> (Greek: hand). Hands: mirror images. Plain ball, ordinary mug: own mirror image. Molecules can have handedness.","options":[{"why":"Yes. Mirror swaps left and right. Left glove on right hand: no turn fits."},{"why":"Mirror reverses handedness: thumb other side. Reflection of right hand looks left."},{"why":"Turning over puts thumb right, but palm wrong way. No single turn fixes both."},{"why":"Mirror keeps distances, flips handedness: same shape built other way round: not same object."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'chirality',
       prompt: 'Look at your two hands. Hold your right hand up to a mirror: the reflection looks like one of your hands. Which one? And could you lay a copy of that reflected hand exactly on top of your real right hand, palms facing the same way?',
       options: [
@@ -25,6 +26,7 @@ export default {
       reveal: 'An object that cannot be superimposed on its own mirror image is <b>chiral</b> (from the Greek word for hand). A pair of hands is a pair of mirror images that cannot be superimposed. A plain ball or an ordinary mug is its own mirror image. Molecules can have a handedness too.'
     },
     {
+      caveman: {"prompt":"A = CH₂ClBr, B = CHFClBr. Which has mirror image not placeable on it?","reveal":"Test with models. Each comes with <b>true mirror image</b> (3D coordinates reflected); computer tries every turn.","options":[{"why":"Good guess. B: four different atoms on carbon (H, F, Cl, Br): handedness possible. Next models test it."},{"why":"A: two identical H. Swapping identical atoms changes nothing: no handedness."},{"why":"Needs four different groups on carbon. A has two identical H: not handed."},{"why":"Size irrelevant. Four different atoms on carbon suffice."}]}, // CAVEMAN
       id: 's02', type: 'predict', skill: 'chirality',
       prompt: 'Two small molecules: A is CH₂ClBr and B is CHFClBr. Which do you expect to have a mirror image that cannot be placed exactly on top of it?',
       figures: [{ smiles: 'ClCBr', label: 'A  CH₂ClBr' }, { smiles: 'FC(Cl)Br', label: 'B  CHFClBr' }],
@@ -37,6 +39,7 @@ export default {
       reveal: 'Test it with models. Each model below comes with its <b>true mirror image</b> (the same 3D coordinates reflected through a plane), and the computer tries every way of turning one onto the other.'
     },
     {
+      caveman: {"prompt":"Three molecules with mirror images. Turn models, press <b>Try to superimpose</b>: chiral or achiral (fits mirror image)?","worked":"Computer tries every atom pairing and turn. CH₂ClBr: match (identical H trade places): achiral. CHFClBr, CH₃CH(OH)CH₂CH₃ (<name new=\"butan-2-ol\" old=\"2-butanol\"></name>): some atoms stay off partners: chiral.","hints":["Press “Try to superimpose”: all atoms land on partners?","Atom that cannot land: ghost, red dashed line. Any atom off: no turn fixes: chiral."]}, // CAVEMAN
       id: 's03', type: 'try', skill: 'chirality', widget: 'mirror-pair',
       prompt: 'Three molecules, each next to its mirror image. Turn the models if you like, press <b>Try to superimpose</b>, then decide for each one: chiral, or achiral (it can be laid exactly on its mirror image)?',
       config: { models: ['chfclbr', 'ch2clbr', 'butan-2-ol'], titles: { chfclbr: 'CHFClBr', ch2clbr: 'CH₂ClBr', 'butan-2-ol': 'CH₃CH(OH)CH₂CH₃' } },
@@ -45,10 +48,12 @@ export default {
       worked: 'The computer tries every allowed way of pairing the atoms and every turn of the mirror image. For CH₂ClBr it finds a perfect match (the two identical H atoms trade places), so it is achiral. For CHFClBr and for CH₃CH(OH)CH₂CH₃ (<name new="butan-2-ol" old="2-butanol"></name>) some atoms always stay off their partners, so those two are chiral.'
     },
     {
+      caveman: {"html":"<p>Handedness usually from <b>chirality center</b>: sp³ carbon with <b>four different groups</b> (H counts). CHFClBr: H, F, Cl, Br: center. CH₂ClBr: two H: not.</p><p>Never: CH₃, CH₂, sp² or sp carbon (C=O, C=C, benzene rings). Mirror-image pair: <b>enantiomers</b>.</p>"}, // CAVEMAN
       id: 's04', type: 'explain', skill: 'chirality',
       html: '<p>The usual cause of handedness is a <b>chirality center</b> (stereocenter): an sp³ carbon bonded to <b>four different groups</b>, counting H as a group. In CHFClBr the carbon has H, F, Cl and Br, so it is a center. In CH₂ClBr it has two H, so it is not.</p><p>Never centers: CH₃, CH₂, and any sp² or sp carbon (C=O, C=C, benzene rings). A pair of mirror-image molecules are <b>enantiomers</b>.</p>'
     },
     {
+      caveman: {"prompt":"Find chirality centers in each molecule.","worked":"<name new=\"butan-2-ol\" old=\"2-butanol\"></name>: C2 has H, OH, CH₃, CH₂CH₃: center. <name new=\"propan-2-ol\" old=\"2-propanol\"></name>: C2 two CH₃: none. <name new=\"pentan-3-ol\" old=\"3-pentanol\"></name>: C3 two CH₂CH₃: none. Only <name new=\"butan-2-ol\" old=\"2-butanol\"></name> chiral.","hints":["Each sp³ carbon: four groups (H counts). All different?","<name new=\"propan-2-ol\" old=\"2-propanol\"></name>: carbon with OH has H, OH, two CH₃. Two identical: not center."]}, // CAVEMAN
       id: 's05', type: 'try', skill: 'chirality', widget: 'stereocenter-finder',
       prompt: 'Find the chirality centers in each molecule.',
       config: { rounds: [{ smiles: 'CCC(C)O' }, { smiles: 'CC(C)O' }, { smiles: 'CCC(O)CC' }] },
@@ -57,6 +62,7 @@ export default {
       worked: '<name new="butan-2-ol" old="2-butanol"></name>: C2 has H, OH, CH₃ and CH₂CH₃, four different groups, so one center. <name new="propan-2-ol" old="2-propanol"></name>: C2 has two CH₃, no center. <name new="pentan-3-ol" old="3-pentanol"></name>: C3 has two CH₂CH₃, no center. Only <name new="butan-2-ol" old="2-butanol"></name> is chiral.'
     },
     {
+      caveman: {"prompt":"Find chirality centers (or none). Ring: two directions round ring count as two groups, different only if two sides differ.","worked":"Methylcyclohexane, 1-methylcyclohexanol: ring symmetrical: no center. 2-Methylcyclohexanone: C2 has CH₃, H, C1 (C=O), C3 (CH₂): four different. Ibuprofen: only CH(CH₃)CO₂H carbon.","hints":["Each sp³ carbon: two ring directions different? Walk both ways: identical = one group.","C=O, benzene carbons: sp², never center. Inspect neighbouring CH(CH₃)."]}, // CAVEMAN
       id: 's06', type: 'try', skill: 'chirality', widget: 'stereocenter-finder',
       prompt: 'Rings and a benzene ring now. Find the chirality centers (or say there is none). In a ring, the two directions around the ring count as two groups, and they are different only if the ring is different on its two sides.',
       config: { rounds: [{ smiles: 'CC1CCCCC1' }, { smiles: 'CC1(O)CCCCC1' }, { smiles: 'CC1CCCCC1=O' }, { smiles: 'CC(C)Cc1ccc(cc1)C(C)C(=O)O' }] },
@@ -65,6 +71,7 @@ export default {
       worked: 'Methylcyclohexane and 1-methylcyclohexanol: the ring is symmetrical about that carbon, so its two ring directions are identical (no center). 2-Methylcyclohexanone: C2 has CH₃, H, C1 (the C=O) and C3 (a CH₂), four different groups. Ibuprofen: only the CH(CH₃)CO₂H carbon has four different groups.'
     },
     {
+      caveman: {"prompt":"Chiral molecule: no plane of symmetry. CH₂ClBr, plane through three atoms. Which atoms lie in plane? Chiral?","worked":"C, Cl, Br in plane. Each H one side, identical H opposite on other. Reflection through plane gives molecule back: plane of symmetry: achiral.","hints":["Turn until plane is a line. Which atoms on it?","Two H on opposite faces, one each side: neither in plane."]}, // CAVEMAN
       id: 's07', type: 'try', skill: 'chirality', widget: 'mirror-pair',
       prompt: 'A chiral molecule has no plane of symmetry. Here is CH₂ClBr with a plane drawn through three of its atoms. Which atoms lie in the plane? Then decide whether the molecule is chiral.',
       config: { mode: 'plane', model: 'ch2clbr', titles: { ch2clbr: 'CH₂ClBr' } },
@@ -73,6 +80,7 @@ export default {
       worked: 'C, Cl and Br lie in the plane (it was drawn through them). Each H is on one side of the plane, with an identical H directly opposite it on the other side. Reflecting the molecule through this plane gives the molecule back, so it has a plane of symmetry and is achiral.'
     },
     {
+      caveman: {"prompt":"One enantiomer in polarimeter tube turns polarized light +12°. Same tube, same concentration of its mirror-image molecule. Reading?","reveal":"Enantiomers <b>optically active</b>: rotate polarized light equally, oppositely. 50:50 mixture: none.","options":[{"why":"Yes. Enantiomers: identical properties except light turned equally, oppositely."},{"why":"Almost (melting point, boiling point, density). Light rotation: sign reverses."},{"why":"Cancelling in 50:50 mixture (racemic), not pure enantiomer."},{"why":"Nothing adds: each pure enantiomer own reading, equal, opposite."}]}, // CAVEMAN
       id: 's08', type: 'predict', skill: 'chirality',
       prompt: 'One enantiomer, dissolved in a polarimeter tube, turns the plane of polarized light by +12°. You then fill the same tube with the same concentration of its mirror-image molecule. What reading do you expect?',
       options: [
@@ -84,10 +92,12 @@ export default {
       reveal: 'Enantiomers are <b>optically active</b>: they rotate the plane of polarized light by equal amounts in opposite directions. A 50:50 mixture shows no rotation at all.'
     },
     {
+      caveman: {"html":"<p><b>Polarimeter</b>: plane-polarized light through solution; turn α. Clockwise <b>dextrorotatory (+)</b>; counterclockwise <b>levorotatory (−)</b>. <b>[α]D = α ÷ (l × c)</b>, l dm, c g/mL.</p><p>Pasteur: mirror-image tartrate crystals turned light oppositely.</p>"}, // CAVEMAN
       id: 's09', type: 'explain', skill: 'chirality',
       html: '<p>A <b>polarimeter</b> sends plane-polarized light through a solution and measures how far the plane turns, α. Clockwise is <b>dextrorotatory (+)</b>; counterclockwise is <b>levorotatory (−)</b>. <b>[α]D = α ÷ (l × c)</b>, with l in dm and c in g/mL.</p><p>In 1848 Pasteur hand-sorted two kinds of mirror-image tartrate crystals: their solutions turned light equally in opposite directions.</p>'
     },
     {
+      caveman: {"prompt":"Tube 20.0 cm, 2.40 g optically active compound in 12.0 mL solvent, observed rotation −1.30°. [α]D? Write sign; within 0.1 accepted.","worked":"l = 2.00 dm, c = 0.200 g/mL. [α]D = −1.30 ÷ 0.400 = −3.25, about −3.3.","hints":["[α]D = α ÷ (l × c). l in decimetres (10 cm = 1 dm), c in g/mL.","c = 2.40 g ÷ 12.0 mL. Then −1.30 ÷ (l × c)."]}, // CAVEMAN
       id: 's10', type: 'input', skill: 'chirality',
       prompt: 'A polarimeter tube is 20.0 cm long. It holds 2.40 g of an optically active compound dissolved in 12.0 mL of solvent, and the observed rotation is −1.30°. Calculate [α]D. Write the sign; an answer within 0.1 is accepted.',
       answer: -3.25, tolerance: 0.1,
@@ -102,6 +112,7 @@ export default {
       worked: 'l = 20.0 cm = 2.00 dm. c = 2.40 g ÷ 12.0 mL = 0.200 g/mL. [α]D = −1.30° ÷ (2.00 dm × 0.200 g/mL) = −1.30 ÷ 0.400 = −3.25, about −3.3.'
     },
     {
+      caveman: {"prompt":"Both <b>R</b>: (R)-limonene (orange peel), (R)-carvone (spearmint). Polarimeter: (R)-limonene (+), (R)-carvone (−). What does it tell?","worked":"R, S: CIP ranking, structure only. Rotation sign: physical measurement. Two R compounds, opposite signs: no link between R/S and +/−.","hints":["R, S worked out from drawing. Sign (+ or −) from where?","Both R, one (+), one (−). Label cannot fix sign."],"options":[{"why":"Yes. R, S from CIP rules on structure; (+), (−) from experiment. Both R, opposite rotation possible."},{"why":"No such rule. Both correct: (R)-carvone is (−)."},{"why":"No such rule. Limonene R and (+), carvone R and (−): sign unpredictable from label or groups."},{"why":"Both R. Configuration label and rotation direction: unrelated."}]}, // CAVEMAN
       id: 's11', type: 'choice', skill: 'chirality',
       prompt: 'Two natural compounds are both <b>R</b>: (R)-limonene, from orange peel, and (R)-carvone, from spearmint. Measured with a polarimeter, (R)-limonene is dextrorotatory (+) and (R)-carvone is levorotatory (−). What does that tell you?',
       figures: [{ smiles: 'CC1=CC[C@@H](CC1)C(C)=C', label: '(R)-limonene (+)' }, { smiles: 'CC1=CC[C@H](CC1=O)C(C)=C', label: '(R)-carvone (−)' }],
@@ -116,6 +127,7 @@ export default {
       confirm: 'R/S is read from the structure; (+)/(−) is read from a polarimeter. There is no relation between them.'
     },
     {
+      caveman: {"prompt":"R/S recipe, 3D CHFClBr. Tap four groups priority 1 to 4 (higher atomic number first), turn: group 4 away, follow 1 → 2 → 3: R or S?","worked":"Br 1, Cl 2, F 3, H 4. H behind: Br → Cl → F clockwise: R.","hints":["Rank by atomic number: biggest 1, H 4.","“Point 4 away”; 1 → 2 → 3: clockwise R, counterclockwise S."]}, // CAVEMAN
       id: 's12', type: 'try', skill: 'rs', widget: 'rs-assigner',
       prompt: 'Now the R/S recipe, on a real 3D model of CHFClBr. Tap the four groups from priority 1 to 4 (higher atomic number first), turn the model so that group 4 points away from you, follow 1 → 2 → 3, and decide: R or S?',
       config: { mode: '3d', model: 'chfclbr', which: 'molblock' },
@@ -124,10 +136,12 @@ export default {
       worked: 'Br is 1, Cl is 2, F is 3 and H is 4. With H behind the carbon, Br → Cl → F goes clockwise, so the center is R.'
     },
     {
+      caveman: {"html":"<p><b>R/S, three moves.</b> 1 Rank four groups (CIP). 2 Turn: group 4 <b>away</b>. 3 Follow 1 → 2 → 3: <b>clockwise = R</b>, <b>counterclockwise = S</b>.</p><p>Traps: first atom decides before size; double bond counts far atom twice (CHO (O,O,H); CH=CH₂ (C,C,H); CO₂H (O,O,O)).</p>"}, // CAVEMAN
       id: 's13', type: 'explain', skill: 'rs',
       html: '<p><b>R/S in three moves.</b> 1 Rank the four groups (the CIP rules of Lesson 7). 2 Turn the molecule so group 4, the lowest, points <b>away</b> from you. 3 Follow 1 → 2 → 3: <b>clockwise = R</b> (<i>rectus</i>), <b>counterclockwise = S</b> (<i>sinister</i>).</p><p>Two traps in step 1: the first atom decides before size does, and a double bond counts its far atom twice (CHO is (O,O,H); CH=CH₂ is (C,C,H); CO₂H is (O,O,O)).</p>'
     },
     {
+      caveman: {"prompt":"<name new=\"butan-2-ol\" old=\"2-butanol\"></name> 3D. Two groups start with carbon: <b>Go one atom further</b>. R or S?","worked":"OH 1; CH₂CH₃ (C,H,H) 2 beats CH₃ (H,H,H) 3; H 4. H away: counterclockwise: S.","hints":["O beats C. Ethyl, methyl both start with C: compare attached atoms.","Ethyl (C,H,H) beats methyl (H,H,H). H behind, follow 1 → 2 → 3."]}, // CAVEMAN
       id: 's14', type: 'try', skill: 'rs', widget: 'rs-assigner',
       prompt: '<name new="butan-2-ol" old="2-butanol"></name>, in 3D. Two of its groups start with carbon, so press <b>Go one atom further</b> if you need to. R or S?',
       config: { mode: '3d', model: 'butan-2-ol', which: 'mirror' },
@@ -136,6 +150,7 @@ export default {
       worked: 'OH is 1. Ethyl (C,H,H) beats methyl (H,H,H), so CH₂CH₃ is 2 and CH₃ is 3; H is 4. With H pointing away, 1 → 2 → 3 turns counterclockwise: S.'
     },
     {
+      caveman: {"prompt":"Glyceraldehyde, HOCH₂–CH(OH)–CHO. CHO, CH₂OH both C carrying O: <b>Go one atom further</b>, mind C=O. R or S?","worked":"OH 1. CHO (O,O,H): C=O oxygen twice; CH₂OH (O,H,H): CHO 2, CH₂OH 3. H 4. H behind: 1 → 2 → 3 clockwise: R.","hints":["OH 1, H 4. CHO, CH₂OH both start with carbon carrying O: next atoms.","CHO (O,O,H) beats CH₂OH (O,H,H)."]}, // CAVEMAN
       id: 's15', type: 'try', skill: 'rs', widget: 'rs-assigner',
       prompt: 'Glyceraldehyde, HOCH₂–CH(OH)–CHO, in 3D. Two of its groups (CHO and CH₂OH) start with a carbon that carries an O. Use <b>Go one atom further</b> and remember the C=O. R or S?',
       config: { mode: '3d', model: 'glyceraldehyde', which: 'molblock' },
@@ -144,6 +159,7 @@ export default {
       worked: 'OH is 1. CHO counts as (O,O,H) because the C=O oxygen is written twice, and CH₂OH is (O,H,H), so CHO is 2 and CH₂OH is 3. H is 4. With H behind, 1 → 2 → 3 turns clockwise: R.'
     },
     {
+      caveman: {"prompt":"Flat drawing, exam style. Solid wedge toward you, dashed away, plain line in page. Rank, find group 4, decide R or S. (Group 4 = lowest rank: usually H; no H: whichever ranks last, often CH₃.)","worked":"Br 1, ethyl 2, methyl 3, H 4. H on wedge (toward you): read direction (counterclockwise, S) backward: R.","hints":["Rank first. Find group 4: wedge = toward you.","Group 4 toward you: read direction opposite true. Reverse answer."]}, // CAVEMAN
       id: 's16', type: 'try', skill: 'rs', widget: 'rs-assigner',
       prompt: 'The same job on a flat drawing, like those in an exam. A solid wedge comes toward you, a dashed bond goes away, a plain line is in the page. Rank the groups, say where group 4 is, then decide R or S. (Group 4 is the lowest-ranked group: usually H, but at a center with no H it is whichever group ranks last, often CH₃.)',
       config: { mode: 'wedge', smiles: 'CC[C@@H](C)Br', style: 'low', lowOn: 'wedge' },
@@ -152,6 +168,7 @@ export default {
       worked: 'Br is 1, ethyl is 2, methyl is 3, H is 4. H is on a wedge (toward you), so the 1 → 2 → 3 direction you read, counterclockwise (S), is backward. Reversed, the center is R.'
     },
     {
+      caveman: {"prompt":"Same drawing: swap two groups: Br where H was, H where Br was. Result?","reveal":"<b>Swapping any two groups inverts configuration.</b> Use: if group 4 not on dash, swap with dash group, read, reverse once.","options":[{"why":"Yes. Swapping two groups: enantiomer: R flips to S."},{"why":"True only if groups identical. Br, H different: swap builds opposite arrangement."},{"why":"Swap does not change which atoms bond to which: same skeleton. Only arrangement in space changes."},{"why":"Four different groups: always R or S. Swap gives opposite."}]}, // CAVEMAN
       id: 's17', type: 'predict', skill: 'rs',
       prompt: 'In that drawing, imagine you swap two groups: put the Br where the H was, and the H where the Br was. What do you get?',
       smiles: 'CC[C@@H](C)Br',
@@ -164,6 +181,7 @@ export default {
       reveal: '<b>Swapping any two groups inverts the configuration.</b> That is a useful trick: if group 4 is not on a dash, swap it with the group that is, read the direction, then reverse your answer once.'
     },
     {
+      caveman: {"prompt":"Group 4 plain line. Rank, find group 4. Swap trick: swap 4 with dash group, read, reverse once. R or S?","worked":"Ranking: NH₂ (1), CO₂H (2), CH₃ (3), H (4). H plain; CH₃ on dash. Swap numbers: 4 on dash. Reading 1 → 2 → 3 clockwise: R. Swapped: real center S.","hints":["Find dash group. Trade numbers with group 4: 4 on dash, away.","After swap, read 1 → 2 → 3. Swap made mirror image: reverse reading once."]}, // CAVEMAN
       id: 's18', type: 'try', skill: 'rs', widget: 'rs-assigner',
       prompt: 'Now group 4 is a plain line. Rank the groups and say where group 4 is. Then use the swap trick: swap 4 with the group on the dash, read the direction, and reverse once. R or S?',
       config: { mode: 'wedge', smiles: 'C[C@H](N)C(=O)O', style: 'two', pair: 0 },
@@ -172,6 +190,7 @@ export default {
       worked: 'The ranking is NH₂ (1), CO₂H (2), CH₃ (3), H (4). H is a plain bond; CH₃ is on the dash. Swap their numbers so 4 sits on the dash. Reading now: 1 → 2 → 3 is clockwise, which would be R. But we swapped two groups, so the real center is the opposite: S.'
     },
     {
+      caveman: {"problem":"Lactic acid (2-hydroxypropanoic acid): R or S? Your moves.","rule":"Rank; group 4 away (dash ok; wedge: reverse; plain line: swap, reverse once); 1 → 2 → 3: clockwise R, counterclockwise S.","moves":[{"ask":"Rank four groups on center.","then":"Ranks on drawing.","options":[{"why":"Yes. O (8) beats C (6). CO₂H (O,O,O) beats CH₃ (H,H,H). H last."},{"why":"First atom decides: OH starts with O (8), CO₂H with C (6). O wins."},{"why":"CH₃, CO₂H both start with C: CO₂H (O,O,O) beats CH₃ (H,H,H)."},{"why":"Oxygen (8) beats carbon (6): OH before both carbon groups."}]},{"ask":"Where is group 4, hydrogen, in drawing?","then":"Nothing to reverse.","options":[{"why":"Yes. Dashed bond: points away. Read direction as is."},{"why":"Look again: H bond dashed, not solid."},{"why":"Bond to H not plain: dashed."}]},{"ask":"Follow 1 → 2 → 3. Which way on page?","options":[{"why":"Yes: OH (1) → CO₂H (2) → CH₃ (3) clockwise."},{"why":"Arrow 1 to 2 to 3: clock-hands way."}]},{"ask":"Configuration?","then":"(R)-2-hydroxypropanoic acid, (R)-lactic acid.","options":[{"why":"Yes. Clockwise, lowest group away: R."},{"why":"Clockwise = R, counterclockwise = S."},{"why":"Only wedge means reverse. Dash: group 4 away: read directly."}]}]}, // CAVEMAN
       id: 's19', type: 'worked', skill: 'rs',
       problem: 'Worked example: is this lactic acid (2-hydroxypropanoic acid) R or S? You choose each move.',
       moves: [
@@ -217,6 +236,7 @@ export default {
       rule: 'Rank the groups; put group 4 away from you (a dash is already away; a wedge means reverse; a plain line means swap and reverse once); follow 1 → 2 → 3: clockwise is R, counterclockwise is S.'
     },
     {
+      caveman: {"prompt":"Name this molecule with (R) or (S) at front. OH on chain: ending -ol, number from end nearer OH (<name new=\"hexan-3-ol\" old=\"3-hexanol\"></name>); halogens prefixes (2-bromopentane). Work out configuration of its one center. Either IUPAC style; letter and numbers count.","worked":"Parent <name new=\"butan-2-ol\" old=\"2-butanol\"></name>. Center: OH (1), CH₂CH₃ (2), CH₃ (3), H (4). H away: clockwise: R: <name new=\"(R)-butan-2-ol\" old=\"(R)-2-butanol\"></name>.","hints":["Name without stereochemistry first. Center = carbon with OH.","Rank OH, ethyl, methyl, H; H away; 1 → 2 → 3. Add (R) or (S) in brackets."]}, // CAVEMAN
       id: 's20', type: 'input', skill: 'rs',
       prompt: 'Name this molecule, including (R) or (S) at the front. An OH on a chain gives the ending -ol with the number of its carbon, counted from the end nearer the OH (<name new="hexan-3-ol" old="3-hexanol"></name>); halogens are prefixes (2-bromopentane). Work out the configuration of its one center. Type the name in either IUPAC style; spaces, capitals and hyphens do not matter, but the letter and the numbers do.',
       smiles: 'C[C@@H](O)CC',

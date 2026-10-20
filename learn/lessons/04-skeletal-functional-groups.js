@@ -13,6 +13,7 @@ export default {
   ],
   steps: [
     {
+      caveman: {"prompt":"Bare lines now. Only Cl labelled. How many carbons?","reveal":"<b>Skeletal</b>: C at each corner, line end. Cl shown: every non-C, non-H atom is written.","options":[{"why":"Shorthand, not missing atoms. Drawing leaves C labels off on purpose."},{"why":"Corners count, so do free line ends. Ends are CH₃: you miss two."},{"why":"Yes. Two ends + three corners = five. Only Cl labelled."},{"why":"Cl is chlorine, counted separately. Five C plus one Cl."}]}, // CAVEMAN
       id: 's01', type: 'predict', skill: 'skeletal',
       prompt: 'From here on, molecules are drawn as bare lines. Only the Cl is labelled. How many carbon atoms do you think this molecule has?',
       smiles: 'CC(Cl)CCC',
@@ -26,10 +27,12 @@ export default {
       reveal: 'In a <b>skeletal structure</b> each corner and each line end is a carbon atom. The Cl is written because every atom other than C and H is always shown.'
     },
     {
+      caveman: {"html":"<molpair smiles=\"CC(Cl)CCC\" label=\"2-chloropentane, full and skeletal\"></molpair><p><b>1.</b> C at each corner, line end.<br><b>2.</b> H on carbon not drawn.<br><b>3.</b> Other atoms written (Cl, O, N …) with their H: OH, NH₂.</p>"}, // CAVEMAN
       id: 's02', type: 'explain', skill: 'skeletal',
       html: '<molpair smiles="CC(Cl)CCC" label="2-chloropentane, full and skeletal"></molpair><p>Three rules for skeletal drawings:</p><p><b>1.</b> A C sits at every corner and line end.<br><b>2.</b> H atoms bonded to carbon are not drawn.<br><b>3.</b> Every other atom is written out (Cl, O, N …), along with any H on it, such as OH or NH₂.</p>'
     },
     {
+      caveman: {"prompt":"Carbon: four bonds. H on highlighted carbon? Not drawn: work from lines.","worked":"Three lines (two C, one Cl): 4 − 3 = 1 H. Side by side: <molpair smiles=\"CC(Cl)CCC\" hl=\"1\" label=\"the highlighted CH\"></molpair>","hints":["Count lines touching highlighted carbon.","H = 4 − lines. Each neighbour = one line."]}, // CAVEMAN
       id: 's03', type: 'input', skill: 'skeletal',
       prompt: 'Carbon always forms four bonds. How many hydrogens are on the highlighted carbon? They are not drawn, so work it out from the lines.',
       smiles: 'CC(Cl)CCC', highlight: [1],
@@ -45,6 +48,7 @@ export default {
       worked: 'Three lines reach the highlighted carbon (two to carbons, one to Cl), so it has 4 − 3 = 1 H. Side by side: <molpair smiles="CC(Cl)CCC" hl="1" label="the highlighted CH"></molpair>'
     },
     {
+      caveman: {"prompt":"Same with C=O. H on highlighted carbon of cyclohexanone?","worked":"Lines: 1 + 1 (ring C) + 2 (double bond to O) = 4. H = 0.","hints":["Double bond = two of carbon's four bonds.","Add lines: 1 + 1 + 2. Subtract from 4."]}, // CAVEMAN
       id: 's04', type: 'input', skill: 'skeletal',
       prompt: 'The same idea with a C=O. How many hydrogens are on the highlighted carbon of cyclohexanone?',
       smiles: 'O=C1CCCCC1', highlight: [1],
@@ -61,10 +65,12 @@ export default {
       worked: 'Lines into the carbon: 1 (ring carbon) + 1 (ring carbon) + 2 (double bond to O) = 4. Hydrogens = 4 − 4 = 0.'
     },
     {
+      caveman: {"html":"<p><b>H on carbon = 4 − lines in.</b> Double bond = 2 lines, triple = 3.</p><p>One line: CH₃. Two: CH₂. Three: CH. Four: no H.</p><p>Heteroatoms (not C, H): H shown (OH, NH₂, SH).</p>"}, // CAVEMAN
       id: 's05', type: 'explain', skill: 'skeletal',
       html: '<p><b>H on a carbon = 4 − (lines into it).</b> A double bond counts as 2 lines, a triple bond as 3.</p><p>One line in: CH₃. Two: CH₂. Three: CH. Four: no H at all.</p><p>Heteroatoms (any atom except C and H) are different: you can see their H because it is written (OH, NH₂, SH).</p>'
     },
     {
+      caveman: {"prompt":"Why zig-zag? Real 3D butane. Rotate, follow four highlighted carbons. How do they sit?","worked":"Four single bonds: tetrahedral carbons, C–C–C near 110°. Stable shape: chain alternates in one plane, flat zig-zag: skeletal drawing faithful. (Twisting comes later.)","hints":["Butane carbon: four single bonds. What angle?","View from side: bends same way or alternate?"],"options":[{"why":"Four bonds point to tetrahedron corners: C–C–C near 109.5°, not 180°. Straight line = sp carbon."},{"why":"Yes. C–C–C about 110°, alternating up and down in one plane: the zig-zag."},{"why":"C-shape pushes end carbons and H together: crowded, less stable. Model alternates."},{"why":"Butane is chain: ends not bonded. Four-carbon ring = cyclobutane, fewer H."}]}, // CAVEMAN
       id: 's06', type: 'choice', skill: 'skeletal',
       prompt: 'Why does a skeletal chain zig-zag? Here is a real 3D model of butane. Rotate it and follow the four highlighted carbons. How do they sit?',
       smiles: 'CCCC',
@@ -80,6 +86,7 @@ export default {
       confirm: 'The skeletal zig-zag is not just a convention: tetrahedral carbons really do make a zig-zag chain.'
     },
     {
+      caveman: {"prompt":"Count all. Molecular formula? Type like C4H8O; subscripts or plain digits fine.","worked":"C 5. H: CH₃ 3, CH 1, CH₃ 3, CH₂ 2, CH₂ 2 = 11, + 1 in OH = 12. One O: C₅H₁₂O.","hints":["Count carbons: each corner and line end. Add written atoms (O).","H: each carbon (4 − lines), then H on oxygen."]}, // CAVEMAN
       id: 's07', type: 'input', skill: 'skeletal',
       prompt: 'Now count everything. What is the molecular formula of this molecule? Type it like C4H8O; subscripts or plain digits are both fine.',
       smiles: 'CC(C)CCO',
@@ -94,6 +101,7 @@ export default {
       worked: 'Carbons: 5. Hydrogens on carbon, from the left: CH₃ (3), CH (1), CH₃ (3), CH₂ (2), CH₂ (2) = 11, plus 1 in OH = 12. One O. So C₅H₁₂O.'
     },
     {
+      caveman: {"problem":"Worked: draw condensed <b>CH₃CH₂CH(OH)CH₂CH₃</b> (groups in a row) as skeletal. You choose each move.","rule":"One corner or end per carbon unit; write non-C atoms with own H (OH); no H on C. Check H = 4 − lines.","moves":[{"ask":"Each CH₃, CH₂, CH = one carbon. Carbons in zig-zag?","then":"Zig-zag, five corners and ends.","options":[{"why":"Yes: CH₃, CH₂, CH, CH₂, CH₃ = five."},{"why":"OH is not carbon. Oxygen, written later."},{"why":"Recount: CH₃, CH₂, CH, CH₂, CH₃ = five."}]},{"ask":"Which carbon from left carries OH?","then":"Write OH on carbon 3. O and H always written.","options":[{"why":"Yes. (OH) hangs on third unit, CH."},{"why":"First is CH₃: four bonds already."},{"why":"Last is CH₃: four bonds already. OH on middle CH."}]},{"ask":"What to write at CH₃ ends and CH₂ corners?","then":"Leave blank.","options":[{"why":"Yes. Ends and corners = carbon, H understood."},{"why":"Allowed for emphasis, but normally left off: quick to draw."},{"why":"H on carbon never drawn."}]},{"ask":"Carbon with OH written CH(OH). H in drawing? (Lines in: 3.)","then":"Drawing and formula agree.","options":[{"why":"4 − 3 = 1 H. Matches CH."},{"why":"Zero needs four lines. Has three (2 C, O)."},{"why":"Two = CH₂, two lines. This has three."}]}]}, // CAVEMAN
       id: 's08', type: 'worked', skill: 'skeletal',
       problem: 'Worked example: draw the condensed formula <b>CH₃CH₂CH(OH)CH₂CH₃</b> (the molecule written as a row of groups) as a skeletal structure. You choose each move.',
       moves: [
@@ -141,6 +149,7 @@ export default {
       rule: 'Condensed to skeletal: one corner or end per carbon unit, write every non-C atom with its own H (OH), and leave off the H on carbon. Check any carbon with H = 4 − lines.'
     },
     {
+      caveman: {"prompt":"Which drawing matches condensed formula?","worked":"Four-carbon chain; OH on third carbon: CH₃ one side, CH₂CH₃ other. Second drawing.","hints":["Count carbon units. Which has OH?","Four units: CH₃, CH₂, CH(OH), CH₃. OH not at end."]}, // CAVEMAN
       id: 's09', type: 'try', skill: 'skeletal', widget: 'skeletal-builder',
       prompt: 'Your turn. Which skeletal drawing matches this condensed formula?',
       config: {
@@ -157,6 +166,7 @@ export default {
       worked: 'Four carbons in a chain; the OH hangs on the third carbon, so a CH₃ is on one side and a CH₂CH₃ on the other. That is the second drawing.'
     },
     {
+      caveman: {"prompt":"Ethene, CH₂=CH₂, + bromine (Br₂): one Br on each C of C=C. Cyclohexene has C=C too. What with Br₂?","reveal":"<b>Functional group</b> = atoms with own characteristic reactivity, same wherever found. Molecule's chemistry = its groups' chemistry.","options":[{"why":"Yes. C=C reacts same in any molecule. Product: 1,2-dibromocyclohexane."},{"why":"Those carbons have single bonds only. Double bond is the reactive part."},{"why":"Ring single bonds do not react. Ring stays; Br adds across double bond."},{"why":"Rest changes details, not C=C chemistry. That is what functional group means."}]}, // CAVEMAN
       id: 's10', type: 'predict', skill: 'functional-groups',
       prompt: 'Ethene, CH₂=CH₂, reacts with bromine (Br₂) so that one Br ends up on each carbon of the C=C. Cyclohexene, drawn here, also has a C=C. What do you expect when it meets Br₂?',
       smiles: 'C1=CCCCC1', both: true,
@@ -169,6 +179,7 @@ export default {
       reveal: 'A <b>functional group</b> is a group of atoms with its own characteristic reactivity. It behaves much the same wherever it appears, so the chemistry of a molecule is largely the chemistry of its functional groups.'
     },
     {
+      caveman: {"prompt":"Find functional groups. First alkene (C=C).","worked":"Double line between second and third carbons from left: the alkene.","hints":["Alkene = C=C. Find doubled line.","Tap two carbons at ends of double bond."]}, // CAVEMAN
       id: 's11', type: 'try', skill: 'functional-groups', widget: 'group-finder',
       prompt: 'Find the functional groups in this molecule. First the alkene (a C=C double bond).',
       config: { smiles: 'CC=CC(C)O', group: 'alkene' },
@@ -177,6 +188,7 @@ export default {
       worked: 'The double line is between the second and third carbons from the left. Those two carbons are the alkene.'
     },
     {
+      caveman: {"prompt":"Same molecule. Alcohol (O–H on single-bond carbon).","worked":"OH on carbon near right end. That carbon and O = alcohol. Neighbours just chain.","hints":["Alcohol: O–H on carbon with single bonds.","Tap O of OH and its carbon."]}, // CAVEMAN
       id: 's12', type: 'try', skill: 'functional-groups', widget: 'group-finder',
       prompt: 'Same molecule. Now find the alcohol (an O–H on a carbon that has only single bonds).',
       config: { smiles: 'CC=CC(C)O', group: 'alcohol' },
@@ -185,10 +197,12 @@ export default {
       worked: 'The OH is on the carbon near the right end. That carbon and the O are the alcohol; the neighbouring carbons are just part of the chain.'
     },
     {
+      caveman: {}, // CAVEMAN
       id: 's13', type: 'explain', skill: 'functional-groups',
       html: '<p><b>C=C</b> alkene · <b>C≡C</b> alkyne · benzene ring arene · <b>C–X</b> (X = F, Cl, Br, I) alkyl halide · <b>C–OH</b> alcohol · <b>C–O–C</b> ether · <b>C–N</b> amine · <b>C–SH</b> thiol · <b>C–S–C</b> sulfide · <b>C≡N</b> nitrile.</p><p>For C=O (a carbonyl), look at what else is on that carbon: <b>H</b> aldehyde, <b>C</b> ketone, <b>OH</b> carboxylic acid, <b>O–C</b> ester, <b>N</b> amide. Alkanes have no functional group.</p>'
     },
     {
+      caveman: {"prompt":"Which is aldehyde?","worked":"Aldehyde: C=O carbon has H: chain end (B). A ketone, C carboxylic acid, D ester.","hints":["All four C=O. Check what is on its carbon.","Aldehyde C=O carbon: H, one carbon. Chain end."],"options":[{"why":"C=O carbon between two carbons: ketone (acetone). Aldehyde: chain end."},{"why":"Yes. C=O at chain end: carbon holds one C and one H (undrawn). Propanal."},{"why":"C=O carbon has OH: carboxylic acid."},{"why":"C=O carbon has O–C: ester."}]}, // CAVEMAN
       id: 's14', type: 'choice', skill: 'functional-groups',
       prompt: 'Which of these is an aldehyde?',
       options: [
@@ -201,6 +215,7 @@ export default {
       worked: 'Aldehyde: C=O with an H on the carbonyl carbon, so the C=O is at the chain end (B). A is a ketone, C a carboxylic acid, D an ester.'
     },
     {
+      caveman: {"prompt":"Which is ester?","worked":"Ester: C=O carbon bonded to O–carbon. A ether, B carboxylic acid, D amide.","hints":["Ester: C=O and single-bond O, same carbon.","Single-bonded O to what? H acid, carbon ester."],"options":[{"why":"O between two carbons, no C=O: ether (diethyl ether)."},{"why":"O on C=O carbon has H: carboxylic acid. Ester has carbon there."},{"why":"Yes. C=O with O–C on same carbon: ester (methyl propanoate). No C=O: ether."},{"why":"Group on C=O carbon is N, not O: amide."}]}, // CAVEMAN
       id: 's15', type: 'choice', skill: 'functional-groups',
       prompt: 'Which of these is an ester?',
       options: [
@@ -213,6 +228,7 @@ export default {
       worked: 'Ester: C=O carbon bonded to an O that is itself bonded to a carbon (C). A is an ether, B a carboxylic acid, D an amide.'
     },
     {
+      caveman: {"prompt":"Which is amine? (N next to C=O is something else.)","worked":"Amine: N on carbon, no C=O on it (B). A amide, C nitrile (C≡N), D no N.","hints":["Amine needs nitrogen. Which have one?","N next to C=O: amide. Not: amine."],"options":[{"why":"N on C=O carbon: amide (N-methylacetamide), not amine."},{"why":"Yes. N on carbon, no C=O: amine (dimethylamine)."},{"why":"Nitrile (C≡N). Amine: single bonds."},{"why":"No nitrogen: alcohol."}]}, // CAVEMAN
       id: 's16', type: 'choice', skill: 'functional-groups',
       prompt: 'Which of these is an amine? (Be careful: an N next to a C=O is something else.)',
       options: [
@@ -225,6 +241,7 @@ export default {
       worked: 'Amine: an N bonded to carbon with no C=O carbon on it (B). A has the N on a C=O carbon (amide), C has a C≡N (nitrile), D has no N.'
     },
     {
+      caveman: {"prompt":"Drug paracetamol (acetaminophen): ring, ring OH, amide. Tap amide atoms.","worked":"Find C=O, then N on same carbon. C, O, N = amide. Ring = arene; ring OH = phenol, not alcohol.","hints":["Amide = C=O with N on same carbon.","Tap three atoms: carbonyl C, its O, N."]}, // CAVEMAN
       id: 's17', type: 'try', skill: 'functional-groups', widget: 'group-finder',
       prompt: 'A real drug: paracetamol (acetaminophen). It holds several groups, including a ring and a ring OH. Tap the atoms of the amide.',
       config: { smiles: 'CC(=O)Nc1ccc(O)cc1', group: 'amide' },
