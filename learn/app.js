@@ -22,6 +22,7 @@ import { FIGURES } from './figures/figures.js';
 import { figureCard } from './figures/figure-card.js';
 import { scenePage, scenesList, sceneBlock } from './scenes/scene-view.js';
 import { sceneForStep } from './scenes/scene-index.js';
+import { builderPage } from './builder-view.js';
 
 const app = document.getElementById('app');
 // A press of Check with nothing entered is not a slip: it must not count as a weak spot.
@@ -157,7 +158,11 @@ function home() {
   const gl = h('section', { class: 'panel', 'aria-labelledby': 'gl-h' }, h('h2', { id: 'gl-h' }, 'Glossary'),
     h('p', { class: 'muted' }, `${GLOSSARY.length} short definitions: nucleophile, sp³, resonance, R/S and more. In a lesson, tap any dotted word to see its meaning.`),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#glossary', id: 'open-glossary' }, 'Open the glossary')));
-  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, rx, pp, mockPanel, gl, panel)));
+  // the reaction builder: any substrate tile + any reagent tile -> the products, the professor's rule, the mechanism; chain the product into the next step
+  const bld = h('section', { class: 'panel', 'aria-labelledby': 'bld-home-h' }, h('h2', { id: 'bld-home-h' }, 'Reaction builder'),
+    h('p', { class: 'muted' }, 'Pick a starting material and a reagent, see what forms and why (the professor’s ring rules included), then use the product for the next step.'),
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#build', id: 'open-builder' }, 'Open the reaction builder')));
+  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, bld, rx, pp, mockPanel, gl, panel)));
   const op = document.getElementById('open-practice');
   if (op) op.addEventListener('click', () => { const t = panel.querySelector('summary') || panel; panel.scrollIntoView?.({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); t.focus?.({ preventScroll: true }); });
 }
@@ -292,6 +297,7 @@ function lessonView(L, startId) {
       sceneNode = sceneBlock(sceneKey); sceneNode.hidden = !(step.type === 'try' || done.has(step.id));
       if (stereoNode) { const row = h('div', { class: 'extras' }); stereoNode.replaceWith(row); row.append(stereoNode, sceneNode); } else host.append(sceneNode);
     }
+    if ((L.id === '13' || L.id === '14') && step.type === 'useit') host.append(h('p', { class: 'small bld-lesson-link' }, h('a', { class: 'btn small ghost', href: '#build', id: 'bld-lesson-link' }, 'Try any ring + reagent in the reaction builder'), h('span', { class: 'muted' }, ' The professor’s rules for two groups, ipso removal and blocking groups.')));
     setIupacMode(store.getIupac());
     if (!reduceMotion()) { host.classList.remove('enter'); void host.offsetWidth; host.classList.add('enter'); }
     paint();
@@ -331,7 +337,19 @@ function hub(anchor) {
   setDrawStyle('skeletal');
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Reactions'),
     h('p', { class: 'lede' }, 'One card for each reagent. Read the three facts, look at the example, then use the steps on a question.'),
-    h('a', { class: 'btn primary', href: '#practise-predict-product', id: 'drill-predict' }, 'Drill: predict the product')), buildHub(chemP, anchor));
+    h('a', { class: 'btn primary', href: '#practise-predict-product', id: 'drill-predict' }, 'Drill: predict the product')), hubWithBuilder(buildHub(chemP, anchor)));
+}
+/** The hub's sticky jump bar also links to the reaction builder. */
+function hubWithBuilder(node) {
+  const row = node.querySelector('.hub-jumprow');
+  if (row) row.append(h('a', { class: 'btn small ghost hub-builder', href: '#build', id: 'hub-builder' }, 'Builder'));
+  return node;
+}
+
+// ---------------------------------------------------------------- Reaction builder (#build)
+function buildView() {
+  setDrawStyle('skeletal');
+  mount(header(), ...builderPage(chemP));
 }
 
 // ---------------------------------------------------------------- Mechanism scenes (scenes/): the list and one scene
@@ -391,6 +409,7 @@ function route() {
   if (hash === 'scenes') return scenesView();
   if ((m = /^scene\/([a-z0-9-]+)$/.exec(hash))) return sceneView(m[1]);
   if (hash === 'reactions') return hub();
+  if (hash === 'build') return buildView();
   if ((m = /^reactions\/([a-z0-9-]+)$/.exec(hash))) return hub(m[1]);
   if (hash === 'pastpaper') return pastpaper();
   if ((m = /^mock(?:\/(script))?$/.exec(hash))) return mock(m[1] ? 'script' : 'main');
