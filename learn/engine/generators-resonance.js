@@ -5,6 +5,7 @@
 import { analyze } from './chem.js';
 import { enumerate, toSmiles, compareForm } from './resonance.js';
 import { LAB_DIENES, HX_DIENE_IDS, HX, predictDiene, dieneChoices } from './reactions-dienes.js';
+import { RANK_POOL, rankSystem, whyWorse, RULE_TEXT } from './resonance-rank.js';
 import { resolveTasks } from './task-list.js';
 
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
@@ -213,10 +214,38 @@ function productsProblem(rng) {
   };
 }
 
-const TASKS = { draw: drawProblem, valid: validProblem, invalid: invalidProblem, count: countProblem, products: productsProblem };
-const BY_SKILL = { resonance: ['draw', 'valid', 'invalid', 'count'], dienes: ['products'] };
+// ---------------------------------------------------------------- 6. which resonance form is the major contributor (skill 'resonance-rank', question type "Which resonance form matters most?")
+function rankProblem(rng) {
+  let sys, r;
+  for (let t = 0; t < 20; t++) {   // a system whose best forms tie without every form tying has no single answer: never in the pool, but never served if it ever were
+    sys = pick(rng, RANK_POOL); r = rankSystem(sys);
+    if (r.equal || r.major !== null) break;
+  }
+  const equalText = 'They contribute equally';
+  const perm = shuffle(rng, r.forms.map((f, i) => i));   // the engine lists the start first, which is usually the major form: letter the forms in a random order so "Form A" is not a giveaway
+  const majorLetter = r.equal ? null : LETTERS[perm.indexOf(r.major)];
+  const formOpts = perm.map((i, k) => ({
+    smiles: r.forms[i], text: 'Form ' + LETTERS[k], raw: needsRaw(r.forms[i]), form: i,
+    correct: !r.equal && i === r.major,
+    why: r.equal ? 'These forms are equivalent: the same octets, the same charges on the same kinds of atom, so neither is major.'
+      : i === r.major ? `Yes. ${RULE_TEXT[r.rule].charAt(0).toUpperCase() + RULE_TEXT[r.rule].slice(1)}.`
+        : whyWorse(r.keys[i], r.keys[r.major])
+  }));
+  const eqOpt = { text: equalText, correct: r.equal, why: r.equal ? 'Yes. The forms are equivalent, so each contributes the same and the hybrid is symmetric.' : `Not equal: ${RULE_TEXT[r.rule]}.` };
+  const options = shuffle(rng, [...formOpts, eqOpt]);
+  return {
+    kind: 'choice', skill: 'resonance-rank', smiles: null, reaction: null,
+    prompt: `These are resonance forms of the ${sys.name}. Which one is the MAJOR contributor to the hybrid?`,
+    options, answer: options.find((o) => o.correct).text, system: sys.id, forms: perm.map((i) => r.forms[i]), rule: r.rule,
+    derive: r.equal ? 'The forms are equivalent (same octets, same charges on the same kind of atom): they contribute equally and the hybrid is symmetric.' : `Form ${majorLetter} wins by the ${r.rule} rule: ${RULE_TEXT[r.rule]}.`,
+    hints: ['Rule 1 first: does every atom have a full octet in each form? Then count the charges. Then put − on the more electronegative atom.', 'Identical forms (acetate, allyl cation, nitromethane) contribute equally.']
+  };
+}
+
+const TASKS = { draw: drawProblem, valid: validProblem, invalid: invalidProblem, count: countProblem, products: productsProblem, rank: rankProblem };
+const BY_SKILL = { resonance: ['draw', 'valid', 'invalid', 'count'], dienes: ['products'], 'resonance-rank': ['rank'] };
 export const RES_SKILLS = Object.keys(BY_SKILL);
-export const RES_TASKS = Object.keys(TASKS);
+export const RES_TASKS = ['draw', 'valid', 'invalid', 'count', 'products'];   // the default mix (Lesson 11 mastery); 'rank' is served only by skill 'resonance-rank' or tasks: ['rank']
 export function makeResonanceProblem(rng, task) {
   const f = TASKS[task];
   if (!f) throw new Error('unknown task ' + task);

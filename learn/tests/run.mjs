@@ -48,6 +48,7 @@ import { namingLevels } from './naming-levels.mjs';
 import { pastpaper } from './pastpaper.mjs';
 import { mock } from './mock.mjs';
 import { master } from './master.mjs';
+import { resonanceRank } from './resonance-rank.mjs';
 import { stereoMoments } from './stereo-moments.mjs';
 import { player } from './player.mjs';
 import { cavemanLessons } from './caveman-lessons.mjs';
@@ -59,7 +60,7 @@ import { builder } from './builder.mjs';
 import { tables } from './tables.mjs';
 import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product', 'stereo-projections', 'naming-levels', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work', 'aromaticity']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'skeletal-convert', 'resonance-rank', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product', 'stereo-projections', 'naming-levels', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work', 'aromaticity']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -1209,6 +1210,8 @@ await mock({ ok, eq });
 
 // ---- Question-type mastery course: the generators' tasks / settings options, the data of every type (fields, book numbers, links), the worked examples (seeded, repeatable), streaks and mastery, wiring (tests/master.mjs)
 await master({ ok, eq });
+// ---- Question-type stage 4 tasks: 'rank' (skill resonance-rank, hand table in tests/fixtures/resonance-rank.json) and 'convert' (skill skeletal-convert, condensed-formula round trip) (tests/resonance-rank.mjs)
+await resonanceRank({ ok, eq });
 
 // ---- 3D stereo moments: every moment maps to a real step and a real model whose geometry matches its caption (tests/stereo-moments.mjs)
 await stereoMoments({ ok, eq });

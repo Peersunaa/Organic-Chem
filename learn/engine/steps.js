@@ -442,6 +442,7 @@ export function renderProblems(cfg, ctx, host) {
     stage.innerHTML = '';
     const src = cfg.next ? cfg.next() : cfg;
     const p = generate(src.generator || 'lewis-basic', 1, { skill: src.skill || null, settings: src.settings || null, tasks: src.tasks || null })[0];
+    if (cfg.next && p.visual && !Array.isArray(p.visual) && p.visual.widget === 'naming-levels-bar') delete p.visual;   // a question type pins its own naming settings: the drill's settings card stays on the drill page
     const step = { id: 'mastery', skill: p.skill, hints: p.hints, worked: null };
     const card = h('div', { class: 'problem' });
     stage.append(card);

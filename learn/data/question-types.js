@@ -21,7 +21,7 @@ export const GROUPS = [
 ];
 
 /** Types with stage <= LIVE_STAGE are shown; the rest ship in later pieces (reactions + stereo first, then naming, then bonding, then structure). */
-export const LIVE_STAGE = 1;
+export const LIVE_STAGE = 4;
 
 const M = (n, text) => `${n} mark${n === 1 ? '' : 's'}: ${text}`;
 

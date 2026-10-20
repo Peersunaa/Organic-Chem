@@ -58,6 +58,8 @@ function answerText(p) {
   if (p.skill === 'formal-charge' && typeof p.answer === 'number' && p.answer > 0) return '+' + p.answer;
   return String(p.answer).replace(/^-(?=\d)/, '−');
 }
+/** The naming drill attaches its settings card as a visual; a type pins its own settings, so the card is left out here and in the practice. */
+const isSettingsBar = (v) => !Array.isArray(v) && v && v.widget === 'naming-levels-bar';
 function exampleCard(p, k) {
   const card = h('article', { class: 'ms-ex' });
   card.append(h('p', { class: 'eyebrow' }, `Example ${k}`), p.promptHtml ? rich(p.promptHtml, 'h3', 'prompt') : h('h3', { class: 'prompt' }, p.prompt));
@@ -65,7 +67,7 @@ function exampleCard(p, k) {
   else if (p.extra && p.extra.type === 'pair') card.append(h('div', { class: 'rd-figs' }, pairFigure(p.extra.a, 'Molecule A', 0), h('span', { class: 'rd-vs' }, 'and'), pairFigure(p.extra.b, 'Molecule B', p.extra.rotateB)));
   else if (p.kind !== 'builder' && p.kind !== 'polarity' && p.kind !== 'arrows' && p.kind !== 'groupfind' && p.kind !== 'cip' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
   if (p.equation) card.append(equationRow(p.equation));
-  if (p.visual) mountVisual(card, p.visual);
+  if (p.visual && !isSettingsBar(p.visual)) mountVisual(card, p.visual);   // the naming drill's settings bar belongs to its own page, not to a worked example
   if (p.kind === 'choice') {
     const list = h('div', { class: 'opts' + (p.options.some((o) => o.smiles) ? ' mols' : ''), role: 'group', 'aria-label': 'The choices, with the right one marked' });
     p.options.forEach((o) => {

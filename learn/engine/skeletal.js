@@ -123,3 +123,95 @@ export function condensedToSmiles(text) {
   return write(top.first, -1);
 }
 export const condensedCanon = (text) => canon(condensedToSmiles(text));
+
+// ---------------------------------------------------------------- acyclic molecule -> condensed formula (the inverse of condensedToSmiles)
+// Convention (the dialect condensedToSmiles reads): every backbone atom is written as its element plus its H count (CH3, CH2, CH, C, OH, NH2, O, Cl ...);
+// the BACKBONE is the longest chain of heavy atoms (ties: start on a carbon, keep a C=O / C#N out of the chain's end, then the shorter text);
+// every other atom hangs in parentheses straight after the chain atom it is bonded to, with its bond symbol first: CH3C(=O)CH3, CH3CH(CH3)CH2OH, CH3CH2CH(OH)CH3;
+// two or more identical branches are grouped, C(CH3)2; the chain keeps going after the parentheses. A terminal carbonyl is written CH=O (aldehyde) and a nitrile C#N,
+// never the abbreviations CHO / CO2H, which condensedToSmiles rejects. Digits are plain ASCII (the display adds subscripts).
+const MAXV = { C: 4, N: 3, O: 2, F: 1, Cl: 1, Br: 1, I: 1 };
+/** The graph of an ACYCLIC, connected, uncharged molecule of C, N, O and halogens: { el, h, adj } (adj[i] = [{ to, order }]), or null for anything else (rings, charges, S/P, fragments). */
+export function molGraph(smiles) {
+  const info = analyze(smiles);
+  if (!info || !info.atoms.length) return null;
+  const n = info.atoms.length;
+  if (info.bonds.length !== n - 1) return null;
+  if (info.atoms.some((a) => !MAXV[a.sym] || a.fc !== 0)) return null;
+  const adj = info.atoms.map(() => []);
+  for (const b of info.bonds) {
+    const o = b.bo ?? 1;
+    if (![1, 2, 3].includes(o)) return null;
+    adj[b.atoms[0]].push({ to: b.atoms[1], order: o }); adj[b.atoms[1]].push({ to: b.atoms[0], order: o });
+  }
+  const seen = new Set([0]), stack = [0];
+  while (stack.length) { const x = stack.pop(); adj[x].forEach((e) => { if (!seen.has(e.to)) { seen.add(e.to); stack.push(e.to); } }); }
+  if (seen.size !== n) return null;
+  return { el: info.atoms.map((a) => a.sym), h: info.atoms.map((a) => a.impH), adj };
+}
+/** SMILES of a graph (bare symbols: RDKit fills in the hydrogens). */
+export function graphSmiles(g) {
+  const sym = (o) => (o === 2 ? '=' : o === 3 ? '#' : '');
+  const write = (i, parent, order) => {
+    const kids = g.adj[i].filter((e) => e.to !== parent);
+    return sym(order) + g.el[i] + kids.map((k, n) => { const body = write(k.to, i, k.order); return n < kids.length - 1 ? '(' + body + ')' : body; }).join('');
+  };
+  return write(0, -1, 1);
+}
+/** The condensed formula of an acyclic molecule (see the convention above), or null when the molecule is outside the dialect. */
+export function condensedOf(smiles) {
+  const g = molGraph(smiles);
+  if (!g) return null;
+  const n = g.el.length;
+  const unit = (i) => g.el[i] + (g.h[i] ? 'H' + (g.h[i] > 1 ? g.h[i] : '') : '');
+  const sym = (o) => (o === 2 ? '=' : o === 3 ? '#' : '');
+  const size = (i, parent) => 1 + g.adj[i].reduce((t, e) => t + (e.to === parent ? 0 : size(e.to, i)), 0);
+  /** `(X)n` groups of equal branches, in the order shortest first. */
+  const group = (items) => {
+    const isC = (x) => /^[=#]?C(?!l)/.test(x.str);   // shortest first, a heteroatom branch before a carbon one: C(OH)(CH3)
+    const sorted = items.slice().sort((a, b) => a.size - b.size || (isC(a) ? 1 : 0) - (isC(b) ? 1 : 0) || (a.str < b.str ? -1 : a.str > b.str ? 1 : 0));
+    const out = [];
+    for (let i = 0; i < sorted.length;) { let j = i; while (j < sorted.length && sorted[j].str === sorted[i].str) j++; out.push('(' + sorted[i].str + ')' + (j - i > 1 ? j - i : '')); i = j; }
+    return out.join('');
+  };
+  const branch = (i, parent, order) => {
+    const kids = g.adj[i].filter((e) => e.to !== parent).map((e) => ({ str: branch(e.to, i, e.order), size: size(e.to, i), order: e.order }));
+    if (!kids.length) return sym(order) + unit(i);
+    if (kids.every((k) => k.str === kids[0].str)) return sym(order) + unit(i) + group(kids);   // CH(CH3)2, C(CH3)3: nothing left to continue with
+    const main = kids.slice().sort((a, b) => b.size - a.size || a.order - b.order || (a.str < b.str ? -1 : 1))[0];
+    return sym(order) + unit(i) + group(kids.filter((k) => k !== main)) + main.str;
+  };
+  // every longest path, both directions
+  const best = [];
+  let bestLen = -1;
+  for (let s = 0; s < n; s++) {
+    const par = Array(n).fill(-2), dist = Array(n).fill(0), q = [s];
+    par[s] = -1;
+    for (let k = 0; k < q.length; k++) g.adj[q[k]].forEach((e) => { if (par[e.to] === -2) { par[e.to] = q[k]; dist[e.to] = dist[q[k]] + 1; q.push(e.to); } });
+    for (let t = 0; t < n; t++) {
+      if (t === s || dist[t] < bestLen) continue;
+      if (dist[t] > bestLen) { bestLen = dist[t]; best.length = 0; }
+      const path = []; for (let x = t; x !== -1; x = par[x]) path.push(x);
+      best.push(path.reverse());
+    }
+  }
+  const write = (path) => {
+    let s = '';
+    path.forEach((a, t) => {
+      const on = new Set(path);
+      const br = g.adj[a].filter((e) => !on.has(e.to)).map((e) => ({ str: branch(e.to, a, e.order), size: size(e.to, a) }));
+      const ord = t ? g.adj[path[t - 1]].find((e) => e.to === a).order : 1;
+      s += sym(ord) + unit(a) + group(br);
+    });
+    return s;
+  };
+  const ranked = best.map((path) => {
+    const bondAt = (t) => g.adj[path[t]].find((e) => e.to === path[t + 1]).order;
+    const str = write(path);
+    // keys: start on a carbon, end on a carbon, begin on a saturated end (CH3C#CH, not CH#CCH3), keep a C=O / C#N out of the chain's end, then the shorter text
+    return { str, key: [g.el[path[0]] === 'C' ? 0 : 1, g.el[path[path.length - 1]] === 'C' ? 0 : 1, bondAt(0) > 1 ? 1 : 0, bondAt(path.length - 2) > 1 ? 1 : 0] };
+  }).sort((a, b) => { for (let i = 0; i < 4; i++) if (a.key[i] !== b.key[i]) return a.key[i] - b.key[i]; return a.str.length - b.str.length || (a.str < b.str ? -1 : a.str > b.str ? 1 : 0); });
+  return ranked[0].str;
+}
+/** Plain digits -> subscript digits, for display. */
+export const subscriptDigits = (s) => String(s).replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[d]);

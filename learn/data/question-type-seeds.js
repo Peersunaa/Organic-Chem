@@ -37,8 +37,8 @@ export const SEEDS = {
   'conjugate-base': [{ src: 0, seed: 1 }, { src: 0, seed: 2 }, { src: 0, seed: 3 }],
   'lewis-acid-base': [{ src: 0, seed: 1 }, { src: 2, seed: 1 }, { src: 2, seed: 2 }],
   'functional-groups': [{ src: 0, seed: 7 }, { src: 0, seed: 8 }, { src: 0, seed: 9 }],
-  'skeletal-convert': [],
+  'skeletal-convert': [{ src: 0, seed: 1 }, { src: 0, seed: 2 }, { src: 0, seed: 3 }],
   'resonance-forms': [{ src: 0, seed: 1 }, { src: 0, seed: 2 }, { src: 0, seed: 4 }],
-  'resonance-rank': [],
+  'resonance-rank': [{ src: 0, seed: 1 }, { src: 0, seed: 2 }, { src: 0, seed: 3 }],
   'diene-12-14': [{ src: 0, seed: 1 }, { src: 1, seed: 1 }, { src: 0, seed: 2 }]
 };
