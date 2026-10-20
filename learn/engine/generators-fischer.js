@@ -3,6 +3,7 @@
 // tests (tests/lesson16.mjs + tools/check_fischer.py) recompute each drawing in Python RDKit three ways (wedge/dash molblock, 3D coordinates,
 // the SMILES this file writes) and compare the letter from rdCIPLabeler with the generator's answer, for every molecule of the pool in every arrangement.
 import { FISCHER_POOL, POOL_BY_ID, POSITIONS, H_GROUP, standardDrawing, readRS, applyOp, relationOf, OPS, OP_VERDICT, fischerSmiles, otherLabel, dirWord, isVertical } from './fischer.js';
+import { resolveTasks } from './task-list.js';
 
 export const FISCHER_SKILLS = ['fischer'];
 export const FISCHER_TASKS = ['rs-h', 'rs-v', 'rs-h', 'manip'];
@@ -130,13 +131,14 @@ export function makeFischerProblem(rng, task) {
     derive: round.derive, hints: manip ? MANIP_HINTS : RS_HINTS
   };
 }
-export function generateFischer(count, { skill = null, rng = Math.random } = {}) {
+export function generateFischer(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, FISCHER_TASKS, FISCHER_TASKS);
   const out = [];
-  const start = Math.floor(rng() * FISCHER_TASKS.length);
+  const start = Math.floor(rng() * tasks.length);
   let last = null;
   for (let i = 0; i < count; i++) {
     let p, tries = 0;
-    do { p = makeFischerProblem(rng, FISCHER_TASKS[(start + i) % FISCHER_TASKS.length]); tries++; } while (last && last === p.round.key && tries < 6);
+    do { p = makeFischerProblem(rng, tasks[(start + i) % tasks.length]); tries++; } while (last && last === p.round.key && tries < 6);
     last = p.round.key;
     out.push(p);
   }

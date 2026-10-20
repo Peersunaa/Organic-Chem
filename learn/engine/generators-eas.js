@@ -10,6 +10,7 @@
 import { LAB_EAS, EAS, predictEAS, easChoices, easRightWhy, EAS_HINTS, labLabel, halideText, BENZENE, generationOf } from './reactions-aromatic.js';
 import { SUB, buildArene, nameBothArene, ringLayout } from './naming-arene.js';
 import { normName } from './naming.js';
+import { resolveTasks } from './task-list.js';
 
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
 function shuffle(rng, arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -183,8 +184,8 @@ export function makeEasProblem(rng, task) {
   if (!f) throw new Error('unknown task ' + task);
   return f(rng);
 }
-export function generateEas(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : EAS_TASKS;
+export function generateEas(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill && BY_SKILL[skill] ? BY_SKILL[skill] : EAS_TASKS, TASKS);
   const out = [];
   let last = null;
   for (let i = 0; i < count; i++) {

@@ -23,6 +23,7 @@ import { generateNamingLevels, NAMING_LEVEL_SKILLS } from './naming-custom.js'; 
 import { generateReactionModes, REACTION_MODE_SKILLS, getModeCard } from './generators-reaction-modes.js';
 import { generateReactions, MIX_ID } from './reactions-custom.js';   // the settings of the reaction practice pages (a practice page passes its skill; lessons and the mock do not, and get the plain generators)
 import { generateHuckel, HUCKEL_SKILLS } from './generators-huckel.js';
+import { resolveTasks } from './task-list.js';
 
 export const POOL = ['CN', 'CC#N', 'OC=O', 'C[O-]', '[NH4+]', 'CCl', 'C=C', 'CC=O', 'CC(=O)O', 'COC', '[OH3+]', '[CH3+]', '[CH3-]', 'O=C=O'];
 const MINUS = '−';
@@ -155,6 +156,7 @@ function octetProblem(rng, smi) {
 }
 
 const BASIC_TASKS = ['lp', 'fc', 'total', 'builder'];
+const ALL_BASIC_TASKS = ['lp', 'fc', 'total', 'builder', 'builder-multi', 'valence', 'bonds', 'octet'];   // every task makeProblem knows (generate(..., { tasks }) may name any)
 const hasMulti = (smi) => analyze(smi).bonds.some((b) => (b.bo ?? 1) > 1);
 const smallPool = () => POOL.filter((s) => analyze(s).heavy.length <= 4);
 
@@ -200,38 +202,40 @@ function noRepeats(make, count, active) {
   return out;
 }
 
-/** generate(generatorId, count, {skill, rng}) -> problems. Fresh random molecules each call. */
-export function generate(generatorId, count, { skill = null, rng = Math.random, level = null, settings = null, isolated = false } = {}) {
+/** generate(generatorId, count, {skill, rng, tasks, settings}) -> problems. Fresh random molecules each call.
+ *  tasks: task families inside the generator (e.g. ['product', 'rank']); when given, only those are drawn and `skill` is ignored; an unknown name throws "unknown task X".
+ *  settings: the reaction practice settings (predict-product and the reaction modes) or the naming drill settings (naming-levels); a partial object is fine. The master course uses both. */
+export function generate(generatorId, count, { skill = null, rng = Math.random, level = null, settings = null, isolated = false, tasks = null } = {}) {
   const session = !isolated && rng === Math.random;
-  if (generatorId === 'shape-basic') return generateShape(count, { skill, rng });
-  if (generatorId === 'acid-base') return generateAcid(count, { skill, rng });
-  if (generatorId === 'skeletal-fg') return generateFg(count, { skill, rng });
-  if (generatorId === 'alkane-names') return generateNames(count, { skill, rng });
-  if (generatorId === 'chairs') return generateChairs(count, { skill, rng });
-  if (generatorId === 'alkene-names') return generateAlkenes(count, { skill, rng });
-  if (generatorId === 'mechanism-basics') return generateMech(count, { skill, rng });
-  if (generatorId === 'mechanism-mastery') return skill ? generateMech(count, { skill, rng }) : generateMechMastery(count, { rng });   // Lesson 08 mastery: arrows and energy diagrams in turn
-  if (generatorId === 'markovnikov') return generateMarkovnikov(count, { skill, rng });
-  if (generatorId === 'alkene-additions-2') return generateAdditions2(count, { skill, rng });
-  if (generatorId === 'resonance') return generateResonance(count, { skill, rng });
-  if (generatorId === 'alkynes') return generateAlkynes(count, { skill, rng });
-  if (generatorId === 'eas-basics') return generateEas(count, { skill, rng });
-  if (generatorId === 'directors') return generateDirectors(count, { skill, rng });
-  if (generatorId === 'rs') return generateRs(count, { skill, rng });
-  if (generatorId === 'stereo-relationships') return generateRel(count, { skill, rng });
-  if (generatorId === 'fischer') return generateFischer(count, { skill, rng });
-  if (generatorId === 'predict-product') return noRepeats((n) => (skill ? generateReactions('predict-product', n, { rng }) : generatePredict(n, { skill, rng })), count, session);
+  if (generatorId === 'shape-basic') return generateShape(count, { skill, rng, tasks });
+  if (generatorId === 'acid-base') return generateAcid(count, { skill, rng, tasks });
+  if (generatorId === 'skeletal-fg') return generateFg(count, { skill, rng, tasks });
+  if (generatorId === 'alkane-names') return generateNames(count, { skill, rng, tasks });
+  if (generatorId === 'chairs') return generateChairs(count, { skill, rng, tasks });
+  if (generatorId === 'alkene-names') return generateAlkenes(count, { skill, rng, tasks });
+  if (generatorId === 'mechanism-basics') return generateMech(count, { skill, rng, tasks });
+  if (generatorId === 'mechanism-mastery') return skill || tasks ? generateMech(count, { skill, rng, tasks }) : generateMechMastery(count, { rng });   // Lesson 08 mastery: arrows and energy diagrams in turn
+  if (generatorId === 'markovnikov') return generateMarkovnikov(count, { skill, rng, tasks });
+  if (generatorId === 'alkene-additions-2') return generateAdditions2(count, { skill, rng, tasks });
+  if (generatorId === 'resonance') return generateResonance(count, { skill, rng, tasks });
+  if (generatorId === 'alkynes') return generateAlkynes(count, { skill, rng, tasks });
+  if (generatorId === 'eas-basics') return generateEas(count, { skill, rng, tasks });
+  if (generatorId === 'directors') return generateDirectors(count, { skill, rng, tasks });
+  if (generatorId === 'rs') return generateRs(count, { skill, rng, tasks });
+  if (generatorId === 'stereo-relationships') return generateRel(count, { skill, rng, tasks });
+  if (generatorId === 'fischer') return generateFischer(count, { skill, rng, tasks });
+  if (generatorId === 'predict-product') return noRepeats((n) => (skill || settings ? generateReactions('predict-product', n, { rng, settings }) : generatePredict(n, { skill, rng })), count, session);
   if (generatorId === 'stereo-projections') return generateStereoProjections(count, { skill, rng });
   if (generatorId === 'naming-levels') return generateNamingLevels(count, { skill, rng, level, settings });
-  if (generatorId === 'huckel') return generateHuckel(count, { skill, rng });
+  if (generatorId === 'huckel') return generateHuckel(count, { skill, rng, tasks });
   if (generatorId === MIX_ID) return noRepeats((n) => generateReactions(MIX_ID, n, { rng }), count, session);
-  if (REACTION_MODE_SKILLS.includes(generatorId)) return noRepeats((n) => (skill && !getModeCard() ? generateReactions(generatorId, n, { rng }) : generateReactionModes(generatorId, n, { rng })), count, session);
-  const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : BASIC_TASKS;
+  if (REACTION_MODE_SKILLS.includes(generatorId)) return noRepeats((n) => ((skill && !getModeCard()) || settings ? generateReactions(generatorId, n, { rng, settings }) : generateReactionModes(generatorId, n, { rng })), count, session);
+  const pool = resolveTasks(tasks, skill && BY_SKILL[skill] ? BY_SKILL[skill] : BASIC_TASKS, ALL_BASIC_TASKS);
   const out = [];
   let last = null;
   for (let i = 0; i < count; i++) {
     let p, tries = 0;
-    do { p = makeProblem(rng, tasks.length === 1 ? tasks[0] : pick(rng, tasks)); tries++; } while (last && p.smiles && p.smiles === last && tries < 5);
+    do { p = makeProblem(rng, pool.length === 1 ? pool[0] : pick(rng, pool)); tries++; } while (last && p.smiles && p.smiles === last && tries < 5);
     last = p.smiles;
     out.push(p);
   }

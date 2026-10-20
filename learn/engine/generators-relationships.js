@@ -6,6 +6,7 @@ import { relationship, isMeso, isChiral, formulaKey } from './chirality.js';
 import { STEREO_POOL, PARTNERS, enumerateCached, tagged, centersOfEntry, cisTrans, KIND_LABEL } from './stereoisomers.js';
 import { gradePair } from './widgets/relationship-drill.js';
 import { predictAdd } from './reactions-additions.js';
+import { resolveTasks } from './task-list.js';
 
 export const REL_SKILLS = ['stereo-relationships', 'meso', 'racemates'];
 export const REL_TASKS = ['rel', 'count', 'rel', 'meso', 'rotation', 'rel', 'br2'];
@@ -211,8 +212,8 @@ export function makeRelProblem(rng, task) {
     default: throw new Error('unknown task ' + task);
   }
 }
-export function generateRel(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill === 'meso' ? ['meso', 'br2', 'meso'] : skill === 'racemates' ? ['rotation', 'rotation', 'br2'] : skill === 'stereo-relationships' ? ['rel', 'count', 'rel'] : REL_TASKS;
+export function generateRel(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill === 'meso' ? ['meso', 'br2', 'meso'] : skill === 'racemates' ? ['rotation', 'rotation', 'br2'] : skill === 'stereo-relationships' ? ['rel', 'count', 'rel'] : REL_TASKS, REL_TASKS);
   const out = [];
   const start = Math.floor(rng() * tasks.length);
   let last = null;

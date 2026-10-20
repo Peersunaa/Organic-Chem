@@ -24,11 +24,12 @@ import { scenePage, scenesList, sceneBlock } from './scenes/scene-view.js';
 import { sceneForStep } from './scenes/scene-index.js';
 import { builderPage } from './builder-view.js';
 import { tablesPage } from './tables-view.js';
+import { masterPage, overallText } from './master-view.js';
+import { progress as masteryProgress } from './engine/master.js';
+import { TYPE_BY_ID, typesForLesson } from './data/question-types.js';
 
 const app = document.getElementById('app');
-// A press of Check with nothing entered is not a slip: it must not count as a weak spot.
-const EMPTY_CHECK = /^(Draw at least|Tap (the|each|one|at least)|Mark every|Fill in every|Type your answer|Choose at least|Your two picks are right|Enter a number)/;
-const logSlip = (e) => { if (!EMPTY_CHECK.test(String(e.diagnosis || '').trim())) store.logMistake(e); };
+const logSlip = store.logSlip;   // a press of Check with nothing entered is not a slip (store.EMPTY_CHECK)
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 let chemReady = false;
 const chemP = ready().then(() => { chemReady = true; });
@@ -74,6 +75,16 @@ function whereLink(w) {
   const l = w.last && LESSONS.find((x) => x.id === w.last.lessonId);
   const st = l && l.steps.find((x) => x.id === w.last.stepId);
   return st ? h('a', { class: 'ws-last small', href: `#lesson-${l.id}/${st.id}` }, `Last slip: Lesson ${Number(l.id)}, step ${Number(st.id.slice(1))}`) : null;
+}
+
+/** Home's "Mastery course" panel: the question-type ladder with the overall count. */
+function masterHome() {
+  const P = masteryProgress();
+  return h('section', { class: 'panel', 'aria-labelledby': 'ms-home-h' }, h('h2', { id: 'ms-home-h' }, 'Mastery course'),
+    h('p', { class: 'muted' }, 'Every question type on the midterm: recognise it, the procedure, what earns the marks, three worked examples, then practise to five in a row.'),
+    h('p', { class: 'small ms-home-n', id: 'ms-home-n' }, overallText(P)),
+    h('span', { class: 'ms-bar', role: 'img', 'aria-label': `${P.pct}% of the question types mastered` }, h('i', { style: `width:${P.pct}%` })),
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#master', id: 'open-master' }, 'Open the mastery course')));
 }
 
 function home() {
@@ -163,7 +174,7 @@ function home() {
   const bld = h('section', { class: 'panel', 'aria-labelledby': 'bld-home-h' }, h('h2', { id: 'bld-home-h' }, 'Reaction builder'),
     h('p', { class: 'muted' }, 'Pick a starting material and a reagent, see what forms and why (the professor’s ring rules included), then use the product for the next step.'),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#build', id: 'open-builder' }, 'Open the reaction builder'), h('a', { class: 'btn ghost', href: '#table', id: 'open-tables' }, 'Reaction tables')));
-  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, bld, rx, pp, mockPanel, gl, panel)));
+  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, masterHome(), bld, rx, pp, mockPanel, gl, panel)));
   const op = document.getElementById('open-practice');
   if (op) op.addEventListener('click', () => { const t = panel.querySelector('summary') || panel; panel.scrollIntoView?.({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); t.focus?.({ preventScroll: true }); });
 }
@@ -298,6 +309,10 @@ function lessonView(L, startId) {
       sceneNode = sceneBlock(sceneKey); sceneNode.hidden = !(step.type === 'try' || done.has(step.id));
       if (stereoNode) { const row = h('div', { class: 'extras' }); stereoNode.replaceWith(row); row.append(stereoNode, sceneNode); } else host.append(sceneNode);
     }
+    if (step.type === 'useit') {   // the question types this lesson teaches, as links into the mastery course
+      const mt = typesForLesson(L.id);
+      if (mt.length) host.append(h('div', { class: 'ms-lesson-links' }, h('p', { class: 'small muted' }, 'Master this question type:'), h('div', { class: 'ms-links' }, mt.map((t) => h('a', { class: 'btn small ghost', href: '#master/' + t.id }, t.title)))));
+    }
     if ((L.id === '13' || L.id === '14') && step.type === 'useit') host.append(h('p', { class: 'small bld-lesson-link' }, h('a', { class: 'btn small ghost', href: '#build', id: 'bld-lesson-link' }, 'Try any ring + reagent in the reaction builder'), h('span', { class: 'muted' }, ' The professor’s rules for two groups, ipso removal and blocking groups.')));
     setIupacMode(store.getIupac());
     if (!reduceMotion()) { host.classList.remove('enter'); void host.offsetWidth; host.classList.add('enter'); }
@@ -385,6 +400,13 @@ function reactionsPractice() {
     card, h('div', { class: 'rm-grid' }, modes));
 }
 
+// ---------------------------------------------------------------- Question-type mastery course (#master, #master/<typeId>: master-view.js)
+function masterView(typeId) {
+  const t = typeId && TYPE_BY_ID[typeId];
+  setDrawStyle(t && t.group === 'bonding' ? 'full' : 'skeletal');
+  mount(header(), ...masterPage(chemP, typeId));
+}
+
 // ---------------------------------------------------------------- Past papers
 function pastpaper() {
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Past papers, by topic'),
@@ -419,6 +441,7 @@ function route() {
   if (hash === 'build') return buildView();
   if (hash === 'table') return tablesView();
   if ((m = /^reactions\/([a-z0-9-]+)$/.exec(hash))) return hub(m[1]);
+  if ((m = /^master(?:\/([a-z0-9-]+))?$/.exec(hash))) return masterView(m[1]);
   if (hash === 'pastpaper') return pastpaper();
   if ((m = /^mock(?:\/(script))?$/.exec(hash))) return mock(m[1] ? 'script' : 'main');
   if (hash === 'reactions-practice') return reactionsPractice();

@@ -208,8 +208,8 @@ export async function text({ ok, eq }) {
     ok(/href: '#glossary'/.test(app), 'the home page links to the glossary');
     ok(/attachGlossary\(host\)/.test(app), 'app.js makes glossary terms tappable after every step renders');
     ok(/prereqCard\(L\.id\)/.test(app) && /idx === 0/.test(app), 'app.js shows the prerequisite card above step 1');
-    const m = /const EMPTY_CHECK = (\/.*\/);/.exec(app);
-    ok(!!m, 'app.js has the EMPTY_CHECK filter');
+    const m = /export const EMPTY_CHECK = (\/.*\/);/.exec(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'engine', 'store.js'), 'utf8'));
+    ok(!!m && /store\.logSlip/.test(app), 'engine/store.js has the EMPTY_CHECK filter and app.js logs slips through it');
     if (m) {
       const re = eval(m[1]);
       for (const d of ['Draw at least one arrow: tap the electrons it starts from', 'Tap the carbons first, then press Check.', 'Fill in every box first.', 'Type your answer first.', 'Mark every bond first.', 'Choose at least one reagent card', 'Enter a number, for example 4'])

@@ -6,6 +6,7 @@ import { canon } from './chem.js';
 import { predictAdd, productChoices2, reagentsFor, REAGENTS2, REAGENT_IDS2, MONOMERS, repeatUnit, repeatChoices, stereoKey, sameProducts, LAB_ALKENES2 } from './reactions-additions.js';
 import { mirror } from './stereo-graph.js';
 import { nameAlkeneBoth } from './naming.js';
+import { resolveTasks } from './task-list.js';
 
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
 function shuffle(rng, arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -214,8 +215,8 @@ export function makeAdditions2Problem(rng, task) {
   if (!f) throw new Error('unknown task ' + task);
   return f(rng);
 }
-export function generateAdditions2(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : ADD2_TASKS;
+export function generateAdditions2(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill && BY_SKILL[skill] ? BY_SKILL[skill] : ADD2_TASKS, TASKS);
   const out = [];
   let last = null;
   for (let i = 0; i < count; i++) {

@@ -3,6 +3,7 @@
 import { analyze } from './chem.js';
 import { hCount, lineCount, formulaCounts, hill } from './skeletal.js';
 import { FG, QUIZ_GROUPS, CONFUSABLE, FG_POOL, classify, matchGroup, singleGroups, notThere } from './functional-groups.js';
+import { resolveTasks } from './task-list.js';
 
 export const FG_SKILLS = ['skeletal', 'functional-groups'];
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
@@ -113,8 +114,8 @@ export function makeFgProblem(rng, task, entry) {
   }
 }
 
-export function generateFg(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : FG_TASKS;
+export function generateFg(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill && BY_SKILL[skill] ? BY_SKILL[skill] : FG_TASKS, FG_TASKS);
   const out = [];
   let last = null;
   const start = Math.floor(rng() * tasks.length);

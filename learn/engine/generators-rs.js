@@ -4,6 +4,7 @@
 // (with its R/S prefix) is checked against OPSIN.
 import { tetraInfo, chiralCenters } from './cip.js';
 import { flipStereo, specificRotation, observedRotation, roundTo, signed } from './chirality.js';
+import { resolveTasks } from './task-list.js';
 
 export const RS_SKILLS = ['chirality', 'rs'];
 export const RS_TASKS = ['centers', 'rs', 'rs', 'mirror', 'name', 'alpha', 'sign'];
@@ -191,8 +192,8 @@ export function makeRsProblem(rng, task) {
     default: throw new Error('unknown task ' + task);
   }
 }
-export function generateRs(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill === 'rs' ? ['rs', 'rs', 'name'] : skill === 'chirality' ? ['centers', 'mirror', 'alpha', 'sign', 'centers'] : RS_TASKS;
+export function generateRs(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill === 'rs' ? ['rs', 'rs', 'name'] : skill === 'chirality' ? ['centers', 'mirror', 'alpha', 'sign', 'centers'] : RS_TASKS, RS_TASKS);
   const out = [];
   const start = Math.floor(rng() * tasks.length);
   let last = null;

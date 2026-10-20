@@ -8,6 +8,7 @@ import { skillLabel } from './engine/skills.js';
 import { SECTIONS, PRESETS, LIMITS } from './data/mock-blueprint.js';
 import * as store from './engine/store.js';
 import * as M from './engine/mock.js';
+import { typesForSkill } from './data/question-types.js';
 
 const fmtClock = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); const hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = s % 60; return (hh ? hh + ':' + String(mm).padStart(2, '0') : String(mm)) + ':' + String(ss).padStart(2, '0'); };
 const fmtDate = (t) => { try { return new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ' ' + new Date(t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); } catch (e) { return String(t); } };
@@ -17,12 +18,12 @@ const marksText = (n) => `${n} ${n === 1 ? 'mark' : 'marks'}`;
 const secCode = (id) => h('span', { class: 'pp-id' }, id);
 
 // ================================================================================================ one question: the figures and the prompt
-function pairFigure(smiles, label, rotate) {
+export function pairFigure(smiles, label, rotate) {
   const f = h('figure', { class: 'rd-fig' });
   f.append(h('div', { class: 'rd-svg', html: rdSvg(smiles, { width: 230, height: 170, style: 'skeletal', rotate: rotate || 0 }) }), h('figcaption', {}, label));
   return f;
 }
-function projFigure(dr, tag) {
+export function projFigure(dr, tag) {
   const f = h('figure', { class: 'rd-fig pj-fig' });
   f.append(h('div', { class: 'pj-box', html: drawingMarkup(dr) }), h('figcaption', { html: drawingCaption(dr, tag) }));
   return f;
@@ -311,8 +312,10 @@ function scriptCard(q, it) {
     if (L.rule) card.append(h('details', { class: 'fb-more' }, h('summary', {}, 'The rule'), h('p', {}, L.rule)));
     const work = v.deriveHtml || v.derive || v.worked;
     if (work) card.append(h('details', { class: 'fb-more' }, h('summary', {}, 'Worked answer'), v.deriveHtml ? rich(v.deriveHtml, 'p') : h('p', {}, v.derive || v.worked)));
+    const mt = typesForSkill(q.skill, v.card)[0];   // the question type of the mastery course (#master) that practises this kind of question
     card.append(h('p', { class: 'fb-links' },
       L.lesson ? h('a', { class: 'btn small ghost', href: L.lesson.href }, L.lesson.label) : null,
+      mt ? h('a', { class: 'btn small ghost', href: '#master/' + mt.id }, 'Master this type') : null,
       L.card ? h('a', { class: 'btn small ghost', href: L.card.href }, L.card.label) : null,
       h('a', { class: 'btn small ghost', href: L.practise.href }, L.practise.label)));
   }

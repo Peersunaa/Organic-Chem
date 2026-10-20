@@ -1,6 +1,7 @@
 // Mastery generator "shape-basic" (Lesson 02). Every answer is computed from RDKit atom/bond data
 // and the electronegativity table in chem.js; nothing is hand-typed per molecule.
 import { analyze, ENEG, NAME, bondClass, groupCount, hybridOf, sigmaPi } from './chem.js';
+import { resolveTasks } from './task-list.js';
 
 export const SHAPE_POOL = ['CC', 'C=C', 'C#C', 'C=O', 'CO', 'CN', 'CC#N', 'C=CC', 'O=C=O', 'CCl', 'C[Li]', 'CC(=O)O', 'CC=O'];
 const MINUS = '−';
@@ -163,8 +164,8 @@ export function makeShapeProblem(rng, task, smi) {
   return f(rng, smi || pick(rng, SHAPE_POOL));
 }
 
-export function generateShape(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : Object.keys(TASKS);
+export function generateShape(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill && BY_SKILL[skill] ? BY_SKILL[skill] : Object.keys(TASKS), TASKS);
   const out = [];
   let last = null;
   for (let i = 0; i < count; i++) {

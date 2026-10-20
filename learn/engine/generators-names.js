@@ -5,6 +5,7 @@ import {
   nameBoth, alkaneInfo, buildSmiles, wrongNames, diagnoseTyped, subName, subSize, subRooted,
   parseAlkane, CLASS_NAMES, ROOT_NAMES
 } from './naming.js';
+import { resolveTasks } from './task-list.js';
 
 export const NAMING_SKILLS = ['naming'];
 export const NAME_TASKS = ['name', 'pick', 'class'];
@@ -207,13 +208,14 @@ export function makeNameProblem(rng, task, smi) {
   return nameProblem(rng, 'CC(C)CC(C)C');
 }
 
-export function generateNames(count, { skill = null, rng = Math.random } = {}) {
+export function generateNames(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, NAME_TASKS, NAME_TASKS);
   const out = [];
   let last = null;
-  const start = Math.floor(rng() * NAME_TASKS.length);
+  const start = Math.floor(rng() * tasks.length);
   for (let i = 0; i < count; i++) {
     let p, tries = 0;
-    do { p = makeNameProblem(rng, NAME_TASKS[(start + i) % NAME_TASKS.length]); tries++; } while (last && (p.smiles || p.target) === last && tries < 6);
+    do { p = makeNameProblem(rng, tasks[(start + i) % tasks.length]); tries++; } while (last && (p.smiles || p.target) === last && tries < 6);
     last = p.smiles || p.target;
     out.push(p);
   }

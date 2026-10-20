@@ -4,6 +4,7 @@
 // Rule used (Hückel): a cyclic, planar, fully conjugated ring is aromatic with 4n + 2 pi electrons and anti-aromatic with 4n.
 //   A ring with an sp3 atom is not fully conjugated, and neutral cyclooctatetraene is tub-shaped (not planar): both are "not aromatic".
 import { analyze } from './chem.js';
+import { resolveTasks } from './task-list.js';
 
 export const HUCKEL_SKILLS = ['aromaticity'];
 const pick = (rng, a) => a[Math.floor(rng() * a.length)];
@@ -100,14 +101,16 @@ function countProblem(rng, e) {
   };
 }
 
-export function generateHuckel(count, { skill = null, rng = Math.random } = {}) {
+export function generateHuckel(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, null, ['class', 'count']);   // 'class' = aromatic / anti-aromatic / not; 'count' = the pi electrons; both (or none) = the usual mix
+  const mix = !tasks || tasks.length > 1, wantCount = !mix && tasks[0] === 'count';
   const out = [];
   let last = null;
   for (let i = 0; i < count; i++) {
     let p, tries = 0;
     do {
-      const e = pick(rng, HUCKEL_POOL.filter((x) => huckelInfo(x.smiles, x.planar !== false).cls !== 'non' || rng() < 0.35));
-      const asCount = huckelInfo(e.smiles, e.planar !== false).cls !== 'non' && rng() < 0.45;
+      const e = pick(rng, HUCKEL_POOL.filter((x) => huckelInfo(x.smiles, x.planar !== false).cls !== 'non' || (!wantCount && rng() < 0.35)));
+      const asCount = mix ? huckelInfo(e.smiles, e.planar !== false).cls !== 'non' && rng() < 0.45 : wantCount;
       p = asCount ? countProblem(rng, e) : classProblem(rng, e);
       tries++;
     } while (last && p.hid === last && tries < 8);

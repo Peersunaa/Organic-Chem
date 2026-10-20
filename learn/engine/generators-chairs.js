@@ -1,6 +1,7 @@
 // Mastery generator `chairs` (Lesson 06): fresh disubstituted cyclohexanes and ethane/bromoethane numbers every run.
 // The relationship rule below is the one taught in the lesson; the tests re-derive it by building both chairs in 3D
 // (RDKit embed + ring flip) and measuring axial/equatorial from the coordinates, and recheck cis/trans from the drawing.
+import { resolveTasks } from './task-list.js';
 const pick = (rng, a) => a[Math.floor(rng() * a.length)];
 
 /** Substituents used in the generator: SMILES for the group (attached at its first atom), how to write it, and its A-value rank. */
@@ -130,8 +131,8 @@ export const CHAIR_SKILLS = ['chairs', 'conformations'];
 const BY_SKILL = { chairs: ['bothEq', 'whichEq', 'cisTrans'], conformations: ['energyAngle', 'brEclipse'] };
 const MIX = ['bothEq', 'whichEq', 'cisTrans', 'bothEq', 'whichEq', 'energyAngle', 'brEclipse'];
 
-export function generateChairs(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : MIX;
+export function generateChairs(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill && BY_SKILL[skill] ? BY_SKILL[skill] : MIX, CHAIR_TASKS);
   const out = [];
   let last = null;
   for (let i = 0; i < count; i++) {

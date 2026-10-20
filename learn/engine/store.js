@@ -37,6 +37,9 @@ export function logMistake({ skill, stepId, lessonId, diagnosis, card }) {
   if (s.log.length > 400) s.log.splice(0, s.log.length - 400);
   save();
 }
+// A press of Check with nothing entered is not a slip: it must not count as a weak spot.
+export const EMPTY_CHECK = /^(Draw at least|Tap (the|each|one|at least)|Mark every|Fill in every|Type your answer|Choose at least|Your two picks are right|Enter a number)/;
+export const logSlip = (e) => { if (!EMPTY_CHECK.test(String(e.diagnosis || '').trim())) logMistake(e); };
 export function logWin(skill, card) {
   const s = st();
   s.wins.push(card ? { skill, card, t: Date.now() } : { skill, t: Date.now() });

@@ -8,6 +8,7 @@ import { LAB_ALKYNES, ALKYNE_RXN, predictAlkyne, alkyneChoices, alkyneRightWhy, 
 import { CARDS, runSequence, solveSequences } from './synthesis.js';
 import { ACID } from './acidbase.js';
 import { nameBothAny } from './naming-chain.js';
+import { resolveTasks } from './task-list.js';
 
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
 function shuffle(rng, arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -176,8 +177,8 @@ export function makeAlkyneProblem(rng, task) {
   if (!f) throw new Error('unknown task ' + task);
   return f(rng);
 }
-export function generateAlkynes(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : ALKYNE_TASKS;
+export function generateAlkynes(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill && BY_SKILL[skill] ? BY_SKILL[skill] : ALKYNE_TASKS, TASKS);
   const out = [];
   let last = null;
   for (let i = 0; i < count; i++) {

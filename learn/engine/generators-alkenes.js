@@ -4,6 +4,7 @@
 // and decide whether an alkene shows cis/trans isomerism.
 import { subFragment, nameAlkeneBoth, alkeneInfo, alkeneAltNames, wrongAlkeneNames, diagnoseAlkene, subName } from './naming.js';
 import { ezInfo, usesDuplicate, symOf, sphereSets } from './cip.js';
+import { resolveTasks } from './task-list.js';
 
 export const ALKENE_SKILLS = ['ez'];
 export const ALKENE_TASKS = ['name', 'ez', 'cistrans'];
@@ -252,8 +253,8 @@ export function makeAlkeneProblem(rng, task, smi) {
   return nameProblem(rng, 'CC=C(C)C');
 }
 
-export function generateAlkenes(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill === 'ez' ? ['ez', 'cistrans', 'ez'] : ALKENE_TASKS;
+export function generateAlkenes(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill === 'ez' ? ['ez', 'cistrans', 'ez'] : ALKENE_TASKS, ALKENE_TASKS);
   const out = [];
   let last = null;
   const start = Math.floor(rng() * tasks.length);

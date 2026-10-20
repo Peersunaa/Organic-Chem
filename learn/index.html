@@ -819,6 +819,43 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 .pp-steps { padding-block: 0 var(--s-2); }
 .hub-target { outline: var(--focus-w) solid var(--accent); outline-offset: var(--focus-off); scroll-margin-top: 140px; }
 @media (max-width: 460px) { .pp-links .btn { flex: 1 1 140px; } }
+/* question-type mastery course */
+.ms-overall { display: grid; gap: var(--s-2); max-width: 52ch; }
+.ms-overall-t, .ms-home-n { margin: 0; font-weight: 600; }
+.ms-bar { display: block; height: 8px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.ms-bar i { display: block; height: 100%; background: var(--accent); transition: width var(--dur-base) var(--ease-out); }
+.ms-group { display: grid; gap: var(--s-3); min-width: 0; }
+.ms-group h2 { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap; }
+.ms-list { list-style: none; margin: 0; padding: 0; display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.ms-list > li + li { border-top: 1px solid var(--line); }
+.ms-type { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-2) var(--s-4); align-items: center; padding: var(--s-3) var(--s-4); min-height: 64px; text-decoration: none; color: var(--ink); }
+a.ms-type:hover { background: var(--surface-2); } a.ms-type:focus-visible { outline-offset: -2px; }
+.ms-type.is-m { box-shadow: inset 3px 0 0 var(--ok); }
+.ms-t { display: grid; gap: var(--s-1); min-width: 0; overflow-wrap: anywhere; }
+.ms-chips, .ms-top, .ms-links, .ms-streak, .ms-banner-btns { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-2); align-items: center; }
+.ms-st { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; justify-content: flex-end; }
+.ms-dots { display: inline-flex; gap: 5px; align-items: center; }
+.ms-dots i { display: block; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--line-strong); background: transparent; transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out); }
+.ms-dots i.on { background: var(--accent); border-color: var(--accent); }
+.ms-dots.is-m i.on { background: var(--ok); border-color: var(--ok); }
+.ms-ul { margin: 0; padding-left: 1.25rem; display: grid; gap: var(--s-2); }
+.ms-traps { display: grid; gap: var(--s-2); padding: var(--s-3) var(--s-4); background: var(--hint-soft); border: 1px solid var(--hint-line); border-left: 3px solid var(--hint); border-radius: var(--r-xs) var(--r-md) var(--r-md) var(--r-xs); }
+.ms-traps h3 { margin: 0; }
+.ms-examples { display: grid; gap: var(--s-4); min-width: 0; }
+.ms-ex { display: grid; gap: var(--s-3); padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); min-width: 0; }
+.ms-ex .prompt { margin: 0; }
+.ms-ex .opt:disabled.good { opacity: 1; }
+.ms-answer { margin: 0; font: 600 1rem/1.5rem var(--mono); overflow-wrap: anywhere; }
+.ms-run { font: 600 var(--fs-small)/var(--lh-small) var(--mono); }
+.ms-card { min-width: 0; }
+.ms-banner:empty { display: none; }
+.ms-book { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: var(--s-2); }
+.ms-bk { display: flex; align-items: center; gap: var(--s-2); min-height: 44px; padding: 0 var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); cursor: pointer; font: 500 var(--fs-small)/var(--lh-small) var(--mono); }
+.ms-bk:hover { border-color: var(--line-hover); } .ms-bk input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); flex: none; }
+.ms-links .btn { height: auto; min-height: 44px; padding-block: var(--s-2); text-align: left; }
+.ms-lesson-links { display: grid; gap: var(--s-2); margin-top: var(--s-4); min-width: 0; } .ms-lesson-links p { margin: 0; }
+.ms-foot { display: flex; justify-content: space-between; gap: var(--s-2); flex-wrap: wrap; }
+@media (max-width: 460px) { .ms-type { grid-template-columns: minmax(0, 1fr); } .ms-st { justify-content: flex-start; } .ms-foot .btn { flex: 1 1 100%; } }
 /* mock midterm */
 .mk, .mk-slot { display: grid; gap: var(--s-6); min-width: 0; }
 .mk-presets { display: flex; flex-wrap: wrap; gap: var(--s-2); }

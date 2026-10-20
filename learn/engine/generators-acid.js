@@ -4,6 +4,7 @@ import { analyze, canon } from './chem.js';
 import { ACIDS, ACID, reaction, deprotonate, protonate, lewisRole } from './acidbase.js';
 import { sceneFromSmiles, lpCount, applyArrows } from './widgets/arrow-core.js';
 import { formula } from './generators.js';
+import { resolveTasks } from './task-list.js';
 
 const MINUS = '−';
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
@@ -143,8 +144,8 @@ export function makeAcidProblem(rng, task) {
   if (!f) throw new Error('unknown task ' + task);
   return f(rng);
 }
-export function generateAcid(count, { skill = null, rng = Math.random } = {}) {
-  const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : DEFAULT_TASKS;
+export function generateAcid(count, { skill = null, rng = Math.random, tasks: only = null } = {}) {
+  const tasks = resolveTasks(only, skill && BY_SKILL[skill] ? BY_SKILL[skill] : DEFAULT_TASKS, TASKS);
   const out = [];
   let last = null;
   for (let i = 0; i < count; i++) {

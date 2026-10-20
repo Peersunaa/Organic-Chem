@@ -47,6 +47,7 @@ import { stereoProjections } from './stereo-projections.mjs';
 import { namingLevels } from './naming-levels.mjs';
 import { pastpaper } from './pastpaper.mjs';
 import { mock } from './mock.mjs';
+import { master } from './master.mjs';
 import { stereoMoments } from './stereo-moments.mjs';
 import { player } from './player.mjs';
 import { cavemanLessons } from './caveman-lessons.mjs';
@@ -1205,6 +1206,9 @@ await pastpaper({ ok, eq });
 
 // ---- Mock midterm: blueprint sums, 20 seeded papers, weighting toward weak spots (+-50%, total unchanged), marking, resume, history, the Hückel generator, wiring (tests/mock.mjs)
 await mock({ ok, eq });
+
+// ---- Question-type mastery course: the generators' tasks / settings options, the data of every type (fields, book numbers, links), the worked examples (seeded, repeatable), streaks and mastery, wiring (tests/master.mjs)
+await master({ ok, eq });
 
 // ---- 3D stereo moments: every moment maps to a real step and a real model whose geometry matches its caption (tests/stereo-moments.mjs)
 await stereoMoments({ ok, eq });

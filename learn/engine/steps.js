@@ -255,7 +255,7 @@ function addPrompt(host, step) {
   if (step.visual) mountVisual(host, step.visual);
 }
 
-function mountVisual(host, visual) {
+export function mountVisual(host, visual) {
   if (Array.isArray(visual)) {
     // several panels side by side (each may have a caption in `title`), e.g. a wrong mechanism and the product it gives
     const grid = h('div', { class: 'rv' });
@@ -418,7 +418,11 @@ const RENDER = {
   }
 };
 
-/** Mastery / practice player: `count` fresh generated problems, each must be answered correctly. */
+/**
+ * Mastery / practice player: `count` fresh generated problems, each must be answered correctly.
+ * cfg.next() -> { generator, skill, settings, tasks } picks each problem's source (the question-type course; else cfg.generator / cfg.skill); cfg.status() -> the bar text;
+ * cfg.onSettled(counted, problem) is called ONCE per problem: true when the first answer was right, false at the first wrong answer (or at time out), so a streak resets at once.
+ */
 export function renderProblems(cfg, ctx, host) {
   const endless = cfg.endless === true;                // the reaction practice settings: no fixed number, the learner ends the session
   const need = endless ? Infinity : (cfg.count || 3);
@@ -434,9 +438,10 @@ export function renderProblems(cfg, ctx, host) {
   const stopTimer = () => { if (tick) { clearInterval(tick); tick = null; } };
   function show() {
     stopTimer();
-    bar.textContent = endless ? `Problem ${got + 1}. Endless: end the session whenever you like.` : cfg.extra ? `Extra practice, problem ${tally.shown + 1}. Each one is generated fresh; none of it changes your result.` : `Problem ${tally.shown + 1}: ${got} of ${need} right first try so far. Each one is generated fresh, and only a right first answer counts.`;
+    bar.textContent = cfg.status ? cfg.status() : endless ? `Problem ${got + 1}. Endless: end the session whenever you like.` : cfg.extra ? `Extra practice, problem ${tally.shown + 1}. Each one is generated fresh; none of it changes your result.` : `Problem ${tally.shown + 1}: ${got} of ${need} right first try so far. Each one is generated fresh, and only a right first answer counts.`;
     stage.innerHTML = '';
-    const p = generate(cfg.generator || 'lewis-basic', 1, { skill: cfg.skill || null })[0];
+    const src = cfg.next ? cfg.next() : cfg;
+    const p = generate(src.generator || 'lewis-basic', 1, { skill: src.skill || null, settings: src.settings || null, tasks: src.tasks || null })[0];
     const step = { id: 'mastery', skill: p.skill, hints: p.hints, worked: null };
     const card = h('div', { class: 'problem' });
     stage.append(card);
@@ -446,8 +451,9 @@ export function renderProblems(cfg, ctx, host) {
     if (p.visual) mountVisual(card, p.visual);
     const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
     const hints = h('div', { class: 'hints' });
-    let wrong = 0, settled = false;
+    let wrong = 0, settled = false, told = false;
     const ft = firstTry();
+    const settle = (counted) => { if (told) return; told = true; if (cfg.onSettled) cfg.onSettled(counted, p); };   // once per problem
     const advance = (ok) => {                          // ok: this problem COUNTS (its first answer was right)
       settled = true; stopTimer();
       const btn = h('button', { type: 'button', class: 'btn primary' }, ok ? (got + 1 >= need ? 'Finish' : 'Next problem') : 'Try another');
@@ -455,7 +461,7 @@ export function renderProblems(cfg, ctx, host) {
       card.append(btn); btn.focus();
     };
     const onWrong = (why, opt) => {
-      wrong++; ft.wrong();
+      wrong++; ft.wrong(); settle(false);
       ctx.mistake(p.skill, 'mastery', opt && opt.lead ? opt.lead : why, p.card);
       fb.className = 'fb bad'; fb.textContent = '';
       if (opt && opt.lead) {
@@ -478,6 +484,7 @@ export function renderProblems(cfg, ctx, host) {
     };
     const onRight = (note) => {
       const counts = ft.right();                       // right on the first answer only
+      settle(counts);
       if (counts) ctx.win(p.skill, p.card);
       fb.className = 'fb ok'; if (p.deriveHtml) { fb.textContent = ''; fb.append(rich('Correct. ' + p.deriveHtml, 'span')); } else fb.textContent = 'Correct. ' + p.derive;
       if (!counts) fb.append(h('p', { class: 'style-note' }, 'Not first try, so this one does not count toward the check. The slip is logged; the next problem is fresh.'));
@@ -551,7 +558,7 @@ export function renderProblems(cfg, ctx, host) {
         if (settled || !card.isConnected) { stopTimer(); return; }   // answered, or the page moved on
         left--; paint();
         if (left <= 0) {
-          stopTimer(); clock.textContent = 'Time is up.';
+          stopTimer(); clock.textContent = 'Time is up.'; settle(false);
           ctx.mistake(p.skill, 'mastery', p.card || p.skill === 'predict-product' ? 'Time ran out on a reaction question.' : 'Time ran out on a naming question.', p.card);
           fb.className = 'fb bad'; fb.textContent = 'Time is up. Here is the worked answer; the next one is a fresh problem.';
           const ans = p.kind === 'input' ? `The answer is ${p.answer}. ` : p.kind === 'choice' ? `The answer is ${p.answer || ''}. ` : '';
