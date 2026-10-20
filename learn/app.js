@@ -23,6 +23,7 @@ import { figureCard } from './figures/figure-card.js';
 import { scenePage, scenesList, sceneBlock } from './scenes/scene-view.js';
 import { sceneForStep } from './scenes/scene-index.js';
 import { builderPage } from './builder-view.js';
+import { tablesPage } from './tables-view.js';
 
 const app = document.getElementById('app');
 // A press of Check with nothing entered is not a slip: it must not count as a weak spot.
@@ -161,7 +162,7 @@ function home() {
   // the reaction builder: any substrate tile + any reagent tile -> the products, the professor's rule, the mechanism; chain the product into the next step
   const bld = h('section', { class: 'panel', 'aria-labelledby': 'bld-home-h' }, h('h2', { id: 'bld-home-h' }, 'Reaction builder'),
     h('p', { class: 'muted' }, 'Pick a starting material and a reagent, see what forms and why (the professor’s ring rules included), then use the product for the next step.'),
-    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#build', id: 'open-builder' }, 'Open the reaction builder')));
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#build', id: 'open-builder' }, 'Open the reaction builder'), h('a', { class: 'btn ghost', href: '#table', id: 'open-tables' }, 'Reaction tables')));
   mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, bld, rx, pp, mockPanel, gl, panel)));
   const op = document.getElementById('open-practice');
   if (op) op.addEventListener('click', () => { const t = panel.querySelector('summary') || panel; panel.scrollIntoView?.({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); t.focus?.({ preventScroll: true }); });
@@ -352,6 +353,12 @@ function buildView() {
   mount(header(), ...builderPage(chemP));
 }
 
+// ---------------------------------------------------------------- Reaction tables (#table)
+function tablesView() {
+  setDrawStyle('skeletal');
+  mount(header(), ...tablesPage(chemP));
+}
+
 // ---------------------------------------------------------------- Mechanism scenes (scenes/): the list and one scene
 function scenesView() {
   setDrawStyle('skeletal');
@@ -410,6 +417,7 @@ function route() {
   if ((m = /^scene\/([a-z0-9-]+)$/.exec(hash))) return sceneView(m[1]);
   if (hash === 'reactions') return hub();
   if (hash === 'build') return buildView();
+  if (hash === 'table') return tablesView();
   if ((m = /^reactions\/([a-z0-9-]+)$/.exec(hash))) return hub(m[1]);
   if (hash === 'pastpaper') return pastpaper();
   if ((m = /^mock(?:\/(script))?$/.exec(hash))) return mock(m[1] ? 'script' : 'main');

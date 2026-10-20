@@ -22,12 +22,12 @@ const TOP_OF_KIND = { alkene: 'alkene', alkyne: 'alkyne', arene: 'ring' };
 const showOn = (row) => requestAnimationFrame(() => { const on = row.querySelector('.is-on'); if (on && row.scrollWidth > row.clientWidth + 4) row.scrollLeft = Math.max(0, row.scrollLeft + on.getBoundingClientRect().left - row.getBoundingClientRect().left - 8); });
 const TAB_OF = (s) => (s.group === 'ring2' ? 'ring2' : s.group);
 
-function nameNode(smiles, fallback) {
+export function nameNode(smiles, fallback) {
   const n = B.nameOf(smiles);
   if (n) return nameSpan(n);
   return h('span', {}, fallback || B.describe(smiles));
 }
-function tileSvg(smiles, w = 108, hh = 76) {
+export function tileSvg(smiles, w = 108, hh = 76) {
   return h('span', { class: 'bld-svg', 'aria-hidden': 'true', html: rdSvg(smiles, { width: w, height: hh, style: 'skeletal' }) });
 }
 function shareChip(p, res) {
@@ -41,12 +41,109 @@ function shareChip(p, res) {
   return txt ? h('span', { class: cls + ' bld-share' }, txt) : null;
 }
 
+// ---------------------------------------------------------------- the result panel, shared with the reaction tables (tables-view.js): products, why, facts, notes, energy sketch, mechanism
+/** One drawn product with its name, share chip and label; `onUse(p)` adds the "Use this product next" button (the builder's chain), null leaves it out. */
+export function productCard(p, res, i, onUse = null) {
+  let useB = null;
+  if (onUse && B.classifySubstrate(p.smiles).kind !== 'none') {
+    useB = h('button', { type: 'button', class: 'btn small bld-use', 'data-use': String(i) }, 'Use this product next');
+    useB.addEventListener('click', () => onUse(p));
+  }
+  return h('figure', { class: 'bld-prod' + (p.minor ? ' is-minor' : '') + (p.excess ? ' is-excess' : '') },
+    molFigure(p.smiles, '', { style: 'skeletal', width: 200, height: 150, alt: B.describe(p.smiles) }),
+    h('figcaption', {}, h('span', { class: 'bld-pname' }, nameNode(p.smiles)), shareChip(p, res), p.label ? h('span', { class: 'muted small bld-plabel' }, tAuto(p.label)) : null),
+    useB);
+}
+export function factsBlock(res) {
+  const f = res.facts;
+  if (!f) return null;
+  const chip = (k, v) => (v ? h('li', { class: 'chip hub-chip' }, h('span', { class: 'hub-chip-k' }, k), h('span', { class: 'hub-chip-v' }, v)) : null);
+  if (f.ring) return h('ul', { class: 'hub-facts bld-facts', 'aria-label': 'Facts' }, chip('What adds', t(f.adds)), chip('Which position', tAuto(f.where)), chip('Director', tAuto(f.director)));
+  return h('ul', { class: 'hub-facts bld-facts', 'aria-label': 'Three facts' }, chip('What adds', t(f.adds, f.cave && f.cave.adds)), chip('Where it adds', t(f.where, f.cave && f.cave.where)), chip('How, in space', SPACE_TEXT[f.space] || f.space));
+}
+/** The mechanism block: scene, step player (mounted into `widgets` so the caller can destroy it), the card's scheme, the card link. */
+export function mechBlock(res, widgets = []) {
+  const M = res.mechanism || {};
+  const box = h('div', { class: 'bld-mech' }, h('p', { class: 'hub-label' }, 'Mechanism'));
+  const btns = h('div', { class: 'rx-btns' });
+  const panels = h('div', { class: 'bld-mechpanels' });
+  box.append(btns, panels);
+  if (M.scene && SCENE_BY_ID[M.scene]) {
+    const tg = sceneToggle(M.scene, { label: 'Watch the scene', cls: 'btn small bld-watch' });
+    btns.append(tg.button); panels.append(tg.panel);
+    box.append(h('p', { class: 'muted small' }, `Scene: ${SCENE_BY_ID[M.scene].title}. The arrows are the same for your molecule.`));
+  }
+  if (M.hasMech) {
+    const host = h('div', { class: 'bld-player', hidden: 'hidden' });
+    const b = h('button', { type: 'button', class: 'btn small ghost', id: 'bld-steps', 'aria-expanded': 'false' }, 'Step through the arrows');
+    b.addEventListener('click', () => {
+      if (!host.hidden) { host.hidden = true; host.innerHTML = ''; b.setAttribute('aria-expanded', 'false'); return; }
+      const full = B.react(res.substrate, res.reagent.id, { full: true });
+      const mech = full.mechanism && full.mechanism.mech;
+      host.hidden = false; b.setAttribute('aria-expanded', 'true');
+      if (!mech) { host.append(h('p', { class: 'muted small' }, 'No step-by-step mechanism for this pair.')); return; }
+      if (full.mechanism.mechOnBenzene) host.append(h('p', { class: 'muted small' }, 'Drawn on benzene: the electrophile and the arrows are the same; the groups only decide WHERE it attacks.'));
+      const inner = h('div', {});
+      host.append(inner);
+      try { widgets.push(mechanismPlayer.mount(inner, { mech, mode: 'watch', whatIf: false }, { onResult() {}, onProgress() {} }) || {}); } catch (e) { inner.append(h('p', { class: 'fb bad' }, 'The mechanism could not be drawn.')); }
+    });
+    btns.append(b); panels.append(host);
+  }
+  if (M.alsoScene && SCENE_BY_ID[M.alsoScene]) {
+    const tg = sceneToggle(M.alsoScene, { label: 'Why ortho/para or meta (scene)', cls: 'btn small ghost bld-watch2' });
+    btns.append(tg.button); panels.append(tg.panel);
+  }
+  if (!M.scene && !M.hasMech && M.scheme && M.scheme.example) {
+    const ex = M.scheme.example;
+    box.append(h('p', { class: 'muted small' }, 'No animated mechanism for this reagent; here is the worked example from its reaction card:'));
+    box.append(h('div', { class: 'bld-scheme' }, molFigure(ex.substrate.split('.')[0], '', { style: 'skeletal', width: 140, height: 100 }), h('span', { class: 'eqn-arrow', 'aria-hidden': 'true' }, '→', h('small', {}, ex.reagent || '')), ...ex.product.split('.').map((s) => molFigure(s, '', { style: 'skeletal', width: 140, height: 100 }))));
+  }
+  if (M.card) btns.append(h('a', { class: 'btn small ghost', href: '#reactions/' + M.card }, 'Open the reaction card'));
+  return box;
+}
+export function energyBlock(res, widgets = []) {
+  const E = res.energy;
+  if (!E) return null;
+  const host = h('div', { class: 'bld-energy' });
+  const det = h('details', { class: 'bld-edet', open: 'open' }, h('summary', {}, 'Energy sketch: σ-complexes (professor, pages 7–8)'), host);
+  try { widgets.push(energyDiagram.mount(host, { mode: 'view', levels: E.main.levels, label: E.main.label, overlay: E.overlay ? { levels: E.overlay.levels, label: E.overlay.label } : undefined, caption: tAuto(E.caption) }, { onResult() {}, onProgress() {} }) || {}); } catch (e) { host.append(h('p', { class: 'muted small' }, E.caption)); }
+  return det;
+}
+/** The no-reaction / not-modelled card. */
+export function noneCard(res) {
+  return h('div', { class: 'card bld-none', id: 'bld-none', role: 'note' },
+    h('p', { class: 'bld-none-h' }, res.status === 'none' ? 'No reaction' : 'Not modelled here'),
+    h('p', {}, tAuto(String(res.reason).replace(/^No reaction[.:]\s*/, ''))),
+    res.mechanism && res.mechanism.card ? h('a', { class: 'btn small ghost', href: '#reactions/' + res.mechanism.card }, 'Open the reaction card') : null);
+}
+/** Everything under the equation for a result: the products (with `onUse` for chaining), the shares source, the professor's rule and why, the facts, the notes,
+ *  the energy sketch and the mechanism. Widgets mounted on the way are pushed into `widgets`. */
+export function resultBlocks(res, { onUse = null, widgets = [] } = {}) {
+  if (res.status !== 'ok') return [noneCard(res)];
+  const out = [];
+  const grid = h('div', { class: 'bld-prods', id: 'bld-prods' });
+  res.products.forEach((p, i) => grid.append(productCard(p, res, i, onUse)));
+  out.push(grid);
+  if (res.source) out.push(h('p', { class: 'muted small bld-source' }, 'Shares: ' + res.source + '.'));
+  out.push(h('div', { class: 'bld-why', id: 'bld-why' },
+    h('p', { class: 'bld-rule' }, h('span', { class: 'hub-label' }, 'Professor’s rule'), h('b', { class: 'bld-rulename' }, t(res.ruleName || '', res.ruleCave))),
+    h('p', {}, tAuto(res.why))));
+  const fb = factsBlock(res);
+  if (fb) out.push(fb);
+  if (res.warnings && res.warnings.length) out.push(h('ul', { class: 'bld-warn', 'aria-label': 'Notes' }, res.warnings.map((w) => h('li', { 'data-w': w.id }, tAuto(w.text)))));
+  const en = energyBlock(res, widgets);
+  if (en) out.push(en);
+  out.push(mechBlock(res, widgets));
+  return out;
+}
+
 /** #build: returns the nodes app.js mounts under the header. */
 export function builderPage(chemReady) {
   const saved = load();
   const st = { sub: saved.sub || 'Cc1ccccc1', subTab: saved.subTab || 'ring', rtab: saved.rtab || 'ring', reagent: saved.reagent || null, chain: [], quiz: false, quizPick: null, custom: '' };
   const lhead = h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Reaction builder'),
-    h('p', { class: 'lede' }, 'Pick a starting material, pick a reagent, and see what forms, where, and why, with the professor’s rule by name. Then use the product as the next starting material.'));
+    h('p', { class: 'lede' }, 'Pick a starting material, pick a reagent, and see what forms, where, and why, with the professor’s rule by name. Then use the product as the next starting material.'),
+    h('p', { class: 'small bld-tables-link' }, h('a', { class: 'btn small ghost', href: '#table', id: 'bld-tables' }, 'Reaction tables'), h('span', { class: 'muted' }, ' Every tile against every reagent on one grid, with a fill-it-in quiz.')));
   const root = h('div', { class: 'bld', id: 'bld' });
   const bar = h('div', { class: 'bld-bar' });
   const crumbs = h('nav', { class: 'bld-crumbs', 'aria-label': 'Your route so far', hidden: 'hidden' });
@@ -174,79 +271,17 @@ export function builderPage(chemReady) {
   // ---------------------------------------------------------------- result
   let liveWidgets = [];
   const dropWidgets = () => { liveWidgets.forEach((w) => { try { w.destroy && w.destroy(); } catch (e) { /* ignore */ } }); liveWidgets = []; };
-  function productCard(p, res, i) {
-    const useB = h('button', { type: 'button', class: 'btn small bld-use', 'data-use': String(i) }, 'Use this product next');
-    useB.addEventListener('click', () => {
-      st.chain.push({ from: res.substrate, reagentId: res.reagent.id, to: p.smiles });
-      st.subTab = 'custom';
-      const k = B.classifySubstrate(p.smiles);
-      st.sub = p.smiles; st.reagent = null; st.quizPick = null;
-      if (TOP_OF_KIND[k.kind]) st.rtab = TOP_OF_KIND[k.kind];
-      st.custom = p.smiles;
-      persist();
-      drawSubs(); drawRgts(); drawCrumbs(); drawResult();
-      colX.scrollIntoView?.({ block: 'start', behavior: 'auto' });
-    });
-    const canUse = B.classifySubstrate(p.smiles).kind !== 'none';
-    return h('figure', { class: 'bld-prod' + (p.minor ? ' is-minor' : '') + (p.excess ? ' is-excess' : '') },
-      molFigure(p.smiles, '', { style: 'skeletal', width: 200, height: 150, alt: B.describe(p.smiles) }),
-      h('figcaption', {}, h('span', { class: 'bld-pname' }, nameNode(p.smiles)), shareChip(p, res), p.label ? h('span', { class: 'muted small bld-plabel' }, tAuto(p.label)) : null),
-      canUse ? useB : null);
-  }
-  function factsBlock(res) {
-    const f = res.facts;
-    if (!f) return null;
-    const chip = (k, v) => (v ? h('li', { class: 'chip hub-chip' }, h('span', { class: 'hub-chip-k' }, k), h('span', { class: 'hub-chip-v' }, v)) : null);
-    if (f.ring) return h('ul', { class: 'hub-facts bld-facts', 'aria-label': 'Facts' }, chip('What adds', t(f.adds)), chip('Which position', tAuto(f.where)), chip('Director', tAuto(f.director)));
-    return h('ul', { class: 'hub-facts bld-facts', 'aria-label': 'Three facts' }, chip('What adds', t(f.adds, f.cave && f.cave.adds)), chip('Where it adds', t(f.where, f.cave && f.cave.where)), chip('How, in space', SPACE_TEXT[f.space] || f.space));
-  }
-  function mechBlock(res) {
-    const M = res.mechanism || {};
-    const box = h('div', { class: 'bld-mech' }, h('p', { class: 'hub-label' }, 'Mechanism'));
-    const btns = h('div', { class: 'rx-btns' });
-    const panels = h('div', { class: 'bld-mechpanels' });
-    box.append(btns, panels);
-    if (M.scene && SCENE_BY_ID[M.scene]) {
-      const tg = sceneToggle(M.scene, { label: 'Watch the scene', cls: 'btn small bld-watch' });
-      btns.append(tg.button); panels.append(tg.panel);
-      box.append(h('p', { class: 'muted small' }, `Scene: ${SCENE_BY_ID[M.scene].title}. The arrows are the same for your molecule.`));
-    }
-    if (M.hasMech) {
-      const host = h('div', { class: 'bld-player', hidden: 'hidden' });
-      const b = h('button', { type: 'button', class: 'btn small ghost', id: 'bld-steps', 'aria-expanded': 'false' }, 'Step through the arrows');
-      b.addEventListener('click', () => {
-        if (!host.hidden) { host.hidden = true; host.innerHTML = ''; b.setAttribute('aria-expanded', 'false'); return; }
-        const full = B.react(res.substrate, res.reagent.id, { full: true });
-        const mech = full.mechanism && full.mechanism.mech;
-        host.hidden = false; b.setAttribute('aria-expanded', 'true');
-        if (!mech) { host.append(h('p', { class: 'muted small' }, 'No step-by-step mechanism for this pair.')); return; }
-        if (full.mechanism.mechOnBenzene) host.append(h('p', { class: 'muted small' }, 'Drawn on benzene: the electrophile and the arrows are the same; the groups only decide WHERE it attacks.'));
-        const inner = h('div', {});
-        host.append(inner);
-        try { liveWidgets.push(mechanismPlayer.mount(inner, { mech, mode: 'watch', whatIf: false }, { onResult() {}, onProgress() {} }) || {}); } catch (e) { inner.append(h('p', { class: 'fb bad' }, 'The mechanism could not be drawn.')); }
-      });
-      btns.append(b); panels.append(host);
-    }
-    if (M.alsoScene && SCENE_BY_ID[M.alsoScene]) {
-      const tg = sceneToggle(M.alsoScene, { label: 'Why ortho/para or meta (scene)', cls: 'btn small ghost bld-watch2' });
-      btns.append(tg.button); panels.append(tg.panel);
-    }
-    if (!M.scene && !M.hasMech && M.scheme && M.scheme.example) {
-      const ex = M.scheme.example;
-      box.append(h('p', { class: 'muted small' }, 'No animated mechanism for this reagent; here is the worked example from its reaction card:'));
-      box.append(h('div', { class: 'bld-scheme' }, molFigure(ex.substrate.split('.')[0], '', { style: 'skeletal', width: 140, height: 100 }), h('span', { class: 'eqn-arrow', 'aria-hidden': 'true' }, '→', h('small', {}, ex.reagent || '')), ...ex.product.split('.').map((s) => molFigure(s, '', { style: 'skeletal', width: 140, height: 100 }))));
-    }
-    if (M.card) btns.append(h('a', { class: 'btn small ghost', href: '#reactions/' + M.card }, 'Open the reaction card'));
-    return box;
-  }
-  function energyBlock(res) {
-    const E = res.energy;
-    if (!E) return null;
-    const host = h('div', { class: 'bld-energy' });
-    const det = h('details', { class: 'bld-edet', open: 'open' }, h('summary', {}, 'Energy sketch: σ-complexes (professor, pages 7–8)'), host);
-    try { liveWidgets.push(energyDiagram.mount(host, { mode: 'view', levels: E.main.levels, label: E.main.label, overlay: E.overlay ? { levels: E.overlay.levels, label: E.overlay.label } : undefined, caption: tAuto(E.caption) }, { onResult() {}, onProgress() {} }) || {}); } catch (e) { host.append(h('p', { class: 'muted small' }, E.caption)); }
-    return det;
-  }
+  const useNext = (res) => (p) => {
+    st.chain.push({ from: res.substrate, reagentId: res.reagent.id, to: p.smiles });
+    st.subTab = 'custom';
+    const k = B.classifySubstrate(p.smiles);
+    st.sub = p.smiles; st.reagent = null; st.quizPick = null;
+    if (TOP_OF_KIND[k.kind]) st.rtab = TOP_OF_KIND[k.kind];
+    st.custom = p.smiles;
+    persist();
+    drawSubs(); drawRgts(); drawCrumbs(); drawResult();
+    colX.scrollIntoView?.({ block: 'start', behavior: 'auto' });
+  };
   function quizBlock(res) {
     const q = B.quizFor(res.substrate, res.reagent.id);
     if (!q) return null;
@@ -279,30 +314,12 @@ export function builderPage(chemReady) {
     const res = B.react(st.sub, st.reagent);
     const eq = h('div', { class: 'bld-eq' }, subFig, h('div', { class: 'bld-arrow' }, h('span', { 'aria-hidden': 'true' }, '→'), h('b', {}, res.reagent.label)));
     colX.append(eq);
-    if (res.status !== 'ok') {
-      colX.append(h('div', { class: 'card bld-none', id: 'bld-none', role: 'note' },
-        h('p', { class: 'bld-none-h' }, res.status === 'none' ? 'No reaction' : 'Not modelled here'),
-        h('p', {}, tAuto(String(res.reason).replace(/^No reaction[.:]\s*/, ''))),
-        res.mechanism && res.mechanism.card ? h('a', { class: 'btn small ghost', href: '#reactions/' + res.mechanism.card }, 'Open the reaction card') : null));
-      return;
-    }
+    if (res.status !== 'ok') { colX.append(noneCard(res)); return; }
     if (st.quiz && !keepQuiz && st.quizPick == null) {
       const qb = quizBlock(res);
       if (qb) { colX.append(qb); return; }
     }
-    const grid = h('div', { class: 'bld-prods', id: 'bld-prods' });
-    res.products.forEach((p, i) => grid.append(productCard(p, res, i)));
-    colX.append(grid);
-    if (res.source) colX.append(h('p', { class: 'muted small bld-source' }, 'Shares: ' + res.source + '.'));
-    colX.append(h('div', { class: 'bld-why', id: 'bld-why' },
-      h('p', { class: 'bld-rule' }, h('span', { class: 'hub-label' }, 'Professor’s rule'), h('b', { class: 'bld-rulename' }, t(res.ruleName || '', res.ruleCave))),
-      h('p', {}, tAuto(res.why))));
-    const fb = factsBlock(res);
-    if (fb) colX.append(fb);
-    if (res.warnings && res.warnings.length) colX.append(h('ul', { class: 'bld-warn', 'aria-label': 'Notes' }, res.warnings.map((w) => h('li', { 'data-w': w.id }, tAuto(w.text)))));
-    const en = energyBlock(res);
-    if (en) colX.append(en);
-    colX.append(mechBlock(res));
+    colX.append(...resultBlocks(res, { onUse: useNext(res), widgets: liveWidgets }));
   }
 
   // ---------------------------------------------------------------- buttons

@@ -55,6 +55,7 @@ import { text } from './text.mjs';
 import { figures } from './figures.mjs';
 import { scenes } from './scenes.mjs';
 import { builder } from './builder.mjs';
+import { tables } from './tables.mjs';
 import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
 const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product', 'stereo-projections', 'naming-levels', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work', 'aromaticity']);
@@ -1228,6 +1229,9 @@ await scenes({ ok, eq });
 
 // ---- Reaction builder: tiles, every pair, the professor's rules as fixtures, the blocking-group chains, quiz options, Python RDKit read-back, wiring (tests/builder.mjs)
 await builder({ ok, eq });
+
+// ---- Reaction tables: every row x column through react() and pairs(), tags against the builder's facts, four-option quizzes, the PDF export equals the page (tests/tables.mjs)
+await tables({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {
