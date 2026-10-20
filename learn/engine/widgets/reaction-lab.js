@@ -26,6 +26,8 @@ import { LAB_EAS, LAB_EAS_BY_ID, EAS, predictEAS, easChoices, generationOf, netO
 import { nameBothAny } from '../naming-chain.js';
 import mechanismPlayer from './mechanism-player.js';
 import { getIupac } from '../store.js';
+import { firstTry } from '../first-try.js';
+import { describeMol } from '../mol-name.js';
 
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 const fig = (smiles, w = 150, hh = 108) => `<span class="rl-svg">${rdSvg(smiles, { style: 'skeletal', width: w, height: hh, showCharge: true })}</span>`;
@@ -65,6 +67,7 @@ export default {
     let alkene = easMode ? BENZ : config.start ? ALK[config.start.alkene] : null;
     let reagent = config.start ? config.start.reagent : null;
     let right = 0, doneSent = false, mp = null;
+    const tried = new Set();   // reactions already attempted (right or wrong): a second visit to one never scores, so retrying cannot inflate the count
 
     host.innerHTML = '';
     const root = h('div', 'rl');
@@ -98,7 +101,7 @@ export default {
     function optionCard(o, onPick, fam2) {
       const b = h('button', 'rl-opt'); b.type = 'button';
       b.innerHTML = o.smiles.map((s, i) => (i ? '<span class="rl-plus">+</span>' : '') + fig(s, 130, 96)).join('') + (o.smiles.length > 1 ? `<span class="rl-mix">${fam2 ? 'two products' : 'a mixture of both'}</span>` : '');
-      b.setAttribute('aria-label', 'Product option ' + o.smiles.join(' and '));
+      { let d = ''; try { d = describeMol(o.smiles.join('.')); } catch (e) { d = ''; } b.setAttribute('aria-label', 'Product option: ' + (d || o.smiles.join(' and '))); if (d) b.insertAdjacentHTML('beforeend', `<span class="sr-only">${d}</span>`); }
       b.addEventListener('click', () => onPick(b, o));
       return b;
     }
@@ -147,7 +150,7 @@ export default {
       });
       box.append(play, mpBox);
       const again = h('button', 'btn ' + (right >= need ? 'primary' : '')); again.type = 'button';
-      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} predicted)`;
+      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} right on the first try)`;
       again.addEventListener('click', () => { alkene = null; reagent = null; render(); root.scrollIntoView?.({ block: 'nearest' }); });
       const act = h('div', 'lb-actions'); act.append(again);
       box.append(act);
@@ -188,7 +191,7 @@ export default {
       });
       box.append(play, mpBox);
       const again = h('button', 'btn ' + (right >= need ? 'primary' : '')); again.type = 'button';
-      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} predicted)`;
+      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} right on the first try)`;
       again.addEventListener('click', () => { alkene = null; reagent = null; render(); root.scrollIntoView?.({ block: 'nearest' }); });
       const act = h('div', 'lb-actions'); act.append(again);
       box.append(act);
@@ -227,7 +230,7 @@ export default {
         box.append(play, mpBox);
       }
       const again = h('button', 'btn ' + (right >= need ? 'primary' : '')); again.type = 'button';
-      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} predicted)`;
+      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} right on the first try)`;
       again.addEventListener('click', () => { alkene = null; reagent = null; render(); root.scrollIntoView?.({ block: 'nearest' }); });
       const act = h('div', 'lb-actions'); act.append(again);
       box.append(act);
@@ -261,7 +264,7 @@ export default {
         box.append(play, mpBox);
       }
       const again = h('button', 'btn ' + (right >= need ? 'primary' : '')); again.type = 'button';
-      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} predicted)`;
+      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} right on the first try)`;
       again.addEventListener('click', () => { alkene = null; reagent = null; render(); root.scrollIntoView?.({ block: 'nearest' }); });
       const act = h('div', 'lb-actions'); act.append(again);
       box.append(act);
@@ -300,7 +303,7 @@ export default {
         box.append(play, mpBox);
       }
       const again = h('button', 'btn ' + (right >= need ? 'primary' : '')); again.type = 'button';
-      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} predicted)`;
+      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} right on the first try)`;
       again.addEventListener('click', () => { alkene = BENZ; reagent = null; render(); root.scrollIntoView?.({ block: 'nearest' }); });
       const act = h('div', 'lb-actions'); act.append(again);
       box.append(act);
@@ -349,7 +352,7 @@ export default {
       box.append(prod);
       void entry;
       const again = h('button', 'btn ' + (right >= need ? 'primary' : '')); again.type = 'button';
-      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} predicted)`;
+      again.textContent = right >= need ? 'Try another reaction' : `Try another reaction (${right} of ${need} right on the first try)`;
       again.addEventListener('click', () => { alkene = null; reagent = null; render(); root.scrollIntoView?.({ block: 'nearest' }); });
       const act = h('div', 'lb-actions'); act.append(again);
       box.append(act);
@@ -360,7 +363,7 @@ export default {
       mp?.destroy?.(); mp = null;
       root.append(pickers());
       if (!alkene || !reagent) {
-        root.append(h('p', 'rl-hint muted', alkene || reagent ? 'Now pick the other one.' : `Predict first: you need to get ${need} prediction${need > 1 ? 's' : ''} right.`));
+        root.append(h('p', 'rl-hint muted', alkene || reagent ? 'Now pick the other one.' : `Predict first: you need ${need} prediction${need > 1 ? 's' : ''} right on the FIRST try (a retry shows the answer but does not count).`));
         return;
       }
       let pred;
@@ -382,20 +385,26 @@ export default {
       const eq = h('div', 'rl-eq');
       eq.innerHTML = `${fig(alkene.smiles, 130, 96)}<span class="rl-plus">+</span><span class="rl-reag">${R.label}</span><span class="rl-arrow">→ ?</span>`;
       box.append(eq);
+      const rxnKey = `${alkene.id}|${reagent}`, ft = firstTry(), fresh = !tried.has(rxnKey);
       const choices = shuffle(rng, substMode ? substChoices(pred) : easMode ? easChoices(pred) : fam4 ? alkyneChoices(pred) : fam3 ? dieneChoices(pred) : fam2 ? productChoices2(pred) : productChoices(pred));
       const list = h('div', 'rl-opts', null);
       const fb = h('div', 'fb'); fb.setAttribute('aria-live', 'polite');
       choices.forEach((o) => list.append(optionCard(o, (btn) => {
+        tried.add(rxnKey);
         if (o.correct) {
           [...list.children].forEach((x) => { x.disabled = true; });
           btn.classList.add('good');
-          fb.className = 'fb ok'; fb.textContent = o.why;
+          const counts = ft.right() && fresh;   // only a first answer that was right scores
+          fb.className = 'fb ok'; fb.textContent = o.why + (counts ? '' : (fresh ? ' This does not count: your first answer was wrong, so it is logged as a slip. Pick another reaction and get it right first time.' : ' This reaction was already tried, so it does not count again. Pick another one.'));
           list.after(fb);
-          right++;
+          if (counts) right++;
           if (substMode) reveal6(pred, box); else if (easMode) reveal5(pred, box); else if (fam4) reveal4(pred, box); else if (fam3) reveal3(pred, box); else if (fam2) reveal2(pred, box); else reveal(pred, box);
-          if (right >= need && !doneSent) { doneSent = true; ctx.onResult({ ok: true }); }
+          // the "Why" paragraph the reveal just wrote must not repeat the feedback line word for word
+          { const said = fb.textContent.replace(/^Yes.s*/, '').split(' This does not count')[0].split(' This reaction was already')[0].trim(); if (said && [...box.querySelectorAll('.rl-why')].some((p) => p.textContent.trim() === said)) fb.textContent = 'Yes, that is the major product.' + fb.textContent.slice(fb.textContent.indexOf(said) + said.length); }
+          if (counts && right >= need && !doneSent) { doneSent = true; ctx.onResult({ ok: true }); }
           else if (ctx.onProgress) ctx.onProgress();
         } else {
+          ft.wrong();
           btn.classList.add('bad'); btn.disabled = true;
           fb.className = 'fb bad'; fb.textContent = o.why;
           ctx.onResult({ ok: false, diagnosis: o.why });

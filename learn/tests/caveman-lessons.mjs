@@ -25,6 +25,8 @@ const LEFT_PLAIN = {
   '05:s07': 'the list of alkyl groups: every word is a formula or a name',
   '14:s03': 'the map of activators and deactivators (McMurry Figure 5.6): a list of groups'
 };
+// Steps revised on purpose after the caveman pass (fix wave T3b, novice review 3): for these only the id is compared with HEAD; every other step must still equal HEAD apart from its caveman object.
+const EDITED = { '17': new Set(['s01', 's04', 's07', 's12', 's13', 's14', 's15', 's18', 's19', 's20', 's22', 's31', 's33', 's38', 's40', 's42', 's43', 's45', 's48', 's49', 's50', 's53', 's54', 's55', 's56', 's57', 's58', 's60', 's61', 's62', 's63', 's64']) };
 const SIMPLE = ['prompt', 'problem', 'html', 'reveal', 'rule', 'worked', 'trap'];
 
 /** Length is measured on the TEXT a learner reads: drawings (inline <svg>, <mol>, <molpair>) and <name> chips are figures, and every other tag (<b>, <p>, <br>, <sub> ...) is markup, so none of them counts; entities count as one character. */
@@ -123,9 +125,10 @@ export async function cavemanLessons({ ok, eq }) {
       steps++;
       out.forEach(([k, a, b]) => { fields++; const bad = checkPair(a, b); ok(!bad.length, `${where} ${k}: ${bad.join('; ')}`); });
       if (head) {
-        const h = head.steps[n];
-        ok(!!h && h.id === s.id, `${where}: same step id as HEAD`);
-        if (h) {
+        const h = head.steps.find((x) => x.id === s.id);   // by id: a step removed since HEAD (Lesson 17 s02, s05, s08) does not shift the others
+        ok(!!h, `${where}: same step id as HEAD`);
+        const edited = EDITED[L.id] && EDITED[L.id].has(s.id);
+        if (h && !edited) {
           ok(plain(s) === plain(h), `${where}: everything except caveman is unchanged from HEAD`);
           // option texts one by one, so a failure names the option
           (s.options || []).forEach((o, i) => {

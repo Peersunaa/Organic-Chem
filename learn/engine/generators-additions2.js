@@ -108,7 +108,7 @@ function trapProblem(rng) {
     return {
       text: R.label, correct: good, id,
       why: good ? (useBasic ? 'Yes. Basic KMnO₄ gives the cis diol (syn addition of two OH).' : 'Yes. Acidic KMnO₄ cuts the C=C; these carbonyl products are what it gives.')
-        : id === 'KMnO4_OH' ? 'Basic KMnO₄ stops at the cis diol; it does not cut the C=C.'
+        : id === 'KMnO4_OH' ? 'Cold, dilute KMnO₄ in base stops at the cis diol; it does not cut the C=C (hot or acidic KMnO₄ cuts it).'
           : id === 'KMnO4_H' ? 'Acidic KMnO₄ cuts the C=C into carbonyl compounds; it does not stop at a diol.'
             : id === 'RCO3H_H3O' ? 'RCO₃H then H₃O⁺ gives the TRANS diol (anti), not a cis diol and not a cleavage product.'
               : `H₂, Pd/C only adds two H atoms and gives ${q ? 'the alkane' : 'an alkane'}.`

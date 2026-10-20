@@ -2,7 +2,8 @@
 //  (1) no <mol> / <molpair> tag is left open in any lesson, generated problem, hub card or past-paper item (an open tag swallows the text after it);
 //  (2) option order: shuffled at render time (seeded, deterministic, objects kept), and the answer-position and answer-length cues are gone;
 //  (3) the glossary (40-60 terms, one sentence of at most 140 characters, found as whole words) and the prerequisite recap cards (every link is a real step);
-//  (4) content fixes from the novice review (valence table in L1 s03, sigma/pi figures, Li electronegativity, Diels-Alder hub drawing and past-paper link).
+//  (4) content fixes from the novice review (valence table in L1 s03, sigma/pi figures, Li electronegativity, Diels-Alder hub drawing and past-paper link);
+//  (5) review 3 (fix wave T3b): first-try scoring (engine/first-try.js, the reaction lab, the mastery player), worked-step moves shuffled like choice steps, accessible names for image options (engine/mol-name.js).
 // Run on its own with `node learn/tests/text.mjs`, or as part of run.mjs.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,7 +13,9 @@ import { ready, VALENCE } from '../engine/chem.js';
 import { generate } from '../engine/generators.js';
 import { HUB_CARDS, HUB_BY_ID } from '../engine/reaction-hub.js';
 import { PASTPAPER } from '../data/pastpaper.js';
-import { closeMolTags, shuffleOptions, shufflable, orderedOptions } from '../engine/steps.js';
+import { closeMolTags, shuffleOptions, shufflable, orderedOptions, orderedMoveOptions, optionSmiles, optionNames } from '../engine/steps.js';
+import { firstTry, firstTryTally } from '../engine/first-try.js';
+import { describeMol, describeAll } from '../engine/mol-name.js';
 import { GLOSSARY, findTerm, termsIn } from '../engine/glossary.js';
 import { RECAP } from '../engine/recap.js';
 
@@ -213,6 +216,61 @@ export async function text({ ok, eq }) {
         ok(re.test(d), `an empty check is not logged as a slip ("${d.slice(0, 28)}...")`);
       ok(!re.test('That carbon has 3 bonds, so it cannot be a carbocation.'), 'a real slip is still logged');
     }
+  }
+  { // (5a) first try: a problem counts only when the FIRST answer was right
+    const a = firstTry(); eq([a.wrong(), a.right(), a.counted, a.slipped, a.misses], [1, false, false, true, 1], 'first try: wrong then right is a slip and scores 0');
+    const b = firstTry(); eq([b.right(), b.counted, b.slipped], [true, true, false], 'first try: right at once counts');
+    const c = firstTry(); c.right(); c.wrong(); eq([c.counted, c.right()], [true, true], 'first try: a later wrong answer cannot un-count a first right one (the first answer decides)');
+    const t = firstTryTally(); t.add(true); t.add(false); t.add(true); eq([t.good, t.shown, t.text()], [2, 3, '2 of 3 right first try'], 'the tally reads "2 of 3 right first try"');
+    const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'engine');
+    const lab = fs.readFileSync(path.join(root, 'widgets', 'reaction-lab.js'), 'utf8'), stp = fs.readFileSync(path.join(root, 'steps.js'), 'utf8');
+    ok(/firstTry\(\)/.test(lab) && /const counts = ft\.right\(\) && fresh/.test(lab) && /if \(counts\) right\+\+/.test(lab) && /if \(counts && right >= need/.test(lab), 'reaction-lab: the counter only goes up for a first answer that was right (and a reaction not tried before)');
+    ok(/tried\.add\(rxnKey\)/.test(lab) && /ft\.wrong\(\)/.test(lab), 'reaction-lab: a wrong click is recorded and a reaction already attempted never scores again');
+    ok(/right on the first try/.test(lab) && !/predicted\)/.test(lab), 'reaction-lab: the button reads "n of need right on the first try"');
+    ok(/const ft = firstTry\(\)/.test(stp) && /const counts = ft\.right\(\)/.test(stp) && /advance\(counts\)/.test(stp) && /tally\.add\(ok\); if \(ok\) got\+\+/.test(stp), 'steps.js mastery: only a first-try right answer adds to the gate, and the end line reads "n of m right first try"');
+    ok(!/advance\(true\)/.test(stp), 'steps.js mastery: no path counts a retry as right');
+    ok(/ft\.wrong\(\)/.test(stp) && /g\.right\(sayWhy\(step, o\), \{ note: true \}\)/.test(stp), 'steps.js choice and input: a right answer after a wrong one says it is a slip');
+  }
+  { // (5b) worked steps: the options of every move are shuffled like a choice step, tracked by object
+    const worked = []; for (const L of LESSONS) for (const s of L.steps) if (s.type === 'worked') worked.push([L, s]);
+    ok(worked.length >= 10, `worked steps found (${worked.length})`);
+    let first = 0, total = 0, kept = true, stable = true;
+    for (const [L, s] of worked) s.moves.forEach((m, mi) => {
+      const a = orderedMoveOptions(s, mi, L.id, 3), b = orderedMoveOptions(s, mi, L.id, 3);
+      if (a.map((o) => m.options.indexOf(o)).join() !== b.map((o) => m.options.indexOf(o)).join()) stable = false;
+      if (!(a.length === m.options.length && a.every((o) => m.options.includes(o)) && a.filter((o) => o.correct).length === 1)) kept = false;
+      for (let k = 0; k < 40; k++) { const sh = orderedMoveOptions(s, mi, L.id, k); total++; if (sh[0].correct) first++; }
+    });
+    ok(stable && kept, 'worked moves: the same attempt gives the same order, with the same option objects and one correct option');
+    ok(first / total < 0.5 && first / total > 0.1, `worked moves: the correct option is not always first (first in ${(100 * first / total).toFixed(0)}% of renders)`);
+    const L17 = LESSONS.find((l) => l.id === '17');
+    ok(orderedMoveOptions(L17.steps.find((s) => s.id === 's01'), 0, '17', 1).map((o) => o.correct).indexOf(true) >= 0, 'worked moves of Lesson 17 are shuffled');
+    ok(/orderedMoveOptions\(step, mi, ctx\.lessonId, ctx\.attempt\)/.test(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'engine', 'steps.js'), 'utf8')), 'steps.js renders the moves through orderedMoveOptions');
+    ok(orderedMoveOptions({ id: 'x', ordered: true, moves: [{ options: worked[0][1].moves[0].options }] }, 0, '1', 1).every((o, i) => o === worked[0][1].moves[0].options[i]), 'ordered: true keeps the move order');
+  }
+  { // (5c) image options get an accessible name: the generated IUPAC name, else the formula and what tells it apart
+    eq(describeMol('CCCC(C)Cl'), '2-chloropentane', 'an option the naming engine can name is read by its IUPAC name');
+    ok(/2,3-dibromobutane, stereocentres [RS] and [RS]/.test(describeMol('C[C@H](Br)[C@@H](C)Br')), 'a named stereo drawing adds its R / S labels');
+    ok(describeMol('C[C@H](Br)[C@@H](C)Br') !== describeMol('C[C@@H](Br)[C@@H](C)Br'), 'meso and racemate drawings read differently');
+    ok(/^formula C6H13Br, a chain of 6 carbons, Br on a tertiary carbon$/.test(describeMol('CCCC(C)(C)Br')) && /primary carbon/.test(describeMol('CCC(C)CBr')), 'an unnamed molecule gets its formula and the kind of carbon the group sits on');
+    ok(describeMol('OC(=O)C1C=CCC=C1') !== describeMol('OC(=O)C1=CCC=CC1') && describeMol('OC(=O)C1C=CCC=C1') !== describeMol('OC(=O)C1C=CC=CC1'), 'isomeric dienes with the same formula are told apart');
+    eq(describeMol('CC(C)=O.CCC(=O)O').split(' and ').length, 2, 'several molecules read "A and B"');
+    eq(describeAll(['CCCC', 'CCCC']), ['butane, drawing 1 of 2', 'butane, drawing 2 of 2'], 'two identical names are told apart');
+    eq(optionSmiles({ text: 'x <mol smiles="CC"></mol> y <mol smiles="CCC"></mol>' }), 'CC.CCC', 'optionSmiles reads the drawing inside an option text');
+    // no option of any lesson, in any step type, is left without a name or shares a name with its neighbours (Lessons 1-17)
+    let n = 0, empty = 0, clash = 0;
+    for (const L of LESSONS) for (const s of L.steps) {
+      const lists = s.type === 'worked' ? s.moves.map((m) => m.options) : [s.options || []];
+      for (const list of lists) {
+        if (!list.some((o) => optionSmiles(o))) continue;
+        const names = optionNames(list);
+        names.forEach((nm, i) => { n++; if (optionSmiles(list[i]) && !nm) empty++; });
+        if (new Set(names.filter(Boolean)).size !== names.filter(Boolean).length) clash++;
+      }
+    }
+    ok(n > 250 && empty === 0 && clash === 0, `every drawn option in the lessons has a name of its own (${n} options, ${empty} unnamed, ${clash} steps with a repeated name)`);
+    const stp = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'engine', 'steps.js'), 'utf8');
+    ok(/setAttribute\('aria-label'/.test(stp) && /class: 'sr-only'/.test(stp) && (stp.match(/nameOptionButton\(/g) || []).length >= 5, 'steps.js sets an aria-label and visually hidden text on predict, choice, worked and mastery options');
   }
   { // wrong-answer feedback names the slip: no why of a wrong option is a bare "wrong"
     let thin = 0;

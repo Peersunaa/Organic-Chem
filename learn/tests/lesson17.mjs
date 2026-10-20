@@ -21,6 +21,7 @@ import { SKILLS } from '../engine/skills.js';
 import { RECAP } from '../engine/recap.js';
 import { generate, generatorForSkill } from '../engine/generators.js';
 import { molProblem } from './text.mjs';
+import { optionNames, optionSmiles } from '../engine/steps.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const strip = (h) => String(h).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -106,14 +107,78 @@ export async function lesson17({ ok, eq }) {
       ok(!/\bhub\b/i.test(strip(str)) || /#reactions/.test(str), `${t}: learner-facing text does not say "hub"`);
     }
   }
-  eq([byPart[1].length, byPart[3].length, byPart[4].length], [9, 7, 3], 'step counts: Part 1 = 9 (3 x worked, explain, predict), Part 3 = 7 exceptions, Part 4 = 3 exam items');
+  eq([byPart[1].length, byPart[3].length, byPart[4].length], [6, 7, 3], 'step counts: Part 1 = 6 (3 x worked, predict; the three explain steps that restated the rule boxes are gone), Part 3 = 7 exceptions, Part 4 = 3 exam items');
+  ok(!L.steps.some((s) => ['s02', 's05', 's08'].includes(s.id)), 'the steps that only restated the rule boxes (s02, s05, s08) are removed; the other ids are not renumbered');
+  ok(['s01', 's04', 's07'].every((id) => /\blesson-\d\d\/s\d\d/.test(L.steps.find((s) => s.id === id).rule) === (id !== 's04')), 'the merged facts moved into the rule boxes of the worked steps (links to Lessons 08, 09, 10)');
   ok(byPart[2].length >= 38 + 4, `Part 2 has a step for every one of the 38 cards plus labs and kinds (${byPart[2].length})`);
-  eq(byPart[1].map((s) => s.type), ['worked', 'explain', 'predict', 'worked', 'explain', 'predict', 'worked', 'explain', 'predict'], 'Part 1: worked, explain, predict for each question');
+  eq(byPart[1].map((s) => s.type), ['worked', 'predict', 'worked', 'predict', 'worked', 'predict'], 'Part 1: worked, predict for each question');
   ok(byPart[3].every((s) => s.type === 'choice'), 'Part 3: one choice step each');
   ok(byPart[4].every((s) => s.type === 'predict' && /Write the structure of the major organic product/.test(strip(s.prompt))), 'Part 4: predict steps in workbook phrasing');
   ok(byPart[4].filter((s) => /indicate stereochemistry/.test(strip(s.prompt))).length === 2, 'Part 4: the alkene and the alkyne say "indicate stereochemistry"');
   const order = L.steps.map((s) => s.part);
   ok(order.every((p, i) => i === 0 || p >= order[i - 1]), 'the four parts come in order');
+
+  // ------------------------------------------------------------------ (1b) review-3 fixes
+  const step = (id) => L.steps.find((s) => s.id === id);
+  { // Finding 5: every first-seen reagent or idea is tagged "New ...: guess, then learn." with the one fact needed
+    for (const id of ['s22', 's33', 's43', 's48', 's49', 's50', 's53', 's54', 's61']) ok(typeof step(id).aside === 'string' && /^<b>New (reagent|idea|reaction): guess, then learn\.<\/b> /.test(step(id).aside) && words(step(id).aside) <= 60, `L17/${id}: a "New ...: guess, then learn" aside of at most 60 words`);
+    ok(/Clemmensen/.test(strip(step('s49').prompt)) && /Birch/.test(strip(step('s50').aside)) && /NBS/.test(strip(step('s48').aside)) && /PCC/.test(strip(step('s53').aside)) && /Na₂Cr₂O₇/.test(strip(step('s54').aside)) && /dienophile/.test(strip(step('s33').aside)) && /lone pair/.test(strip(step('s22').aside)) && /CH₂ end/.test(strip(step('s61').aside)), 'L17: the asides name the reagent and give its one fact (Clemmensen, Birch, NBS, PCC, Na₂Cr₂O₇, dienophile, Cl lone pair, regiochemistry reason)');
+    for (const id of ['s50', 's60']) ok(step(id).options.every((o) => (o.label && o.label.length > 8) || /label="[^"]{8,}"/.test(o.text || '')), `L17/${id}: every cyclohexadiene drawing carries its name underneath`);
+  }
+  { // Finding 6: the KMnO4 conditions are said, and base is not said to be unable to cut
+    ok(/cold, dilute/.test(strip(step('s15').prompt)) && /cold, dilute/.test(step('s15').equation.cond) && /hot/.test(strip(step('s18').prompt)) && /hot/.test(step('s18').equation.cond), 'L17: S15 says cold, dilute and S18 says hot');
+    ok(/cold and dilute/.test(strip(step('s19').prompt)) && /hot acidic KMnO₄/.test(step('s19').hints[0]), 'L17: the alkene lab says what KMnO₄ in base and in acid means');
+    ok(!L.steps.some((s) => strings(s).some((x) => /In base the C–C bond stays/.test(x))), 'L17: no feedback claims that base never cleaves the C=C');
+    ok(/hot, concentrated base can cut it too/.test(step('s15').options.find((o) => /C=C is cut/.test(o.why)).why), 'L17: the diacid option names hot acidic KMnO₄ and says hot base can cut too');
+  }
+  { // Finding 4: a drawing whose wedges sit only on CH3 ends says which groups are wedged
+    const rd = rdkit();
+    const onlyCH3 = (smi) => {
+      const m = rd.get_mol(smi); if (!m) return false;
+      try {
+        m.set_new_coords();
+        const mb = m.get_molblock().split('\n'), n = parseInt(mb[3].slice(0, 3)), nb = parseInt(mb[3].slice(3, 6));
+        const deg = Array(n).fill(0), el = []; for (let i = 0; i < n; i++) el.push(mb[4 + i].slice(31, 34).trim());
+        const wedges = [];
+        for (let i = 0; i < nb; i++) { const l = mb[4 + n + i], a = parseInt(l.slice(0, 3)) - 1, b = parseInt(l.slice(3, 6)) - 1, st = parseInt(l.slice(9, 12)); deg[a]++; deg[b]++; if (st === 1 || st === 6) wedges.push(b); }
+        return wedges.length > 0 && wedges.every((t) => el[t] === 'C' && deg[t] === 1);
+      } finally { m.delete(); }
+    };
+    const hit = [];
+    for (const s of L.steps) if ((s.options || []).some((o) => { const smi = optionSmiles(o); return smi && /@/.test(smi) && smi.split('.').every((x) => /@/.test(x)) && onlyCH3(smi); })) hit.push(s.id);
+    ok(hit.length >= 3, `L17: the CH3-only wedge drawings are found (${hit.join(', ')})`);
+    for (const id of hit) ok(/Reading these drawings/.test(step(id).aside || '') && /(wedge|dash)/.test(step(id).aside), `L17/${id}: its wedge-only-on-CH₃ drawings are explained in an aside`);
+  }
+  { // Finding 10: Part 3 repeats are tightened, the PCC stem does not state its answer, exam stems say they are pick-one
+    ok(!/stops at the aldehyde/.test(strip(step('s57').prompt)), 'L17 S57: the stem does not give the answer away');
+    for (const id of ['s62', 's63', 's64']) ok(/pick the drawing that matches yours/.test(step(id).prompt), `L17/${id}: the exam-pattern stem says the answer is picked, not drawn`);
+    ok(words(step('s20').html) < 52 && words(step('s31').html) < 52 && words(step('s45').html) < 52, 'L17: the three product-kind summaries are short');
+  }
+  { // Finding 11: in text-only questions of Parts 1 and 3 the correct option is never the strictly longest
+    for (const s of L.steps) if ((s.type === 'choice' || s.type === 'predict') && s.options.every((o) => !o.smiles && !/<mol/.test(o.text || ''))) {
+      const lens = s.options.map((o) => strip(o.text).length), ci = s.options.findIndex((o) => o.correct);
+      ok(!(lens[ci] === Math.max(...lens) && lens.filter((x) => x === lens[ci]).length === 1), `L17/${s.id}: the correct option is not the strictly longest (${lens.join('/')})`);
+    }
+  }
+  { // Finding 12: every drawn option of Lesson 17 gets a distinct accessible name
+    let n = 0;
+    for (const s of L.steps) {
+      const opts = s.type === 'worked' ? s.moves.flatMap((m) => m.options) : (s.options || []);
+      const lists = s.type === 'worked' ? s.moves.map((m) => m.options) : [s.options || []];
+      for (const list of lists) {
+        if (!list.some((o) => optionSmiles(o))) continue;
+        const names = optionNames(list);
+        ok(list.every((o, i) => !optionSmiles(o) || names[i].length > 3), `L17/${s.id}: every drawn option has a name`);
+        ok(new Set(names).size === names.length, `L17/${s.id}: no two options share a name (${names.join(' | ')})`);
+        n += names.length;
+      }
+      void opts;
+    }
+    ok(n > 100, `accessible names were generated for ${n} options`);
+  }
+  { // Finding 14: the last step links to the drill, the past paper and the mock
+    ok(/href="#reactions-practice"/.test(L.useIt.note) && /href="#pastpaper"/.test(L.useIt.note) && /href="#mock"/.test(L.useIt.note), 'L17: the use-it note links the Reactions drill, the past paper and the mock');
+  }
 
   // ------------------------------------------------------------------ (2) SMILES
   const checkSmiles = (smi, label) => { nSmiles++; ok(smi && flat([smi]).every((x) => canon(x) !== null), `${label}: ${smi} parses`); };

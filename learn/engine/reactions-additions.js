@@ -22,8 +22,8 @@ export const REAGENTS2 = {
   H2: { id: 'H2', kind: 'hydrogen', label: 'H₂, Pd/C', short: 'H₂/Pd', reactant: '[H][H]', rel: 'syn' },
   RCO3H: { id: 'RCO3H', kind: 'epoxide', label: 'RCO₃H (e.g. mCPBA)', short: 'RCO₃H', reactant: '[O]', rel: 'syn' },
   RCO3H_H3O: { id: 'RCO3H_H3O', kind: 'epoxide-diol', label: 'RCO₃H, then H₃O⁺', short: 'RCO₃H, then H₃O⁺', reactant: '[O]', rel: 'anti' },
-  KMnO4_OH: { id: 'KMnO4_OH', kind: 'diol-syn', label: 'KMnO₄, OH⁻, H₂O', short: 'KMnO₄ / OH⁻', reactant: '[O]', rel: 'syn' },
-  KMnO4_H: { id: 'KMnO4_H', kind: 'cleavage', label: 'KMnO₄, H₃O⁺', short: 'KMnO₄ / H₃O⁺', reactant: '[O]', rel: null }
+  KMnO4_OH: { id: 'KMnO4_OH', kind: 'diol-syn', label: 'KMnO₄, cold, dilute, OH⁻', short: 'KMnO₄ / OH⁻ (cold)', reactant: '[O]', rel: 'syn' },
+  KMnO4_H: { id: 'KMnO4_H', kind: 'cleavage', label: 'KMnO₄, hot, H₃O⁺', short: 'KMnO₄ / H₃O⁺ (hot)', reactant: '[O]', rel: null }
 };
 export const REAGENT_IDS2 = ['Br2', 'Cl2', 'H2', 'RCO3H', 'RCO3H_H3O', 'KMnO4_OH', 'KMnO4_H'];
 export const OXIDANT = '[O]';
@@ -465,7 +465,7 @@ export function productChoices2(pred, opts = {}) {
       : R.kind === 'hydrogen'
         ? 'This puts the two H atoms on opposite faces (anti). Hydrogenation is syn: both H atoms are delivered from the catalyst surface, which touches only one face of the alkene.'
         : R.kind === 'diol-syn'
-          ? 'This is the trans (anti) diol, the product of the epoxide route. KMnO₄ in base adds both OH groups to the SAME face (syn), so the diol is cis.'
+          ? 'This is the trans (anti) diol, the product of the epoxide route. cold, dilute KMnO₄ in base adds both OH groups to the SAME face (syn), so the diol is cis.'
           : 'This is the cis (syn) diol, the KMnO₄ product. Here water attacks the protonated epoxide from the back, so the two OH groups end up anti (trans).';
     push('wrongStereo', [opp], why);
   }
@@ -516,7 +516,7 @@ export function rightWhy(pred) {
     case 'hydrogen': return `Yes. H₂ adds syn: both H atoms come from the catalyst surface, to the same face.${ringTxt}${rac}`;
     case 'epoxide': return `Yes. A peroxyacid gives an epoxide (one O across the C=C). The alkene geometry is kept: a cis alkene gives a cis epoxide, a trans alkene a trans one.${rac}`;
     case 'epoxide-diol': return `Yes. The peroxyacid makes the epoxide; H₃O⁺ and water open it from the back, so the two OH groups are anti (trans on a ring).${rac}`;
-    case 'diol-syn': return `Yes. KMnO₄ in base puts both OH groups on the same face (syn): a cis diol on a ring.${rac}`;
+    case 'diol-syn': return `Yes. Cold, dilute KMnO₄ in base puts both OH groups on the same face (syn): a cis diol on a ring.${rac}`;
     default: return 'Yes. KMnO₄ in acid cuts the C=C: =CR₂ becomes a ketone, =CHR a carboxylic acid, =CH₂ becomes CO₂.';
   }
 }

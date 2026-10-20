@@ -9,6 +9,8 @@ import { matchNameForms } from './generators-naming-levels.js';
 import { t, tAuto } from './voice.js';
 import { HUB_BY_ID } from './reaction-hub.js';
 import { svgWithLonePairs } from './lp-draw.js';
+import { firstTry, firstTryTally } from './first-try.js';
+import { describeMol, describeAll } from './mol-name.js';
 
 // ---- caveman voice for lesson text. A lesson step may carry `caveman: { prompt, problem, html, reveal, rule, worked, trap, hints: [..], options: [{ why }, ..], moves: [{ ask, then, options: [{ why }, ..] }, ..] }`
 //      (terse copies of the step's own fields, arrays in the same order as the lesson data). Each helper gives the caveman copy when the switch is on AND the step has one, else the normal text,
@@ -60,6 +62,35 @@ export function sessionSalt() {
 export function orderedOptions(step, lessonId, attempt) {
   if (!shufflable(step)) return step.options.slice();
   return shuffleOptions(step.options, `${lessonId}|${step.id}|${attempt != null ? attempt : sessionSalt()}`);
+}
+/** The options of move `mi` of a worked step, in the same seeded shuffle as a choice step (a move's options never carry "Option A" labels, and `ordered: true` on the step keeps the order). Objects are kept: correctness is read from the object. */
+export function orderedMoveOptions(step, mi, lessonId, attempt) {
+  const mv = step.moves[mi];
+  if (!shufflable({ options: mv.options, ordered: step.ordered, shuffle: step.shuffle })) return mv.options.slice();
+  return shuffleOptions(mv.options, `${lessonId}|${step.id}|m${mi}|${attempt != null ? attempt : sessionSalt()}`);
+}
+
+// ---- accessible names for image options (Finding 12): the generated IUPAC name when the naming engine can name the molecule, else the formula plus what tells it apart (engine/mol-name.js).
+/** SMILES drawn by an option: its own `smiles`, or every <mol smiles="..."> in its text (joined into one dot-separated string), or ''. */
+export function optionSmiles(o) {
+  if (o.smiles) return o.smiles;
+  const found = [...String(o.text || '').matchAll(/<mol\b[^>]*\bsmiles="([^"]+)"/g)].map((m) => m[1]);
+  return found.join('.');
+}
+/** The accessible names of a list of options, one per option ('' for an option that is words only); two identical names are told apart. */
+export function optionNames(options) {
+  const smi = options.map(optionSmiles);
+  const idx = smi.map((s, i) => (s ? i : -1)).filter((i) => i >= 0);
+  const names = describeAll(idx.map((i) => smi[i]));
+  const out = options.map(() => '');
+  idx.forEach((i, k) => { out[i] = names[k]; });
+  return out;
+}
+/** Put `name` on an option button as its aria-label and as visually hidden text (`lead`: a visible label such as "Option A" is kept in front of it). */
+export function nameOptionButton(btn, name, lead) {
+  if (!name) return;
+  btn.setAttribute('aria-label', (lead ? lead + ': ' : '') + name);
+  btn.append(h('span', { class: 'sr-only' }, name));
 }
 
 export function h(tag, props, ...kids) {
@@ -137,15 +168,17 @@ export function rich(html, tag = 'div', cls = '') { return enhance(h(tag, { clas
 
 function grader(step, ctx, host) {
   let wrong = 0;
+  const ft = firstTry();                       // a step counts as right only when the FIRST answer was right; later tries reveal and log the slip but score 0
   const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
   const hints = h('div', { class: 'hints' });
   host.append(fb, hints);
   const say = (kind, html) => { fb.className = 'fb ' + kind; fb.innerHTML = ''; fb.append(rich(html, 'p')); };
   return {
     get wrongCount() { return wrong; },
+    get slipped() { return ft.slipped; },
     // `shown`: the text to display when it differs from the diagnosis that is logged (the caveman copy of an option's why)
     wrong(diagnosis, shown) {
-      wrong++;
+      wrong++; ft.wrong();
       ctx.mistake(step.skill, step.id, diagnosis);
       say('bad', shown != null ? shown : diagnosis);
       hints.innerHTML = '';
@@ -158,7 +191,7 @@ function grader(step, ctx, host) {
       }
       return wrong;
     },
-    right(msg) { say('ok', msg || 'Correct.'); ctx.done(); },
+    right(msg, opts) { ft.right(); say('ok', (msg || 'Correct.') + (opts && opts.note && ft.slipped ? ' <span class="muted">Not first try: it is logged as a slip and does not count as a first-try answer.</span>' : '')); ctx.done(); },
     // a widget made partial progress (e.g. 1 of 2 predictions right): drop stale wrong-answer feedback
     clear() { fb.className = 'fb'; fb.innerHTML = ''; }
   };
@@ -252,8 +285,10 @@ const RENDER = {
     const list = h('div', { class: 'opts', role: 'group' });
     const out = h('div', { class: 'after' });
     const shown = orderedOptions(step, ctx.lessonId, ctx.attempt);
-    shown.forEach((o) => {
+    const names = optionNames(shown);
+    shown.forEach((o, oi) => {
       const b = h('button', { type: 'button', class: 'opt' }, rich(o.text, 'span'));
+      nameOptionButton(b, names[oi]);
       b.addEventListener('click', () => {
         [...list.children].forEach((x, i) => { x.disabled = true; if (shown[i].correct) x.classList.add('good'); });
         if (!o.correct) { b.classList.add('bad'); ctx.mistake(step.skill, step.id, o.why); }
@@ -270,10 +305,12 @@ const RENDER = {
     addPrompt(host, step);
     const g = grader(step, ctx, host);
     const list = h('div', { class: 'opts' + (step.options.some((o) => o.smiles) ? ' mols' : ''), role: 'group' });
-    orderedOptions(step, ctx.lessonId, ctx.attempt).forEach((o) => {
+    const cShown = orderedOptions(step, ctx.lessonId, ctx.attempt), cNames = optionNames(cShown);
+    cShown.forEach((o, oi) => {
       const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.label || '', { ...(o.raw ? { raw: true, showCharge: true } : {}), ...(o.lp ? { lp: true } : {}), ...(o.alt ? { alt: o.alt } : {}) }) : rich(o.text, 'span'));
+      nameOptionButton(b, o.alt || cNames[oi]);
       b.addEventListener('click', () => {
-        if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); g.right(sayWhy(step, o)); }
+        if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); g.right(sayWhy(step, o), { note: true }); }
         else { b.classList.add('bad'); b.disabled = true; g.wrong(o.why, sayWhy(step, o)); }
       });
       list.append(b);
@@ -286,7 +323,7 @@ const RENDER = {
     const g = grader(step, ctx, host);
     const { form, inp } = inputRow((val, input, btn) => {
       const r = checkInput(step, val);
-      if (r.ok) { input.disabled = true; btn.disabled = true; g.right((step.confirm || 'Correct.') + (r.note ? ` <span class="style-note">${r.note}</span>` : '')); }
+      if (r.ok) { input.disabled = true; btn.disabled = true; g.right((step.confirm || 'Correct.') + (r.note ? ` <span class="style-note">${r.note}</span>` : ''), { note: true }); }
       else if (r.empty || r.malformed) { host.querySelector('.fb').className = 'fb bad'; host.querySelector('.fb').textContent = r.diagnosis; input.focus(); }
       else { g.wrong(r.diagnosis); input.select(); }
     });
@@ -325,8 +362,10 @@ const RENDER = {
       if (mv.visual) mountVisual(card, mv.visual);
       const opts = h('div', { class: 'opts', role: 'group' });
       const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
-      mv.options.forEach((o) => {
+      const mShown = orderedMoveOptions(step, mi, ctx.lessonId, ctx.attempt), mNames = optionNames(mShown);
+      mShown.forEach((o, oi) => {
         const b = h('button', { type: 'button', class: 'opt' }, rich(o.text, 'span'));
+        nameOptionButton(b, mNames[oi]);
         b.addEventListener('click', () => {
           if (o.correct) {
             [...opts.children].forEach((x) => { x.disabled = true; });
@@ -363,7 +402,7 @@ const RENDER = {
     host.append(h('div', { class: 'useit' },
       inCh.length ? h('div', {}, h('h3', {}, 'In-chapter problems'), chips(inCh)) : null,
       end.length ? h('div', {}, h('h3', {}, 'End of chapter'), chips(end)) : null,
-      u.note ? h('p', { class: 'muted' }, u.note) : null));
+      u.note ? rich(u.note, 'p', 'muted') : null));
     const btn = h('button', { type: 'button', class: 'btn primary', id: 'complete-btn' }, ctx.complete ? 'Mark lesson complete' : 'Done');
     btn.addEventListener('click', () => { btn.disabled = true; ctx.complete(); });
     host.append(btn);
@@ -374,7 +413,8 @@ const RENDER = {
 export function renderProblems(cfg, ctx, host) {
   const endless = cfg.endless === true;                // the reaction practice settings: no fixed number, the learner ends the session
   const need = endless ? Infinity : (cfg.count || 3);
-  let got = 0;
+  let got = 0;                                       // problems answered right on the FIRST try: only these count toward the gate
+  const tally = firstTryTally();
   host.append(h('p', { class: 'eyebrow' }, cfg.skill ? 'Practise' : 'Mastery check'));
   const stage = h('div', { class: 'stage' });
   host.append(stage);
@@ -385,7 +425,7 @@ export function renderProblems(cfg, ctx, host) {
   const stopTimer = () => { if (tick) { clearInterval(tick); tick = null; } };
   function show() {
     stopTimer();
-    bar.textContent = endless ? `Problem ${got + 1}. Endless: end the session whenever you like.` : `Problem ${Math.min(got + 1, need)} of ${need}. Each one is generated fresh.`;
+    bar.textContent = endless ? `Problem ${got + 1}. Endless: end the session whenever you like.` : `Problem ${tally.shown + 1}: ${got} of ${need} right first try so far. Each one is generated fresh, and only a right first answer counts.`;
     stage.innerHTML = '';
     const p = generate(cfg.generator || 'lewis-basic', 1, { skill: cfg.skill || null })[0];
     const step = { id: 'mastery', skill: p.skill, hints: p.hints, worked: null };
@@ -398,14 +438,15 @@ export function renderProblems(cfg, ctx, host) {
     const fb = h('div', { class: 'fb', 'aria-live': 'polite' });
     const hints = h('div', { class: 'hints' });
     let wrong = 0, settled = false;
-    const advance = (ok) => {
+    const ft = firstTry();
+    const advance = (ok) => {                          // ok: this problem COUNTS (its first answer was right)
       settled = true; stopTimer();
       const btn = h('button', { type: 'button', class: 'btn primary' }, ok ? (got + 1 >= need ? 'Finish' : 'Next problem') : 'Try another');
-      btn.addEventListener('click', () => { if (ok) got++; if (got >= need) { bar.textContent = `All ${need} correct.`; stage.innerHTML = ''; stage.append(h('div', { class: 'fb ok' }, h('p', {}, 'Mastery check passed.'))); ctx.done(); } else show(); });
+      btn.addEventListener('click', () => { tally.add(ok); if (ok) got++; if (got >= need) { bar.textContent = `${tally.text()}.`; stage.innerHTML = ''; stage.append(h('div', { class: 'fb ok' }, h('p', {}, `Mastery check passed: ${tally.text()}.`))); ctx.done(); } else show(); });
       card.append(btn); btn.focus();
     };
     const onWrong = (why, opt) => {
-      wrong++;
+      wrong++; ft.wrong();
       ctx.mistake(p.skill, 'mastery', opt && opt.lead ? opt.lead : why, p.card);
       fb.className = 'fb bad'; fb.textContent = '';
       if (opt && opt.lead) {
@@ -427,11 +468,13 @@ export function renderProblems(cfg, ctx, host) {
       }
     };
     const onRight = (note) => {
-      if (wrong === 0) ctx.win(p.skill, p.card);
+      const counts = ft.right();                       // right on the first answer only
+      if (counts) ctx.win(p.skill, p.card);
       fb.className = 'fb ok'; if (p.deriveHtml) { fb.textContent = ''; fb.append(rich('Correct. ' + p.deriveHtml, 'span')); } else fb.textContent = 'Correct. ' + p.derive;
+      if (!counts) fb.append(h('p', { class: 'style-note' }, 'Not first try, so this one does not count toward the check. The slip is logged; the next problem is fresh.'));
       if (note) fb.append(h('p', { class: 'style-note' }, note));
       hints.innerHTML = '';
-      advance(true);
+      advance(counts);
     };
     if (p.kind === 'input') {
       const { form, inp } = inputRow((val, input, btn) => {
@@ -444,8 +487,10 @@ export function renderProblems(cfg, ctx, host) {
       card.append(form);
     } else if (p.kind === 'choice') {
       const list = h('div', { class: 'opts' + (p.options.some((o) => o.smiles) ? ' mols' : ''), role: 'group' });
-      p.options.forEach((o) => {
+      const pNames = p.options.some((o) => o.smiles && !o.raw) ? optionNames(p.options.map((o) => (o.raw ? { text: o.text } : o))) : [];
+      p.options.forEach((o, oi) => {
         const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.text || '', o.raw ? { raw: true, showCharge: true } : {}) : rich(o.text, 'span'));
+        if (pNames[oi]) nameOptionButton(b, pNames[oi], /^Option [A-H]$/.test(o.text || '') ? o.text : '');
         b.addEventListener('click', () => {
           if (settled) return;
           if (o.correct) { [...list.children].forEach((x) => { x.disabled = true; }); b.classList.add('good'); onRight(); }
@@ -483,7 +528,7 @@ export function renderProblems(cfg, ctx, host) {
     card.append(fb, hints);
     if (endless) {
       const end = h('button', { type: 'button', class: 'btn small ghost rs-end' }, 'End session');
-      end.addEventListener('click', () => { stopTimer(); bar.textContent = `Session over: ${got} correct.`; stage.innerHTML = ''; stage.append(h('div', { class: 'fb ok' }, h('p', {}, `${got} problem${got === 1 ? '' : 's'} solved.`))); ctx.done(); });
+      end.addEventListener('click', () => { stopTimer(); bar.textContent = `Session over: ${tally.text()}.`; stage.innerHTML = ''; stage.append(h('div', { class: 'fb ok' }, h('p', {}, `${got} problem${got === 1 ? '' : 's'} right on the first try${tally.shown > got ? ` (${tally.shown} shown)` : ''}.`))); ctx.done(); });
       card.append(end);
     }
     if (cfg.timer > 0) {

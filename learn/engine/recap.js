@@ -111,7 +111,9 @@ export function recapCard(lessonId) {
     h('span', {}, f.fact),
     h('span', { class: 'rc-from' }, `You need from ${LABEL(f.n)}: `, h('a', { class: 'rc-link', href: `#lesson-${f.n}/${f.step}` }, 'see the step')))));
   const d = h('details', { class: 'rc-card', 'data-gl-skip': '1', id: 'rc-card' }, h('summary', {}, 'Before you start: what you need from earlier lessons'), list);
-  if (first) d.open = true;
+  // open on the first visit, except on a narrow screen where the card would push the first question off the page
+  let narrow = false; try { narrow = typeof matchMedia === 'function' && matchMedia('(max-width: 600px)').matches; } catch (e) { narrow = false; }
+  if (first && !narrow) d.open = true;
   markSeen(lessonId);
   return d;
 }

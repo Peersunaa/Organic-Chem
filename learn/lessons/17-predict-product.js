@@ -21,11 +21,11 @@ export default {
   mastery: { count: 5, generator: 'predict-product' },
   useIt: {
     book: [],
-    note: 'Now do the Reactions drill and the past-paper B3 items.'
+    note: 'Now do the <a href="#reactions-practice">Reactions drill</a>, the <a href="#pastpaper">past-paper B3 items</a> and the <a href="#mock">mock midterm</a>.'
   },
   steps: [
     {
-      caveman: {"problem":"<b>Q1: rich or poor?</b> HBr + propene. Who gives, takes electrons? Stepwise.","rule":"Q1: arrow from rich atom or bond to poor atom. Reagent's poor end bonds first; left-behind pair finishes.","moves":[{"ask":"Which part of propene electron-rich?","options":[{"why":"Yes. π bond: exposed, loose pair: C=C nucleophile."},{"why":"H atoms do not enrich. Loose electrons: π pair of C=C."},{"why":"It does. C=C π bond is rich."}]},{"ask":"Which atom of H–Br electron-poor?","options":[{"why":"Yes. Br pulls pair: H short: δ+."},{"why":"Lone pairs enrich. Br is δ− end."},{"why":"Electronegativity differs (2.8, 2.1): polar, H δ+."}]},{"ask":"First curved arrow runs which way?","options":[{"why":"Yes. Arrows start at electrons: π bond to H, then H–Br pair onto Br."},{"why":"H⁺ has no electrons: no arrow starts there."},{"why":"Br pair moves in SECOND arrow."}]},{"ask":"What does HBr put on alkene?","options":[{"why":"Yes. H bonds first. Br⁻ leaves with pair, then bonds to carbocation."},{"why":"That is Br₂, not HBr. H–Br: one H, one Br."},{"why":"That is H₂, Pd/C. HBr: one H, one Br."}]}]}, // CAVEMAN
+      caveman: {"problem":"<b>Q1: rich or poor?</b> HBr + propene. Who gives, takes electrons? Stepwise.","rule":"Q1: arrow rich (π bond, lone pair, anion, metal) to poor (δ+ H, cation, short of octet). Poor end bonds first: H of HBr, near Br of Br₂, O of RCO₃H, B of BH₃, NO₂⁺ on ring. <a href=\"#lesson-08/s07\">Lesson 08</a>, <a href=\"#lesson-09/s04\">Lesson 09</a>.","moves":[{"ask":"Which part of propene electron-rich?","options":[{"why":"Yes. π bond: exposed, loose pair: C=C nucleophile."},{"why":"H atoms do not enrich. Loose electrons: π pair of C=C."},{"why":"It does. C=C π bond is rich."}]},{"ask":"Which atom of H–Br electron-poor?","options":[{"why":"Yes. Br pulls pair: H short: δ+."},{"why":"Lone pairs enrich. Br is δ− end."},{"why":"Electronegativity differs (2.8, 2.1): polar, H δ+."}]},{"ask":"First curved arrow runs which way?","options":[{"why":"Yes. Arrows start at electrons: π bond to H, then H–Br pair onto Br."},{"why":"H⁺ has no electrons: no arrow starts there."},{"why":"Br pair moves in SECOND arrow."}]},{"ask":"What does HBr put on alkene?","options":[{"why":"Yes. H bonds first. Br⁻ leaves with pair, then bonds to carbocation."},{"why":"That is Br₂, not HBr. H–Br: one H, one Br."},{"why":"That is H₂, Pd/C. HBr: one H, one Br."}]}]}, // CAVEMAN
       type: 'worked',
       skill: 'nuc-elec',
       part: 1,
@@ -105,16 +105,8 @@ export default {
           ]
         }
       ],
-      rule: 'Q1: the arrow runs from the electron-rich atom or bond to the electron-poor atom. The poor end of the reagent is the group that bonds first, and the pair left behind finishes the job.',
+      rule: 'Q1: the arrow runs from the electron-rich atom or bond (a π bond, a lone pair, an anion, a metal giving electrons) to the electron-poor atom (a δ+ H, a cation, an atom short of an octet). The poor end of the reagent bonds first: the H of HBr, the near Br of Br₂, the O of RCO₃H, the B of BH₃, NO₂⁺ on a ring. <a href="#lesson-08/s07">Lesson 08</a> and <a href="#lesson-09/s04">Lesson 09</a> have the steps.',
       id: 's01'
-    },
-    {
-      caveman: {"html":"<p><b>Q1: what adds.</b> Rich: π bond, lone pair, anion, metal. Poor: δ+ H, cation, atom short of octet. Arrow rich → poor. Poor end bonds first: H of HBr, near Br of Br₂, O of RCO₃H, B of BH₃, NO₂⁺ on ring. <a href=\"#lesson-08/s07\">Lesson 08</a>, <a href=\"#lesson-09/s04\">Lesson 09</a>.</p>"}, // CAVEMAN
-      type: 'explain',
-      skill: 'nuc-elec',
-      part: 1,
-      html: '<p><b>Q1 decides what adds.</b> Find the rich partner: a π bond, a lone pair, an anion, a metal giving electrons. Find the poor partner: a δ+ H, a cation, an atom short of an octet. The arrow runs rich → poor. The poor end of the reagent bonds first: the H of HBr, the near Br of Br₂, the O of RCO₃H, the B of BH₃, NO₂⁺ on a ring. <a href="#lesson-08/s07">Lesson 08</a> and <a href="#lesson-09/s04">Lesson 09</a> have the steps.</p>',
-      id: 's02'
     },
     {
       caveman: {"prompt":"Cyclohexene + Br₂. Br–Br nonpolar. π bond approaches: what happens?","reveal":"Rich to poor even for Br₂: π bond attacks, one Br leaves as Br⁻: two Br on carbons (<a href=\"#lesson-10/s03\">Lesson 10</a>).","options":[{"why":"Yes. Big Br–Br bond polarises: π pair attacks near Br, far Br leaves as Br⁻."},{"why":"Br₂ reacts. Big polarisable bond: near atom δ+ as electrons approach."},{"why":"C=C is rich. Arrow starts at π electrons."},{"why":"Ring H not δ+. Reaction at C=C."}]}, // CAVEMAN
@@ -145,7 +137,7 @@ export default {
       id: 's03'
     },
     {
-      caveman: {"problem":"<b>Q2: where?</b> HBr + 2-methylbut-1-ene. Where H, Br?","rule":"H to carbon with more H; + on carbon with more carbon neighbours (3° > 2° > 1°); X, OH there. Reverse: hydroboration.","moves":[{"ask":"H on two C=C carbons. More H?","options":[{"why":"Yes. =CH₂: two H; other: none, three carbon neighbours."},{"why":"No H there."},{"why":"They differ."}]},{"ask":"H to that carbon. Where is +?","options":[{"why":"Yes. + on carbon with CH₃, CH₂CH₃, new CH₃."},{"why":"Needs H on OTHER carbon."},{"why":"H on one carbon: + on other."}]},{"ask":"Why that cation?","options":[{"why":"Yes. 3° > 2° > 1° (Lesson 09)."},{"why":"Stability: carbon groups lending to C⁺, not bulk."},{"why":"3° far more stable: faster path."}]},{"ask":"Br⁻ bonds + carbon. Product?","options":[{"why":"Yes. Br on carbon that had +: tertiary bromide."},{"why":"anti-Markovnikov: needs 1° cation."},{"why":"HBr adds Br, not Cl."}]}]}, // CAVEMAN
+      caveman: {"problem":"<b>Q2: where?</b> HBr + 2-methylbut-1-ene. Where H, Br?","rule":"Q2: H to carbon with more H; + on carbon with more carbon neighbours (3° > 2° > 1°); X, OH there. Equal ends: mixture. Ring: ortho/para or meta: + where ring group carries it. Reverse: hydroboration, OH on MORE H carbon.","moves":[{"ask":"H on two C=C carbons. More H?","options":[{"why":"Yes. =CH₂: two H; other: none, three carbon neighbours."},{"why":"No H there."},{"why":"They differ."}]},{"ask":"H to that carbon. Where is +?","options":[{"why":"Yes. + on carbon with CH₃, CH₂CH₃, new CH₃."},{"why":"Needs H on OTHER carbon."},{"why":"H on one carbon: + on other."}]},{"ask":"Why that cation?","options":[{"why":"Yes. 3° > 2° > 1° (Lesson 09)."},{"why":"Stability: carbon groups lending to C⁺, not bulk."},{"why":"3° far more stable: faster path."}]},{"ask":"Br⁻ bonds + carbon. Product?","options":[{"why":"Yes. Br on carbon that had +: tertiary bromide."},{"why":"anti-Markovnikov: needs 1° cation."},{"why":"HBr adds Br, not Cl."}]}]}, // CAVEMAN
       type: 'worked',
       skill: 'markovnikov',
       part: 1,
@@ -227,16 +219,8 @@ export default {
           chk: { card: 'alkene-hx', sub: 'CCC(C)=C', v: 'HBr', answer: 'CCC(C)(C)Br' }
         }
       ],
-      rule: 'Q2: H goes to the carbon with more H. The + sits on the carbon with more carbon neighbours (3° > 2° > 1°), and the other piece (X, OH) bonds there. Hydroboration is the one reverse.',
+      rule: 'Q2: H goes to the carbon with more H. The + sits on the carbon with more carbon neighbours (3° > 2° > 1°), and the other piece (X, OH) bonds there. Equal ends mean a mixture. On a ring the same idea picks ortho/para or meta: the + goes where the group already on the ring can carry it. Hydroboration is the one reverse: OH goes on the carbon with MORE H.',
       id: 's04'
-    },
-    {
-      caveman: {"html":"<p><b>Q2: where.</b> H to end with more H: + on end with more carbon neighbours (3° > 2° > 1°); X there. Equal ends: mixture. Ring: ortho/para or meta: + where group on ring carries it. Reverse: hydroboration, OH on carbon with MORE H.</p>"}, // CAVEMAN
-      type: 'explain',
-      skill: 'markovnikov',
-      part: 1,
-      html: '<p><b>Q2 decides where.</b> H goes to the end of the C=C with more H, so the + lands on the end with more carbon neighbours (3° beats 2° beats 1°) and the other piece bonds there. Equal ends mean a mixture. On a ring the same idea picks ortho/para or meta: the + goes where the group already on the ring can carry it. One reverse: hydroboration puts OH on the carbon with MORE H.</p>',
-      id: 's05'
     },
     {
       caveman: {"prompt":"<name new=\"hex-1-ene\" old=\"1-hexene\"></name> + <b>H₂O, H₂SO₄ (cat.)</b>: major product?","reveal":"H to CH₂ end (more H), + on C2 (2°), OH there: hexan-2-ol, <b>alcohol</b>. Alkane: two H; anti-Markovnikov alcohol: OH on C1.","options":[{"why":"Alkene unchanged. H₂O adds H and OH."},{"why":"Alkane: two H, no O. Water adds H and OH."},{"why":"OH on carbon with MORE H: anti-Markovnikov. H to carbon with more H."},{"why":"Yes. H to carbon with more H: + on more substituted carbon: secondary (2°) cation. OH there."}]}, // CAVEMAN
@@ -273,7 +257,7 @@ export default {
       id: 's06'
     },
     {
-      caveman: {"problem":"<b>Q3: same side or opposite?</b> 1,2-Dimethylcyclopentene, three reagents: groups on ring?","rule":"Q3: flat carbocation: either face. Three-membered ring (bromonium, epoxide + water): anti. Both pieces at once (H₂/Pd, cold KMnO₄, peroxyacid, borane): syn.","moves":[{"ask":"HBr: carbocation. Shape, meaning for Br⁻?","options":[{"why":"Yes. Flat: two faces, no preference."},{"why":"Flat (sp²), three bonds. Nothing forces Br⁻ to one face."},{"why":"Bromonium from Br₂, not HBr."}]},{"ask":"Br₂: ring on one face. Br⁻ attacks where?","options":[{"why":"Yes. Ring blocks its face: Br⁻ from back. Anti: trans on ring."},{"why":"Ring on that face: Br⁻ cannot approach."},{"why":"Flat cation case. Bromonium blocks one face."}]},{"ask":"H₂, Pd/C: both H from surface. How add?","options":[{"why":"Yes. Alkene on metal, both H from surface: syn, cis on ring."},{"why":"Only one face touches surface."},{"why":"H₂ split on metal; both H to one face."}]}]}, // CAVEMAN
+      caveman: {"problem":"<b>Q3: same side or opposite?</b> 1,2-Dimethylcyclopentene, three reagents: groups on ring?","rule":"Q3: flat carbocation: either face. Three-membered ring (bromonium, epoxide + water): anti. Both pieces at once (H₂/Pd, cold KMnO₄, peroxyacid, borane): syn. Ring: syn cis, anti trans. Stereocentres: racemate (flat alkene) or meso (matching halves). <a href=\"#lesson-10/s03\">Lesson 10</a>.","moves":[{"ask":"HBr: carbocation. Shape, meaning for Br⁻?","options":[{"why":"Yes. Flat: two faces, no preference."},{"why":"Flat (sp²), three bonds. Nothing forces Br⁻ to one face."},{"why":"Bromonium from Br₂, not HBr."}]},{"ask":"Br₂: ring on one face. Br⁻ attacks where?","options":[{"why":"Yes. Ring blocks its face: Br⁻ from back. Anti: trans on ring."},{"why":"Ring on that face: Br⁻ cannot approach."},{"why":"Flat cation case. Bromonium blocks one face."}]},{"ask":"H₂, Pd/C: both H from surface. How add?","options":[{"why":"Yes. Alkene on metal, both H from surface: syn, cis on ring."},{"why":"Only one face touches surface."},{"why":"H₂ split on metal; both H to one face."}]}]}, // CAVEMAN
       type: 'worked',
       skill: 'stereo-addition',
       part: 1,
@@ -335,16 +319,8 @@ export default {
           ]
         }
       ],
-      rule: 'Q3: a flat carbocation gives either face. A three-membered ring intermediate (bromonium, or an epoxide opened by water) gives anti. Both pieces delivered at once from one surface or one reagent (H₂ over Pd, cold KMnO₄, a peroxyacid O, borane) give syn.',
+      rule: 'Q3: a flat carbocation gives either face. A three-membered ring intermediate (bromonium, or an epoxide opened by water) gives anti. Both pieces delivered at once from one surface or one reagent (H₂ over Pd, cold KMnO₄, a peroxyacid O, borane) give syn. On a ring, syn is cis and anti is trans. A product with stereocentres is a racemate (flat or one-sided reagent on a flat alkene), meso (two matching halves) or a single compound. <a href="#lesson-10/s03">Lesson 10</a>.',
       id: 's07'
-    },
-    {
-      caveman: {"html":"<p><b>Q3: faces.</b> Flat carbocation: either face. Three-membered ring (bromonium, epoxide + water): anti. Both pieces at once: syn. Stereocentres: racemate (flat or one-sided reagents, flat alkene) or meso (matching halves). <a href=\"#lesson-10/s03\">Lesson 10</a>.</p>"}, // CAVEMAN
-      type: 'explain',
-      skill: 'stereo-addition',
-      part: 1,
-      html: '<p><b>Q3 decides the faces.</b> Flat carbocation: either face. Three-membered ring (bromonium, epoxide opened by water): anti. Both pieces arriving at once: syn. On a ring, syn is cis and anti is trans. If the product has stereocentres, ask whether it is a racemate (flat or one-sided reagents on a flat alkene), meso (two matching halves) or a single compound. See <a href="#lesson-10/s03">Lesson 10</a>.</p>',
-      id: 's08'
     },
     {
       caveman: {"prompt":"<name new=\"cyclopentene\" old=\"cyclopentene\"></name> + <b>Br₂, CH₂Cl₂</b>: major product?","reveal":"Bromonium ring: Br⁻ from back: anti, <b>trans</b>-1,2-dibromocyclopentane. Flat alkene, achiral reagent: <b>racemate</b>.","options":[{"why":"Yes. Br₂ adds anti: bromonium, Br⁻ from back: trans on ring. (racemate: either drawing correct)"},{"why":"syn product: both Br SAME face. Br₂ adds anti."},{"why":"Two H (alkane). Br₂: one Br per carbon."},{"why":"Other halogen. Br₂ adds Br."}]}, // CAVEMAN
@@ -455,6 +431,7 @@ export default {
       skill: 'stereo-addition',
       part: 2,
       prompt: '<b>Anti additions.</b> Substrate: <name new="(E)-but-2-ene" old="(E)-2-butene"></name>. Reagent: <b>Br₂, CH₂Cl₂</b>. What is the major product?',
+      aside: '<b>Reading these drawings.</b> The wedges and dashes are on the CH₃ ends of the chain, not on the Br. A wedged CH₃ points toward you, a dashed one points away, and the Br on each carbon is drawn plain (in the page).',
       equation: {
         reactants: ['C/C=C/C'],
         products: [],
@@ -489,6 +466,7 @@ export default {
       skill: 'stereo-addition',
       part: 2,
       prompt: 'Substrate: <name new="(Z)-but-2-ene" old="(Z)-2-butene"></name>. Reagent: <b>RCO₃H, then H₃O⁺</b>. What is the major product?',
+      aside: '<b>Reading these drawings.</b> The wedges and dashes are on the CH₃ ends of the chain, not on the OH. A wedged CH₃ points toward you, a dashed one points away, and the OH on each carbon is drawn plain (in the page).',
       equation: {
         reactants: ['C/C=C\\C'],
         products: [],
@@ -523,6 +501,7 @@ export default {
       skill: 'stereo-addition',
       part: 2,
       prompt: '<b>Syn additions and oxidations.</b> Both pieces arrive together. Substrate: <name new="1,2-dimethylcyclopentene" old="1,2-dimethylcyclopentene"></name>. Reagent: <b>H₂, Pd/C</b>. What is the major product?',
+      aside: '<b>Reading these drawings.</b> The wedges and dashes are on the CH₃ groups of the ring (and on Br where it is drawn). Two groups that are both wedged, or both dashed, sit on the SAME face of the ring (cis); one wedge and one dash sit on opposite faces (trans).',
       equation: {
         reactants: ['CC1=C(C)CCC1'],
         products: [],
@@ -552,15 +531,15 @@ export default {
       id: 's14'
     },
     {
-      caveman: {"prompt":"<name new=\"cyclopentene\" old=\"cyclopentene\"></name> + <b>KMnO₄, OH⁻, H₂O</b>: major product?","reveal":"<b>Q1:</b> OH, OH add.<br><b>Q2:</b> One OH per carbon.<br><b>Q3:</b> Both O from one MnO₄⁻: syn: cis diol (meso).<br><b>Kind:</b> <b>cis diol</b>. <a href=\"#reactions/alkene-kmno4-base\">Open card</a>","options":[{"why":"Epoxide. KMnO₄, OH⁻, H₂O adds OH, OH."},{"why":"C=C cut: KMnO₄ in ACID. Base: C–C stays."},{"why":"anti product: OH OPPOSITE faces. KMnO₄, OH⁻, H₂O adds syn."},{"why":"Yes. KMnO₄ in base: both OH same face (syn): cis diol."}]}, // CAVEMAN
+      caveman: {"prompt":"<name new=\"cyclopentene\" old=\"cyclopentene\"></name> + <b>KMnO₄ (cold, dilute), OH⁻, H₂O</b>: major product?","reveal":"<b>Q1:</b> OH, OH add.<br><b>Q2:</b> One OH per carbon.<br><b>Q3:</b> Both O from one MnO₄⁻: syn: cis diol (meso).<br><b>Kind:</b> <b>cis diol</b>. <a href=\"#reactions/alkene-kmno4-base\">Open card</a>","options":[{"why":"Epoxide. KMnO₄, OH⁻, H₂O adds OH, OH."},{"why":"C=C cut: hot KMnO₄, acid. Cold dilute base: C–C stays."},{"why":"anti product: OH OPPOSITE faces. KMnO₄, OH⁻, H₂O adds syn."},{"why":"Yes. KMnO₄ in base: both OH same face (syn): cis diol."}]}, // CAVEMAN
       type: 'predict',
       skill: 'stereo-addition',
       part: 2,
-      prompt: 'Substrate: <name new="cyclopentene" old="cyclopentene"></name>. Reagent: <b>KMnO₄, OH⁻, H₂O</b>. What is the major product?',
+      prompt: 'Substrate: <name new="cyclopentene" old="cyclopentene"></name>. Reagent: <b>KMnO₄ (cold, dilute), OH⁻, H₂O</b>. What is the major product?',
       equation: {
         reactants: ['C1=CCCC1'],
         products: [],
-        cond: 'KMnO₄, OH⁻, H₂O'
+        cond: 'KMnO₄ (cold, dilute), OH⁻, H₂O'
       },
       options: [
         {
@@ -569,7 +548,7 @@ export default {
         },
         {
           text: '<mol smiles="O=C(O)CCCC(=O)O"></mol>',
-          why: 'The C=C is cut here, and that is KMnO₄ in ACID. In base the C–C bond stays and each carbon gains an OH.'
+          why: 'The C=C is cut here. That is what hot, acidic KMnO₄ does (hot, concentrated base can cut it too). Cold, dilute KMnO₄ in base keeps the C–C bond, and each carbon gains an OH.'
         },
         {
           text: '<mol smiles="O[C@H]1CCC[C@@H]1O"></mol>',
@@ -654,15 +633,15 @@ export default {
       id: 's17'
     },
     {
-      caveman: {"prompt":"<name new=\"2-methylpent-2-ene\" old=\"2-methyl-2-pentene\"></name> + <b>KMnO₄, H₃O⁺</b>: major product(s)?","reveal":"<b>Q1:</b> Oxidant cuts C=C: each end gains O.<br><b>Q2:</b> H count: =CR₂ ketone, =CHR carboxylic acid (=CH₂: CO₂).<br><b>Q3:</b> C=C gone.<br><b>Kind:</b> <b>ketone</b>, <b>carboxylic acid</b>. <a href=\"#reactions/alkene-kmno4-acid\">Open KMnO₄ card</a>","options":[{"why":"C=C still there. KMnO₄, H₃O⁺ adds O, uses up C=C."},{"why":"Epoxide. KMnO₄, H₃O⁺ adds O to each end, not epoxide."},{"why":"Diol. KMnO₄, H₃O⁺ cuts C=C in acid."},{"why":"KMnO₄ in acid cuts C=C: =CR₂ ketone, =CHR acid, =CH₂ CO₂."}]}, // CAVEMAN
+      caveman: {"prompt":"<name new=\"2-methylpent-2-ene\" old=\"2-methyl-2-pentene\"></name> + <b>KMnO₄ (hot), H₃O⁺</b>: major product(s)?","reveal":"<b>Q1:</b> Oxidant cuts C=C: each end gains O.<br><b>Q2:</b> H count: =CR₂ ketone, =CHR carboxylic acid (=CH₂: CO₂).<br><b>Q3:</b> C=C gone.<br><b>Kind:</b> <b>ketone</b>, <b>carboxylic acid</b>. <a href=\"#reactions/alkene-kmno4-acid\">Open KMnO₄ card</a>","options":[{"why":"C=C still there. KMnO₄, H₃O⁺ adds O, uses up C=C."},{"why":"Epoxide. KMnO₄, H₃O⁺ adds O to each end, not epoxide."},{"why":"Diol. KMnO₄, H₃O⁺ cuts C=C in acid."},{"why":"KMnO₄ in acid cuts C=C: =CR₂ ketone, =CHR acid, =CH₂ CO₂."}]}, // CAVEMAN
       type: 'predict',
       skill: 'alkene-oxidation',
       part: 2,
-      prompt: 'Substrate: <name new="2-methylpent-2-ene" old="2-methyl-2-pentene"></name>. Reagent: <b>KMnO₄, H₃O⁺</b>. What is the major product (or products)?',
+      prompt: 'Substrate: <name new="2-methylpent-2-ene" old="2-methyl-2-pentene"></name>. Reagent: <b>KMnO₄ (hot), H₃O⁺</b>. What is the major product (or products)?',
       equation: {
         reactants: ['CCC=C(C)C'],
         products: [],
-        cond: 'KMnO₄, H₃O⁺'
+        cond: 'KMnO₄ (hot), H₃O⁺'
       },
       options: [
         {
@@ -688,12 +667,12 @@ export default {
       id: 's18'
     },
     {
-      caveman: {"prompt":"Lab, alkenes. Pick alkene, reagent, run Q1, Q2, Q3, predict BEFORE answer. Three right, three reagents.","worked":"1-Methylcyclohexene + HBr: tertiary bromide. Cyclopentene + Br₂: trans racemate; + KMnO₄ (base): cis diol. Hexene + KMnO₄ (acid): pentanoic acid, CO₂.","hints":["HX/H₂O: H + X or OH; Br₂ two Br; H₂ two H; peroxyacid O; KMnO₄: base two OH, acid cuts.","Markovnikov (HX, water). Faces: anti (Br₂, epoxide-then-acid); syn (H₂, epoxide, KMnO₄ base)."]}, // CAVEMAN
+      caveman: {"prompt":"Lab, alkenes. Pick alkene, reagent, run Q1, Q2, Q3, predict BEFORE answer. Three right first try, three reagents. KMnO₄ base: cold; acid: hot.","worked":"1-Methylcyclohexene + HBr: tertiary bromide. Cyclopentene + Br₂: trans racemate; + KMnO₄ (base): cis diol. Hexene + KMnO₄ (acid): pentanoic acid, CO₂.","hints":["HX/H₂O: H + X or OH; Br₂ two Br; H₂ two H; peroxyacid O; KMnO₄: cold base two OH, hot acid cuts.","Markovnikov (HX, water). Faces: anti (Br₂, epoxide-then-acid); syn (H₂, epoxide, KMnO₄ base)."]}, // CAVEMAN
       type: 'try',
       skill: 'predict-product',
       widget: 'reaction-lab',
       part: 2,
-      prompt: 'Your turn in the lab with alkenes. Pick an alkene and a reagent, run Q1, Q2 and Q3 in your head, then predict BEFORE the lab shows the answer. Get three predictions right, using at least three different reagents.',
+      prompt: 'Your turn in the lab with alkenes. Pick an alkene and a reagent, run Q1, Q2 and Q3 in your head, then predict BEFORE the lab shows the answer. Get three predictions right on the first try, using at least three different reagents. (KMnO₄ in base means cold and dilute; KMnO₄ in acid means hot.)',
       config: {
         need: 3,
         alkenes: [
@@ -707,18 +686,18 @@ export default {
       },
       confirm: 'Three right. Each time you named what adds (Q1), where it goes (Q2) and the faces (Q3) before looking.',
       hints: [
-        'Name the reagent’s job first: HX or H₂O add H + X or OH; Br₂ adds two Br; H₂ two H; a peroxyacid one O; KMnO₄ in base two OH, in acid it cuts.',
+        'Name the reagent’s job first: HX or H₂O add H + X or OH; Br₂ adds two Br; H₂ two H; a peroxyacid one O; cold, dilute KMnO₄ in base two OH, hot acidic KMnO₄ cuts.',
         'Then pick the orientation (Markovnikov for HX and water) and the faces (anti for Br₂ and the epoxide-then-acid route, syn for H₂, the epoxide and KMnO₄ in base).'
       ],
       worked: 'For example: 1-methylcyclohexene + HBr gives the tertiary bromide; cyclopentene + Br₂ gives the trans dibromide (a racemate); cyclopentene + KMnO₄ in base gives the cis diol; hex-1-ene + KMnO₄ in acid is cut to pentanoic acid and CO₂.',
       id: 's19'
     },
     {
-      caveman: {"html":"<p><b>Alkene products.</b> H + X: alkyl halide. H + OH: alcohol. OH + OH: diol (cis: KMnO₄, base; trans: epoxide). O across C=C: epoxide. H + H: alkane. Cut: ketones, acids. Br₂ anti; H₂ syn. Flat reagents: racemate; matching halves: meso.</p>"}, // CAVEMAN
+      caveman: {"html":"<p><b>Alkene products.</b> H+X halide. H+OH alcohol. OH+OH diol (cis: cold KMnO₄). O: epoxide. H+H alkane. Cut: ketone, acid. Br₂ anti, H₂ syn; flat: racemate.</p>"}, // CAVEMAN
       type: 'explain',
       skill: 'predict-product',
       part: 2,
-      html: '<p><b>Alkene product kinds.</b> H + X: an alkyl halide. H + OH: an alcohol. OH + OH: a diol (cis from cold KMnO₄ in base, trans from the epoxide route). One O across the C=C: an epoxide. H + H: an alkane. C=C cut: ketones and acids. Then the faces: flat cation, either; Br₂, anti; H₂, syn. A chiral product from flat reagents is a racemate; two matching halves are meso.</p>',
+      html: '<p><b>Alkene product kinds.</b> H + X: halide. H + OH: alcohol. OH + OH: diol (cis from cold KMnO₄ in base, trans from the epoxide route). One O: epoxide. H + H: alkane. C=C cut: ketones and acids. Br₂ adds anti, H₂ syn; flat reagents give a racemate.</p>',
       id: 's20'
     },
     {
@@ -761,6 +740,7 @@ export default {
       skill: 'alkynes',
       part: 2,
       prompt: 'Substrate: <name new="but-1-yne" old="1-butyne"></name>. Reagent: <b>HCl (2 equiv.)</b>. What is the major product?',
+      aside: '<b>New idea: guess, then learn.</b> After the first HCl the molecule has a C=C with one Cl on it. A lone pair on that Cl can share the + charge, so the second Cl bonds to the carbon that already holds a Cl.',
       equation: {
         reactants: ['CCC#C'],
         products: [],
@@ -1048,11 +1028,11 @@ export default {
       id: 's30'
     },
     {
-      caveman: {"html":"<p>One HX: vinylic halide. Two HX: geminal dihalide. One X₂: trans dihaloalkene; two: tetrahalide. Hg²⁺, water: ketone. Hydroboration: aldehyde. Lindlar: cis alkene. Pd/C: alkane. Acetylide + R–Br: longer alkyne.</p>"}, // CAVEMAN
+      caveman: {"html":"<p>HX: vinylic halide, geminal. X₂: trans dihaloalkene, tetrahalide. Hg²⁺: ketone. Hydroboration: aldehyde. Lindlar: cis. Pd/C: alkane. Acetylide + RBr: alkyne.</p>"}, // CAVEMAN
       type: 'explain',
       skill: 'predict-product',
       part: 2,
-      html: '<p><b>Alkyne product kinds.</b> One HX: a vinylic halide. Two HX: a geminal dihalide. One X₂: a trans dihaloalkene; two: a tetrahalide. Hg²⁺ and water: an enol, then a ketone (a methyl ketone from a terminal alkyne). Hydroboration: an aldehyde from a terminal alkyne. Lindlar: a cis alkene. Pd/C: the alkane. Acetylide plus R–Br: a longer alkyne.</p>',
+      html: '<p><b>Alkyne product kinds.</b> HX: a vinylic halide, then a geminal dihalide. X₂: a trans dihaloalkene, then a tetrahalide. Hg²⁺ and water: a ketone. Hydroboration: an aldehyde. Lindlar: a cis alkene; Pd/C: the alkane. Acetylide plus R–Br: a longer alkyne.</p>',
       id: 's31'
     },
     {
@@ -1095,6 +1075,7 @@ export default {
       skill: 'predict-product',
       part: 2,
       prompt: 'Buta-1,3-diene and acrolein, CH₂=CH–CHO, are heated together. The diene is the rich partner; acrolein’s C=C is poor (the C=O pulls on it). Both π systems react at once. What forms?',
+      aside: '<b>New reaction: guess, then learn.</b> A Diels–Alder joins a diene to a dienophile, an alkene with an electron-pulling group such as C=O. Both ends of the diene bond to the two alkene carbons in one step and close a six-membered ring.',
       equation: {
         reactants: ['C=CC=C', 'C=CC=O'],
         products: [],
@@ -1251,11 +1232,11 @@ export default {
       id: 's37'
     },
     {
-      caveman: {"prompt":"<name new=\"benzene\" old=\"benzene\"></name> + <b>(CH₃)₃CCl, AlCl₃</b>: major product?","reveal":"<b>Q1:</b> AlCl₃ pulls Cl⁻ off R–Cl: carbocation R⁺ (poor); ring attacks. Tertiary cation does not shift.<br><b>Q2:</b> Six carbons alike.<br><b>Q3:</b> Nothing.<br><b>Kind:</b> <b>alkylbenzene</b> (tert-butylbenzene). <a href=\"#reactions/fc-alkylation\">Open card</a>","options":[{"why":"Yes. R⁺ replaces one H, H⁺ leaves: aromatic: tert-butylbenzene + HCl."},{"why":"Added across ring C=C. Ring kept: (CH₃)₃C REPLACES one H."},{"why":"TWO groups: only one (CH₃)₃C adds."},{"why":"Ethylbenzene: CH₃CH₂Cl, AlCl₃. Here (CH₃)₃CCl: (CH₃)₃C."}]}, // CAVEMAN
+      caveman: {"prompt":"<name new=\"benzene\" old=\"benzene\"></name> (excess) + <b>(CH₃)₃CCl, AlCl₃</b>: major product?","reveal":"<b>Q1:</b> AlCl₃ pulls Cl⁻ off R–Cl: carbocation R⁺ (poor); ring attacks. Tertiary cation does not shift.<br><b>Q2:</b> Six carbons alike.<br><b>Q3:</b> Nothing.<br><b>Kind:</b> <b>alkylbenzene</b> (tert-butylbenzene). <a href=\"#reactions/fc-alkylation\">Open card</a>","options":[{"why":"Yes. R⁺ replaces one H, H⁺ leaves: aromatic: tert-butylbenzene + HCl."},{"why":"Added across ring C=C. Ring kept: (CH₃)₃C REPLACES one H."},{"why":"TWO groups: only one (CH₃)₃C adds."},{"why":"Ethylbenzene: CH₃CH₂Cl, AlCl₃. Here (CH₃)₃CCl: (CH₃)₃C."}]}, // CAVEMAN
       type: 'predict',
       skill: 'eas',
       part: 2,
-      prompt: 'Substrate: <name new="benzene" old="benzene"></name>. Reagent: <b>(CH₃)₃CCl, AlCl₃</b>. What is the major product?',
+      prompt: 'Substrate: <name new="benzene" old="benzene"></name> (in excess). Reagent: <b>(CH₃)₃CCl, AlCl₃</b>. What is the major product?',
       equation: {
         reactants: ['c1ccccc1'],
         products: [],
@@ -1273,7 +1254,7 @@ export default {
         },
         {
           text: '<mol smiles="CC(C)(C)c1ccc(C(C)(C)C)cc1"></mol>',
-          why: 'This ring has TWO new groups. (CH₃)₃CCl, AlCl₃ puts on only one (CH₃)₃C.'
+          why: 'This ring has TWO new groups. With benzene in excess, (CH₃)₃CCl, AlCl₃ puts on only one (CH₃)₃C.'
         },
         {
           text: '<mol smiles="CCc1ccccc1"></mol>',
@@ -1319,11 +1300,11 @@ export default {
       id: 's39'
     },
     {
-      caveman: {"prompt":"<b>Directors.</b> Ring already has group: where can + sit best? <name new=\"methoxybenzene\" old=\"anisole\"></name> + <b>HNO₃, H₂SO₄</b>: major product(s)?","reveal":"<b>Q1:</b> Ring richer than benzene (O lone pair feeds it); NO₂⁺ poor: NO₂ replaces ring H.<br><b>Q2:</b> ortho, para attack: + can sit on carbon holding OCH₃, O lone pair shares it. Meta: no such form.<br><b>Q3:</b> Two position isomers.<br><b>Kind:</b> <b>ortho and para</b> products (two isomers, drawn together). <a href=\"#reactions/director-activating\">Open card</a>","options":[{"why":"Only para drawn; ortho/para director gives ortho AND para: both form."},{"why":"TWO groups. HNO₃, H₂SO₄: one NO₂."},{"why":"NO₂ meta to –OR. –OR is ortho/para director."},{"why":"Yes. –OCH₃ ortho/para: NO₂⁺ replaces H ortho or para. Both isomers drawn."}]}, // CAVEMAN
+      caveman: {"prompt":"<b>Directors.</b> Ring already has group: where can + sit best? <name new=\"methoxybenzene\" old=\"anisole\"></name> + <b>HNO₃, H₂SO₄</b>: which products form?","reveal":"<b>Q1:</b> Ring richer than benzene (O lone pair feeds it); NO₂⁺ poor: NO₂ replaces ring H.<br><b>Q2:</b> ortho, para attack: + can sit on carbon holding OCH₃, O lone pair shares it. Meta: no such form.<br><b>Q3:</b> Two position isomers.<br><b>Kind:</b> <b>ortho and para</b> products (two isomers, drawn together). <a href=\"#reactions/director-activating\">Open card</a>","options":[{"why":"Only para drawn; ortho/para director: both isomers form."},{"why":"TWO groups. HNO₃, H₂SO₄: one NO₂."},{"why":"NO₂ meta to –OR. –OR is ortho/para director."},{"why":"Yes. –OCH₃ ortho/para: NO₂⁺ replaces H ortho or para. Both isomers drawn."}]}, // CAVEMAN
       type: 'predict',
       skill: 'directors',
       part: 2,
-      prompt: '<b>Directors.</b> Now the ring already has a group. Ask where the + can sit best. Substrate: <name new="methoxybenzene" old="anisole"></name>. Reagent: <b>HNO₃, H₂SO₄</b>. What is the major product (or products)?',
+      prompt: '<b>Directors.</b> Now the ring already has a group. Ask where the + can sit best. Substrate: <name new="methoxybenzene" old="anisole"></name>. Reagent: <b>HNO₃, H₂SO₄</b>. Which products form? Pick the drawing that shows every major product.',
       equation: {
         reactants: ['COc1ccccc1'],
         products: [],
@@ -1332,7 +1313,7 @@ export default {
       options: [
         {
           text: '<mol smiles="COc1ccc([N+](=O)[O-])cc1"></mol>',
-          why: 'Only the para product is drawn, but an ortho/para director sends the new group ortho AND para, so both isomers form.'
+          why: 'Only the para product is drawn. An ortho/para director sends the new group ortho AND para, so both isomers form (para may be the bigger share, but this answer leaves one out).'
         },
         {
           text: '<mol smiles="COc1cccc([N+](=O)[O-])c1[N+](=O)[O-]"></mol>',
@@ -1387,11 +1368,11 @@ export default {
       id: 's41'
     },
     {
-      caveman: {"prompt":"<name new=\"bromobenzene\" old=\"bromobenzene\"></name> + <b>HNO₃, H₂SO₄</b>: major product(s)?","reveal":"<b>Q1:</b> Br pulls through σ bond: slower than benzene; NO₂⁺ poor.<br><b>Q2:</b> Br lone pair can share + in ortho, para attack (extra form): NO₂ <b>ortho and para</b> despite slower rate.<br><b>Q3:</b> Nothing.<br><b>Kind:</b> <b>ortho and para</b> products. <a href=\"#reactions/director-halogen\">Open card</a>","options":[{"why":"Only para drawn; halogen ortho/para: NO₂ ortho AND para, both isomers."},{"why":"TWO groups. HNO₃, H₂SO₄: one NO₂."},{"why":"NO₂ meta to –Br. –Br is ortho/para director."},{"why":"Yes. –Br ortho/para: NO₂⁺ replaces H ortho or para: 1-bromo-4-nitrobenzene, 1-bromo-2-nitrobenzene. Mixture."}]}, // CAVEMAN
+      caveman: {"prompt":"<name new=\"bromobenzene\" old=\"bromobenzene\"></name> + <b>HNO₃, H₂SO₄</b>: which products form?","reveal":"<b>Q1:</b> Br pulls through σ bond: slower than benzene; NO₂⁺ poor.<br><b>Q2:</b> Br lone pair can share + in ortho, para attack (extra form): NO₂ <b>ortho and para</b> despite slower rate.<br><b>Q3:</b> Nothing.<br><b>Kind:</b> <b>ortho and para</b> products. <a href=\"#reactions/director-halogen\">Open card</a>","options":[{"why":"Only para drawn; halogen ortho/para: NO₂ ortho AND para, both isomers form."},{"why":"TWO groups. HNO₃, H₂SO₄: one NO₂."},{"why":"NO₂ meta to –Br. –Br is ortho/para director."},{"why":"Yes. –Br ortho/para: NO₂⁺ replaces H ortho or para: 1-bromo-4-nitrobenzene, 1-bromo-2-nitrobenzene. Mixture."}]}, // CAVEMAN
       type: 'predict',
       skill: 'directors',
       part: 2,
-      prompt: 'Substrate: <name new="bromobenzene" old="bromobenzene"></name>. Reagent: <b>HNO₃, H₂SO₄</b>. What is the major product (or products)?',
+      prompt: 'Substrate: <name new="bromobenzene" old="bromobenzene"></name>. Reagent: <b>HNO₃, H₂SO₄</b>. Which products form? Pick the drawing that shows every major product.',
       equation: {
         reactants: ['Brc1ccccc1'],
         products: [],
@@ -1400,7 +1381,7 @@ export default {
       options: [
         {
           text: '<mol smiles="O=[N+]([O-])c1ccc(Br)cc1"></mol>',
-          why: 'Only the para product is drawn, but a halogen is an ortho/para director, so NO₂ goes ortho AND para and both isomers form.'
+          why: 'Only the para product is drawn. A halogen is an ortho/para director, so NO₂ goes ortho AND para and both isomers form (para may be the bigger share, but this answer leaves one out).'
         },
         {
           text: '<mol smiles="O=[N+]([O-])c1cccc(Br)c1[N+](=O)[O-]"></mol>',
@@ -1426,6 +1407,7 @@ export default {
       skill: 'predict-product',
       part: 2,
       prompt: 'Substrate: N,N,4-trimethylaniline. Reagent: <b>HNO₃, H₂SO₄</b>. What is the major product?',
+      aside: '<b>New idea: guess, then learn.</b> In strong acid an amine N takes an H⁺ with its lone pair. The N then has a + charge and no lone pair, so it pulls electrons out of the ring instead of pushing them in.',
       equation: {
         reactants: ['CN(C)c1ccc(C)cc1'],
         products: [],
@@ -1477,11 +1459,11 @@ export default {
       id: 's44'
     },
     {
-      caveman: {"html":"<p>Benzene: substituted ring (halide, nitroarene, sulfonic acid, alkylbenzene, ketone). Activator, halogen: ortho, para isomers. Other deactivator, amine in acid: one meta product. Two groups: stronger activator decides.</p>"}, // CAVEMAN
+      caveman: {"html":"<p>Benzene: one substituted ring. Activator, halogen: ortho, para. Other deactivator, amine in acid: meta. Two groups: stronger activator decides. Nothing adds.</p>"}, // CAVEMAN
       type: 'explain',
       skill: 'predict-product',
       part: 2,
-      html: '<p><b>Ring product kinds.</b> Benzene: one substituted ring (aryl halide, nitroarene, sulfonic acid, alkylbenzene, aryl ketone). An activator or a halogen: ortho and para products, two isomers. Any other deactivator, and an amine in strong acid: one meta product. When two groups compete, the stronger activator decides. Nothing adds across the ring.</p>',
+      html: '<p><b>Ring product kinds.</b> Benzene: one substituted ring. An activator or a halogen: ortho and para isomers. Any other deactivator, and an amine in strong acid: one meta product. Two competing groups: the stronger activator decides. Nothing adds across the ring.</p>',
       id: 's45'
     },
     {
@@ -1558,6 +1540,7 @@ export default {
       skill: 'predict-product',
       part: 2,
       prompt: 'Substrate: <name new="propylbenzene" old="propylbenzene"></name>. Reagent: <b>NBS, heat (or Br₂, light)</b>. What is the major product?',
+      aside: '<b>New reagent: guess, then learn.</b> NBS (or Br₂ with light) works by radicals, not by a rich-to-poor attack. Br· takes the weakest C–H, the one on the carbon next to the ring (benzylic), because the ring steadies the radical.',
       equation: {
         reactants: ['CCCc1ccccc1'],
         products: [],
@@ -1587,11 +1570,12 @@ export default {
       id: 's48'
     },
     {
-      caveman: {"prompt":"<name new=\"acetophenone\" old=\"acetophenone\"></name> + <b>Zn(Hg), HCl, heat</b>: major product?","reveal":"<b>Q1:</b> Zn(Hg), HCl electron donor (rich): C=O next to ring reduced: two H add, O leaves.<br><b>Q2:</b> Only carbonyl on ring.<br><b>Q3:</b> CH₂: no stereocentre.<br><b>Kind:</b> <b>alkylbenzene</b>: aryl ketone to alkane side chain. <a href=\"#reactions/clemmensen\">Open Clemmensen card</a>","options":[{"why":"Starting ketone. Zn(Hg), HCl: C=O does not survive."},{"why":"Reduction goes all the way to CH₂. Alcohol only partial: Clemmensen does not stop."},{"why":"Ring not reduced. Clemmensen: only carbonyl next to ring."},{"why":"Yes. Zn(Hg), HCl, heat: C=O next to ring to CH₂. O leaves; ring untouched."}]}, // CAVEMAN
+      caveman: {"prompt":"<name new=\"acetophenone\" old=\"acetophenone\"></name> + <b>Zn(Hg), HCl, heat</b> (Clemmensen): major product?","reveal":"<b>Q1:</b> Zn(Hg), HCl electron donor (rich): C=O next to ring reduced: two H add, O leaves.<br><b>Q2:</b> Only carbonyl on ring.<br><b>Q3:</b> CH₂: no stereocentre.<br><b>Kind:</b> <b>alkylbenzene</b>: aryl ketone to alkane side chain. <a href=\"#reactions/clemmensen\">Open Clemmensen card</a>","options":[{"why":"Starting ketone. Zn(Hg), HCl: C=O does not survive."},{"why":"Reduction goes all the way to CH₂. Alcohol only partial: Clemmensen does not stop."},{"why":"Ring not reduced. Clemmensen: only carbonyl next to ring."},{"why":"Yes. Zn(Hg), HCl, heat: C=O next to ring to CH₂. O leaves; ring untouched."}]}, // CAVEMAN
       type: 'predict',
       skill: 'predict-product',
       part: 2,
-      prompt: 'Substrate: <name new="acetophenone" old="acetophenone"></name>. Reagent: <b>Zn(Hg), HCl, heat</b>. What is the major product?',
+      prompt: 'Substrate: <name new="acetophenone" old="acetophenone"></name>. Reagent: <b>Zn(Hg), HCl, heat</b> (the Clemmensen reduction). What is the major product?',
+      aside: '<b>New reagent: guess, then learn.</b> Zn(Hg) with HCl and heat is the Clemmensen reduction: it turns a C=O next to a ring into CH₂ and leaves the ring alone.',
       equation: {
         reactants: ['CC(=O)c1ccccc1'],
         products: [],
@@ -1626,6 +1610,7 @@ export default {
       skill: 'predict-product',
       part: 2,
       prompt: 'Substrate: <name new="benzoic acid" old="benzoic acid"></name>. Reagent: <b>Na, liquid NH₃, EtOH</b>. What is the major product?',
+      aside: '<b>New reagent: guess, then learn.</b> Na in liquid NH₃ with EtOH is the Birch reduction. It adds two H to the ring on carbons para to each other and stops at a diene with two separate C=C. An electron-withdrawing group such as CO₂H ends up on an sp³ carbon.',
       equation: {
         reactants: ['OC(=O)c1ccccc1'],
         products: [],
@@ -1633,19 +1618,19 @@ export default {
       },
       options: [
         {
-          text: '<mol smiles="OC(=O)C1=CCC=CC1"></mol>',
+          text: '<mol smiles="OC(=O)C1=CCC=CC1" label="cyclohexa-1,4-diene-1-carboxylic acid"></mol>',
           why: 'Here the CO₂H sits on a C=C carbon. An electron-withdrawing group ends up on an sp³ carbon in the Birch product.'
         },
         {
-          text: '<mol smiles="OC(=O)C1CCCCC1"></mol>',
+          text: '<mol smiles="OC(=O)C1CCCCC1" label="cyclohexanecarboxylic acid"></mol>',
           why: 'That is the fully reduced ring. Birch adds only two H atoms and stops at the diene.'
         },
         {
-          text: '<mol smiles="OC(=O)C1C=CC=CC1"></mol>',
+          text: '<mol smiles="OC(=O)C1C=CC=CC1" label="cyclohexa-2,4-diene-1-carboxylic acid"></mol>',
           why: 'That is a conjugated 1,3-diene. Birch gives the 1,4-diene: the two H atoms add para to each other, so the two C=C bonds are apart.'
         },
         {
-          text: '<mol smiles="OC(=O)C1C=CCC=C1"></mol>',
+          text: '<mol smiles="OC(=O)C1C=CCC=C1" label="cyclohexa-2,5-diene-1-carboxylic acid"></mol>',
           correct: true,
           why: 'Yes. Birch puts H on two para ring carbons and leaves a 1,4-diene. The CO₂H (electron-withdrawing) sits on an sp³ carbon.'
         }
@@ -1728,6 +1713,7 @@ export default {
       skill: 'predict-product',
       part: 2,
       prompt: '<b>Alcohol oxidations.</b> Each C–OH carbon that has an H loses two H. Substrate: 1-phenylbutane-1,4-diol. Reagent: <b>PCC, CH₂Cl₂</b>. What is the major product?',
+      aside: '<b>New reagent: guess, then learn.</b> PCC in CH₂Cl₂ (no water) oxidises an alcohol by taking two H: a 1° alcohol becomes an aldehyde and stops there, a 2° alcohol becomes a ketone.',
       equation: {
         reactants: ['OC(CCCO)c1ccccc1'],
         products: [],
@@ -1762,6 +1748,7 @@ export default {
       skill: 'predict-product',
       part: 2,
       prompt: 'Substrate: butan-1-ol. Reagent: <b>Na₂Cr₂O₇, H₂SO₄, H₂O</b>. What is the major product?',
+      aside: '<b>New reagent: guess, then learn.</b> Na₂Cr₂O₇ with H₂SO₄ in water also takes two H, but in water the aldehyde is oxidised once more: a 1° alcohol goes all the way to the carboxylic acid.',
       equation: {
         reactants: ['CCCCO'],
         products: [],
@@ -1799,7 +1786,7 @@ export default {
       prompt: '<b>Exception 1: Q2 has one reverse.</b> Propene meets four reagents. Three put the new group on C2, the middle carbon. One puts it on C1, the end carbon, where there is MORE H. Which one?',
       options: [
         {
-          text: 'HBr in ether',
+          text: 'HBr gas bubbled into ether',
           why: 'H goes to C1 and Br to C2: 2-bromopropane. The 2° cation decides, so this follows Q2 as usual.'
         },
         {
@@ -1812,7 +1799,7 @@ export default {
           why: 'The 2° cation again: OH ends up on C2, propan-2-ol.'
         },
         {
-          text: 'HCl in ether',
+          text: 'HCl gas bubbled into ether',
           why: 'The same as HBr: H to C1, Cl to C2, through the 2° cation.'
         }
       ],
@@ -1824,12 +1811,12 @@ export default {
       id: 's55'
     },
     {
-      caveman: {"prompt":"<b>Exception 2: halogens.</b> Chlorobenzene + HNO₃, H₂SO₄. Rate vs benzene, where NO₂ goes?","worked":"Rate: Cl pulls: slower. Position: ortho, para attack: Cl lone pair shares +; meta cannot. Slower, but ortho, para. <a href=\"#reactions/director-halogen\">Card</a>.","hints":["Two separate questions: rate (Cl pulls or pushes?), position (lone pair shares +?).","Rate: Cl pulls: slower. Position: ortho, para: lone pair gives extra form; meta none."],"options":[{"why":"Yes. Cl pulls (slower); lone pair carries + in ortho, para attack. Halogens: deactivator not meta."},{"why":"Slower right; meta is NO₂, C≡N, C=O pattern. Cl lone pair: ortho/para."},{"why":"ortho/para right. But Cl pulls electrons: slower, not faster."},{"why":"Neither: Cl slows ring; lone pair sends ortho, para."}]}, // CAVEMAN
+      caveman: {"prompt":"<b>Exception 2: halogens.</b> Chlorobenzene + HNO₃, H₂SO₄: rate, NO₂ where?","worked":"Rate: Cl pulls: slower. Position: ortho, para only: Cl lone pair shares +. Slower, ortho, para. <a href=\"#reactions/director-halogen\">Card</a>.","hints":["Rate: Cl pulls or pushes? Position: Cl lone pair shares +?","Cl pulls: slower. Only ortho, para attack: Cl lone pair gives extra form."],"options":[{"why":"Yes. Cl pulls (slower); lone pair carries + in ortho, para attack. Halogens: deactivator not meta."},{"why":"Slower right; meta is NO₂, C≡N, C=O pattern. Cl lone pair: ortho/para."},{"why":"ortho/para right. But Cl pulls electrons: slower, not faster."},{"why":"Neither: Cl slows ring; lone pair sends ortho, para."}]}, // CAVEMAN
       type: 'choice',
       part: 3,
       skill: 'directors',
       smiles: 'Clc1ccccc1',
-      prompt: '<b>Exception 2: halogens.</b> Chlorobenzene is nitrated with HNO₃ and H₂SO₄. Compared with benzene, how fast is it, and where does NO₂ go?',
+      prompt: '<b>Exception 2: halogens.</b> Chlorobenzene is nitrated (HNO₃, H₂SO₄). How fast compared with benzene, and where does NO₂ go?',
       options: [
         {
           text: 'Slower than benzene, and NO₂ goes ortho and para to the Cl',
@@ -1850,19 +1837,19 @@ export default {
         }
       ],
       hints: [
-        'Two separate questions: the rate (does Cl pull electrons or push them through the σ bond?) and the position (can a lone pair on Cl share the +?).',
-        'Rate: Cl is more electronegative than C, so it pulls: slower. Position: in ortho and para attack, Cl’s lone pair gives an extra resonance form; meta has none.'
+        'Two questions: rate (does Cl pull electrons or push them?) and position (can a lone pair on Cl share the +?).',
+        'Cl is more electronegative than C, so it pulls: slower. Only ortho and para attack give Cl’s lone pair an extra resonance form.'
       ],
-      worked: 'Rate: the inductive pull of Cl makes the ring poorer, so slower than benzene. Position: ortho and para attack allow a form with the + shared by Cl’s lone pair; meta attack cannot. So slower, but ortho and para. <a href="#reactions/director-halogen">See the card</a>.',
+      worked: 'Rate: Cl pulls electrons, so slower than benzene. Position: only ortho and para attack let Cl’s lone pair share the +. Slower, but ortho and para. <a href="#reactions/director-halogen">See the card</a>.',
       id: 's56'
     },
     {
-      caveman: {"prompt":"<b>Exception 3: PCC stops at aldehyde.</b> Butan-1-ol, PCC, CH₂Cl₂, no water. (Na₂Cr₂O₇, aqueous H₂SO₄: butanoic acid.) Product?","worked":"PCC, CH₂Cl₂ removes two H from CH₂OH: CH=O, stops: butanal. Cr(VI) in water: butanoic acid. <a href=\"#reactions/oxidation-pcc\">Card</a>.","hints":["Alcohol oxidation takes two H, keeps O as C=O. Solvent?","No water: aldehyde not hydrated: no second oxidation."],"options":[{"why":"Yes. PCC takes two H from 1° alcohol; no water: butanal."},{"why":"Needs water. In CH₂Cl₂ PCC stops at aldehyde (Na₂Cr₂O₇ in water: acid)."},{"why":"Starting alcohol. PCC oxidises 1° alcohol."},{"why":"Dehydration (H₂O lost), not oxidation. PCC takes two H."}]}, // CAVEMAN
+      caveman: {"prompt":"<b>Exception 3: PCC.</b> Butan-1-ol, PCC, CH₂Cl₂, no water. (Na₂Cr₂O₇, aqueous H₂SO₄: butanoic acid.) Product?","worked":"PCC, CH₂Cl₂ removes two H from CH₂OH: CH=O, stops: butanal. Cr(VI) in water: butanoic acid. <a href=\"#reactions/oxidation-pcc\">Card</a>.","hints":["Alcohol oxidation takes two H, keeps O as C=O. Solvent?","No water: aldehyde not hydrated: no second oxidation."],"options":[{"why":"Yes. PCC takes two H from 1° alcohol; no water: butanal."},{"why":"Needs water. In CH₂Cl₂ PCC stops at aldehyde (Na₂Cr₂O₇ in water: acid)."},{"why":"Starting alcohol. PCC oxidises 1° alcohol."},{"why":"Dehydration (H₂O lost), not oxidation. PCC takes two H."}]}, // CAVEMAN
       type: 'choice',
       part: 3,
       skill: 'predict-product',
       smiles: 'CCCCO',
-      prompt: '<b>Exception 3: PCC stops at the aldehyde.</b> Butan-1-ol is stirred with PCC in CH₂Cl₂, with no water. (Na₂Cr₂O₇ in aqueous H₂SO₄ turns the same alcohol into butanoic acid.) What does PCC give?',
+      prompt: '<b>Exception 3: PCC.</b> Butan-1-ol is stirred with PCC in CH₂Cl₂, with no water. (Na₂Cr₂O₇ in aqueous H₂SO₄ turns the same alcohol into butanoic acid.) What does PCC give?',
       options: [
         {
           smiles: 'CCCC=O',
@@ -1895,12 +1882,12 @@ export default {
       id: 's57'
     },
     {
-      caveman: {"prompt":"<b>Exception 4: amine in strong acid.</b> Aniline NH₂: ortho/para, yet HNO₃, H₂SO₄: NO₂ meta. Why?","worked":"Strong acid: –NH₂ becomes –NH₃⁺. No lone pair, + charge: electron-withdrawing: meta. <a href=\"#reactions/amine-in-acid\">Card</a>.","hints":["Basic N in concentrated H₂SO₄? Then: lone pair left to give?","No lone pair, + charge: pulls electrons. Such deactivators direct meta."],"options":[{"why":"Yes. Lone pair now holds H⁺. Positive group deactivates: meta."},{"why":"C–N bond stays. Change on N: picks up H⁺."},{"why":"Size no: para far from N. Reason: –NH₃⁺ no lone pair, electron-withdrawing."},{"why":"Neutral or basic: NH₂ strong activator, ortho/para. Acid changes it."}]}, // CAVEMAN
+      caveman: {"prompt":"<b>Exception 4: amine in strong acid.</b> NH₂ ortho/para, yet aniline + HNO₃, H₂SO₄: meta. Why?","worked":"Acid: –NH₂ to –NH₃⁺: no lone pair, +: electron-withdrawing: meta. <a href=\"#reactions/amine-in-acid\">Card</a>.","hints":["Basic N in concentrated H₂SO₄? Then: lone pair left to give?","No lone pair, + charge: pulls electrons. Direct meta."],"options":[{"why":"Yes. Lone pair now holds H⁺. Positive group deactivates: meta."},{"why":"C–N bond stays. Change on N: picks up H⁺."},{"why":"Size no: para far from N. Reason: –NH₃⁺ no lone pair, electron-withdrawing."},{"why":"Neutral or basic: NH₂ strong activator, ortho/para. Acid changes it."}]}, // CAVEMAN
       type: 'choice',
       part: 3,
       skill: 'predict-product',
       smiles: 'Nc1ccccc1',
-      prompt: '<b>Exception 4: an amine in strong acid.</b> The NH₂ group of aniline is an ortho/para director. Yet with HNO₃ in H₂SO₄ the NO₂ goes mostly meta. What changed?',
+      prompt: '<b>Exception 4: an amine in strong acid.</b> NH₂ is an ortho/para director, yet aniline in HNO₃, H₂SO₄ is nitrated meta (the textbook result). What changed?',
       options: [
         {
           text: 'The N takes H⁺ in the strong acid, and –NH₃⁺ has no lone pair and pulls electrons: it directs meta',
@@ -1921,10 +1908,10 @@ export default {
         }
       ],
       hints: [
-        'What does a basic N do in concentrated H₂SO₄? Then ask whether the new group still has a lone pair to give.',
-        'Without a lone pair, and carrying a + charge, the group pulls electrons out of the ring. Deactivators with no lone pair direct meta.'
+        'What does a basic N do in concentrated H₂SO₄? Does the new group still have a lone pair to give?',
+        'With no lone pair and a + charge, the group pulls electrons out of the ring. Such deactivators direct meta.'
       ],
-      worked: 'In strong acid the amine is protonated: –NH₂ becomes –NH₃⁺. With no lone pair and a + charge it is electron-withdrawing, so it directs meta. <a href="#reactions/amine-in-acid">See the card</a>.',
+      worked: 'In strong acid –NH₂ becomes –NH₃⁺: no lone pair, a + charge, electron-withdrawing, so it directs meta. <a href="#reactions/amine-in-acid">See the card</a>.',
       id: 's58'
     },
     {
@@ -1970,18 +1957,22 @@ export default {
       options: [
         {
           smiles: 'COC1C=CCC=C1',
+          label: '3-methoxycyclohexa-1,4-diene',
           why: 'Here the OCH₃ sits on an sp³ carbon. An electron-donating group stays on a C=C carbon in the Birch product.'
         },
         {
           smiles: 'COC1CCCCC1',
+          label: 'methoxycyclohexane',
           why: 'That is the fully reduced ring. Birch adds only two H atoms and stops at the diene.'
         },
         {
           smiles: 'COC1=CC=CCC1',
+          label: '1-methoxycyclohexa-1,3-diene',
           why: 'That is a conjugated 1,3-diene. Birch gives the 1,4-diene: the two H atoms add para to each other, so the two C=C bonds are apart.'
         },
         {
           smiles: 'COC1=CCC=CC1',
+          label: '1-methoxycyclohexa-1,4-diene',
           correct: true,
           why: 'Yes. Birch puts H on two para ring carbons and leaves a 1,4-diene. The OCH₃ (electron-donating) stays on a C=C carbon (sp²).'
         }
@@ -2005,6 +1996,7 @@ export default {
         cond: 'heat'
       },
       prompt: '<b>Exception 7: Diels–Alder, taught on its card.</b> Penta-1,3-diene (a CH₃ on diene C1) and acrolein (a dienophile with a CHO group) are heated. Which six-membered ring forms?',
+      aside: '<b>New idea: guess, then learn.</b> A CH₃ on diene C1 makes the far end (C4) the richest end of the diene, and C4 bonds to the poorest dienophile carbon, the CH₂ end of acrolein. So C1 bonds to the carbon holding the CHO, and the CH₃ and CHO end up next to each other: the “1,2” product.',
       options: [
         {
           smiles: 'CC1C=CCCC1C=O',
@@ -2033,11 +2025,11 @@ export default {
       id: 's61'
     },
     {
-      caveman: {"prompt":"<b>Exam pattern: alkene.</b> Write major organic product, indicate stereochemistry. <name new=\"1-methylcyclohexene\" old=\"1-methylcyclohexene\"></name> + <b>RCO₃H, then H₃O⁺</b>.","reveal":"Q1: epoxide, then water: OH, OH add. Q2: one OH per carbon. Q3: water opens epoxide from back: anti: OH <b>trans</b>; flat alkene: <b>racemate</b> (write one enantiomer, say so). <a href=\"#reactions/alkene-epoxide-diol\">Open card</a>","options":[{"why":"Yes. Epoxide; H₃O⁺, water open from back: OH anti (trans on ring). (racemate: either drawing correct)"},{"why":"syn product: both OH SAME face. RCO₃H, then H₃O⁺ adds anti."},{"why":"Not just H₂: RCO₃H, H₃O⁺ adds OH, OH."},{"why":"Epoxide. RCO₃H, H₃O⁺ adds OH, OH, not epoxide."}]}, // CAVEMAN
+      caveman: {"prompt":"<b>Exam pattern: alkene.</b> Write major organic product, indicate stereochemistry. <name new=\"1-methylcyclohexene\" old=\"1-methylcyclohexene\"></name> + <b>RCO₃H, then H₃O⁺</b>. Pick matching drawing.","reveal":"Q1: epoxide, then water: OH, OH add. Q2: one OH per carbon. Q3: water opens epoxide from back: anti: OH <b>trans</b>; flat alkene: <b>racemate</b> (write one enantiomer, say so). <a href=\"#reactions/alkene-epoxide-diol\">Open card</a>","options":[{"why":"Yes. Epoxide; H₃O⁺, water open from back: OH anti (trans on ring). (racemate: either drawing correct)"},{"why":"syn product: both OH SAME face. RCO₃H, then H₃O⁺ adds anti."},{"why":"Not just H₂: RCO₃H, H₃O⁺ adds OH, OH."},{"why":"Epoxide. RCO₃H, H₃O⁺ adds OH, OH, not epoxide."}]}, // CAVEMAN
       type: 'predict',
       skill: 'stereo-addition',
       part: 4,
-      prompt: '<b>Exam pattern: an alkene.</b> Write the structure of the major organic product of the reaction below, and indicate stereochemistry. The substrate is <name new="1-methylcyclohexene" old="1-methylcyclohexene"></name>; it is treated with <b>RCO₃H, then H₃O⁺</b>.',
+      prompt: '<b>Exam pattern: an alkene.</b> Write the structure of the major organic product of the reaction below, and indicate stereochemistry. The substrate is <name new="1-methylcyclohexene" old="1-methylcyclohexene"></name>; it is treated with <b>RCO₃H, then H₃O⁺</b>. In the exam you draw it; here, pick the drawing that matches yours.',
       equation: {
         reactants: ['CC1=CCCCC1'],
         products: [],
@@ -2067,11 +2059,11 @@ export default {
       id: 's62'
     },
     {
-      caveman: {"prompt":"<b>Exam pattern: ring, two directors.</b> Write major organic product. 1-Chloro-4-methylbenzene + <b>HNO₃, H₂SO₄</b>.","reveal":"Q1: ring rich, NO₂⁺ poor. Q2: CH₃, Cl both ortho/para: stronger activator CH₃ wins. NO₂ ortho to CH₃ (two ortho alike: one product), also meta to Cl. Q3: nothing. Name kind: <b>ortho substitution product</b>. <a href=\"#reactions/director-activating\">Open activator card</a>, <a href=\"#reactions/director-halogen\">halogen card</a>.","options":[{"why":"Yes. Both ortho/para, CH₃ stronger activator: NO₂ ortho to CH₃, also meta to Cl (4-chloro-2-nitrotoluene)."},{"why":"Both ortho/para; stronger activator (CH₃) decides, not Cl: NO₂ meta to CH₃ wrong."},{"why":"NO₂ replaced Cl. Electrophile replaces H; groups there stay."},{"why":"TWO new groups. One NO₂⁺ replaces one H: one product asked."}]}, // CAVEMAN
+      caveman: {"prompt":"<b>Exam pattern: ring, two directors.</b> Write major organic product. 1-Chloro-4-methylbenzene + <b>HNO₃, H₂SO₄</b>. Pick matching drawing.","reveal":"Q1: ring rich, NO₂⁺ poor. Q2: CH₃, Cl both ortho/para: stronger activator CH₃ wins. NO₂ ortho to CH₃ (two ortho alike: one product), also meta to Cl. Q3: nothing. Name kind: <b>ortho substitution product</b>. <a href=\"#reactions/director-activating\">Open activator card</a>, <a href=\"#reactions/director-halogen\">halogen card</a>.","options":[{"why":"Yes. Both ortho/para, CH₃ stronger activator: NO₂ ortho to CH₃, also meta to Cl (4-chloro-2-nitrotoluene)."},{"why":"Both ortho/para; stronger activator (CH₃) decides, not Cl: NO₂ meta to CH₃ wrong."},{"why":"NO₂ replaced Cl. Electrophile replaces H; groups there stay."},{"why":"TWO new groups. One NO₂⁺ replaces one H: one product asked."}]}, // CAVEMAN
       type: 'predict',
       skill: 'directors',
       part: 4,
-      prompt: '<b>Exam pattern: an aromatic ring with two directors.</b> Write the structure of the major organic product of the reaction below. 1-Chloro-4-methylbenzene is treated with <b>HNO₃, H₂SO₄</b>.',
+      prompt: '<b>Exam pattern: an aromatic ring with two directors.</b> Write the structure of the major organic product of the reaction below. 1-Chloro-4-methylbenzene is treated with <b>HNO₃, H₂SO₄</b>. In the exam you draw it; here, pick the drawing that matches yours.',
       equation: {
         reactants: ['Clc1ccc(C)cc1'],
         products: [],
@@ -2106,11 +2098,11 @@ export default {
       id: 's63'
     },
     {
-      caveman: {"prompt":"<b>Exam pattern: alkyne.</b> Write major organic product, indicate stereochemistry. <name new=\"hex-3-yne\" old=\"3-hexyne\"></name> + <b>Br₂ (1 equiv.)</b>.","reveal":"Q1: π bond rich, polarised Br₂ poor: Br, Br add. Q2: one Br per triple-bond carbon. Q3: bromonium: anti: Br opposite sides: <b>(E)</b> dibromoalkene. Two equivalents: tetrabromide. <a href=\"#reactions/alkyne-x2-1\">Open card</a>","options":[{"why":"Other halogen. Br₂ (1 equiv.) adds Br."},{"why":"Four Br: 2 equivalents Br₂. One equivalent: one Br₂."},{"why":"Both Br SAME side (cis). Br₂ adds anti: Br trans."},{"why":"Yes. Br₂ adds ANTI: Br opposite sides: (E). One equivalent stops at dihaloalkene."}]}, // CAVEMAN
+      caveman: {"prompt":"<b>Exam pattern: alkyne.</b> Write major organic product, indicate stereochemistry. <name new=\"hex-3-yne\" old=\"3-hexyne\"></name> + <b>Br₂ (1 equiv.)</b>. Pick matching drawing.","reveal":"Q1: π bond rich, polarised Br₂ poor: Br, Br add. Q2: one Br per triple-bond carbon. Q3: bromonium: anti: Br opposite sides: <b>(E)</b> dibromoalkene. Two equivalents: tetrabromide. <a href=\"#reactions/alkyne-x2-1\">Open card</a>","options":[{"why":"Other halogen. Br₂ (1 equiv.) adds Br."},{"why":"Four Br: 2 equivalents Br₂. One equivalent: one Br₂."},{"why":"Both Br SAME side (cis). Br₂ adds anti: Br trans."},{"why":"Yes. Br₂ adds ANTI: Br opposite sides: (E). One equivalent stops at dihaloalkene."}]}, // CAVEMAN
       type: 'predict',
       skill: 'alkynes',
       part: 4,
-      prompt: '<b>Exam pattern: an alkyne.</b> Write the structure of the major organic product of the reaction below, and indicate stereochemistry. The substrate is <name new="hex-3-yne" old="3-hexyne"></name>; it reacts with <b>Br₂ (1 equiv.)</b>.',
+      prompt: '<b>Exam pattern: an alkyne.</b> Write the structure of the major organic product of the reaction below, and indicate stereochemistry. The substrate is <name new="hex-3-yne" old="3-hexyne"></name>; it reacts with <b>Br₂ (1 equiv.)</b>. In the exam you draw it; here, pick the drawing that matches yours.',
       equation: {
         reactants: ['CCC#CCC'],
         products: [],
