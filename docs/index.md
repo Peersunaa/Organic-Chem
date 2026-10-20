@@ -12,9 +12,12 @@ One line per page. A fresh session should read this first, then the page it need
 
 - `superpowers/specs/2026-10-20-redesign-design.md`: the overnight product-grade pass: Track T (novice-proof teaching: glossary, recap cards, shuffled options, content fixes) and Track D (token system, widgets, six isometric chapter figures).
 
+- `scenes/README.md`, `scenes/SCENE-SCHEMA.md`, `scenes/NN-*.md`: the animated mechanism scenes: house style, JSON schema, and 16 storyboards (each ends with its scene JSON, copied verbatim into `learn/scenes/scenes/`).
+
 ## Reviews
 - `reviews/2026-10-20-novice-review.md`: first zero-background student test (grades 2.5–4) that drove Track T.
 - `reviews/2026-10-20-novice-review-2.md`: the re-test after the fixes.
+- `reviews/2026-10-20-novice-review-3.md`: Lesson 17, the reaction modes, drills and the mock; drove fix waves T3a/T3b.
 - `reviews/d1-*.png`, `d2-*.png`, `w-*.png`: before/after screenshots of the design waves.
 
 ## Plans and briefs
@@ -28,8 +31,12 @@ One line per page. A fresh session should read this first, then the page it need
 - Git identity is not configured in this repo: commit with `-c user.name=Peersunaa -c user.email=peera.sunny@gmail.com`.
 - Local preview: `python3 -m http.server 8765` from `learn/`; stale module caches happen, verify with a fresh `import('./x.js?v=1')`.
 
+## Later additions (2026-10-20)
+- Lesson 17 Predict the product; `#practise-stereo-projections`; `#practise-naming-levels` with a settings card and systematic name forms; `#reactions-practice` (five modes + settings); `#mock` midterm from `learn/data/mock-blueprint.js`; `#scenes` animated mechanisms; caveman voice everywhere; `study-guide/past-paper-study-guide.pdf` (untracked, rebuild with `python3 study-guide/build_guide.py`).
+
 ## Backlog (post-midterm)
-- Caveman variants for lesson text (only hub, player and drill have them).
+- Standalone lesson tests 07–14 hit an import cycle (WIDGETS before init) unless steps.js is preloaded; the full runner is fine.
+- Scenes: a student test of the 16 scenes; the 22 remaining hub cards have no scene.
 - Hub search / jump list; richer drill feedback wording; a figure for chapters 2 and 3 on their lesson pages is placed, the hub shows only ch4/ch5.
 - Naming and isomer-relationship drills.
 - Visual redesign is done (waves D1–D3, 2026-10-20); next design step would be a reference-driven refinement once Peera names a site he likes.
