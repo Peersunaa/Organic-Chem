@@ -49,9 +49,11 @@ import { pastpaper } from './pastpaper.mjs';
 import { mock } from './mock.mjs';
 import { stereoMoments } from './stereo-moments.mjs';
 import { player } from './player.mjs';
+import { cavemanLessons } from './caveman-lessons.mjs';
 import { voice } from './voice.mjs';
 import { text } from './text.mjs';
 import { figures } from './figures.mjs';
+import { scenes } from './scenes.mjs';
 import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
 const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product', 'stereo-projections', 'naming-levels', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work', 'aromaticity']);
@@ -463,7 +465,7 @@ function checkArrowConfig(t, c, reactants, products) {
   eq(['N', 'B(F)(F)F', '[Mg+2]', 'CCO', 'O'].map((x) => lewisRole(analyze(x))), ['base', 'acid', 'acid', 'base', 'base'], 'Lewis roles from structure');
   eq(analyze('CN').atoms[1].lp, 1, 'methylamine N has 1 lone pair'); eq(analyze('CN').atoms[0].lp, 0, 'methylamine C has none');
   // pKa numbers quoted in text are table values
-  const allowed = new Set(['16.00', '15.74', '9.31', '7.21', '4.76', '2.16', '1.3', '7.0', '19.3', '25', '36', '9.25', '10.66']);
+  const allowed = new Set(['16.00', '15.74', '9.31', '7.21', '4.76', '2.16', '1.3', '7.0', '19.3', '25', '36', '9.25', '10.66', '9']);  // '9' is the worked log example (Ka = 1e-9)
   const text = htmlStrings(l.steps).join(' ');
   const quoted = [...text.matchAll(/pKa (?:≈ )?(?:−)?(\d+(?:\.\d+)?)/g)].map((m) => m[1]);
   ok(quoted.length > 8 && quoted.every((q) => allowed.has(q)), `L03 only quotes allowed pKa values (${[...new Set(quoted)].join(', ')})`);
@@ -1208,6 +1210,9 @@ await stereoMoments({ ok, eq });
 // ---- Mechanism step player: every arrow of every mechanism has a why line; arrows applied one at a time reach the after state (tests/player.mjs)
 await player({ ok, eq });
 
+// ---- Caveman voice: every lesson step has terse variants with the chemistry intact (tests/caveman-lessons.mjs)
+await cavemanLessons({ ok, eq });
+
 // ---- Caveman voice: the helper, the compressor on every why and card text, the header switch and the views that use it (tests/voice.mjs)
 await voice({ ok, eq });
 
@@ -1216,6 +1221,9 @@ await text({ ok, eq });
 
 // ---- Crafted figures: files, wiring on the lessons and hub, charset, glossary hit area, why-line terms (tests/figures.mjs)
 await figures({ ok, eq });
+
+// ---- Mechanism scenes: the 16 storyboards validate against the schema, beats and captions obey the rules, layouts are up to date, every frame renders well-formed, the last frame matches coords.json, cards / lessons / routes are wired (tests/scenes.mjs)
+await scenes({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

@@ -1,0 +1,469 @@
+{
+ "id": "03-alkene-x2",
+ "title": "Br₂ adds to cyclohexene",
+ "reagentCard": "alkene-x2",
+ "alsoCards": [],
+ "lesson": {
+  "id": "10",
+  "step": "s04"
+ },
+ "intent": "After this scene the learner can say: \"The π cloud polarises Br₂ and bonds to the near Br. The bridged bromonium ion blocks one face, so Br⁻ must attack from the other face, straight behind a C–Br bond. The two Br end up anti: trans on a ring, formed as a racemate.\"",
+ "reactant": {
+  "smiles": "C1=CCCCC1",
+  "name": "cyclohexene"
+ },
+ "reagent": {
+  "smiles": "BrBr",
+  "label": "Br₂ in CH₂Cl₂"
+ },
+ "products": [
+  {
+   "smiles": "Br[C@@H]1CCCC[C@H]1Br",
+   "name": "trans-1,2-dibromocyclohexane",
+   "stereo": "racemate",
+   "note": "Formed as a racemate; this SMILES is one of the two mirror images (as on the hub card)."
+  }
+ ],
+ "intermediates": [{"name": "bromonium ion", "smiles": "C1CCC2[Br+]C2C1"}],
+ "atomNames": {
+  "1": "C1",
+  "2": "C2",
+  "3": "C3",
+  "4": "C4",
+  "5": "C5",
+  "6": "C6",
+  "7": "Br(near)",
+  "8": "Br(far)"
+ },
+ "stage": {
+  "species": [
+   {
+    "key": "alkene",
+    "role": "reactant",
+    "smiles": "[CH:1]1=[CH:2][CH2:3][CH2:4][CH2:5][CH2:6]1",
+    "label": "cyclohexene",
+    "at": [0, 0],
+    "style": "skeletal"
+   },
+   {
+    "key": "Br2",
+    "role": "reagent",
+    "smiles": "[Br:7][Br:8]",
+    "label": "Br₂",
+    "at": [3.6, 0],
+    "style": "full"
+   }
+  ],
+  "state": "[CH:1]1=[CH:2][CH2:3][CH2:4][CH2:5][CH2:6]1.[Br:7][Br:8]"
+ },
+ "layers": ["arrows", "orbitals"],
+ "duration": 31.0,
+ "beats": [
+  {
+   "id": "b1-meet",
+   "t0": 0.0,
+   "t1": 3.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "Cyclohexene meets Br₂. The Br–Br bond is not polar, but the π cloud of the C=C is rich in electrons.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [{"kind": "pi", "atoms": [1, 2], "side": "both", "emphasis": "focus", "electrons": 2}],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1,
+    "focus": [1, 2],
+    "tilt": 35
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[CH:1]1=[CH:2][CH2:3][CH2:4][CH2:5][CH2:6]1.[Br:7][Br:8]"
+  },
+  {
+   "id": "b2-polarise",
+   "t0": 4.0,
+   "t1": 7.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "As Br₂ nears the top face, the π cloud pushes on its electrons: the near Br turns δ+, the far Br δ−.",
+   "moves": [
+    {
+     "species": "Br2",
+     "anchor": 7,
+     "near": [1, 2],
+     "offset": [0, 0, 1.3],
+     "orient": {
+      "atoms": [7, 8],
+      "dir": [0, 0, 1]
+     },
+     "at": [0, 0.6]
+    }
+   ],
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [{"atom": 7, "sign": "+"}, {"atom": 8, "sign": "-"}],
+   "orbitals": [{"kind": "pi", "atoms": [1, 2], "side": "top", "emphasis": "focus", "electrons": 2}],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.2,
+    "focus": [1, 2],
+    "tilt": 65
+   },
+   "faces": {
+    "show": true,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[CH:1]1=[CH:2][CH2:3][CH2:4][CH2:5][CH2:6]1.[Br:7][Br:8]"
+  },
+  {
+   "id": "b3-bridge",
+   "t0": 8.0,
+   "t1": 13.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "The π pair bonds to the near Br and Br⁻ leaves. A Br lone pair grabs the other carbon: a 3-ring.",
+   "moves": [{"atoms": [8], "by": [0, 0, 1.4], "at": [0.6, 1]}],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "bond": [1, 2]
+     },
+     "to": {
+      "bond": [1, 7]
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "elec"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.05, 0.6],
+     "why": "The π pair attacks the near Br of Br₂ and forms a new C–Br bond. This starts the bridge across the C=C."
+    },
+    {
+     "id": "a2",
+     "from": {
+      "bond": [7, 8]
+     },
+     "to": {
+      "atom": 8
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "none",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.2, 0.75],
+     "why": "The Br–Br bond pair leaves with the far Br, which departs as Br⁻ (a good leaving group)."
+    },
+    {
+     "id": "a3",
+     "from": {
+      "lp": 7
+     },
+     "to": {
+      "atom": 2
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.4, 0.95],
+     "why": "A lone pair on the bonded Br reaches the other carbon, closing a three-membered ring: the bromonium ion with Br⁺."
+    }
+   ],
+   "bonds": [
+    {
+     "a": 1,
+     "b": 2,
+     "action": "order",
+     "order": 1
+    },
+    {
+     "a": 1,
+     "b": 7,
+     "action": "form",
+     "order": 1
+    },
+    {
+     "a": 2,
+     "b": 7,
+     "action": "form",
+     "order": 1
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "action": "break",
+     "order": 0
+    }
+   ],
+   "charges": [{"atom": 7, "charge": 1}, {"atom": 8, "charge": -1}],
+   "partials": [],
+   "orbitals": [{"kind": "bromonium", "atoms": [1, 2, 7], "side": "top", "emphasis": "focus"}],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.2,
+    "focus": [1, 2],
+    "tilt": 65
+   },
+   "faces": {
+    "show": true,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[CH:1]12[CH:2]([Br+:7]2)[CH2:3][CH2:4][CH2:5][CH2:6]1.[Br-:8]"
+  },
+  {
+   "id": "b4-bromonium",
+   "t0": 14.0,
+   "t1": 17.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "The bromonium ion: Br⁺ bridges C1 and C2 on the top face, so the top face is now blocked.",
+   "captionOrbitals": "Each C–Br⁺ bond has an empty σ* lobe pointing out of the bottom face. That is the way in.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "bromonium",
+     "atoms": [1, 2, 7],
+     "side": "top",
+     "emphasis": "focus"
+    },
+    {
+     "kind": "sigma-star",
+     "atoms": [1],
+     "side": "bottom",
+     "emphasis": "normal",
+     "axis": [1, 7]
+    },
+    {
+     "kind": "sigma-star",
+     "atoms": [2],
+     "side": "bottom",
+     "emphasis": "normal",
+     "axis": [2, 7]
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.2,
+    "focus": [1, 2],
+    "tilt": 65
+   },
+   "faces": {
+    "show": true,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[CH:1]12[CH:2]([Br+:7]2)[CH2:3][CH2:4][CH2:5][CH2:6]1.[Br-:8]"
+  },
+  {
+   "id": "b5-backside",
+   "t0": 18.0,
+   "t1": 22.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "Br⁻ hits C1 from below, straight behind the C–Br⁺ bond. That pair moves onto Br and the bridge opens.",
+   "moves": [{"atoms": [8], "backside": {"of": 1, "leaving": 7, "dist": 1.6}, "at": [0, 0.4]}],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "lp": 8
+     },
+     "to": {
+      "atom": 1
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "elec"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.35, 0.85],
+     "why": "A lone pair on Br⁻ attacks C1 from the back, opposite the bridge, and forms a new C–Br bond."
+    },
+    {
+     "id": "a2",
+     "from": {
+      "bond": [1, 7]
+     },
+     "to": {
+      "atom": 7
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "none",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.45, 0.95],
+     "why": "The C–Br⁺ bond pair goes back to the bridging Br, which becomes neutral. The ring opens."
+    }
+   ],
+   "bonds": [{"a": 1, "b": 7, "action": "break", "order": 0}, {"a": 1, "b": 8, "action": "form", "order": 1}],
+   "charges": [{"atom": 7, "charge": 0}, {"atom": 8, "charge": 0}],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "sigma-star",
+     "atoms": [1],
+     "side": "bottom",
+     "emphasis": "focus",
+     "axis": [1, 7]
+    },
+    {
+     "kind": "lone-pair",
+     "atoms": [8],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 2,
+     "toward": 1
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.2,
+    "focus": [1, 2],
+    "tilt": 65
+   },
+   "faces": {
+    "show": true,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[Br:8][CH:1]1[CH:2]([Br:7])[CH2:3][CH2:4][CH2:5][CH2:6]1"
+  },
+  {
+   "id": "b6-anti",
+   "t0": 23.0,
+   "t1": 26.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "One Br ended on the top face and the other on the bottom face: anti addition. On a ring, that is trans.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [],
+   "badges": [{"atom": 7, "text": "top", "tone": "muted"}, {"atom": 8, "text": "bottom", "tone": "muted"}],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.2,
+    "focus": [1, 2],
+    "tilt": 65
+   },
+   "faces": {
+    "show": true,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[Br:8][CH:1]1[CH:2]([Br:7])[CH2:3][CH2:4][CH2:5][CH2:6]1",
+   "pose": {
+    "7": 1,
+    "8": -1
+   }
+  },
+  {
+   "id": "b7-racemate",
+   "t0": 27.0,
+   "t1": 31.0,
+   "hold": 0,
+   "kind": "look",
+   "caption": "Attack at C2 instead gives the mirror image, just as often. So the trans product forms as a racemate.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [],
+   "badges": [],
+   "ghosts": [{"mirror": true, "label": "mirror image (attack at C2)"}],
+   "camera": {
+    "zoom": 1,
+    "focus": [],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[Br:8][CH:1]1[CH:2]([Br:7])[CH2:3][CH2:4][CH2:5][CH2:6]1",
+   "relayout": {
+    "anchor": [1, 2]
+   }
+  }
+ ],
+ "stereoCallout": {
+  "title": "Backside attack makes anti",
+  "stereoMoment": "bromonium-backside",
+  "text": "The bridge sits on one face, so Br⁻ can only enter from the other. Ring: trans-1,2-dibromide, a racemate (attack at C1 or C2, and bridge on the top or bottom face, give the two mirror images equally). Open chain: anti addition to (E)-but-2-ene gives meso-2,3-dibromobutane; to (Z)-but-2-ene, the racemic (2R,3R)/(2S,3S) pair."
+ },
+ "whatIf": ["01-alkene-hx", "05-alkene-epoxide", "06-alkene-kmno4-cold", "12-eas-bromination"],
+ "quiz": {
+  "q": "Cyclopentene is treated with Br₂ in CH₂Cl₂. Which product forms?",
+  "options": [
+   {
+    "text": "trans-1,2-Dibromocyclohexane, as a racemate.",
+    "correct": true,
+    "why": "Yes. The bromonium bridge blocks one face, Br⁻ comes in from the other: anti, so trans on the ring."
+   },
+   {
+    "text": "cis-1,2-Dibromocyclohexane.",
+    "correct": false,
+    "why": "cis needs both Br on one face. The bridge blocks that face, so the second Br must come from the other face."
+   },
+   {
+    "text": "1,1-Dibromocyclohexane.",
+    "correct": false,
+    "why": "The bridge spans both carbons and Br⁻ opens it at one of them, so each carbon gets one Br."
+   }
+  ]
+ },
+ "notes": ["Arrows match the course data (reactions-additions.js): three arrows in one step for the bromonium, two for the opening.", "Show the bromonium as the course does: a real three-membered ring with Br⁺. No open carbocation intermediate."]
+}

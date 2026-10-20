@@ -20,6 +20,8 @@ import { attachGlossary, glossaryView, GLOSSARY } from './engine/glossary.js';
 import { recapCard as prereqCard } from './engine/recap.js';
 import { FIGURES } from './figures/figures.js';
 import { figureCard } from './figures/figure-card.js';
+import { scenePage, scenesList, sceneBlock } from './scenes/scene-view.js';
+import { sceneForStep } from './scenes/scene-index.js';
 
 const app = document.getElementById('app');
 // A press of Check with nothing entered is not a slip: it must not count as a weak spot.
@@ -139,6 +141,7 @@ function home() {
   const rx = h('section', { class: 'panel', 'aria-labelledby': 'rx-h' }, h('h2', { id: 'rx-h' }, 'Reactions'),
     h('p', { class: 'muted' }, 'Every reagent on one card: what it does, a worked example, three facts and how to answer the exam question.'),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'open-reactions' }, 'Open the reaction cards'),
+      h('a', { class: 'btn ghost', href: '#scenes', id: 'open-scenes' }, 'Watch how each reagent works'),
       h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'open-drill' }, 'Drill: predict the product'),
       h('a', { class: 'btn ghost', href: '#reactions-practice', id: 'open-reaction-modes' }, 'Reaction modes: five ways to practise'),
       h('a', { class: 'btn ghost', href: '#lesson-17', id: 'open-lesson-17' }, 'Lesson 17: Predict the product')));
@@ -236,6 +239,7 @@ function lessonView(L, startId) {
   const save = () => store.setProgress(L.id, { idx: deep ? resumeIdx : idx, done: [...done] });
 
   let stereoNode = null;   // the "See it in 3D" block of the current step (Piece 4), if it has one
+  let sceneNode = null;    // the "Watch the scene" block of the current step (scenes/), if its mechanism has an animated scene
   let glossaryStop = null; // stops the term-button observer of the step on screen
   let figure;  // the chapter's "See the idea" figure card (built once per visit, so its open state and animation survive Back / Continue)
   const figId = Object.keys(FIGURES).find((k) => FIGURES[k].lesson === L.id);
@@ -247,6 +251,7 @@ function lessonView(L, startId) {
     done: () => {
       done.add(step.id); save(); paint();
       if (stereoNode) stereoNode.hidden = false;
+      if (sceneNode) sceneNode.hidden = false;
       if (step.type !== 'explain' && step.type !== 'useit') next.focus({ preventScroll: true });
     },
     complete: () => { store.setProgress(L.id, { complete: true, idx: steps.length - 1, done: steps.map((s) => s.id) }); location.hash = '#home'; }
@@ -276,6 +281,13 @@ function lessonView(L, startId) {
     // Piece 4: where the 3D shape decides the answer, a "See it in 3D" button under the step. A question that asks for the answer stays unspoiled until it is answered.
     const moment = momentFor(L.id, step.id);
     if (moment) { stereoNode = stereoBlock(moment); stereoNode.hidden = !(step.type === 'try' || done.has(step.id)); host.append(stereoNode); }
+    // the animated scene for the same mechanism: "Watch the scene" beside the 3D button, unspoiled in the same way
+    sceneNode = null;
+    const sceneKey = sceneForStep(L.id, step.id);
+    if (sceneKey) {
+      sceneNode = sceneBlock(sceneKey); sceneNode.hidden = !(step.type === 'try' || done.has(step.id));
+      if (stereoNode) { const row = h('div', { class: 'extras' }); stereoNode.replaceWith(row); row.append(stereoNode, sceneNode); } else host.append(sceneNode);
+    }
     setIupacMode(store.getIupac());
     if (!reduceMotion()) { host.classList.remove('enter'); void host.offsetWidth; host.classList.add('enter'); }
     paint();
@@ -316,6 +328,16 @@ function hub(anchor) {
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Reactions'),
     h('p', { class: 'lede' }, 'One card for each reagent. Read the three facts, look at the example, then use the steps on a question.'),
     h('a', { class: 'btn primary', href: '#practise-predict-product', id: 'drill-predict' }, 'Drill: predict the product')), buildHub(chemP, anchor));
+}
+
+// ---------------------------------------------------------------- Mechanism scenes (scenes/): the list and one scene
+function scenesView() {
+  setDrawStyle('skeletal');
+  mount(header(), ...scenesList());
+}
+function sceneView(id) {
+  setDrawStyle('skeletal');
+  mount(header(), ...scenePage(id));
 }
 
 // ---------------------------------------------------------------- Reaction modes (landing page of the six practice modes, with their settings)
@@ -362,6 +384,8 @@ function route() {
     const L = LESSONS.find((l) => l.id === m[1]);
     if (L) return lessonView(L, m[2]);
   }
+  if (hash === 'scenes') return scenesView();
+  if ((m = /^scene\/([a-z0-9-]+)$/.exec(hash))) return sceneView(m[1]);
   if (hash === 'reactions') return hub();
   if ((m = /^reactions\/([a-z0-9-]+)$/.exec(hash))) return hub(m[1]);
   if (hash === 'pastpaper') return pastpaper();

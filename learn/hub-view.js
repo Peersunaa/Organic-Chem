@@ -5,6 +5,8 @@ import { HUB_CARDS, HUB_GROUPS, HUB_SPACE, HUB_ADDS, SPACE_TEXT } from './engine
 import { t, tAuto, onVoiceChange } from './engine/voice.js';
 import { figureCard } from './figures/figure-card.js';
 import { GUESS_REAGENT_CARDS } from './engine/generators-reaction-modes.js';
+import { sceneForCard } from './scenes/scene-index.js';
+import { sceneToggle } from './scenes/scene-view.js';
 
 /** The crafted chapter figure shown (collapsed) at the top of a hub group: alkenes -> ch4, aromatics -> ch5 (ch3 and ch6 have no group here). */
 export const GROUP_FIGURE = { alkene: 'ch4', arene: 'ch5' };
@@ -121,6 +123,10 @@ function cardNode(c) {
   if (c.lesson && c.mech) links.push(h('a', { class: 'btn small ghost', href: lessonHref({ id: c.lesson.id, step: c.mech }) }, 'See the mechanism'));
   // the cards that can make a four-reagent question can be practised: "which reagent?" limited to this card
   if (GUESS_REAGENT_CARDS.includes(c.id)) links.push(h('a', { class: 'btn small ghost hub-practise-card', href: '#practise-guess-reagent/' + c.id }, 'Practise this reagent'));
+  // the animated scene for this reagent (scenes/): a button that opens it right under the card
+  let scenePanel = null;
+  const sid = sceneForCard(c.id);
+  if (sid) { const tg = sceneToggle(sid, { label: 'Watch how it works', cls: 'btn small hub-watch' }); links.push(tg.button); scenePanel = tg.panel; }
   const grp = HUB_GROUPS.find((g) => g.id === c.group);
   return h('article', { class: 'card hub-card', id: 'rx-' + c.id, 'data-group': c.group, 'data-space': c.facts.space, 'data-adds': c.facts.addsKey.join(' ') },
     h('h3', { class: 'hub-title' }, c.reagent),
@@ -128,7 +134,8 @@ function cardNode(c) {
     h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'Worked example'), exampleBlock(c), c.example2 ? exampleBlock(c, c.example2, true) : null),
     h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'Three facts'), factsBlock(c)),
     h('div', { class: 'hub-part' }, h('p', { class: 'hub-label' }, 'When the question looks like this'), applyBlock(c)),
-    h('div', { class: 'hub-links' }, ...links, h('span', { class: 'chip' }, grp ? grp.label : c.group)));
+    h('div', { class: 'hub-links' }, ...links, h('span', { class: 'chip' }, grp ? grp.label : c.group)),
+    scenePanel);
 }
 
 /** Build the hub. Returns a node; the cards are drawn as soon as `ready` (the RDKit promise) resolves.
@@ -181,7 +188,7 @@ export function buildHub(ready, anchor) {
   search.addEventListener('input', () => { state.q = search.value; apply(); });
   const jump = h('nav', { class: 'hub-jump', 'aria-label': 'Search the cards and jump to a group' },
     h('label', { class: 'sr-only', for: 'hub-q' }, 'Search the reaction cards by reagent or substrate'),
-    h('div', { class: 'hub-jumprow' }, search, h('a', { class: 'btn small ghost hub-practise', href: '#reactions-practice', id: 'hub-practise' }, 'Practise')),
+    h('div', { class: 'hub-jumprow' }, search, h('a', { class: 'btn small ghost hub-practise', href: '#reactions-practice', id: 'hub-practise' }, 'Practise'), h('a', { class: 'btn small ghost hub-scenes', href: '#scenes', id: 'hub-scenes' }, 'Scenes')),
     h('div', { class: 'hub-jumps' }, HUB_GROUPS.map((g) => {
       const b = h('button', { type: 'button', class: 'btn small hub-jumpbtn', 'data-jump': g.id }, g.label, ' ', h('span', { class: 'hub-jump-n' }, ''));
       b.addEventListener('click', () => { const sec = list.querySelector('#hub-g-' + g.id); if (sec && !sec.closest('[hidden]')) sec.scrollIntoView?.({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); });

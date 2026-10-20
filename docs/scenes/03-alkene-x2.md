@@ -52,11 +52,11 @@ The bridge sits on one face, so Br⁻ can only enter from the other. Ring: trans
 
 **Cyclopentene is treated with Br₂ in CH₂Cl₂. Which product forms?**
 
-A. trans-1,2-Dibromocyclopentane, as a racemate. **(correct)**  
+A. trans-1,2-Dibromocyclohexane, as a racemate. **(correct)**  
    Why: Yes. The bromonium bridge blocks one face, Br⁻ comes in from the other: anti, so trans on the ring.
-B. cis-1,2-Dibromocyclopentane.   
+B. cis-1,2-Dibromocyclohexane.   
    Diagnosis: cis needs both Br on one face. The bridge blocks that face, so the second Br must come from the other face.
-C. 1,1-Dibromocyclopentane.   
+C. 1,1-Dibromocyclohexane.   
    Diagnosis: The bridge spans both carbons and Br⁻ opens it at one of them, so each carbon gets one Br.
 
 ## Notes
@@ -520,17 +520,17 @@ C. 1,1-Dibromocyclopentane.
   "q": "Cyclopentene is treated with Br₂ in CH₂Cl₂. Which product forms?",
   "options": [
    {
-    "text": "trans-1,2-Dibromocyclopentane, as a racemate.",
+    "text": "trans-1,2-Dibromocyclohexane, as a racemate.",
     "correct": true,
     "why": "Yes. The bromonium bridge blocks one face, Br⁻ comes in from the other: anti, so trans on the ring."
    },
    {
-    "text": "cis-1,2-Dibromocyclopentane.",
+    "text": "cis-1,2-Dibromocyclohexane.",
     "correct": false,
     "why": "cis needs both Br on one face. The bridge blocks that face, so the second Br must come from the other face."
    },
    {
-    "text": "1,1-Dibromocyclopentane.",
+    "text": "1,1-Dibromocyclohexane.",
     "correct": false,
     "why": "The bridge spans both carbons and Br⁻ opens it at one of them, so each carbon gets one Br."
    }
