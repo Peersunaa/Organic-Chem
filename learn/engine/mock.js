@@ -66,8 +66,10 @@ export function bandOf(count) { return { lo: Math.ceil(count * (1 - LIMITS.weigh
  * One question at a time moves from the section whose weakness per question is lowest to the one that gains most (w / (n + 1)), while that is a strict gain
  * (so the result is a proportional split, not "everything to the worst section"). With no weak spots nothing moves.
  */
-export function weightedCounts(bp, scores) {
-  const secs = bp.sections.map((s) => ({ id: s.id, base: s.count, n: s.count, w: sectionWeakness(s.id, scores || {}), ...bandOf(s.count) }));
+export function weightedCounts(bp, scores, sectionLoss = null) {
+  // `sectionLoss` ({ A1: marks lost, ... }, from lossFromMarked) replaces the skill scores: a retake is weighted by the marks THIS paper lost, section by section
+  const weak = (id) => (sectionLoss ? sectionLoss[id] || 0 : sectionWeakness(id, scores || {}));
+  const secs = bp.sections.map((s) => ({ id: s.id, base: s.count, n: s.count, w: weak(s.id), ...bandOf(s.count) }));
   for (let guard = 0; guard < 500; guard++) {
     let r = null, d = null;
     for (const s of secs) {
@@ -83,8 +85,8 @@ export function weightedCounts(bp, scores) {
   return Object.fromEntries(secs.map((s) => [s.id, s.n]));
 }
 /** What the weighting would change (for the start screen): [{ id, from, to }] for sections whose count moves. */
-export function weightingPreview(bp, scores) {
-  const c = weightedCounts(bp, scores);
+export function weightingPreview(bp, scores, loss = null) {
+  const c = weightedCounts(bp, scores, loss ? loss.sections : null);
   return bp.sections.filter((s) => c[s.id] !== s.count).map((s) => ({ id: s.id, from: s.count, to: c[s.id] }));
 }
 
@@ -100,10 +102,11 @@ export function splitFeeds(weights, n) {
 const feedWeight = (feed, scores, weighted) => { if (!weighted) return feed.w; const s = feed.skills.reduce((a, k) => a + ((scores || {})[k] || 0), 0); return feed.w * (1 + (2 * s) / (s + 1)); };
 
 /** The plan for one sitting: counts after weighting (when bp.weighted), how each section's questions split between its feeds, marks, time. Sections with 0 questions are left out. */
-export function planPaper(bp0, scores = null) {
+export function planPaper(bp0, scores = null, loss = null) {
   const bp = normalizeBp(bp0);
-  const weighted = bp.weighted && !!scores;
-  const counts = weighted ? weightedCounts(bp, scores) : Object.fromEntries(bp.sections.map((s) => [s.id, s.count]));
+  const weighted = bp.weighted && (!!scores || !!loss);
+  if (loss) scores = loss.skills;                     // a retake: the feeds are weighted by the marks lost on each skill of the last paper too
+  const counts = weighted ? weightedCounts(bp, scores, loss ? loss.sections : null) : Object.fromEntries(bp.sections.map((s) => [s.id, s.count]));
   return {
     minutes: bp.minutes, weighted,
     sections: bp.sections.filter((s) => counts[s.id] > 0).map((s) => ({
@@ -112,13 +115,33 @@ export function planPaper(bp0, scores = null) {
     }))
   };
 }
+/**
+ * The marks a marked paper lost: { sections: { id: marks lost }, skills: { skill: marks lost } } (lost marks = the section's weak-spot score). Only wrong or blank answers lose marks,
+ * so a section that scored full marks has no weakness and can only give questions away.
+ */
+export function lossFromMarked(marked) {
+  const sections = {}, skills = {};
+  marked.items.forEach((it) => {
+    const lost = it.marks - it.got;
+    if (lost <= 0) return;
+    sections[it.sec] = (sections[it.sec] || 0) + lost;
+    skills[it.skill] = (skills[it.skill] || 0) + lost;
+  });
+  return { sections, skills };
+}
 export function planTotals(plan) { return { questions: plan.sections.reduce((a, s) => a + s.count, 0), marks: plan.sections.reduce((a, s) => a + s.count * s.marks, 0), minutes: plan.minutes }; }
 
 // ================================================================================================ turning a generated problem into a question the paper can show and grade
 const RS_OPTS = ['R', 'S'];
 /** The view model of a generated problem, or null when it cannot be answered on a page with no feedback (tap-and-draw widgets). */
+/** The identity of a reaction question for "not twice in one paper": card + substrate + reagent(s) (+ the case and failing option of a will-not-work question). Two modes asking about the same substrate and reagent share a key. '' when the problem has no card. */
+export function dedupeKey(p) {
+  if (!p || !p.card) return '';
+  const sub = Array.isArray(p.substrate) ? p.substrate.join('.') : p.substrate || '';
+  return [p.card, sub, p.caseId || '', p.reagent || '', p.halide || '', p.reagent2 || '', p.halide2 || '', typeof p.fails === 'string' ? p.fails + '+' + (p.works || []).slice().sort().join(',') : ''].join('|');
+}
 export function adapt(p) {
-  const base = { skill: p.skill, promptHtml: p.promptHtml || null, prompt: p.prompt || '', derive: p.derive || '', deriveHtml: p.deriveHtml || '', worked: p.worked || '', hints: p.hints || [], card: p.card || null, smiles: null, highlight: [], equation: p.equation || null, extra: null };
+  const base = { skill: p.skill, dk: dedupeKey(p), dk1: p.reagent2 ? dedupeKey({ ...p, reagent2: '', halide2: '' }) : '', promptHtml: p.promptHtml || null, prompt: p.prompt || '', derive: p.derive || '', deriveHtml: p.deriveHtml || '', worked: p.worked || '', hints: p.hints || [], card: p.card || null, smiles: null, highlight: [], equation: p.equation || null, extra: null };
   if (p.kind === 'choice' && Array.isArray(p.options) && p.options.some((o) => o.correct)) {
     return { ...base, mode: 'choice', smiles: p.smiles || null, highlight: p.highlight || [],
       options: p.options.map((o) => ({ text: o.text || '', smiles: o.smiles || null, raw: !!o.raw, correct: !!o.correct, lead: o.lead || null, more: o.more || '', why: o.why || '' })) };
@@ -175,7 +198,7 @@ const fingerprint = (v) => `${v.skill}|${v.smiles || ''}|${v.prompt}|${v.equatio
 function one(feed, rng, last) {
   if (feed.pick === 'hbr') return hbrProblem(rng);
   if (feed.gen === 'predict-product') return makePredictProblem(rng, last);
-  return generate(feed.gen, 1, { rng, skill: feed.skill || null, settings: feed.settings || null })[0];
+  return generate(feed.gen, 1, { rng, skill: feed.skill || null, settings: feed.settings || null, isolated: true })[0];
 }
 /** n distinct, answerable questions (view models) from one feed. Throws if the feed cannot supply them. */
 export function drawFeed(feed, n, rng, used = new Set()) {
@@ -190,9 +213,10 @@ export function drawFeed(feed, n, rng, used = new Set()) {
       const v = adapt(p);
       if (!v) continue;
       if (!feed.skills.includes(v.skill)) continue;   // a problem outside the skills the blueprint lists for this feed is never used
-      const key = fingerprint(v);
-      if (used.has(key)) continue;
-      used.add(key); out.push(v); last = { card: p.card, group: p.group };
+      const key = fingerprint(v), dk = v.dk ? 'dk:' + v.dk : '', dk1 = v.dk1 ? 'dk:' + v.dk1 : '';
+      // not the same drawing, and not the same card + substrate + reagent in another dress (guess-reagent after predict-product); a two-step question also uses up its first step
+      if (used.has(key) || (dk && used.has(dk)) || (dk1 && used.has(dk1))) continue;
+      used.add(key); if (dk) used.add(dk); if (dk1) used.add(dk1); out.push(v); last = { card: p.card, group: p.group };
     }
   });
   if (out.length < n) throw new Error(`mock: ${feed.gen} could not supply ${n} questions`);
@@ -269,8 +293,10 @@ export function linksFor(q) {
 
 // ================================================================================================ the sitting (store-backed)
 /** Open a sitting: a fresh plan and seed, the clock started, saved so a reload resumes it. */
-export function startSitting(bp, { seed = newSeed(), scores = null, now = Date.now() } = {}) {
-  const plan = planPaper(bp, scores);
+export function startSitting(bp, { seed = newSeed(), scores = null, loss = null, now = Date.now() } = {}) {
+  // a weighted retake (bp.retake, set by bpFromPlan) is weighted by the marks the last paper lost, not by the long-run log
+  if (!loss && bp && bp.retake && bp.weighted) loss = lossFromLastPaper();
+  const plan = planPaper(bp, scores, loss);
   const sess = { seed, plan, startedAt: now, minutes: plan.minutes, answers: {}, status: 'open' };
   store.setMock({ bp: normalizeBp(bp), current: sess });
   return sess;
@@ -279,6 +305,12 @@ export function currentSitting() { return store.getMock().current; }
 export function saveAnswer(sess, qid, val) {
   if (blank(val)) delete sess.answers[qid]; else sess.answers[qid] = val;
   store.setMock({ current: sess });
+}
+/** The marks lost on the last marked paper (rebuilt from its seed and answers), or null when there is none. */
+export function lossFromLastPaper() {
+  const last = store.getMock().last;
+  if (!last || !last.plan) return null;
+  try { return lossFromMarked(markPaper(buildPaper(last.plan, last.seed), last.answers)); } catch (e) { return null; }
 }
 export const remainingMs = (sess, now = Date.now()) => sess.startedAt + sess.minutes * 60000 - now;
 export function abandonSitting() { store.setMock({ current: null }); }
@@ -306,5 +338,7 @@ export { SECTIONS, SECTION_BY_ID, PRESETS, LIMITS, DEFAULT_MINUTES };
 /** The blueprint a plan came from (counts BEFORE weighting, marks, minutes), so a retake can start from the same blueprint. */
 export function bpFromPlan(plan, weighted = false) {
   const by = Object.fromEntries(plan.sections.map((s) => [s.id, s]));
-  return normalizeBp({ minutes: plan.minutes, weighted, sections: SECTIONS.map((s) => ({ id: s.id, count: by[s.id] ? by[s.id].base : 0, marks: by[s.id] ? by[s.id].marks : s.marks })) });
+  const bp = normalizeBp({ minutes: plan.minutes, weighted, sections: SECTIONS.map((s) => ({ id: s.id, count: by[s.id] ? by[s.id].base : 0, marks: by[s.id] ? by[s.id].marks : s.marks })) });
+  if (weighted) bp.retake = true;                      // startSitting then weights by the marks the last paper lost
+  return bp;
 }

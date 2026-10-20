@@ -383,17 +383,17 @@ export const TEMPLATES = [
   { id: 'alkyne-build-x2-2', A: 'alkyne-acetylide', B: 'alkyne-x2-2', why: 'Build the chain first (the terminal ≡C–H is needed), then two X₂ add across the new internal alkyne: the tetrahalide.', swap: 'X₂ first would use up the triple bond, so NaNH₂ then has no ≡C–H to remove.' },
   { id: 'alkyne-build-hydration', A: 'alkyne-acetylide', B: 'alkyne-hydration', why: 'Build the chain first, then hydrate the new alkyne: Markovnikov OH goes on the more substituted carbon and the enol flips to the ketone.', swap: 'Hydration first would turn the terminal alkyne into a ketone, so there is no ≡C–H left for NaNH₂.' },
   { id: 'lindlar-bromine', A: 'alkyne-lindlar', B: 'alkene-x2', why: 'Lindlar makes the cis (Z) alkene first, then X₂ adds anti across that C=C.', swap: 'X₂ first would add across the C≡C, so Lindlar would then have no triple bond left to reduce.' },
-  { id: 'lindlar-diol', A: 'alkyne-lindlar', B: 'alkene-kmno4-base', why: 'Lindlar makes the cis alkene first, then KMnO₄ in base adds two OH on the same face (syn).', swap: 'KMnO₄ first would attack the C≡C, so there is no alkyne left for Lindlar to turn into a cis alkene.' },
+  { id: 'lindlar-diol', A: 'alkyne-lindlar', B: 'alkene-kmno4-base', why: 'Lindlar makes the cis alkene first, then cold, dilute KMnO₄ in base (OH⁻) adds two OH on the same face (syn).', swap: 'KMnO₄ first would attack the C≡C, so there is no alkyne left for Lindlar to turn into a cis alkene.' },
   { id: 'lindlar-epoxide', A: 'alkyne-lindlar', B: 'alkene-epoxide', why: 'Lindlar makes the cis alkene first, then the peroxyacid puts one O across that C=C (a cis epoxide).', swap: 'The peroxyacid first would react with the C≡C (not an epoxidation of a C=C), so Lindlar then has nothing to do.' },
-  { id: 'lindlar-antidiol', A: 'alkyne-lindlar', B: 'alkene-epoxide-diol', why: 'Lindlar makes the cis alkene, RCO₃H makes the epoxide, and H₃O⁺ opens it anti: an anti diol.', swap: 'The peroxyacid first would not give the cis alkene that the epoxide route needs, and Lindlar then has no triple bond left.' },
-  { id: 'lindlar-cleavage', A: 'alkyne-lindlar', B: 'alkene-kmno4-acid', why: 'Lindlar makes the alkene first, then KMnO₄ in acid cuts the C=C into two C=O pieces.', swap: 'KMnO₄ first would cut the C≡C, so Lindlar then has nothing left to reduce.' },
+  { id: 'lindlar-antidiol', A: 'alkyne-lindlar', B: 'alkene-epoxide-diol', why: 'Lindlar makes the cis alkene, RCO₃H makes the epoxide, and H₃O⁺ opens it anti: an anti diol.', swap: 'The peroxyacid first would meet the C≡C, not a C=C, so it does not make the epoxide this route needs, and Lindlar then has no triple bond left.' },
+  { id: 'lindlar-cleavage', A: 'alkyne-lindlar', B: 'alkene-kmno4-acid', why: 'Lindlar makes the alkene first, then hot or acidic KMnO₄ cuts the C=C into two C=O pieces.', swap: 'KMnO₄ first would cut the C≡C, so Lindlar then has nothing left to reduce.' },
   { id: 'lindlar-hx', A: 'alkyne-lindlar', B: 'alkene-hx', why: 'Lindlar stops at the alkene; HBr or HCl then adds across that C=C (H to the carbon with more H, the halogen to the other one).', swap: 'HX first would add across the C≡C (to a vinylic halide), so Lindlar then has no triple bond left to reduce.' },
   { id: 'lindlar-hydration', A: 'alkyne-lindlar', B: 'alkene-hydration', why: 'Lindlar stops at the alkene; H₂O with H₂SO₄ then adds across that C=C (Markovnikov: OH on the carbon with more alkyl groups).', swap: 'Water with acid first would not touch the C≡C the way the alkene route needs, and Lindlar then has no alkyne left to reduce.' },
   { id: 'nitrate-reduce', A: 'eas-nitration', B: 'nitro-reduction', why: 'The ring must carry the NO₂ before it can be reduced: nitrate first, then Fe with H₃O⁺ (and HO⁻) turns NO₂ into NH₂.', swap: 'Fe with H₃O⁺ first has no NO₂ to reduce on the starting ring, so nothing happens and the amine is never made.' },
   { id: 'nitrate-then', A: 'eas-nitration', B: 'director-meta', why: 'NO₂ is a meta director: put it on first, and the next group goes meta to it.', swap: 'Putting the other group on first would place the NO₂ where THAT group directs (ortho/para or meta), not where the target has it.' },
   { id: 'acylate-then', A: 'fc-acylation', B: 'director-meta', why: 'The C=O of the acyl group is a meta director and also stops further acylation: acylate first, then the next group goes meta.', swap: 'Friedel–Crafts cannot be done after the ring carries a strong deactivator, and the other reagent first would put its group where the order of directors is different.' },
   { id: 'alkylate-oxidise', A: 'fc-alkylation', B: 'side-chain-kmno4', why: 'Friedel–Crafts alkylation puts an alkyl group on the ring, and KMnO₄ then turns its benzylic carbon into CO₂H (the rest of the chain is cut off).', swap: 'KMnO₄ first has no alkyl group to oxidise on a plain ring, so nothing happens and the alkylation comes too late.' },
-  { id: 'oxidise-then', A: 'side-chain-kmno4', B: 'director-meta', why: 'KMnO₄ turns the alkyl group into CO₂H, a meta director. Do it first, so the next group goes meta to the CO₂H.', swap: 'With the CH₃ still there, the next group would go ortho/para to it, and only afterwards does KMnO₄ change the CH₃. The final positions come out different.' },
+  { id: 'oxidise-then', A: 'side-chain-kmno4', B: 'director-meta', why: 'KMnO₄ turns the alkyl group into CO₂H, a meta director. Do it first, so the next group goes meta to the CO₂H.', swap: 'With the CH₃ still there, the next group would go ortho/para to it, and only afterwards does KMnO₄ change the CH₃.' },
   { id: 'oxidise-reduce', A: 'side-chain-kmno4', B: 'nitro-reduction', why: 'Oxidise the CH₃ to CO₂H while the nitro group is still NO₂ (an amine would be attacked too), then reduce the NO₂ to NH₂.', swap: 'KMnO₄ also attacks an NH₂ group, so reducing first and oxidising second does not give the amino acid.' },
   { id: 'hydrogenate-oxidise', A: 'side-chain-h2pd', B: 'side-chain-kmno4', why: 'H₂ with Pd/C reduces the C=C or C≡C outside the ring to an alkyl group; KMnO₄ then turns its benzylic carbon into CO₂H.', swap: 'KMnO₄ first would cut the side chain at the C=C instead, giving a different product, and the H₂ step then has nothing to reduce.' },
   { id: 'acylate-clemmensen', A: 'fc-acylation', B: 'clemmensen', why: 'Acylate first (no rearrangement), then Zn(Hg) with HCl reduces the C=O next to the ring to CH₂: the alkyl chain without the rearrangement problem of direct alkylation.', swap: 'Clemmensen needs a C=O next to the ring, and benzene has none: the reduction can only come after the acylation.' }
@@ -426,6 +426,29 @@ export function chainsOf(t, limitStarts = null) {
   return out;
 }
 const pairText = (l1, l2) => `1. ${l1}<br>2. ${l2}`;
+/** True when the molecule has a C=C that has a cis/trans (E/Z) geometry: only then may feedback talk about cis or trans. */
+function hasGeometry(smiles) { try { return (ezInfo(smiles) || []).some((e) => e.capable && e.label); } catch (e) { return false; } }
+/** Take the cis/trans wording out of a sentence about an alkene that has no cis/trans (a terminal alkene, =CH₂). */
+function noGeometry(text) {
+  return String(text)
+    .replace(/\ba cis \(Z\) alkene/g, 'an alkene').replace(/\bthe cis \(Z\) alkene/g, 'the alkene')
+    .replace(/\ba cis alkene/g, 'an alkene').replace(/\bthe cis alkene/g, 'the alkene').replace(/\bcis alkene/g, 'alkene')
+    .replace(/\(a cis epoxide\)/g, '(an epoxide)').replace(/\bcis epoxide/g, 'epoxide');
+}
+/** Names of a product list, or the formulas when a namer does not know them. */
+const namesOrFormulas = (list) => nameList(list) || formulaList(list);
+/** The first hint of a two-step puzzle: specific to the order puzzle of this template, with the start and target formulas. */
+const DIRECTING = ['nitrate-then', 'acylate-then', 'oxidise-then'];
+function chainHint(t, start, final) {
+  const head = `The start is ${formulaOf(start)} and the target is ${formulaList(final)}.`;
+  if (DIRECTING.includes(t.id)) return `${head} This is an order puzzle about directing effects: the group put on FIRST decides where the second one goes. Which of the two groups is a meta director and which is ortho/para? Choose the order that puts both where the target has them.`;
+  if (t.A === 'alkyne-lindlar') return `${head} Lindlar needs a C≡C to reduce. Which of the two reagents would use up or change the triple bond if it came first?`;
+  if (t.A === 'alkyne-acetylide') return `${head} NaNH₂ needs a terminal ≡C–H. Which of the two reagents would use up that triple bond or its H if it came first?`;
+  if (t.id === 'nitrate-reduce') return `${head} Fe with H₃O⁺ reduces a NO₂ group. Does the starting ring have one, or must another reagent put it there first?`;
+  if (t.id === 'acylate-clemmensen') return `${head} Clemmensen reduces a C=O next to the ring. Does the starting ring have one, or must another reagent make it first?`;
+  if (t.A === 'side-chain-kmno4' || t.B === 'side-chain-kmno4') return `${head} KMnO₄ oxidises an alkyl side chain (and would also attack an NH₂). Which reagent has to come first so that the side chain is there, or the NH₂ is not yet?`;
+  return `${head} Which of the two reagents has to come first for the second one to have something to act on?`;
+}
 /** One two-step problem for a chain {t, start, a, b}, or null (fewer than three wrong pairs). */
 export function buildTwoStep(chain, rng) {
   const { t, start, a, b } = chain;
@@ -433,15 +456,19 @@ export function buildTwoStep(chain, rng) {
   if (!run.ok) return null;
   const labelA = run.s1.label, labelB = run.s2.label;
   const rightKey = run.key;
+  // cis/trans wording only when the first product (the alkene) really has a geometry; a terminal alkene has none
+  const geom = hasGeometry(run.p1) || run.final.some(hasGeometry);
+  const why = geom ? t.why : noGeometry(t.why), swapText = geom ? t.swap : noGeometry(t.swap);
   const cands = [];
-  const addCand = (kind, l1, l2, lead, more, rank, steps) => cands.push({ kind, text: pairText(l1, l2), l1, l2, lead, more, rank, steps });
+  const addCand = (kind, l1, l2, lead, more, rank, steps) => cands.push({ kind, text: pairText(l1, l2), l1, l2, lead: geom ? lead : noGeometry(lead), more: geom ? more : noGeometry(more), rank, steps });
   const ST = (cardId, v) => ({ card: cardId, reagent: v.id, halide: v.halide || null });
   const wrongEnds = (r) => !r.ok || disjoint(r.key, rightKey);        // a pair is wrong when it fails or ends at a compound that shares nothing with the target
   // (a) the two reagents in the other order
   {
     const r = runChain(start, b, a);
     if (wrongEnds(r)) {
-      addCand('swapped', labelB, labelA, t.swap, `${t.why}${r.ok ? '' : ` In the other order the chain stops at step ${r.at}: ${failText(r.reason)}.`}`, 0, [ST(t.B, b.v), ST(t.A, a.v)]);
+      const ran = r.ok ? ` In that order the product is ${namesOrFormulas(r.final)}, not ${namesOrFormulas(run.final)}.` : '';
+      addCand('swapped', labelB, labelA, `${swapText}${ran}`, `${why}${r.ok ? '' : ` In the other order the chain stops at step ${r.at}: ${failText(r.reason)}.`}`, 0, [ST(t.B, b.v), ST(t.A, a.v)]);
     }
   }
   // (b) the second reagent replaced by another reagent of the same kind, run on A's product
@@ -449,8 +476,8 @@ export function buildTwoStep(chain, rng) {
     const S = solve(cardId, run.p1, vb);
     const lab = variantLabel(cardId, vb);
     if (lab === labelB) continue;
-    if (S.ok && S.reacts && disjoint(S.key, rightKey)) addCand('second', labelA, lab, `${lab} on the first product gives ${phrase(cardId, vb, run.p1)}, not ${phrase(t.B, b.v, run.p1)}.`, `${t.why} The target needs ${labelB} here.`, 1, [ST(t.A, a.v), ST(cardId, vb)]);
-    else if (!S.ok || !S.reacts) addCand('second', labelA, lab, `${lab} does not give the target from the first product: ${S.ok ? 'it does not react' : failText(S.reason)}.`, `${t.why} The target needs ${labelB} here.`, 2, [ST(t.A, a.v), ST(cardId, vb)]);
+    if (S.ok && S.reacts && disjoint(S.key, rightKey)) addCand('second', labelA, lab, `${lab} on the first product gives ${phrase(cardId, vb, run.p1)}, not ${phrase(t.B, b.v, run.p1)}.`, `${why} The target needs ${labelB} here.`, 1, [ST(t.A, a.v), ST(cardId, vb)]);
+    else if (!S.ok || !S.reacts) addCand('second', labelA, lab, `${lab} does not give the target from the first product: ${S.ok ? 'it does not react' : failText(S.reason)}.`, `${why} The target needs ${labelB} here.`, 2, [ST(t.A, a.v), ST(cardId, vb)]);
   }
   // (c) the first reagent replaced by another one, then the right second reagent
   for (const cardId of REP[groupOf(t.A)] || []) for (const va of variantsFor(cardId, start)) {
@@ -458,7 +485,7 @@ export function buildTwoStep(chain, rng) {
     if (!S.ok || !S.reacts || S.label === labelA || S.products.length !== 1) continue;
     const r = runChain(start, { cardId, v: va }, b);
     if (!wrongEnds(r)) continue;
-    addCand('first', S.label, labelB, `${S.label} makes a different first product (${phrase(cardId, va, start)}), so the sequence does not end at the target${r.ok ? '' : `: step 2 then fails (${failText(r.reason)})`}.`, `${t.why} The target needs ${labelA} first.`, 1, [ST(cardId, va), ST(t.B, b.v)]);
+    addCand('first', S.label, labelB, `${S.label} makes a different first product (${phrase(cardId, va, start)}), so the sequence does not end at the target${r.ok ? '' : `: step 2 then fails (${failText(r.reason)})`}.`, `${why} The target needs ${labelA} first.`, 1, [ST(cardId, va), ST(t.B, b.v)]);
   }
   // distinct texts, at most one of each kind first, then the rest
   const uniq = [], seenText = new Set([pairText(labelA, labelB)]);
@@ -469,7 +496,7 @@ export function buildTwoStep(chain, rng) {
   for (const c of uniq) if (wrong.length < 3 && !wrong.includes(c)) wrong.push(c);
   if (wrong.length < 3) return null;
   const opts = optionsFrom(rng, { text: pairText(labelA, labelB), kind: 'major', steps: [ST(t.A, a.v), ST(t.B, b.v)] }, wrong, (o, i) => {
-    if (o.correct) return standard(o, i, { steps: o.steps, why: `Yes. ${t.why}` });
+    if (o.correct) return standard(o, i, { steps: o.steps, why: `Yes. ${why}` });
     return standard(o, i, { steps: o.steps, kind2: o.kind, lead: o.lead, more: o.more, why: `${o.lead} ${o.more}`, fact: 'order' });
   });
   const card = HUB_BY_ID[t.A];
@@ -481,10 +508,10 @@ export function buildTwoStep(chain, rng) {
     options: opts, answer: opts.find((o) => o.correct).text,
     card: t.A, card2: t.B, template: t.id, group: groupOf(t.A), substrate: start, reagent: a.v.id, halide: a.v.halide || null, reagent2: b.v.id, halide2: b.v.halide || null,
     intermediate: run.p1, products: run.final, labels: [labelA, labelB],
-    worked: `1. ${labelA}: ${phrase(t.A, a.v, start)}. 2. ${labelB} on that product: ${phrase(t.B, b.v, run.p1)}. ${t.why}`,
-    derive: `${labelA} first, then ${labelB}. ${t.why}`,
-    deriveHtml: `${labelA} first gives <mol smiles="${run.p1}"></mol>, then ${labelB}. ${t.why}`,
-    hints: [`Name the group the target has that the start does not, and the step that makes it. Which of the two reagents has to come first for the second one to have something to act on?`, `${card.facts.where}. Work backwards from the final product: which reagent made the last change, and what did it need?`]
+    worked: (geom ? (x) => x : noGeometry)(`1. ${labelA}: ${phrase(t.A, a.v, start)}. 2. ${labelB} on that product: ${phrase(t.B, b.v, run.p1)}. ${why}`),
+    derive: `${labelA} first, then ${labelB}. ${why}`,
+    deriveHtml: `${labelA} first gives <mol smiles="${run.p1}"></mol>, then ${labelB}. ${why}`,
+    hints: [chainHint(t, start, run.final), `${card.facts.where}. Work backwards from the final product: which reagent made the last change, and what did it need?`]
   };
 }
 
@@ -609,10 +636,12 @@ export const WONT_CASES = [
     fails: [{ text: 'PCC, CH₂Cl₂', reason: 'PCC in CH₂Cl₂ has no water, so the oxidation stops at the aldehyde. The acid needs a Cr(VI) oxidant in water (Na₂Cr₂O₇, H₂SO₄, H₂O) or KMnO₄.' }],
     hint: 'Which oxidant is used without water, so the aldehyde cannot be oxidised further?' }
 ];
+const hasHalogen = (o) => /Cl|Br|F|I/.test(String(o.smiles || ''));
+const HALO_FC = (el) => `this ring carries a halogen, which slows it down a little (a deactivator) but does not stop Friedel–Crafts: a halobenzene works, just more slowly than benzene, so ${el} still attacks it`;
 const REASON_WORKS = {
-  'fc-alkylation-deactivated': 'this ring is at least as reactive as benzene, so the carbocation attacks it and the alkyl group goes on',
-  'fc-acylation-deactivated': 'this ring is at least as reactive as benzene, so the acylium ion attacks it and the acyl group goes on',
-  'fc-amine': 'this ring has no group that binds AlCl₃ or deactivates it, so the alkylation goes',
+  'fc-alkylation-deactivated': (o) => (hasHalogen(o) ? HALO_FC('the carbocation') : 'this ring is not strongly deactivated (it has no NO₂, C≡N, SO₃H or C=O group and no amine), so the carbocation attacks it and the alkyl group goes on'),
+  'fc-acylation-deactivated': (o) => (hasHalogen(o) ? HALO_FC('the acylium ion') : 'this ring is not strongly deactivated (it has no NO₂, C≡N, SO₃H or C=O group and no amine), so the acylium ion attacks it and the acyl group goes on'),
+  'fc-amine': (o) => (hasHalogen(o) ? HALO_FC('the carbocation') : 'this ring has no amine to bind AlCl₃ and no strongly deactivating group, so the alkylation goes'),
   'fc-rearrangement': 'this chloride gives a carbocation that does not rearrange to anything better, so the alkyl group goes on exactly as written',
   'fc-vinyl-aryl-halide': 'this is an alkyl chloride: AlCl₃ pulls off Cl⁻ and the carbocation alkylates the ring',
   'h2pd-ring-alone': 'it has a C=C or C≡C outside the ring, and H₂ with Pd/C reduces that',
@@ -642,7 +671,7 @@ export function buildWontWork(c, rng) {
   const opts = optsRaw.map((o, i) => {
     const base = drawn ? { smiles: o.smiles, text: 'Option ' + LETTERS[i] } : { text: o.text };
     if (o.correct) return { ...base, correct: true, kind: 'fails', why: `Yes, this is the one that fails. ${fail.reason}` };
-    const lead = `This one does work: ${REASON_WORKS[c.id]}.`, more = `The one that fails is the one with the problem named on the card: ${c.hint}`;
+    const rw = REASON_WORKS[c.id], lead = `This one does work: ${typeof rw === 'function' ? rw(o.src) : rw}.`, more = `The one that fails is the one with the problem named on the card: ${c.hint}`;
     return { ...base, correct: false, kind: 'works', lead, more, why: `${lead} ${more}`, fact: 'works' };
   });
   const card = HUB_BY_ID[c.card];
@@ -704,9 +733,16 @@ function makeOne(mode, rng) {
   throw new Error('no ' + mode + ' problem');
 }
 export function makeReactionModeProblem(mode, rng = Math.random) { return makeOne(mode, rng); }
+/** The identity of a problem for "never the same question twice in one set": card, substrate, reagent(s) and, for a will-not-work set, the failing option. */
+export const sameQuestionKey = (p) => [p.card, p.substrate || p.caseId, p.reagent || '', p.halide || '', p.reagent2 || '', p.halide2 || '', typeof p.fails === 'string' ? p.fails + '+' + (p.works || []).slice().sort().join(',') : ''].join('|');
 export function generateReactionModes(mode, count, { rng = Math.random } = {}) {
-  const out = [];
-  for (let i = 0; i < count; i++) out.push(makeOne(mode, rng));
+  const out = [], seen = new Set();
+  for (let i = 0; i < count; i++) {
+    let p = null;
+    for (let t = 0; t < 40; t++) { p = makeOne(mode, rng); if (!seen.has(sameQuestionKey(p))) break; }
+    seen.add(sameQuestionKey(p));
+    out.push(p);
+  }
   return out;
 }
 /** Every (card, substrate, variant) combo of the given cards (the drill's own pools): for the counts and the tests. */

@@ -73,9 +73,9 @@ function leadFor(card, entry, sub, v, S, o) {
     },
     add: {
       alkane: () => (id === 'alkene-x2' ? `This adds two H (the alkane). ${X}₂ puts one ${X} on EACH carbon of the C=C, no H.` : `This adds two H (the alkane). ${label} adds ${adds}, not just H₂.`),
-      cleavage: () => 'The C=C is cut here, and that is KMnO₄ in ACID. In base the C–C bond stays and each carbon gains an OH.',
+      cleavage: () => 'The C=C is cut here, and that is hot or acidic KMnO₄. Cold, dilute KMnO₄ in base (OH⁻) leaves the C–C bond alone and each carbon gains an OH.',
       dihalide: () => `Two halogens added: that is Br₂ (or Cl₂), not ${label}. ${label} adds ${adds}.`,
-      diol: () => `This has an OH on each carbon (a diol). ${label} ${id === 'alkene-kmno4-acid' ? 'cuts the C=C in acid, so the diol is not the product' : 'adds ' + adds}.`,
+      diol: () => `This has an OH on each carbon (a diol). ${label} ${id === 'alkene-kmno4-acid' ? 'cuts the C=C when it is hot or acidic, so the diol is not the product' : 'adds ' + adds}.`,
       epoxide: () => `This has an O bridging the two carbons (an epoxide). ${label} adds ${adds}, not an epoxide.`,
       unchanged: () => `The C=C is still there, so nothing added. ${label} adds ${adds}, which uses up the C=C.`,
       wrongHalogen: () => `This carries the other halogen. The reagent is ${X}₂, so ${X} is the atom that adds.`,
@@ -460,8 +460,8 @@ export const DRILL = {
   'alkene-hydration': { fam: 'alkene', subs: HX_POOL, variants: [V('H2O', 'H₂O, H₂SO₄ (cat.)')], ex: 0, solve: (s, v) => solveHX(s, v) },
   'alkene-x2': { fam: 'alkene', subs: STEREO_POOL,variants: [V('Br2', 'Br₂, CH₂Cl₂'), V('Cl2', 'Cl₂, CH₂Cl₂')], ex: 0, solve: (s, v) => solveAdd(s, v) },
   'alkene-h2-pd': { fam: 'alkene', subs: uniq(['CC1=C(C)CCCC1', 'CC1=C(C)CCC1', 'CC1=CCCCC1', 'CCCCC=C', 'C/C=C/C'], STEREO_POOL), variants: [V('H2', 'H₂, Pd/C')], ex: 0, solve: (s, v) => solveAdd(s, v) },
-  'alkene-kmno4-base': { fam: 'alkene', subs: uniq(['C1=CCCCC1', 'C1=CCCC1', 'CC1=CCCCC1', 'C/C=C/C', 'C/C=C\\C', 'CC=C(C)C'], STEREO_POOL), variants: [V('KMnO4_OH', 'KMnO₄, OH⁻, H₂O')], ex: 0, solve: (s, v) => solveAdd(s, v) },
-  'alkene-kmno4-acid': { fam: 'alkene', subs: uniq(['CC=C(C)C', 'CCCCC=C', 'C1=CCCCC1', 'CC1=CCCCC1', 'CC=C', 'CC/C=C/CC'], STEREO_POOL), variants: [V('KMnO4_H', 'KMnO₄, H₃O⁺')], ex: 0, solve: (s, v) => solveAdd(s, v) },
+  'alkene-kmno4-base': { fam: 'alkene', subs: uniq(['C1=CCCCC1', 'C1=CCCC1', 'CC1=CCCCC1', 'C/C=C/C', 'C/C=C\\C', 'CC=C(C)C'], STEREO_POOL), variants: [V('KMnO4_OH', 'KMnO₄, cold, dilute, OH⁻')], ex: 0, solve: (s, v) => solveAdd(s, v) },
+  'alkene-kmno4-acid': { fam: 'alkene', subs: uniq(['CC=C(C)C', 'CCCCC=C', 'C1=CCCCC1', 'CC1=CCCCC1', 'CC=C', 'CC/C=C/CC'], STEREO_POOL), variants: [V('KMnO4_H', 'KMnO₄, hot or acidic (H₃O⁺)')], ex: 0, solve: (s, v) => solveAdd(s, v) },
   'alkene-epoxide': { fam: 'alkene', subs: uniq(['C/C=C/CC', 'C/C=C/C', 'C/C=C\\C', 'C1=CCCCC1', 'CC1=CCCCC1', 'CC=C(C)C'], STEREO_POOL), variants: [V('RCO3H', 'RCO₃H (e.g. mCPBA)')], ex: 0, solve: (s, v) => solveAdd(s, v) },
   'alkene-epoxide-diol': { fam: 'alkene', subs: uniq(['C1=CCCCC1', 'C1=CCCC1', 'C/C=C/C', 'C/C=C\\C', 'CC1=CCCCC1'], STEREO_POOL), variants: [V('RCO3H_H3O', 'RCO₃H, then H₃O⁺')], ex: 0, solve: (s, v) => solveAdd(s, v) },
 
@@ -564,8 +564,11 @@ export function makePredictProblem(rng, last = {}) {
 export function generatePredict(count, { skill = null, rng = Math.random } = {}) {
   const out = [];
   let last = { card: lastCard, group: lastGroup };
+  const seen = new Set();                                    // (card, substrate, reagent): never the same question twice in one set
   for (let i = 0; i < count; i++) {
-    const p = makePredictProblem(rng, last);
+    let p = null;
+    for (let t = 0; t < 40; t++) { p = makePredictProblem(rng, last); if (!seen.has(`${p.card}|${p.substrate}|${p.reagent}|${p.halide || ''}`)) break; }
+    seen.add(`${p.card}|${p.substrate}|${p.reagent}|${p.halide || ''}`);
     out.push(p);
     last = { card: p.card, group: p.group };
   }

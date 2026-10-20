@@ -174,8 +174,35 @@ export function makeProblem(rng, task, smi) {
 
 const BY_SKILL = { 'lone-pairs': ['lp'], 'formal-charge': ['fc'], 'electron-count-total': ['total'], 'multiple-bonds': ['builder-multi'], 'octet': ['octet'], 'valence-electrons': ['valence'], 'bond-count': ['bonds'] };
 
+// ---------------------------------------------------------------- no verbatim repeats inside a session
+// A mastery check or practice page asks for ONE problem at a time (steps.js calls generate(id, 1)), so the generators cannot see what came before. For the reaction
+// generators this module keeps the last RING_MAX problems' keys: (card, substrate, reagent(s), failing case) is never asked again while it is in the ring.
+// Not used when the caller passes its own rng (the tests, the mock) or `isolated: true` (the mock sets Math.random to its seeded rng while it builds a paper, and a paper must be
+// the same every time it is rebuilt).
+const RING = [], RING_MAX = 30;
+/** The identity of a reaction problem, enough to tell "the same question again" (the option order does not matter). '' when the problem has no card. */
+export function problemKey(p) {
+  if (!p || !p.card) return '';
+  const sub = Array.isArray(p.substrate) ? p.substrate.join('.') : p.substrate || '';
+  return [p.card, sub, p.caseId || '', p.reagent || '', p.halide || '', p.reagent2 || '', p.halide2 || '', typeof p.fails === 'string' ? p.fails + '+' + (p.works || []).slice().sort().join(',') : ''].join('|');
+}
+/** Forget the session (a new session starts with nothing remembered). */
+export function resetSessionRing() { RING.length = 0; }
+function noRepeats(make, count, active) {
+  if (!active) return make(count);
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    let p = null, k = '';
+    for (let t = 0; t < 25; t++) { p = make(1)[0]; k = problemKey(p); if (!k || !RING.includes(k)) break; }
+    out.push(p);
+    if (k) { RING.push(k); if (RING.length > RING_MAX) RING.shift(); }
+  }
+  return out;
+}
+
 /** generate(generatorId, count, {skill, rng}) -> problems. Fresh random molecules each call. */
-export function generate(generatorId, count, { skill = null, rng = Math.random, level = null, settings = null } = {}) {
+export function generate(generatorId, count, { skill = null, rng = Math.random, level = null, settings = null, isolated = false } = {}) {
+  const session = !isolated && rng === Math.random;
   if (generatorId === 'shape-basic') return generateShape(count, { skill, rng });
   if (generatorId === 'acid-base') return generateAcid(count, { skill, rng });
   if (generatorId === 'skeletal-fg') return generateFg(count, { skill, rng });
@@ -192,12 +219,12 @@ export function generate(generatorId, count, { skill = null, rng = Math.random, 
   if (generatorId === 'rs') return generateRs(count, { skill, rng });
   if (generatorId === 'stereo-relationships') return generateRel(count, { skill, rng });
   if (generatorId === 'fischer') return generateFischer(count, { skill, rng });
-  if (generatorId === 'predict-product') return skill ? generateReactions('predict-product', count, { rng }) : generatePredict(count, { skill, rng });
+  if (generatorId === 'predict-product') return noRepeats((n) => (skill ? generateReactions('predict-product', n, { rng }) : generatePredict(n, { skill, rng })), count, session);
   if (generatorId === 'stereo-projections') return generateStereoProjections(count, { skill, rng });
   if (generatorId === 'naming-levels') return generateNamingLevels(count, { skill, rng, level, settings });
   if (generatorId === 'huckel') return generateHuckel(count, { skill, rng });
-  if (generatorId === MIX_ID) return generateReactions(MIX_ID, count, { rng });
-  if (REACTION_MODE_SKILLS.includes(generatorId)) return skill && !getModeCard() ? generateReactions(generatorId, count, { rng }) : generateReactionModes(generatorId, count, { rng });
+  if (generatorId === MIX_ID) return noRepeats((n) => generateReactions(MIX_ID, n, { rng }), count, session);
+  if (REACTION_MODE_SKILLS.includes(generatorId)) return noRepeats((n) => (skill && !getModeCard() ? generateReactions(generatorId, n, { rng }) : generateReactionModes(generatorId, n, { rng })), count, session);
   const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : BASIC_TASKS;
   const out = [];
   let last = null;

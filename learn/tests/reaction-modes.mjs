@@ -19,6 +19,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { HUB_BY_ID } from '../engine/reaction-hub.js';
 import { generate, generatorForSkill, GENERATORS } from '../engine/generators.js';
+import * as GEN from '../engine/generators.js';
 import { DRILL, drillCombos, solveCard, problemFor } from '../engine/generators-predict.js';
 import * as C from '../engine/reactions-custom.js';
 import * as A from '../engine/reaction-attrs.js';
@@ -380,6 +381,77 @@ export async function reactionModes({ ok, eq }) {
   }
   function acidLabel(a) { return `${ACID[a].haLabel} (pKa ${ACID[a].pkaText})`; }
   eq(new Set(probs['wont-work'].map((p) => p.caseId)).size, M.WONT_CASES.length, 'the 200 problems visit every case');
+
+  // ---- (7b) T3a review fixes: halobenzene Friedel-Crafts, KMnO4 conditions, two-step feedback, no repeats
+  {
+    // finding 2: a halobenzene DOES undergo Friedel-Crafts (slower than benzene); only NO2/CN/SO3H/C=O rings and amines fail
+    const fcw = M.WONT_CASES.filter((c) => c.id.startsWith('fc-') && c.card.startsWith('fc-') && c.id !== 'fc-rearrangement' && c.id !== 'fc-vinyl-aryl-halide');
+    let haloSeen = 0, allText = '';
+    for (const c of fcw) for (let k = 0; k < 40; k++) {
+      const p = M.buildWontWork(c, mulberry32(900 + k));
+      for (const o of p.options) {
+        allText += (o.lead || '') + (o.more || '') + (o.why || '');
+        if (!o.correct && /Cl|Br/.test(o.smiles)) {
+          haloSeen++;
+          ok(/more slowly than benzene/.test(o.lead) && /does not stop Friedel/.test(o.lead), `${c.id}: a halobenzene that works is said to work, slower than benzene (${o.lead})`);
+        }
+      }
+    }
+    ok(haloSeen >= 10, `the FC will-not-work cases show halobenzenes as working options (${haloSeen})`);
+    ok(!/at least as reactive/.test(allText), 'no feedback says a ring is "at least as reactive as benzene"');
+    ok(!M.WONT_CASES.some((c) => c.fails.some((f) => f.smiles && /^(Clc1ccccc1|Brc1ccccc1)$/.test(f.smiles) && c.card.startsWith('fc-') && c.id.includes('deactivated'))), 'no halobenzene is a "deactivated" failing ring');
+    const fa = HUB_BY_ID['fc-alkylation'], fc = HUB_BY_ID['fc-acylation'];
+    ok(!/fail on chlorobenzene/.test(fa.apply.pattern) && /nitrobenzene or acetophenone/.test(fa.apply.pattern), 'hub fc-alkylation question uses nitrobenzene or acetophenone, not chlorobenzene');
+    ok(fa.apply.steps.concat(fc.apply.steps).filter((x) => /chlorobenzene|halogen/i.test(x)).every((x) => /slower|slows|slowly/.test(x)), 'hub FC steps that mention a halogen say it only slows the ring');
+    ok(/Friedel/.test(HUB_BY_ID['director-halogen'].apply.steps.join(' ')) && /slower|slowly/.test(HUB_BY_ID['director-halogen'].apply.steps.join(' ')), 'hub director-halogen card says Friedel-Crafts still works, slower');
+    // finding 6: KMnO4 conditions are named the same way everywhere
+    eq([HUB_BY_ID['alkene-kmno4-base'].reagent, HUB_BY_ID['alkene-kmno4-acid'].reagent], ['KMnO₄, cold, dilute, OH⁻ → cis diol', 'KMnO₄, hot or acidic → cleavage'], 'KMnO4 hub card labels');
+    eq([M.variantLabel('alkene-kmno4-base', DRILL['alkene-kmno4-base'].variants[0]), M.variantLabel('alkene-kmno4-acid', DRILL['alkene-kmno4-acid'].variants[0])], ['KMnO₄, cold, dilute, OH⁻', 'KMnO₄, hot or acidic (H₃O⁺)'], 'KMnO4 drill labels');
+    let kText = '';
+    for (const id of ['alkene-kmno4-base', 'alkene-kmno4-acid']) for (const sub of DRILL[id].subs) for (const v of DRILL[id].variants) {
+      const pr = problemFor(id, sub, v, mulberry32(5));
+      if (pr) kText += pr.options.map((o) => (o.lead || '') + (o.more || '') + (o.why || '')).join(' ') + pr.promptHtml;
+    }
+    for (const p of [...probs['guess-reagent'], ...probs['stereo-outcome'], ...probs['two-step'], ...probs['guess-reactant']]) kText += p.options.map((o) => (o.lead || '') + (o.more || '') + (o.why || '') + o.text).join(' ') + p.promptHtml + p.worked;
+    ok(kText.includes('KMnO₄'), 'the KMnO4 feedback was found');
+    ok(!/In base the C–C bond stays/.test(kText) && !/KMnO₄ in ACID/.test(kText) && !/KMnO₄, OH⁻, H₂O/.test(kText) && !/KMnO₄, H₃O⁺/.test(kText), 'no generator prints the old KMnO4 labels or "in base the C–C bond stays"');
+    // finding 7: two-step feedback never mentions cis/trans when nothing in the chain has a cis/trans geometry; the hint is specific to the chain
+    let noGeom = 0, hintFor = new Set();
+    for (const t of M.TEMPLATES) for (const ch of M.chainsOf(t).filter((x, i) => i % 7 === 0)) {
+      const p = M.buildTwoStep(ch, mulberry32(3));
+      if (!p) continue;
+      hintFor.add(p.template + '|' + p.hints[0]);
+      ok(p.hints[0].includes('The start is') && p.hints[0].includes('the target is'), `two-step ${t.id}: the first hint names the start and the target`);
+      const hasCT = [p.intermediate, ...p.products].some((x) => /[/\\]/.test(x));
+      if (!hasCT) {
+        noGeom++;
+        const text = p.options.map((o) => (o.lead || '') + (o.more || '') + (o.why || '')).join(' ') + p.worked + p.derive;
+        ok(!/\bcis\b|\btrans\b|\(Z\)/.test(text), `two-step ${t.id} ${p.substrate}: no cis/trans in feedback when the chain has no cis/trans geometry (${(text.match(/.{30}\b(cis|trans)\b.{20}/) || [''])[0]})`);
+      }
+    }
+    ok(noGeom >= 20, `two-step: ${noGeom} chains without cis/trans checked`);
+    ok(hintFor.size > M.TEMPLATES.length, 'two-step hints differ by chain, not one generic line');
+    const dirHint = [...hintFor].find((h) => /^(nitrate-then|oxidise-then|acylate-then)\|/.test(h));
+    ok(dirHint && /directing|meta director/.test(dirHint) && !/something to act on/.test(dirHint), 'the directing-order puzzles have an order-of-directors hint');
+    // the swapped-order feedback of a directing puzzle names the products, not just "the final positions come out different"
+    const ot = ['nitrate-then', 'acylate-then', 'oxidise-then'].flatMap((id) => M.chainsOf(M.TEMPLATE_BY_ID[id]).map((ch) => M.buildTwoStep(ch, mulberry32(4))).filter(Boolean));
+    ok(ot.length > 0 && ot.some((p) => p.options.some((o) => o.kind2 === 'swapped' && /In that order the product is/.test(o.lead))), `swapped-order feedback of a directing puzzle names what that order gives (${ot.length} puzzles)`);
+    ok(!ot.some((p) => p.options.some((o) => /final positions come out different/.test(o.lead + o.more))), 'no directing puzzle says only "the final positions come out different"');
+    // finding 8: no verbatim repeats in one set or one session
+    for (const m of M.MODE_IDS) {
+      const set = generate(m, 60, { rng: mulberry32(77) });
+      eq(new Set(set.map((p) => M.sameQuestionKey(p))).size, 60, `${m}: 60 problems in one set, none asked twice`);
+    }
+    const pset = generate('predict-product', 60, { rng: mulberry32(78) });
+    eq(new Set(pset.map((p) => `${p.card}|${p.substrate}|${p.reagent}|${p.halide || ''}`)).size, 60, 'predict-product: 60 problems in one set, none asked twice');
+    GEN.resetSessionRing();
+    for (const m of ['guess-reagent', 'two-step', 'wont-work', 'stereo-outcome']) {
+      const seen = []; let dup = 0;
+      for (let i = 0; i < 40; i++) { const k = GEN.problemKey(generate(m, 1)[0]); if (seen.slice(-30).includes(k)) dup++; seen.push(k); }
+      eq(dup, 0, `${m}: one at a time (as a mastery check asks), nothing repeats within the last 30`);
+    }
+    GEN.resetSessionRing();
+  }
 
   // ---- (8) counts
   const rng0 = () => 0.5;

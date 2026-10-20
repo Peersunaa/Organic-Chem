@@ -1093,6 +1093,15 @@ export const BENZYL = [
 ];
 
 /**
+ * A cycloalkene may be written with the locant of its double bond: cyclopent-1-ene is cyclopentene, 3-(propan-2-yl)cyclopent-1-ene is 3-(propan-2-yl)cyclopentene
+ * (the C=C is always C1=C2, so the locant is optional). Returns the typed name without that locant when the molecule is a ring with one C=C, else the name unchanged.
+ */
+export function ringEneLocant(raw, info) {
+  if (!info || info.kind !== 'ring' || info.type !== 'ene' || info.mult.length !== 1) return raw;
+  return String(raw).replace(/(cyclo(?:undec|dodec|prop|but|pent|hex|hept|oct|non|dec))\s*-?\s*1\s*-?\s*ene\s*$/i, '$1ene');
+}
+
+/**
  * A typed name checked against the correctly ordered name in EVERY style (new, old, systematic-bracketed, yl-locant), each with its own alphabetical order.
  * Returns null when the namer cannot read the molecule, or when `answer` is not one of the molecule's own names (a step that shows one molecule and asks for
  * another's name, such as "name the mirror image", must not be graded here). Otherwise { ok, styles:[...], note } where note says which style was used.
@@ -1102,7 +1111,7 @@ export function matchNameForms(smiles, raw, answer) {
   if (!infos) return null;
   const names = namesOf(infos);
   if (answer !== undefined && !matchStyles(names, answer).ok) return null;
-  const m = matchStyles(names, raw);
+  const m = matchStyles(names, ringEneLocant(raw, infos.new));
   const groups = [...new Set(infos.new.subs.map((s) => s.id).filter((id) => COMPLEX_IDS.includes(id)))];
   return { ok: m.ok, styles: m.styles, names, note: m.ok ? styleNote(m.styles, groups) : '' };
 }

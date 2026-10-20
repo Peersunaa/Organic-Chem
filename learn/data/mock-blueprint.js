@@ -37,7 +37,7 @@ export const SECTIONS = [
   {
     id: 'A5', title: 'HBr addition', count: 1, marks: 4,
     instruction: 'Draw, with stereochemistry, the major product(s) when HBr adds to the alkene.',
-    note: 'The new C–Br carbon is a stereocentre, so the product is a racemic pair: the flat drawing stands for both enantiomers. The workbook asks you to draw; here you pick the drawing that matches yours.',
+    note: 'Pick the drawing that matches your answer. A flat drawing stands for both enantiomers when the product is a racemic pair.',
     feeds: [{ gen: 'predict-product', w: 1, pick: 'hbr', skills: ['predict-product'] }]
   },
   {
@@ -53,7 +53,7 @@ export const SECTIONS = [
   {
     id: 'B3', title: 'Reactions', count: 8, marks: 3,
     instruction: 'Write the structure of the major product. Indicate stereochemistry where necessary.',
-    note: 'The workbook asks you to draw; here you pick the drawing that matches yours (or the reagent that makes it).',
+    note: 'Pick the drawing (or the reagent) that matches your answer.',
     feeds: [
       { gen: 'predict-product', w: 5, skills: ['predict-product'] },
       { gen: 'guess-reagent', w: 3, skills: ['guess-reagent'] }

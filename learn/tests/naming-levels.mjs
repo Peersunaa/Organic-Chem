@@ -22,7 +22,7 @@ import * as G from '../engine/generators-naming-levels.js';
 import { checkInput } from '../engine/steps.js';
 import { WIDGETS } from '../engine/widgets/index.js';
 import { skillLabel, skillRule } from '../engine/skills.js';
-import { nameBoth, nameAlkeneBoth, normName } from '../engine/naming.js';
+import { nameBoth, nameAlkeneBoth, normName, diagnoseAlkene } from '../engine/naming.js';
 import * as store from '../engine/store.js';
 import * as C from '../engine/naming-custom.js';
 import * as NF from '../engine/name-forms.js';
@@ -433,6 +433,27 @@ export async function namingLevels({ ok, eq }) {
     // the answer must belong to the molecule: a step that shows one molecule and asks for ANOTHER name is not graded by this
     const mirror = { name: true, smiles: 'C[C@H](Br)CC', answer: '(R)-2-bromobutane', accept: [] };
     ok(!checkInput(mirror, '(S)-2-bromobutane').ok && checkInput(mirror, '(R)-2-bromobutane').ok, 'the mirror-image step still wants the OTHER name (the shown molecule is not graded by its own name)');
+  }
+
+  // ================================================================== (9b) review finding 3: the "-1-ene" locant on a cycloalkene
+  {
+    const RING_ENE = [
+      ['CC1=CCCC1', ['1-methylcyclopentene', '1-methylcyclopent-1-ene', '1-Methylcyclopent-1-ene', '1-methylcyclopent 1 ene'], [['1-methylcyclopent-2-ene', /always C1=C2/], ['2-methylcyclopent-1-ene', /numbering of the substituents/]]],
+      ['CC(C)C1C=CCC1', ['3-(propan-2-yl)cyclopentene', '3-(propan-2-yl)cyclopent-1-ene', '3-isopropylcyclopentene', '3-isopropylcyclopent-1-ene', '3-(1-methylethyl)cyclopent-1-ene'], [['4-isopropylcyclopent-1-ene', /numbering of the substituents/]]],
+      ['C1=CCCC1', ['cyclopentene', 'cyclopent-1-ene'], [['cyclopent-2-ene', /always C1=C2/]]],
+      ['CC1C=CCCC1', ['3-methylcyclohexene', '3-methylcyclohex-1-ene'], [['6-methylcyclohex-1-ene', /numbering of the substituents/], ['4-methylcyclohex-1-ene', /numbering of the substituents/]]]
+    ];
+    const ringRes = opsin(RING_ENE.flatMap((r) => r[1].filter((n) => !/ /.test(n) && n === n.toLowerCase())));
+    for (const [smi, rights, wrongs] of RING_ENE) {
+      const step = { name: true, smiles: smi, answer: G.namesOf(G.modeInfos(smi)).new, skill: 'naming-levels', diagnoseFn: (raw) => diagnoseAlkene(smi, raw) };
+      rights.forEach((nm) => ok(checkInput(step, nm).ok, `cycloalkene ${smi}: "${nm}" is accepted`));
+      wrongs.forEach(([nm, why]) => { const r = checkInput(step, nm); ok(!r.ok && why.test(r.diagnosis), `cycloalkene ${smi}: "${nm}" is rejected with a hint about the actual difference (${r.diagnosis})`); });
+      rights.filter((nm) => ringRes[nm]).forEach((nm) => ok(same(ringRes[nm], smi, false), `OPSIN: "${nm}" is ${smi} (${ringRes[nm]})`));
+    }
+    // the systematic and traditional spellings are one molecule, both accepted, either with or without the locant
+    ok(['3-(propan-2-yl)cyclopent-1-ene', '3-isopropylcyclopentene'].every((nm) => G.matchNameForms('CC(C)C1C=CCC1', nm).ok), '3-(propan-2-yl)cyclopent-1-ene and 3-isopropylcyclopentene are the same molecule');
+    // a chain alkene is untouched by the ring rule: but-1-ene stays, "cyclo" is needed for the rule
+    ok(G.ringEneLocant('hex-1-ene', G.modeInfos('CCCCC=C').new) === 'hex-1-ene', 'a chain name is left alone by the ring-locant rule');
   }
 
   // ================================================================== (10) Lesson 05 / 07 input steps take every style with no accept list needed

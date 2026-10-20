@@ -320,6 +320,63 @@ export async function mock({ ok, eq }) {
   store.resetAll();
   eq(store.getMock(), { bp: null, current: null, last: null, history: [] }, 'reset clears the mock state');
 
+  // finding 9: a weighted RETAKE moves questions TOWARD the sections where this paper lost marks, never away
+  {
+    const base = M.defaultBp();
+    const planA = M.planPaper(base, null), paperA = M.buildPaper(planA, 321);
+    // a synthetic script: full marks everywhere except A1 (all four naming questions wrong)
+    const ansA = {};
+    paperA.questions.forEach((q) => { ansA[q.id] = q.sec === 'A1' ? M.wrongValue(q) : M.correctValue(q); });
+    const markedA = M.markPaper(paperA, ansA);
+    const loss = M.lossFromMarked(markedA);
+    eq(loss.sections, { A1: 8 }, 'lost marks: only A1 lost (4 questions x 2 marks)');
+    eq(Object.keys(loss.skills), ['naming-levels'], 'lost marks by skill: naming only');
+    const cA = M.weightedCounts(base, null, loss.sections);
+    ok(cA.A1 > 4, `a section that lost marks gains questions (A1: 4 -> ${cA.A1})`);
+    for (const s of base.sections) if (s.id !== 'A1') ok(cA[s.id] <= s.count, `${s.id}: lost nothing, never gains (${s.count} -> ${cA[s.id]})`);
+    eq(Object.values(cA).reduce((a, b) => a + b, 0), 29, 'the total stays 29');
+    eq(cA.A1, 6, 'A1 rises to its +50% ceiling (6)');
+    ok(M.weightingPreview(base, null, loss).some((x) => x.id === 'A1' && x.from === 4 && x.to === 6), 'the preview names A1 as the section that grows');
+    // a section with full marks is NEVER given more questions, however weak the long-run log says it is (the review: B3 grew after 12/12)
+    const noisyLog = { 'guess-reagent': 5, 'predict-product': 5 };
+    const cN = M.weightedCounts(base, noisyLog, loss.sections);
+    ok(cN.B3 <= 8, `the long-run log cannot pull a full-marks section up when a loss is given (B3 ${cN.B3})`);
+    const wpA = M.planPaper({ ...base, weighted: true }, null, loss);
+    ok(wpA.weighted && wpA.sections.find((s) => s.id === 'A1').count === 6 && wpA.sections.find((s) => s.id === 'B3').count <= 8, 'planPaper with a loss: A1 grows, B3 does not');
+    // end to end, the way the view does it: submit this script, then press "Retake weighted"
+    store.resetAll();
+    const s0 = M.startSitting(base, { seed: 321, now: t0 });
+    s0.answers = ansA;
+    store.setMock({ current: s0 });
+    M.submitSitting(s0, paperA, { now: t0 + 600000 });
+    const rbp = M.bpFromPlan(M.lastResult().plan, true);
+    const s1 = M.startSitting(rbp, { scores: store.skillScores(), now: t0 + 700000 });
+    ok(s1.plan.weighted, 'the retake is weighted');
+    eq(s1.plan.sections.find((s) => s.id === 'A1').count, 6, 'retake: A1 (where marks were lost) has more questions');
+    for (const s of s1.plan.sections) if (s.id !== 'A1') ok(s.count <= s.base, `retake: ${s.id} (full marks) does not gain (${s.base} -> ${s.count})`);
+    eq(M.planTotals(s1.plan).questions, 29, 'retake: still 29 questions');
+    // a plain (non-retake) weighted blueprint keeps using the long-run log
+    const s2 = M.startSitting({ ...base, weighted: true }, { scores: { 'guess-reagent': 3 }, now: t0 + 800000 });
+    eq(s2.plan.sections.find((s) => s.id === 'B3').count, 12, 'a fresh weighted paper still follows the long-run log');
+    store.resetAll();
+  }
+  // finding 8: a paper never asks the same card + substrate + reagent twice
+  {
+    for (const [name, bp] of [['full', M.presetBp('full')], ['reactions', M.presetBp('reactions')], ['half', M.presetBp('half')]]) for (const seed of [11, 12, 13, 14]) {
+      const P = M.buildPaper(M.planPaper(bp, null), seed);
+      const dks = P.questions.map((q) => q.v.dk).filter(Boolean);
+      eq(new Set(dks).size, dks.length, `${name} paper, seed ${seed}: no card + substrate + reagent twice (${dks.length} reaction questions)`);
+      const sr = P.questions.map((q) => q.v.dk).filter(Boolean).map((k) => k.split('|').slice(0, 4).join('|'));
+      eq(new Set(sr).size, sr.length, `${name} paper, seed ${seed}: no substrate + reagent twice`);
+      ok(dks.length >= (name === 'reactions' ? 14 : 3), `${name} paper, seed ${seed}: the reaction questions carry a dedupe key`);
+    }
+    // the same (plan, seed) is still the same paper
+    const bp2 = M.presetBp('reactions');
+    ok(paperJson(M.buildPaper(M.planPaper(bp2, null), 31)) === paperJson(M.buildPaper(M.planPaper(bp2, null), 31)), 'deduplication keeps a seeded paper reproducible');
+    // the keys: predict-product and guess-reagent on the same combo collide
+    const kA = M.dedupeKey({ card: 'alkene-hx', substrate: 'CC=C', reagent: 'HBr', halide: null }), kB = M.dedupeKey({ card: 'alkene-hx', substrate: 'CC=C', reagent: 'HBr', halide: null, skill: 'guess-reagent' });
+    ok(kA && kA === kB && M.dedupeKey({ skill: 'rs' }) === '', 'dedupeKey: one combo has one key whatever the mode; problems without a card have none');
+  }
   // ================================================================ (6) the Hückel generator and the adapters
   for (const e of HUCKEL_POOL) {
     const I = huckelInfo(e.smiles, e.planar !== false), H = HAND[e.id];

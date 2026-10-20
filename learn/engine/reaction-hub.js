@@ -129,12 +129,12 @@ export const HUB_CARDS = [
     example: { substrate: 'c1ccccc1', product: 'CCc1ccccc1', reagent: 'CH₃CH₂Cl, AlCl₃' },
     facts: { adds: 'An alkyl group, R (replaces one ring H)', where: 'On the ring', space: 'n.a.', addsKey: ['other'] },
     apply: {
-      pattern: 'Benzene reacts with CH₃CH₂Cl and AlCl₃. Give the product. Why does the same reaction fail on chlorobenzene or nitrobenzene?',
+      pattern: 'Benzene reacts with CH₃CH₂Cl and AlCl₃. Give the product. Why does the same reaction fail on nitrobenzene or acetophenone?',
       steps: [
         'An alkyl chloride with AlCl₃ is a Friedel–Crafts alkylation. The electrophile is the carbocation R⁺.',
         'Swap ONE ring H for R: ethylbenzene here.',
         'Check the halide: Cl must be on a saturated carbon (alkyl). Aryl and vinylic halides make no carbocation.',
-        'Check the ring: it must not carry NO₂, C≡N, SO₃H or a C=O group (COR). Those rings are too unreactive.',
+        'Check the ring: it must not carry NO₂, C≡N, SO₃H or a C=O group (COR), and it must not be an amine (the N binds AlCl₃). Those rings are too unreactive. A halogen only slows the ring a little: chlorobenzene still reacts, just more slowly than benzene.',
         'In a synthesis with a second group, do the Friedel–Crafts step FIRST, while the ring is still reactive.'
       ]
     },
@@ -145,7 +145,7 @@ export const HUB_CARDS = [
         'Alkyl chloride + AlCl₃: Friedel–Crafts. Electrophile R⁺.',
         'ONE H → R: ethylbenzene.',
         'Cl on saturated C. Aryl, vinylic halide: no carbocation.',
-        'Ring has NO₂, C≡N, SO₃H or C=O (COR)? Too unreactive.',
+        'Ring has NO₂, C≡N, SO₃H, C=O (COR)? Too unreactive. Amine binds AlCl₃: fails. Halogen only slows: still reacts.',
         'Synthesis, second group: Friedel–Crafts FIRST. Ring reactive.'
       ]
     },
@@ -162,7 +162,7 @@ export const HUB_CARDS = [
         'Acetophenone has C(=O)CH₃ on the ring. The reagent for that is the acid chloride CH₃COCl with AlCl₃.',
         'AlCl₃ takes Cl⁻ and leaves the acylium ion, CH₃C≡O⁺.',
         'The ring attacks it, then loses H⁺: one ring H is now C(=O)CH₃.',
-        'The same limits apply as for alkylation: no NO₂, C≡N, SO₃H or COR already on the ring.'
+        'The same limits apply as for alkylation: no NO₂, C≡N, SO₃H or COR already on the ring, and no amine. A halogen only slows the ring, so chlorobenzene still reacts (more slowly than benzene).'
       ]
     },
     caveman: {
@@ -172,7 +172,7 @@ export const HUB_CARDS = [
         'Acetophenone: ring C(=O)CH₃. Reagent CH₃COCl, AlCl₃.',
         'AlCl₃ take Cl⁻: acylium CH₃C≡O⁺',
         'Ring attack, lose H⁺: H now C(=O)CH₃.',
-        'Alkylation limits: no NO₂, C≡N, SO₃H, COR on ring.'
+        'Alkylation limits: no NO₂, C≡N, SO₃H, COR, amine on ring. Halogen only slows: still reacts.'
       ]
     },
     lesson: { id: '13', step: 's17' }
@@ -212,7 +212,7 @@ export const HUB_CARDS = [
     apply: {
       pattern: 'Chlorobenzene is nitrated. Which isomers form? Is it faster or slower than benzene, and why?',
       steps: [
-        'Halogens are deactivators (the ring is slower than benzene) but they are ortho/para directors. This is the one exception to "deactivator means meta".',
+        'Halogens are deactivators (the ring is slower than benzene) but they are ortho/para directors. This is the one exception to "deactivator means meta". Friedel–Crafts still works on a halobenzene, only more slowly than on benzene.',
         'Rate: Cl pulls electrons through the σ bond (inductive effect), so the ring is less reactive.',
         'Position: in ortho and para attack, a lone pair on Cl can share the + charge (an extra resonance form). Meta attack cannot.',
         'Draw the ortho and para products.'
@@ -222,7 +222,7 @@ export const HUB_CARDS = [
       what: 'Halogen odd: deactivating, but ortho and para.',
       facts: { adds: 'New group (NO₂, Br) for H', where: 'Ortho, para to halogen', space: 'n.a.' },
       steps: [
-        'Halogen: slower ring, still ortho/para. Only exception to "deactivator means meta".',
+        'Halogen: slower ring, still ortho/para. Only exception to "deactivator means meta". Friedel–Crafts still works, slower.',
         'Cl pull electrons via σ bond (inductive). Ring slower.',
         'Ortho, para: Cl lone pair share + (extra resonance form). Meta cannot.',
         'Draw ortho, para products.'
@@ -651,56 +651,56 @@ export const HUB_CARDS = [
     lesson: { id: '10', step: 's06' }
   },
   {
-    id: 'alkene-kmno4-base', group: 'alkene', reagent: 'KMnO₄, OH⁻, H₂O',
+    id: 'alkene-kmno4-base', group: 'alkene', reagent: 'KMnO₄, cold, dilute, OH⁻ → cis diol',
     what: 'Adds two OH across the C=C in one step and gives a diol. Both OH arrive on the same face (syn).',
     example: { substrate: 'C1=CCCCC1', product: 'O[C@@H]1CCCC[C@@H]1O', note: 'cis diol (meso).' },
     facts: { adds: 'OH and OH', where: 'One OH on each C=C carbon', space: 'syn', addsKey: ['OH'] },
     apply: {
-      pattern: 'Cyclohexene is treated with KMnO₄ in basic solution. Draw the product, showing stereochemistry. What does (Z)-but-2-ene give?',
+      pattern: 'Cyclohexene is treated with cold, dilute KMnO₄ in basic solution (OH⁻). Draw the product, showing stereochemistry. What does (Z)-but-2-ene give?',
       steps: [
-        'Basic (OH⁻) KMnO₄ is syn hydroxylation. The purple colour fades and brown MnO₂ forms.',
+        'Cold, dilute KMnO₄ in base (OH⁻) is syn hydroxylation. The purple colour fades and brown MnO₂ forms.',
         'Put one OH on each C=C carbon, on the SAME face.',
         'On a ring: a cis diol. Draw both OH wedged (or both dashed).',
         'Acyclic: a cis alkene gives a meso diol; a trans alkene gives a racemic pair.',
-        'Do not mix it up with ACIDIC KMnO₄, which cuts the C=C (next card).'
+        'Do not mix it up with hot or acidic KMnO₄, which cuts the C=C (next card). Only the cold, dilute, basic conditions stop at the diol.'
       ]
     },
     caveman: {
       what: 'Two OH across C=C, one step. Diol. Same face (syn).',
       facts: { adds: 'OH, OH', where: 'One OH each', space: 'syn' },
       steps: [
-        'OH⁻ KMnO₄: syn. Purple fades, brown MnO₂ forms.',
+        'Cold, dilute KMnO₄, OH⁻: syn. Purple fades, brown MnO₂.',
         'One OH each, SAME face.',
         'Ring: cis. Both OH wedged/dashed.',
         'Acyclic: cis alkene meso, trans racemic pair.',
-        'Not ACIDIC KMnO₄: cuts C=C (next card).'
+        'Hot/acidic KMnO₄ cuts C=C (next card). Cold, dilute: diol.'
       ],
       note: 'cis, meso.'
     },
     lesson: { id: '10', step: 's12' }
   },
   {
-    id: 'alkene-kmno4-acid', group: 'alkene', reagent: 'KMnO₄, H₃O⁺',
+    id: 'alkene-kmno4-acid', group: 'alkene', reagent: 'KMnO₄, hot or acidic → cleavage',
     what: 'Cuts the C=C in two. Each carbon becomes C=O: a ketone if it had no H, a carboxylic acid if it had one H, CO₂ if it had two.',
     example: { substrate: 'CC=C(C)C', product: 'CC(C)=O.CC(=O)O', note: 'Two products: acetone (the end with no H) and acetic acid (the end with one H).' },
     facts: { adds: 'O (each end of the old C=C gains O)', where: 'At the C=C: count the H on each carbon', space: 'n.a.', addsKey: ['other'] },
     apply: {
-      pattern: '2-Methylbut-2-ene is treated with KMnO₄ in acid. Draw the products.',
+      pattern: '2-Methylbut-2-ene is treated with hot or acidic KMnO₄ (H₃O⁺). Draw the products.',
       steps: [
-        'Acidic KMnO₄ breaks the C=C completely. You get two pieces. A ring alkene opens into one chain with two ends.',
+        'Hot or acidic KMnO₄ breaks the C=C completely. You get two pieces. A ring alkene opens into one chain with two ends.',
         'Count the H on each C=C carbon. No H: ketone. One H: carboxylic acid, –CO₂H. Two H (=CH₂): CO₂.',
         'Every other carbon stays where it was.',
-        'Read the conditions: in BASE the same reagent stops at the cis diol (previous card).'
+        'Read the conditions: cold, dilute KMnO₄ in base (OH⁻) stops at the cis diol (previous card); hot or acidic KMnO₄ cuts the C=C.'
       ]
     },
     caveman: {
       what: 'Cut C=C. Each carbon C=O: no H ketone, one H carboxylic acid, two H CO₂.',
       facts: { adds: 'O: each C=C end gain O', where: 'At C=C: count H each carbon', space: 'n.a.' },
       steps: [
-        'Acidic KMnO₄ break C=C. Two pieces. Ring opens to one chain.',
+        'Hot or acidic KMnO₄ break C=C. Two pieces. Ring opens to one chain.',
         'H count. None: ketone. One: –CO₂H. Two (=CH₂): CO₂.',
         'Other carbons stay.',
-        'BASE: stops at cis diol (previous card).'
+        'Cold, dilute KMnO₄, OH⁻: cis diol (previous card). Hot/acid: cut.'
       ],
       note: 'Acetone (no H end), acetic acid (one H end).'
     },
@@ -741,7 +741,7 @@ export const HUB_CARDS = [
     apply: {
       pattern: 'Make trans-cyclohexane-1,2-diol from cyclohexene.',
       steps: [
-        'KMnO₄ with OH⁻ would give the CIS diol, so use the two-step route instead.',
+        'Cold, dilute KMnO₄ with OH⁻ would give the CIS diol, so use the two-step route instead.',
         'Step 1: RCO₃H turns the C=C into an epoxide (the O sits on one face).',
         'Step 2: H₃O⁺ and water. Water attacks one carbon from the side OPPOSITE the C–O bond that breaks.',
         'Result: OH on opposite faces (trans). It forms as a racemate.'
@@ -751,7 +751,7 @@ export const HUB_CARDS = [
       what: 'Epoxide, water opens from back. Two OH opposite (anti): trans diol.',
       facts: { adds: 'OH, OH', where: 'One OH each', space: 'anti' },
       steps: [
-        'KMnO₄, OH⁻ give CIS diol. Use two steps.',
+        'Cold, dilute KMnO₄, OH⁻: CIS. Two steps.',
         'Step 1: RCO₃H: epoxide, O on one face.',
         'Step 2: H₃O⁺, water attack OPPOSITE the C–O bond.',
         'OH opposite faces (trans). Racemate.'

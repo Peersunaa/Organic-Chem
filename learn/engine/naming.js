@@ -643,7 +643,9 @@ export function diagnoseAlkene(smiles, typed) {
   const infoO = alkeneInfo(smiles, 'old');
   if (!info || !infoO) return null;
   const raw = String(typed);
-  const t = normName(stripStereo(raw));
+  let t = normName(stripStereo(raw));
+  // a cycloalkene may carry the locant of its C=C (cyclopent-1-ene = cyclopentene): the locant is not a mistake
+  if (info.parent.kind === 'ring') t = t.replace(/(cyclo[a-z]+?)1ene$/, '$1ene');
   const typedStereo = stereoOf(raw) || (/^\s*(cis|trans)/i.test(raw) ? 'CT' : null);
   const wantStereo = info.stereo.length > 0;
   const coreNew = normName(info.core), coreOld = normName(infoO.core);
@@ -696,7 +698,11 @@ export function diagnoseAlkene(smiles, typed) {
       const multTyped = (t.match(/(\d+)(?:,\d+)*(?=-?(?:[a-z]*?)(?:di)?(?:ene|yne)$)/) || [])[0];
       if (info.mult.length === 1 && multTyped !== undefined && Number(multTyped) !== info.mult[0]) return `Where does the double bond sit? Number the chain from the end nearer the multiple bond; here it starts at C${info.mult[0]}.`;
     }
-    if (wantRing) return 'Number the ring so that the double bond is C1=C2, then choose the direction that gives the substituents the lowest numbers.';
+    if (wantRing) {
+      const eneLoc = /cyclo[a-z]+?(\d+)ene$/.exec(t);
+      if (eneLoc) return `In a ring the double bond is always C1=C2, so it can only be written -1-ene (or left out), never -${eneLoc[1]}-ene. Number the ring from the C=C first, then choose the direction that gives the substituents the lowest numbers.`;
+      return 'The double bond is C1=C2 (that part is fine). What is off is the numbering of the substituents: from the C=C, go round the ring in the direction that gives the substituents the lowest set of numbers.';
+    }
     return 'Check the numbers: the multiple bond gets the lowest possible locant first, then the substituents.';
   }
   const counts = {};
