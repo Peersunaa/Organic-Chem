@@ -18,6 +18,8 @@ import { generateRs, RS_SKILLS } from './generators-rs.js';
 import { generateRel, REL_SKILLS } from './generators-relationships.js';
 import { generateFischer, FISCHER_SKILLS } from './generators-fischer.js';
 import { generatePredict, PREDICT_SKILLS } from './generators-predict.js';
+import { generateStereoProjections, STEREO_PROJ_SKILLS } from './generators-stereo-projections.js';
+import { generateNamingLevels, NAMING_LEVEL_SKILLS } from './generators-naming-levels.js';
 
 export const POOL = ['CN', 'CC#N', 'OC=O', 'C[O-]', '[NH4+]', 'CCl', 'C=C', 'CC=O', 'CC(=O)O', 'COC', '[OH3+]', '[CH3+]', '[CH3-]', 'O=C=O'];
 const MINUS = '−';
@@ -170,7 +172,7 @@ export function makeProblem(rng, task, smi) {
 const BY_SKILL = { 'lone-pairs': ['lp'], 'formal-charge': ['fc'], 'electron-count-total': ['total'], 'multiple-bonds': ['builder-multi'], 'octet': ['octet'], 'valence-electrons': ['valence'], 'bond-count': ['bonds'] };
 
 /** generate(generatorId, count, {skill, rng}) -> problems. Fresh random molecules each call. */
-export function generate(generatorId, count, { skill = null, rng = Math.random } = {}) {
+export function generate(generatorId, count, { skill = null, rng = Math.random, level = null } = {}) {
   if (generatorId === 'shape-basic') return generateShape(count, { skill, rng });
   if (generatorId === 'acid-base') return generateAcid(count, { skill, rng });
   if (generatorId === 'skeletal-fg') return generateFg(count, { skill, rng });
@@ -188,6 +190,8 @@ export function generate(generatorId, count, { skill = null, rng = Math.random }
   if (generatorId === 'stereo-relationships') return generateRel(count, { skill, rng });
   if (generatorId === 'fischer') return generateFischer(count, { skill, rng });
   if (generatorId === 'predict-product') return generatePredict(count, { skill, rng });
+  if (generatorId === 'stereo-projections') return generateStereoProjections(count, { skill, rng });
+  if (generatorId === 'naming-levels') return generateNamingLevels(count, { skill, rng, level });
   const tasks = skill && BY_SKILL[skill] ? BY_SKILL[skill] : BASIC_TASKS;
   const out = [];
   let last = null;
@@ -199,9 +203,9 @@ export function generate(generatorId, count, { skill = null, rng = Math.random }
   }
   return out;
 }
-export const GENERATORS = { 'lewis-basic': true, 'shape-basic': true, 'acid-base': true, 'skeletal-fg': true, 'alkane-names': true, 'chairs': true, 'alkene-names': true, 'mechanism-basics': true, 'markovnikov': true, 'alkene-additions-2': true, 'resonance': true, 'alkynes': true, 'eas-basics': true, 'directors': true, 'rs': true, 'stereo-relationships': true, 'fischer': true, 'predict-product': true };
+export const GENERATORS = { 'lewis-basic': true, 'shape-basic': true, 'acid-base': true, 'skeletal-fg': true, 'alkane-names': true, 'chairs': true, 'alkene-names': true, 'mechanism-basics': true, 'markovnikov': true, 'alkene-additions-2': true, 'resonance': true, 'alkynes': true, 'eas-basics': true, 'directors': true, 'rs': true, 'stereo-relationships': true, 'fischer': true, 'predict-product': true, 'stereo-projections': true, 'naming-levels': true };
 /** Which generator serves "Practise this" for a weak-spot skill. */
-export function generatorForSkill(skill) { return PREDICT_SKILLS.includes(skill) ? 'predict-product' : FISCHER_SKILLS.includes(skill) ? 'fischer' : REL_SKILLS.includes(skill) ? 'stereo-relationships' : RS_SKILLS.includes(skill) ? 'rs' : DIRECTOR_SKILLS.includes(skill) ? 'directors' : EAS_SKILLS.includes(skill) ? 'eas-basics' : ALKYNE_SKILLS.includes(skill) ? 'alkynes' : RES_SKILLS.includes(skill) ? 'resonance' : ADD2_SKILLS.includes(skill) ? 'alkene-additions-2' : MARK_SKILLS.includes(skill) ? 'markovnikov' : MECH_SKILLS.includes(skill) ? 'mechanism-basics' : ALKENE_SKILLS.includes(skill) ? 'alkene-names' : CHAIR_SKILLS.includes(skill) ? 'chairs' : NAMING_SKILLS.includes(skill) ? 'alkane-names' : FG_SKILLS.includes(skill) ? 'skeletal-fg' : ACID_SKILLS.includes(skill) ? 'acid-base' : SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
+export function generatorForSkill(skill) { return NAMING_LEVEL_SKILLS.includes(skill) ? 'naming-levels' : STEREO_PROJ_SKILLS.includes(skill) ? 'stereo-projections' : PREDICT_SKILLS.includes(skill) ? 'predict-product' : FISCHER_SKILLS.includes(skill) ? 'fischer' : REL_SKILLS.includes(skill) ? 'stereo-relationships' : RS_SKILLS.includes(skill) ? 'rs' : DIRECTOR_SKILLS.includes(skill) ? 'directors' : EAS_SKILLS.includes(skill) ? 'eas-basics' : ALKYNE_SKILLS.includes(skill) ? 'alkynes' : RES_SKILLS.includes(skill) ? 'resonance' : ADD2_SKILLS.includes(skill) ? 'alkene-additions-2' : MARK_SKILLS.includes(skill) ? 'markovnikov' : MECH_SKILLS.includes(skill) ? 'mechanism-basics' : ALKENE_SKILLS.includes(skill) ? 'alkene-names' : CHAIR_SKILLS.includes(skill) ? 'chairs' : NAMING_SKILLS.includes(skill) ? 'alkane-names' : FG_SKILLS.includes(skill) ? 'skeletal-fg' : ACID_SKILLS.includes(skill) ? 'acid-base' : SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
 
 const SUBS = '₀₁₂₃₄₅₆₇₈₉';
 const subNum = (n) => (n === 1 ? '' : String(n).split('').map((d) => SUBS[d]).join(''));

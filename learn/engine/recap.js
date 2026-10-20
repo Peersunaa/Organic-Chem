@@ -87,6 +87,12 @@ export const RECAP = {
     { n: '15', step: 's13', fact: 'R/S in three moves: rank the groups (CIP), put group 4 at the back, then read 1 → 2 → 3 as clockwise (R) or anticlockwise (S).' },
     { n: '10', step: 's03', fact: 'Br₂ adds anti: a bromonium ion forms, and Br⁻ attacks from the face opposite to it.' },
     { n: '15', step: 's09', fact: 'A polarimeter measures how far a solution turns plane-polarised light; enantiomers turn it equally in opposite directions.' }
+  ],
+  '17': [
+    { n: '08', step: 's07', fact: 'A nucleophile is electron-rich and donates a pair; an electrophile is electron-poor and accepts one. A curved arrow runs from the rich end to the poor end.' },
+    { n: '09', step: 's04', fact: 'Markovnikov: H goes to the C=C carbon with more H, so the + lands on the more substituted carbon (3° > 2° > 1°) and the other piece bonds there.' },
+    { n: '10', step: 's03', fact: 'Br₂ adds anti through a bromonium ion; H₂ over Pd, a peroxyacid and cold KMnO₄ put both groups on one face (syn); a flat carbocation takes the group on either face.' },
+    { n: '14', step: 's03', fact: 'A ring substitutes: the electrophile replaces one H. Activators and halogens send the next group ortho and para; every other deactivator sends it meta.' }
   ]
 };
 

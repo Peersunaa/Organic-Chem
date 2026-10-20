@@ -640,6 +640,30 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 .practice-list { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: var(--s-1); } .practice-all summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
 .done-note { display: grid; gap: var(--s-2); padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); } .done-note p { margin: 0; } .done-note .row { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
 @media (max-width: 460px) { .spl .v3 { height: 220px; } .sg-head.side { font-size: var(--fs-label); } .sg-rs { min-width: 44px; } }
+/* stereo projections */
+.pj { display: grid; gap: var(--s-3); min-width: 0; } .pj-ask { margin: 0; }
+.pj-figs { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: var(--s-2); align-items: start; justify-content: stretch; } .pj-fig { max-width: var(--mol-figure); width: 100%; justify-self: center; align-content: start; }
+.pj-figs .rd-vs { align-self: center; } @media (max-width: 479px) { .pj-figs { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .pj-figs .rd-vs { display: none; } }
+.pj-box { width: 100%; display: grid; align-items: center; justify-items: center; min-height: 150px; color: var(--ink); } .pj-box svg { width: 100%; height: auto; display: block; overflow: visible; max-width: 230px; }
+.pj-fig figcaption { text-align: center; } .pj-fig figcaption b { color: var(--accent); }
+.pj-read { display: block; font: 700 1rem/1.5rem var(--mono); color: var(--accent); animation: fb-in var(--dur-base) var(--ease-out) both; }
+.pj-name { width: 100%; box-sizing: border-box; display: grid; place-items: center; min-height: 150px; padding: var(--s-3); text-align: center; border: 1px dashed var(--line-strong); border-radius: var(--r-md); background: var(--surface-2); font: 600 .9375rem/1.4rem var(--body); color: var(--ink); overflow-wrap: anywhere; }
+.pj-opts { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.pj-newman { width: 100%; height: auto; display: block; max-width: 230px; }
+.pj-nlab { font: 700 16px var(--body); fill: var(--ink); } .pj-nlab.fq-O { fill: var(--c-O); } .pj-nlab.fq-N { fill: var(--c-N); } .pj-nlab.fq-Cl { fill: var(--c-Cl); } .pj-nlab.fq-Br { fill: var(--c-P); }
+.pj-stack { max-width: 190px; }
+/* naming levels */
+.nl-bar { display: grid; gap: var(--s-2); margin: 0 0 var(--s-4); min-width: 0; }
+.nl-btns { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--s-2); }
+.nl-lv { display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 52px; padding: var(--s-1) var(--s-1); border-radius: var(--r-md); border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; touch-action: manipulation; transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-hover) var(--ease-out); }
+.nl-lv:hover { border-color: var(--accent-line); background: var(--surface-2); } .nl-lv:active { transform: scale(.97); }
+.nl-lv:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: var(--focus-off); }
+.nl-lv[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.nl-n { font: 700 1.125rem/1.25rem var(--mono); } .nl-t { font: 600 var(--fs-label)/var(--lh-label) var(--body); letter-spacing: 0; white-space: nowrap; }
+.nl-sub { margin: 0; color: var(--muted); font-size: var(--fs-small); line-height: var(--lh-small); overflow-wrap: anywhere; } .nl-sub b { color: var(--ink); font-weight: 600; }
+.problem .opt .iupac, .problem .fb .iupac { overflow-wrap: anywhere; }
+@media (max-width: 380px) { .nl-t { font-size: .6875rem; } }
+@media (prefers-reduced-motion: reduce) { .nl-lv { transition: none; } .nl-lv:active { transform: none; } }
 /* reaction hub */
 .side { display: grid; gap: var(--s-6); min-width: 0; align-content: start; }
 .hub { display: grid; gap: var(--s-6); min-width: 0; }

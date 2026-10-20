@@ -99,6 +99,8 @@ function home() {
     panel.append(list);
   }
   panel.append(h('p', { class: 'small ws-drill' }, h('a', { class: 'btn small ghost', href: '#practise-predict-product', id: 'ws-drill-predict' }, 'Drill: predict the product'), h('span', { class: 'muted' }, ' Mixed reactions, all from the reaction cards.')));
+  panel.append(h('p', { class: 'small ws-drill' }, h('a', { class: 'btn small ghost', href: '#practise-naming-levels', id: 'ws-drill-naming' }, 'Drill: naming by level'), h('span', { class: 'muted' }, ' Five levels, from alkanes to stereo names, plus a tricky set.')));
+  panel.append(h('p', { class: 'small ws-drill' }, h('a', { class: 'btn small ghost', href: '#practise-stereo-projections', id: 'ws-drill-projections' }, 'Drill: stereo across projections'), h('span', { class: 'muted' }, ' Fischer, Newman, wedge and named drawings: the same compound or not?')));
 
   if (courseDone) {
     // one practice link per lesson: the first skill of that lesson that its own mastery generator serves
@@ -117,7 +119,7 @@ function home() {
     const pct = pr.complete ? 100 : Math.round((pr.done.length / total) * 100);
     ul.append(h('li', {}, h('a', { class: 'lesson' + (l.id === L.id ? ' is-current' : ''), href: '#lesson-' + l.id },
       h('span', { class: 'num' }, l.id),
-      h('span', { class: 'ltxt' }, h('b', {}, l.title), h('span', { class: 'muted small' }, `Chapter ${l.chapter} · ${l.sections.length > 1 && l.sections[0] !== l.sections[l.sections.length - 1] ? `sections ${l.sections[0]}–${l.sections[l.sections.length - 1]}` : `section ${l.sections[0]}`} · ${l.minutes} min`),
+      h('span', { class: 'ltxt' }, h('b', {}, l.title), h('span', { class: 'muted small' }, `${l.sections && l.sections.length ? `Chapter ${l.chapter} · ${l.sections.length > 1 && l.sections[0] !== l.sections[l.sections.length - 1] ? `sections ${l.sections[0]}–${l.sections[l.sections.length - 1]}` : `section ${l.sections[0]}`}` : 'Review · all reactions'} · ${l.minutes} min`),
         pct ? h('span', { class: 'mini', role: 'img', 'aria-label': `${pct}% done` }, h('i', { style: `width:${pct}%` })) : null),
       h('span', { class: 'chip ' + (pr.complete ? 'ok' : 'next') }, pr.complete ? 'Done' : pr.done.length ? 'In progress' : 'Next'))));
   });
@@ -131,7 +133,8 @@ function home() {
   const rx = h('section', { class: 'panel', 'aria-labelledby': 'rx-h' }, h('h2', { id: 'rx-h' }, 'Reactions'),
     h('p', { class: 'muted' }, 'Every reagent on one card: what it does, a worked example, three facts and how to answer the exam question.'),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'open-reactions' }, 'Open the reaction cards'),
-      h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'open-drill' }, 'Drill: predict the product')));
+      h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'open-drill' }, 'Drill: predict the product'),
+      h('a', { class: 'btn ghost', href: '#lesson-17', id: 'open-lesson-17' }, 'Lesson 17: Predict the product')));
   const pp = h('section', { class: 'panel', 'aria-labelledby': 'pp-h' }, h('h2', { id: 'pp-h' }, 'Past papers'),
     h('p', { class: 'muted' }, 'The midterm questions by topic: what each one asks, the steps to answer it, and where to learn it.'),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#pastpaper', id: 'open-pastpaper' }, 'Open past papers')));
