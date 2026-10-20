@@ -334,6 +334,7 @@ export default {
       stage.append(box);
       const cfg = stepConfig(step);
       inst = arrowDraw.mount(box, { atoms: cfg.atoms, bonds: cfg.bonds, arrows: step.arrows, products: step.after, extraHint: config.extraHint, regio: cfg.regio, equiv: cfg.equiv }, {
+        onProgress(o) { if (token === gen) ctx.onProgress?.(o); },   // an arrow was added: the step's stale wrong-answer box goes
         onResult(r) {
           if (token !== gen) return;
           if (r.ok) { wrongHere = 0; clearFeedback(); phase = 'play'; lead = 'Correct. '; showState(0, null); return; }

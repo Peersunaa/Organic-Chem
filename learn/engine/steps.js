@@ -193,7 +193,7 @@ function grader(step, ctx, host) {
     },
     right(msg, opts) { ft.right(); say('ok', (msg || 'Correct.') + (opts && opts.note && ft.slipped ? ' <span class="muted">Not first try: it is logged as a slip and does not count as a first-try answer.</span>' : '')); ctx.done(); },
     // a widget made partial progress (e.g. 1 of 2 predictions right): drop stale wrong-answer feedback
-    clear() { fb.className = 'fb'; fb.innerHTML = ''; }
+    clear(o) { fb.className = 'fb'; fb.innerHTML = ''; if (o && o.task) hints.innerHTML = ''; }
   };
 }
 
@@ -338,7 +338,7 @@ const RENDER = {
     const g = grader(step, ctx, host);
     WIDGETS[step.widget].mount(box, step.config, {
       onResult(r) { if (r.ok) g.right(step.confirm || 'Correct.'); else g.wrong(r.diagnosis); },
-      onProgress() { g.clear(); }
+      onProgress(o) { g.clear(o); }        // o.task: the widget moved to a new sub-task (next molecule, next question): its hints go too
     });
   },
 

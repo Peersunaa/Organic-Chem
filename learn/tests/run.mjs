@@ -169,7 +169,7 @@ for (const L of LESSONS) {
     for (const o of s.options || []) if (o.smiles && !o.raw) ok(canon(o.smiles) !== null, `${t} option smiles ${o.smiles} parses`);
     if (s.config && s.config.target) ok(canon(s.config.target) !== null, `${t} target parses`);
     if (s.derive && s.derive.smiles) ok(canon(s.derive.smiles) !== null, `${t} derive smiles parses`);
-    if (s.visual) ok((s.visual.widget === 'model3d' && models[s.visual.config.mol]) || (s.visual.widget === 'newman-rotator' && NR.MOLS[s.visual.config.mol] && models[s.visual.config.mol]) || (s.visual.widget === 'chair-flip' && CC.CHAIRS[s.visual.config.model]) || (s.visual.widget === 'energy-diagram' && Array.isArray(s.visual.config.levels)) || (s.visual.widget === 'fischer-quiz' && (s.visual.config.figures || [s.visual.config]).every((f) => FISCHER_BY_ID[f.entry])), `${t} visual model exists`);
+    if (s.visual) ok((s.visual.widget === 'model3d' && models[s.visual.config.mol]) || (s.visual.widget === 'newman-rotator' && NR.MOLS[s.visual.config.mol] && models[s.visual.config.mol]) || (s.visual.widget === 'chair-flip' && CC.CHAIRS[s.visual.config.model]) || (s.visual.widget === 'energy-diagram' && Array.isArray(s.visual.config.levels)) || (s.visual.widget === 'arrow-draw' && s.visual.config.preset === true && Array.isArray(s.visual.config.atoms) && s.visual.config.atoms.length > 0) || (s.visual.widget === 'fischer-quiz' && (s.visual.config.figures || [s.visual.config]).every((f) => FISCHER_BY_ID[f.entry])), `${t} visual model exists`);
     // options
     if (s.type === 'predict' || s.type === 'choice') {
       ok(s.options.filter((o) => o.correct).length === 1, `${t} exactly one correct option`);
@@ -283,7 +283,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'alkynes', 'eas-basics', 'directors', 'rs', 'stereo-relationships', 'predict-product'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'mechanism-mastery', 'markovnikov', 'alkene-additions-2', 'resonance', 'alkynes', 'eas-basics', 'directors', 'rs', 'stereo-relationships', 'predict-product'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics

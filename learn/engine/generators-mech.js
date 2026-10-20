@@ -5,6 +5,7 @@ import { steps as eSteps, overallDH, rdsStep, consistent, validate, intermediate
 import { stepConfig } from './widgets/mechanism-core.js';
 import { ARROW_BASES, ARROW_ACIDS, arrowScene } from './generators-acid.js';
 import { ACID } from './acidbase.js';
+import { predict } from './reactions.js';
 
 const MINUS = '−';
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
@@ -172,6 +173,22 @@ function hxProblem(rng, which) {
     hints: which === 1 ? ['Two arrows: one for the new bond, one for the bond that breaks. The π bond is the electron source.', 'Arrow 1 starts on the C=C bond and ends on the H of H–X. Arrow 2 starts on the H–X bond and ends on X.'] : ['The nucleophile is the negative ion; the electrophile is the carbon with the + charge.', `The arrow starts on a lone pair of ${X}⁻ and ends on the positive carbon.`]
   };
 }
+/** HBr + propene (the second half of Lesson 08: the H goes where the 2° cation forms). Step 1 asks which carbon takes H (regio, as in Lesson 09's arrow drill);
+ *  step 2 is Br⁻ onto the 2° cation. The mechanism comes from the reaction engine (reactions.js predict), never from a typed table. */
+function propeneProblem(rng, which) {
+  const pred = predict('CC=C', 'HBr');
+  const st = pred.major[0].mech.steps[which - 1];
+  const cfg = stepConfig(st);
+  const text = which === 1
+    ? 'Step 1 of HBr adding to propene, CH₃CH=CH₂: draw the curved arrows. The π bond gives its pair to the H of H–Br; choose the carbon that takes the H so that the steadier (2°) cation forms.'
+    : 'Step 2 of HBr adding to propene: Br⁻ meets the 2° carbocation CH₃CH⁺CH₃. Draw the curved arrow.';
+  return {
+    kind: 'arrows', skill: 'mechanism', smiles: null, reaction: null, prompt: text,
+    config: { atoms: cfg.atoms, bonds: cfg.bonds, arrows: cfg.arrows, products: st.after, ...(cfg.regio ? { regio: cfg.regio } : {}) },
+    derive: which === 1 ? 'Arrow 1: from the C=C to the H, which bonds to the end CH₂ (the carbon with more H), so the + lands on the middle carbon: a 2° cation. Arrow 2: from the H–Br bond onto Br.' : 'One arrow: from a lone pair on Br⁻ to the + carbon in the middle. The pair becomes the new C–Br bond: 2-bromopropane.',
+    hints: which === 1 ? ['Two arrows: the π bond to H, and the H–Br bond onto Br. For the first one, pick the carbon that takes the H.', 'H goes to the end CH₂ (the carbon that already has more H); that leaves the + on the middle carbon, which has two carbon neighbours (2°).'] : ['The rich partner is Br⁻ (lone pairs, − charge); the poor one is the + carbon.', 'Tap a lone pair on Br⁻, then the + carbon.']
+  };
+}
 function abProblem(rng) {
   const b = pick(rng, ARROW_BASES), id = pick(rng, ARROW_ACIDS);
   const A = ACID[id];
@@ -185,9 +202,22 @@ function abProblem(rng) {
   };
 }
 
-const TASKS = { classify: classifyProblem, nucelec: nucElecProblem, rds: rdsProblem, dh: dhProblem, eact: eactProblem, sign: signProblem, count: countProblem, hx1: (rng) => hxProblem(rng, 1), hx2: (rng) => hxProblem(rng, 2), ab: abProblem };
-const DEFAULT_TASKS = ['classify', 'nucelec', 'rds', 'dh', 'eact', 'sign', 'hx1', 'hx2', 'ab'];
-const BY_SKILL = { 'reaction-types': ['classify'], 'nuc-elec': ['nucelec'], 'energy-diagram': ['rds', 'dh', 'eact', 'sign', 'count'], 'mechanism': ['hx1', 'hx2'] };
+const TASKS = { classify: classifyProblem, nucelec: nucElecProblem, rds: rdsProblem, dh: dhProblem, eact: eactProblem, sign: signProblem, count: countProblem, hx1: (rng) => hxProblem(rng, 1), hx2: (rng) => hxProblem(rng, 2), propene1: (rng) => propeneProblem(rng, 1), propene2: (rng) => propeneProblem(rng, 2), ab: abProblem };
+const DEFAULT_TASKS = ['classify', 'nucelec', 'rds', 'dh', 'eact', 'sign', 'hx1', 'hx2', 'propene1', 'propene2', 'ab'];
+const BY_SKILL = { 'reaction-types': ['classify'], 'nuc-elec': ['nucelec'], 'energy-diagram': ['rds', 'dh', 'eact', 'sign', 'count'], 'mechanism': ['hx1', 'hx2', 'propene1', 'propene2'] };
+/** Lesson 08's mastery check (generator 'mechanism-mastery'): problems alternate between drawing arrows (symmetric HX and HBr + propene, step 1 or step 2)
+ *  and reading an energy diagram, so the three first-try answers it needs cover both halves of the lesson about evenly (novice review #13). */
+export const MASTERY_POOLS = { arrows: ['hx1', 'hx2', 'propene1', 'propene2'], energy: ['rds', 'dh', 'eact', 'sign', 'count'] };
+let masteryTurn = null;      // which pool the next problem comes from (alternates across calls: the mastery player asks for one problem at a time)
+export function generateMechMastery(count, { rng = Math.random } = {}) {
+  if (masteryTurn === null) masteryTurn = rng() < 0.5 ? 'arrows' : 'energy';
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    out.push(makeMechProblem(rng, pick(rng, MASTERY_POOLS[masteryTurn])));
+    masteryTurn = masteryTurn === 'arrows' ? 'energy' : 'arrows';
+  }
+  return out;
+}
 export const MECH_SKILLS = Object.keys(BY_SKILL);
 export const MECH_TASKS = Object.keys(TASKS);
 

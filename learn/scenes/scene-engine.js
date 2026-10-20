@@ -18,6 +18,9 @@ import { compress } from '../engine/voice.js';
 import { lpOf } from './scene-parse.js';
 
 export const W = 640, H = 400, SC = 64;
+// Text scale for the current frame (renderScene opts.textScale = {atom, note}; 1 = the 640-wide design size). The player sets it from the drawn width so atom
+// letters stay >= 14 px and notes (orbital labels, faces, badges, delta labels, Nu/E tags) >= 12 px on a 400 px phone (novice review 2026-10-20, #7).
+let TA = 1, TN = 1;
 
 // ------------------------------------------------------------------ small numeric helpers
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -164,7 +167,7 @@ const projector = (cam) => {
 // ------------------------------------------------------------------ atoms: labels and shapes
 const LP_ATOMS = new Set(['O', 'N', 'Br', 'Cl', 'F', 'I', 'S']);
 const labelled = (a, nb) => a.s === 'H' || (a.s === 'C' ? (a.st === 'full' || nb === 0) : a.s !== 'Pd');
-const rOf = (a, lab) => (a.s === 'H' ? 10 : lab ? 14 : 6);
+const rOf = (a, lab) => (a.s === 'H' ? 10 * TA : lab ? 14 * TA : 6);
 
 /** Atom text: the symbol, then its H and the count as a subscript, on the free side of the atom: right (OH, NH2, CH3), else left, above or below, whichever is
  *  farthest from the bonds. `dirs` = the directions (radians, screen) of the atom's bonds. */
@@ -271,7 +274,7 @@ function orbitalSvg(o, ctx) {
   const st = Math.sin(cam.tilt), ct = Math.cos(cam.tilt), k = cam.k;
   const have = o.atoms.every((id) => S(id));
   if (!have) return '';
-  const lab = (x, y) => (o.label ? `<text x="${f1(x)}" y="${f1(y)}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--muted)">${esc(o.label)}</text>` : '');
+  const lab = (x, y) => (o.label ? `<text x="${f1(x)}" y="${f1(y)}" text-anchor="middle" font-size="${f1(14 * TN)}" font-weight="600" fill="var(--muted)">${esc(o.label)}</text>` : '');
   const dash = o.emphasis === 'ghost' ? 'stroke-dasharray="6 5"' : '';
   switch (o.kind) {
     case 'pi': {
@@ -386,6 +389,7 @@ export function renderScene(scene, layout, t, opts = {}) {
   const layer = opts.layer || 'both';
   const showArrows = layer === 'both' || layer === 'arrows';
   const showOrbitals = layer === 'both' || layer === 'orbitals';
+  TA = (opts.textScale && opts.textScale.atom) || 1; TN = (opts.textScale && opts.textScale.note) || 1;
   const fr = buildFrame(scene, layout, t, opts);
   const { i, p, beat, lb, prev, stat, cam, pos } = fr;
   const proj = projector(cam);
@@ -444,7 +448,7 @@ export function renderScene(scene, layout, t, opts = {}) {
       const op = focusSurface ? EMPH[focusSurface.emphasis] * (focusSurface.emphasis === 'focus' ? 1 : 1.25) : 0.9;
       const yy = proj(sites[0])[1];
       parts.push(`<g opacity="${clamp(op, 0.25, 1)}">${G.surface(yy + 8, Math.max(...xs) - Math.min(...xs) + 120, { x: Math.min(...xs) - 60, h: [], height: 20 })}</g>`);
-      parts.push(`<text x="${f1(Math.min(...xs) - 54)}" y="${f1(yy + 46)}" font-size="14" font-weight="600" fill="var(--muted)">${esc(surf.label)}</text>`);
+      parts.push(`<text x="${f1(Math.min(...xs) - 54)}" y="${f1(yy + 46)}" font-size="${f1(14 * TN)}" font-weight="600" fill="var(--muted)">${esc(surf.label)}</text>`);
     }
   }
   if (beat.faces && beat.faces.show && cam.tilt >= 0.5) {
@@ -455,7 +459,7 @@ export function renderScene(scene, layout, t, opts = {}) {
     const yT = proj([gx, gy, 1])[1], yB = proj([gx, gy, -1])[1];
     const x0 = clamp(proj([gx - 2.4, gy, 0])[0], 6, 200), x1 = clamp(proj([gx + 2.4, gy, 0])[0], 440, W - 6);
     const line = (y) => `<line x1="${f1(x0)}" y1="${f1(y)}" x2="${f1(x1)}" y2="${f1(y)}" stroke="var(--muted)" stroke-width="2" stroke-dasharray="7 6" stroke-opacity=".55"/>`;
-    parts.push(`<g class="ms-faces">${line(yT)}${line(yB)}<text x="${f1(x0 + 4)}" y="${f1(yT - 6)}" font-size="14" font-weight="600" fill="var(--muted)">${esc(L)}</text><text x="${f1(x0 + 4)}" y="${f1(yB + 17)}" font-size="14" font-weight="600" fill="var(--muted)">${esc(B)}</text></g>`);
+    parts.push(`<g class="ms-faces">${line(yT)}${line(yB)}<text x="${f1(x0 + 4)}" y="${f1(yT - 6)}" font-size="${f1(14 * TN)}" font-weight="600" fill="var(--muted)">${esc(L)}</text><text x="${f1(x0 + 4)}" y="${f1(yB + 17 * TN)}" font-size="${f1(14 * TN)}" font-weight="600" fill="var(--muted)">${esc(B)}</text></g>`);
   }
 
   // ---- ghosts (atom copies, mirror image, mini drawings): fade in over the first 30 % of the beat
@@ -465,12 +469,12 @@ export function renderScene(scene, layout, t, opts = {}) {
       const Sg = {}; Object.keys(g.pos).forEach((id) => { Sg[id] = proj(g.pos[id]); });
       parts.push(`<g opacity="${f1(0.3 * gIn * 100) / 100}">${structSvg(g.atoms, g.bonds, Sg, { fs: 22 })}</g>`);
       const xs = Object.values(Sg).map((q) => q[0]), ys = Object.values(Sg).map((q) => q[1]);
-      parts.push(`<text x="${f1((Math.min(...xs) + Math.max(...xs)) / 2)}" y="${f1(Math.max(...ys) + 40)}" text-anchor="middle" font-size="14" fill="var(--muted)" opacity="${gIn}">${esc(g.label)}</text>`);
+      parts.push(`<text x="${f1((Math.min(...xs) + Math.max(...xs)) / 2)}" y="${f1(Math.max(...ys) + 40)}" text-anchor="middle" font-size="${f1(14 * TN)}" fill="var(--muted)" opacity="${gIn}">${esc(g.label)}</text>`);
     } else if (g.k === 'mini') {
       const sc = SC * 0.6, cx = 533, cy = 190;
       const Sg = {}; Object.keys(g.pos).forEach((id) => { Sg[id] = [cx + g.pos[id][0] * sc, cy + g.pos[id][1] * sc]; });
       const ys = Object.values(Sg).map((q) => q[1]);
-      parts.push(`<g opacity="${gIn}">${structSvg(g.atoms, g.bonds, Sg, { fs: 17, wBond: 2.2 })}<text x="${cx}" y="${f1(Math.max(...ys) + 34)}" text-anchor="middle" font-size="13.5" fill="var(--muted)">${esc(wrap(g.label, 26)[0])}</text>${wrap(g.label, 26).slice(1).map((s, k) => `<text x="${cx}" y="${f1(Math.max(...ys) + 52 + k * 17)}" text-anchor="middle" font-size="13.5" fill="var(--muted)">${esc(s)}</text>`).join('')}</g>`);
+      parts.push(`<g opacity="${gIn}">${structSvg(g.atoms, g.bonds, Sg, { fs: 17, wBond: 2.2 })}<text x="${cx}" y="${f1(Math.max(...ys) + 34)}" text-anchor="middle" font-size="${f1(13.5 * TN)}" fill="var(--muted)">${esc(wrap(g.label, 26)[0])}</text>${wrap(g.label, 26).slice(1).map((s, k) => `<text x="${cx}" y="${f1(Math.max(...ys) + 52 + k * 17 * TN)}" text-anchor="middle" font-size="${f1(13.5 * TN)}" fill="var(--muted)">${esc(s)}</text>`).join('')}</g>`);
     } else if (g.k === 'atoms') {
       const ps = g.ids.map((id) => g.pos[id]).filter(Boolean).map(proj);
       ps.forEach((q, k) => {
@@ -479,7 +483,7 @@ export function renderScene(scene, layout, t, opts = {}) {
       });
       if (ps.length) {
         const q = ps[0];
-        parts.push(`<text x="${f1(clamp(q[0], 70, W - 70))}" y="${f1(clamp(q[1] + 36, 16, H - 8))}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--muted)" opacity="${gIn}">${esc(g.label)}</text>`);
+        parts.push(`<text x="${f1(clamp(q[0], 70, W - 70))}" y="${f1(clamp(q[1] + 36, 16, H - 8))}" text-anchor="middle" font-size="${f1(14 * TN)}" font-weight="600" fill="var(--muted)" opacity="${gIn}">${esc(g.label)}</text>`);
       }
     }
   });
@@ -575,9 +579,9 @@ export function renderScene(scene, layout, t, opts = {}) {
     const h0 = a0 ? a0.h : null, h1 = a1 ? a1.h : null;
     if (lab) {
       if (a0 && a1 && h0 !== h1 && !stat && chargeWin > 0 && chargeWin < 1) {
-        out.push(labelSvg({ ...a0 }, q[0], q[1], dirs, 22, (1 - chargeWin) * op));
-        out.push(labelSvg({ ...a1 }, q[0], q[1], dirs, 22, chargeWin * op));
-      } else out.push(labelSvg(stat || p >= 0.85 ? (a1 || a0) : (a0 || a1), q[0], q[1], dirs, 22, op));
+        out.push(labelSvg({ ...a0 }, q[0], q[1], dirs, 22 * TA, (1 - chargeWin) * op));
+        out.push(labelSvg({ ...a1 }, q[0], q[1], dirs, 22 * TA, chargeWin * op));
+      } else out.push(labelSvg(stat || p >= 0.85 ? (a1 || a0) : (a0 || a1), q[0], q[1], dirs, 22 * TA, op));
     }
     if (a.s === 'Pd') out.push(`<circle cx="${f1(q[0])}" cy="${f1(q[1])}" r="9" fill="var(--muted)" fill-opacity=".35" stroke="var(--muted)" stroke-width="2" opacity="${op}"/>`);
     // lone pairs
@@ -596,7 +600,7 @@ export function renderScene(scene, layout, t, opts = {}) {
           angs.forEach((t, k) => { let d = Math.abs(t - tgt) % (Math.PI * 2); d = d > Math.PI ? Math.PI * 2 - d : d; if (d < bd) { bd = d; bi = k; } });
           angs = angs.filter((_, k) => k !== bi);
         }
-        const g = angs.map((t) => G.lonePair(q[0], q[1], (t * 180) / Math.PI, { r: 23 })).join('');
+        const g = angs.map((t) => G.lonePair(q[0], q[1], (t * 180) / Math.PI, { r: 23 * (1 + (TA - 1) * 0.6) })).join('');
         out.push(`<g opacity="${f1(alpha * op * 100) / 100}">${g}</g>`);
         takenAt.set(id, (takenAt.get(id) || []).concat(angs));
       };
@@ -611,10 +615,10 @@ export function renderScene(scene, layout, t, opts = {}) {
     }
     // charge
     const c0 = a0 ? a0.c : 0, c1 = a1 ? a1.c : 0;
-    const cx = q[0] + (lab ? 17 : 11), cy = q[1] - (lab ? 17 : 13);
-    if (c0 === c1) { if (c1) out.push(`<g opacity="${op}">${chargeSvg(cx, cy, c1)}</g>`); } else {
-      if (c0) out.push(`<g opacity="${f1((1 - chargeWin) * op * 100) / 100}">${chargeSvg(cx, cy, c0)}</g>`);
-      if (c1) out.push(`<g opacity="${f1(chargeWin * op * 100) / 100}">${chargeSvg(cx, cy, c1)}</g>`);
+    const cx = q[0] + (lab ? 17 : 11) * TA, cy = q[1] - (lab ? 17 : 13) * TA;
+    if (c0 === c1) { if (c1) out.push(`<g opacity="${op}">${chargeSvg(cx, cy, c1, TA)}</g>`); } else {
+      if (c0) out.push(`<g opacity="${f1((1 - chargeWin) * op * 100) / 100}">${chargeSvg(cx, cy, c0, TA)}</g>`);
+      if (c1) out.push(`<g opacity="${f1(chargeWin * op * 100) / 100}">${chargeSvg(cx, cy, c1, TA)}</g>`);
     }
     if (c0 || c1) takenAt.set(id, (takenAt.get(id) || []).concat(-Math.PI / 4));
     if (out.length) atomSvgs.push(`<g class="ms-atom" data-id="${id}">${out.join('')}</g>`);
@@ -626,7 +630,7 @@ export function renderScene(scene, layout, t, opts = {}) {
     const pts = lab.ids.map((id) => scr[id]).filter(Boolean);
     if (!pts.length || cam.k > 1.35) return;
     const x = clamp(pts.reduce((s, q) => s + q[0], 0) / pts.length, 60, W - 60), y = clamp(Math.max(...pts.map((q) => q[1])) + 54, 18, H - 8);
-    parts.push(`<text x="${f1(x)}" y="${f1(y)}" text-anchor="middle" font-size="14" fill="var(--muted)" opacity="${fin}">${esc(lab.text)}</text>`);
+    parts.push(`<text x="${f1(x)}" y="${f1(y)}" text-anchor="middle" font-size="${f1(14 * TN)}" fill="var(--muted)" opacity="${fin}">${esc(lab.text)}</text>`);
   });
 
   // ---- ARROWS layer: δ labels, badges, arrows, electron dots
@@ -641,12 +645,25 @@ export function renderScene(scene, layout, t, opts = {}) {
       takenAt.set(atomId, (takenAt.get(atomId) || []).concat(ang));
       const col = tone === 'elec' ? 'var(--bad)' : tone === 'nuc' ? 'var(--accent)' : 'var(--muted)';
       if (kind === 'delta') {
-        const r = 26;
-        return `<text x="${f1(q[0] + Math.cos(ang) * r)}" y="${f1(q[1] + Math.sin(ang) * r + 5)}" text-anchor="middle" font-size="17" font-weight="700" fill="${col}" opacity="${op}">${esc(text)}</text>`;
+        const at = A1.get(atomId) || A0.get(atomId), r = (at && LP_ATOMS.has(at.s) ? 38 : 26) * Math.max(1, TA);   // clear of the lone-pair dots
+        return `<text x="${f1(q[0] + Math.cos(ang) * r)}" y="${f1(q[1] + Math.sin(ang) * r + 5 * TN)}" text-anchor="middle" font-size="${f1(17 * TN)}" font-weight="700" fill="${col}" opacity="${op}">${esc(text)}</text>`;
       }
-      const wpx = text.length * 8.6 + 18, r = 28 + wpx / 2 * Math.abs(Math.cos(ang)) * 0.9;
-      const px = clamp(q[0] + Math.cos(ang) * r, wpx / 2 + 4, W - wpx / 2 - 4), py = clamp(q[1] + Math.sin(ang) * (28 + 6) , 16, H - 14);
-      return `<g opacity="${op}"><rect x="${f1(px - wpx / 2)}" y="${f1(py - 12)}" width="${f1(wpx)}" height="24" rx="12" fill="var(--surface)" fill-opacity=".92" stroke="${col}" stroke-width="2"/><text x="${f1(px)}" y="${f1(py + 5)}" text-anchor="middle" font-size="14" font-weight="600" fill="${col}">${esc(text)}</text></g>`;
+      const wpx = (text.length * 8.6 + 18) * TN, hpx = 24 * TN;
+      const place = (a, extra) => {
+        const r = 28 * Math.max(1, TA) + extra + wpx / 2 * Math.abs(Math.cos(a)) * 0.9;
+        return [clamp(q[0] + Math.cos(a) * r, wpx / 2 + 4, W - wpx / 2 - 4), clamp(q[1] + Math.sin(a) * (28 * Math.max(1, TA) + 6 + extra), hpx / 2 + 4, H - hpx / 2 - 2)];
+      };
+      // the pill must not cover another atom's label or any bond line: try the free angle first, then turn and push out until it is clear
+      const blocked = (px, py) => {
+        const inR = (x, y, m) => Math.abs(x - px) < wpx / 2 + m && Math.abs(y - py) < hpx / 2 + m;
+        for (const [j, sq] of Object.entries(scr)) { if (Number(j) === atomId || !sq || !A1.has(Number(j))) continue; if (inR(sq[0], sq[1], 12 * TA)) return true; }
+        for (const [x, y] of lb.bonds) { const u = scr[x], v = scr[y]; if (!u || !v) continue; for (let k = 1; k < 8; k++) { const t = k / 8; if (inR(u[0] + (v[0] - u[0]) * t, u[1] + (v[1] - u[1]) * t, 2)) return true; } }
+        return false;
+      };
+      let px, py;
+      search: for (const extra of [0, 14, 28, 44]) for (let k = 0; k < 12; k++) { const a = ang + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (Math.PI / 6); [px, py] = place(a, extra); if (!blocked(px, py)) break search; }
+      if (px == null) [px, py] = place(ang, 0);
+      return `<g opacity="${op}"><rect x="${f1(px - wpx / 2)}" y="${f1(py - hpx / 2)}" width="${f1(wpx)}" height="${f1(hpx)}" rx="${f1(hpx / 2)}" fill="var(--surface)" fill-opacity=".92" stroke="${col}" stroke-width="2"/><text x="${f1(px)}" y="${f1(py + 5 * TN)}" text-anchor="middle" font-size="${f1(14 * TN)}" font-weight="600" fill="${col}">${esc(text)}</text></g>`;
     };
     const items = [];
     partialsNow.forEach((d) => { const was = partialsBefore.some((x) => x.atom === d.atom && x.sign === d.sign); items.push(labelOf(d.atom, d.sign === '+' ? 'δ+' : 'δ' + MINUS, d.sign === '+' ? 'elec' : 'nuc', was ? 1 : f, 'delta')); });
@@ -668,7 +685,7 @@ export function renderScene(scene, layout, t, opts = {}) {
       const run = stat ? 1 : clamp((u - 0.3) / 0.7);
       const trace = !stat && p >= 1 ? 0.35 : 1;
       const tn = ar.tone || {};
-      const halo = (x, y, col, tag) => `<g opacity="${stat ? 0.9 : f1((1 - (p >= 1 ? 1 : 0)) * 0.9 * 100) / 100}"><circle cx="${f1(x)}" cy="${f1(y)}" r="17" fill="${col}" fill-opacity=".14" stroke="${col}" stroke-width="2.5" stroke-opacity=".7"/>${tag ? `<text x="${f1(x - 16)}" y="${f1(y - 16)}" text-anchor="end" font-size="13" font-weight="700" fill="${col}">${tag}</text>` : ''}</g>`;
+      const halo = (x, y, col, tag) => `<g opacity="${stat ? 0.9 : f1((1 - (p >= 1 ? 1 : 0)) * 0.9 * 100) / 100}"><circle cx="${f1(x)}" cy="${f1(y)}" r="17" fill="${col}" fill-opacity=".14" stroke="${col}" stroke-width="2.5" stroke-opacity=".7"/>${tag ? `<text x="${f1(x - 16)}" y="${f1(y - 16)}" text-anchor="end" font-size="${f1(13 * TN)}" font-weight="700" fill="${col}">${tag}</text>` : ''}</g>`;
       if (showArrows && tn.src === 'nuc' && geo.srcPt) arr.push(halo(geo.srcPt[0], geo.srcPt[1], 'var(--accent)', k === 0 ? 'Nu' : ''));
       if (showArrows && tn.dst === 'elec' && geo.dstPt) arr.push(halo(geo.dstPt[0], geo.dstPt[1], 'var(--bad)', k === 0 ? 'E' : ''));
       if (showArrows) {

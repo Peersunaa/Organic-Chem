@@ -166,6 +166,13 @@ a.lesson:hover { background: var(--surface-2); } a.lesson:focus-visible { outlin
 .recap-more { justify-self: start; background: none; border: 0; padding: 0; min-height: 44px; color: var(--accent); font-weight: 600; font-size: var(--fs-small); cursor: pointer; }
 .mol.mol-inline { display: inline-grid; vertical-align: middle; margin: 0 .2em; width: auto; } .mol-inline .mol-svg { width: 110px; max-width: 110px; }
 .recap .mol { display: inline-grid; vertical-align: middle; } .recap .mol-svg { max-width: 110px; }
+/* the key idea of an explain step (it may hold drawings, rows of equations, lists): every paragraph is its own row that wraps inside the card, never runs into the next (novice review 2026-10-20, #4) */
+.recap-body { grid-template-columns: minmax(0, 1fr); min-width: 0; } .recap-body > * { min-width: 0; }
+.recap-note.idea { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.recap-note.idea p { display: block; margin: 0; } .recap-note.idea p + p::before { content: none; }
+.recap-note.idea :is(ol, ul) { margin: 0; padding-left: 1.25rem; display: grid; gap: 4px; }
+.recap-note.idea span[style*="nowrap"] { max-width: 100%; white-space: normal !important; }
+.recap-note.idea .mol { vertical-align: middle; max-width: 100%; } .recap-note.idea .mol-svg { max-width: 84px; }   /* smaller drawings: the recap is a reminder, the full-size step is one tap back */
 
 /* figure cards: the chapter's crafted "See the idea" figure (lesson top, hub group header); the SVG is inlined, so the tokens reach it */
 .fig-card { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--r-xs) var(--r-md) var(--r-md) var(--r-xs); background: var(--surface-2); padding: 0 var(--s-4); min-width: 0; margin-bottom: var(--s-4); }
@@ -366,8 +373,9 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 @keyframes ad-draw { to { stroke-dashoffset: 0; } } @keyframes ad-fade { to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ad-arrow.draw .ad-path, .ad-arrow.draw .ad-head { animation: none; stroke-dashoffset: 0; opacity: 1; } }
 .ad .lb-actions { flex-wrap: wrap; }
-.ad-hits .lb-hit { cursor: pointer; }
+.ad-hits .lb-hit { cursor: pointer; stroke-linecap: butt; }   /* square ends: a band stops short of the atom centres (a round cap would reach over them) */
 .ad-forming .lb-line { stroke-dasharray: 5 6; opacity: .75; }
+.ad-delta { font: 600 17px/1 var(--mono); text-anchor: middle; dominant-baseline: central; pointer-events: none; } .ad-delta.pos { fill: var(--bad); } .ad-delta.neg { fill: var(--accent); }
 .ad-ba { display: flex; justify-content: flex-end; } .ad-ba[hidden] { display: none; }
 /* equilibrium-arrow widget */
 .eq { display: grid; gap: var(--s-3); width: 100%; }
@@ -483,6 +491,8 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 .sp-stage .gf-atom:not(:disabled):is(:hover, :focus-visible)::before { border: 2px solid var(--accent); }
 .sp-stage .gf-atom.bad::before { border: 2px solid var(--bad); }
 .sp-stage .gf-atom.lock[aria-pressed="true"]::before { border: 2px solid var(--ok); }
+.sp-stage .sp-el { position: relative; font: 600 14px/1 var(--mono); color: var(--ink-2); background: var(--surface-2); padding: 1px 3px; border-radius: 4px; pointer-events: none; }   /* the letter a skeletal drawing leaves out (C), and π on the C=C target */
+.sp-stage .sp-bond .sp-el { color: var(--accent); background: none; display: inline-block; transform: translateY(-27px); }   /* the π tag sits just above the two lines, never on them */
 .eqn { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-2) var(--s-3); } .eqn .mol { flex: 0 1 var(--mol-side); min-width: 0; } .eqn .mol-svg { max-width: var(--mol-side); }
 @media (max-width: 520px) { .eqn { gap: var(--s-1) var(--s-2); } .eqn .mol { flex: 1 1 84px; max-width: var(--mol-chip); } .eqn .mol-svg { max-width: var(--mol-chip); } .eqn-op, .eqn-arrow { font-size: 1.125rem; } }
 .eqn-op { font: 700 1.25rem/1.5rem var(--display); color: var(--accent); } .eqn-arrow { display: grid; justify-items: center; font: 700 1.5rem/2rem var(--display); color: var(--accent); } .eqn-arrow small { font: 600 var(--fs-label)/var(--lh-label) var(--body); color: var(--muted); }
@@ -908,10 +918,11 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 /* mechanism scenes */
 .ms { display: grid; gap: var(--s-3); min-width: 0; width: 100%; max-width: 780px; margin-inline: auto; }
 .ms-loading { margin: 0; }
-.ms-stagewrap { width: min(100%, calc(62vh * 1.6)); margin-inline: auto; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface-2); overflow: hidden; min-width: 0; }
+.ms-stagewrap { width: min(100%, calc(58vh * 1.6)); margin-inline: auto; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface-2); overflow: hidden; min-width: 0; }
 .ms-stagewrap:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: var(--focus-off); }
 .ms-stage { aspect-ratio: 640 / 400; width: 100%; }
 .ms-stage svg { display: block; width: 100%; height: 100%; }
+.ms-dock { position: sticky; bottom: 0; z-index: 2; display: grid; gap: var(--s-2); padding: var(--s-2) 0; background: var(--surface); box-shadow: 0 -1px 0 var(--line); }   /* timeline + Play stay on screen with the stage (novice review #14) */
 .ms-capbox { display: grid; gap: var(--s-1); min-width: 0; }
 .ms-count { margin: 0; font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--muted); }
 .ms-cap { margin: 0; min-height: 4.5rem; font-size: 1rem; line-height: 1.5rem; color: var(--ink); }

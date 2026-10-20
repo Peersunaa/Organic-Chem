@@ -76,12 +76,34 @@ export default {
       row.className = 'lb-actions';
       root.append(ask, stage, msg, row);
       let settled = false;
+      // a skeletal drawing shows no letter at a carbon: the button says "C" so the learner knows what it is (novice review 2026-10-20, #2)
+      const label = (b, i) => { const a = info.atoms[i]; if (a.sym === 'C' && !a.fc && !keep) { const t = document.createElement('span'); t.className = 'sp-el'; t.textContent = 'C'; t.setAttribute('aria-hidden', 'true'); b.append(t); } };
+      // a C=C double bond is a target of its own (either line or the gap between them): the π bond IS the rich site, so tapping it counts as either carbon
+      const piBonds = info.bonds.filter((bd) => bd.bo === 2 && bd.atoms.every((j) => info.atoms[j].sym === 'C'));
+      if (piBonds.length) ask.innerHTML = ask.innerHTML.replace(/ atom of <b>/, ' atom (or the C=C bond, marked π) of <b>');
+      piBonds.forEach((bd) => {
+        const [i, j] = bd.atoms, P1 = pick.pts[i], P2 = pick.pts[j];
+        if (!P1 || !P2) return;
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'gf-atom sp-bond';
+        b.style.left = (P1.x + P2.x) / 2 + '%'; b.style.top = (P1.y + P2.y) / 2 + '%';
+        b.setAttribute('aria-label', `The C=C double bond (π bond) of ${S.label}`);
+        b.innerHTML = '<span class="sp-el" aria-hidden="true">π</span>';
+        b.dataset.atom = String(i);
+        stage.append(b);
+        wireTap(b, i);
+      });
       pick.pts.forEach((p, i) => {
         const b = document.createElement('button');
         b.type = 'button'; b.className = 'gf-atom';
         b.style.left = p.x + '%'; b.style.top = p.y + '%';
         b.setAttribute('aria-label', `${NAME[info.atoms[i].sym]} atom of ${S.label}`);
         b.dataset.atom = String(i);
+        label(b, i);
+        wireTap(b, i);
+        stage.append(b);
+      });
+      function wireTap(b, i) {
         b.addEventListener('click', () => {
           if (settled || locked) return;
           const r = grade(item, i, config.words);
@@ -95,7 +117,7 @@ export default {
             next.type = 'button'; next.className = 'btn primary';
             const last = k === config.items.length - 1;
             next.textContent = last ? 'Done' : 'Next molecule';
-            next.addEventListener('click', () => { if (last) { locked = true; next.disabled = true; ctx.onResult({ ok: true }); } else { k++; show(); } });
+            next.addEventListener('click', () => { if (last) { locked = true; next.disabled = true; ctx.onResult({ ok: true }); } else { k++; ctx.onProgress?.({ task: true }); show(); } });   // a new molecule: no stale hints
             row.append(next); next.focus({ preventScroll: true });
           } else {
             stage.querySelectorAll('.gf-atom.bad').forEach((x) => x.classList.remove('bad'));
@@ -104,8 +126,7 @@ export default {
             ctx.onResult(r);
           }
         });
-        stage.append(b);
-      });
+      }
     }
     show();
     return { destroy() {} };

@@ -177,7 +177,7 @@ Y = 200 + 64·k·((y − fy)·cos θ − z·sin θ)
 
 Soft fills use `color-mix(in srgb, <token> N%, transparent)`, as in `figures/ch4-alkene.svg`. Light and dark themes come from the tokens. Text in the SVG is 16 px at the phone-scaled size (the house figure rule). Captions live in HTML under the SVG, not inside it, so they wrap and keep the app font.
 
-**Motion.** Calm and eased. No bounce, no overshoot, no spring, no shake. Electrons travel along the arrow, never jump. One idea per beat. Every beat ends on a clear, still state. Nothing moves during a hold. Total scene length is 25–50 s.
+**Motion.** Calm and eased. No bounce, no overshoot, no spring, no shake. Electrons travel along the arrow, never jump. One idea per beat. Every beat ends on a clear, still state. Nothing moves during a hold. Total scene length is 25–50 s (a short Lesson 08 primer of 3–4 beats, such as scene 19: 12 s or more).
 
 ## 11 Reduced motion
 

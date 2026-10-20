@@ -411,6 +411,27 @@ export async function lesson08({ ok, eq }) {
     ok(new Set(a).size >= 12, `generator varies (${new Set(a).size} distinct of 30)`);
     for (const sk of MECH_SKILLS) ok(generate('mechanism-basics', 8, { skill: sk }).every((p) => p.skill === sk || (sk === 'mechanism' && p.skill === 'mechanism')), `skill filter ${sk}`);
     ok(total === MECH_TASKS.length * 25, `generated ${total} problems`);
+    // the Lesson 08 mastery mix (novice review #13): arrows and energy diagrams in turn, HBr + propene (the lesson's second half) in the arrow pool
+    {
+      const ms = generate('mechanism-mastery', 40, { rng: mulberry32(81) });
+      const fam = ms.map((p) => (p.kind === 'arrows' ? 'arrows' : p.visual && p.visual.widget === 'energy-diagram' ? 'energy' : 'other'));
+      ok(fam.every((f) => f !== 'other'), 'mastery mix: every problem draws arrows or reads an energy diagram');
+      ok(fam.every((f, i) => i === 0 || f !== fam[i - 1]), 'mastery mix: arrows and energy diagrams alternate');
+      ok(ms.some((p) => /propene/.test(p.prompt)), 'mastery mix: HBr + propene appears');
+      for (const which of [1, 2]) {
+        const p = makeMechProblem(mulberry32(5), 'propene' + which), c = p.config;
+        eq(arrow.validate(c), [], `propene step ${which}: arrows valid`);
+        ok(arrow.grade(c, c.arrows).ok, `propene step ${which}: the solution is graded right`);
+        eq(canon(buildMolblock(arrow.applyArrows(c))), canon(c.products.join('.')), `propene step ${which}: the arrows give the products`);
+        if (which === 1) {
+          ok(c.products.map(canon).includes(canon('C[CH+]C')) && !!c.regio, 'propene step 1 gives the 2° cation and asks which carbon takes H');
+          const e = c.arrows.find((a) => a.to.bond), carbon = e.to.bond.find((n) => n !== c.regio.H), other = c.regio.pi.find((n) => n !== carbon);
+          const bad = arrow.grade(c, c.arrows.map((a) => (a === e ? { from: a.from, to: { bond: [other, c.regio.H] } } : a)));
+          ok(!bad.ok && bad.code === 'regio' && /less stable/.test(bad.diagnosis), 'propene step 1: H on the middle carbon gets the regiochemistry diagnosis');
+        } else eq(canon(c.products[0]), canon('CC(C)Br'), 'propene step 2 gives 2-bromopropane');
+        ok(!/Markovnikov/.test(p.prompt + p.derive + p.hints.join(' ')), `propene step ${which}: no Markovnikov yet (Lesson 09 names it)`);
+      }
+    }
   }
 
   // ================================================================ 7. the lesson (rebuilt 2026-10-20 around one spine: docs/reviews/2026-10-20-lesson08-audit.md)
@@ -424,7 +445,7 @@ export async function lesson08({ ok, eq }) {
     ok(L.minutes >= 30 && L.minutes <= 40, `${t} about 35 minutes (${L.minutes})`);
     ok(L.drawing === 'skeletal' && L.chapter === 3, `${t} skeletal drawing, chapter 3`);
     eq(L.sections, ['3.5', '3.6', '3.7', '3.8', '3.9'], `${t} sections`);
-    eq(L.mastery, { count: 3, generator: 'mechanism-basics' }, `${t} mastery`);
+    eq(L.mastery.count, 3, `${t} mastery: 3 right first try`); eq(L.mastery.generator, 'mechanism-mastery', `${t} mastery uses the arrows / energy-diagram mix`);
     eq(L.useIt.book, ['3.11', '3.12', '3.13', '3.14', '3.15', '3.16', '3.17', '3.18', '3.19', '3.22', '3.23', '3.24', '3.25', '3.26', '3.27', '3.28', '3.46', '3.47', '3.48', '3.49', '3.50', '3.51', '3.55', '3.56', '3.57', '3.58', '3.59', '3.60'], `${t} book problems`);
     ok(L.useIt.endFrom === 20, `${t} end-of-chapter exercises start at 3.20`);
     try {
@@ -496,6 +517,22 @@ export async function lesson08({ ok, eq }) {
       ok(/H⁺, which has none/.test(arrow.grade(c1, [{ from: { lp: 0 }, to: { atom: 1 } }]).diagnosis), `${t} s07 lone pair to the O–H hydrogen: "that H already has its bond"`);
       ok(/Cl keeps it/.test(arrow.grade(c2, [{ from: { bond: [0, 1] }, to: { atom: 0 } }]).diagnosis), `${t} s08 bond pair onto H: "Cl pulls harder, Cl keeps it"`);
       ok(/electron-poor partner, H⁺/.test(arrow.grade(c3, [{ from: { bond: [0, 1] }, to: { atom: 2 } }]).diagnosis), `${t} s09 π pair to a C–H hydrogen: "goes to the electron-poor partner, H⁺"`);
+      // s07: an O–H bond arrow is not needed, and the message fits HO⁻ + H⁺ (nothing breaks), not "which bond has to break" (novice review #8)
+      const extra = arrow.grade(c1, [{ from: { bond: [0, 1] }, to: { atom: 2 } }]);
+      ok(!extra.ok && /no bond breaks/.test(extra.diagnosis) && !/has to break/.test(extra.diagnosis), `${t} s07 an O–H bond arrow gets the HO⁻ + H⁺ message`);
+      // s06 shows arrow 1 drawn, on NH₃ + H⁺ (a case the learner does not draw later)
+      const v6 = S('s06').visual.config;
+      eq(arrow.validate(v6), [], `${t} s06 picture: the drawn arrow is legal`);
+      ok(v6.preset && v6.arrows.length === 1 && v6.arrows[0].from.lp != null && v6.arrows[0].to.atom != null, `${t} s06 picture is arrow 1, lone pair → atom`);
+      eq(canon(buildMolblock(arrow.applyArrows(v6))), canon('[NH4+]'), `${t} s06 picture: the arrow gives NH₄⁺`);
+    }
+    // ---- the pictures before the predicts of part 3 (novice review #12)
+    {
+      const mol = (c) => canon(buildMolblock({ atoms: c.atoms.map((a) => ({ ...a, charge: a.charge || 0 })), bonds: c.bonds }));
+      const v11 = S('s11').visual.config, v16 = S('s16').visual.config;
+      ok(v11.preset && v11.arrows.length === 0 && mol(v11) === canon('C=C.Cl'), `${t} s11 shows ethylene and HCl (no arrow: the question is where it goes)`);
+      ok(v11.partials.some((p) => p.sign === '+' && v11.atoms[p.atom].el === 'H') && v11.partials.some((p) => p.sign === '-' && v11.atoms[p.atom].el === 'Cl'), `${t} s11 marks the δ+ H and δ− Cl`);
+      ok(v16.preset && v16.arrows.length === 0 && mol(v16) === canon('C[CH2+].[Cl-]'), `${t} s16 shows CH₃CH₂⁺ and Cl⁻`);
     }
     // ---- part 3: HCl + ethylene in two steps, the carbocation as a real thing
     {
@@ -577,7 +614,8 @@ export async function lesson08({ ok, eq }) {
     }
     // ---- scenes: "Watch the scene" on the grammar step and the HCl steps
     eq(STEP_SCENE['08/s06'], '18-arrow-grammar', `${t} s06 gets scene 18 (arrow grammar)`);
-    ok(['s13', 's15', 's17'].every((id) => STEP_SCENE['08/' + id] === '17-hcl-ethylene'), `${t} s13, s15, s17 get scene 17 (HCl + ethylene)`);
+    ok(['s13', 's17'].every((id) => STEP_SCENE['08/' + id] === '17-hcl-ethylene'), `${t} s13, s17 get scene 17 (HCl + ethylene)`);
+    eq(STEP_SCENE['08/s15'], '19-carbocation', `${t} s15 (the carbocation and its empty p orbital) gets scene 19, which shows exactly that`);
 
     // ---- widgets used and reachable
     for (const w of ['mechanism-player', 'energy-diagram', 'site-picker', 'arrow-draw', 'model3d']) ok(WIDGETS[w] && typeof WIDGETS[w].mount === 'function', `widget ${w} registered`);

@@ -1,47 +1,58 @@
 {
  "id": "18-arrow-grammar",
- "title": "Arrow grammar: the three legal arrows on one molecule",
+ "title": "Arrow grammar: the three legal arrows, one simple case each",
  "reagentCard": "alkene-hx",
  "alsoCards": [],
  "lesson": {
   "id": "08",
   "step": "s06"
  },
- "intent": "After this scene the learner can say: \"An arrow starts at electrons (a lone pair or a bond). Bond → atom breaks a bond and makes a lone pair; bond → bond moves a pair to make a new bond; lone pair → atom makes a new bond. Each arrow changes the picture in one predictable way.\"",
+ "intent": "After this scene the learner can say: \"An arrow starts on electrons (a lone pair or a bond). Bond → atom breaks a bond and makes a lone pair (H–Cl → H⁺ + Cl⁻); lone pair → atom makes a new bond (HO⁻ + H⁺ → H₂O); bond → new bond moves a π pair into a new bond (ethylene + H⁺ → CH₃CH₂⁺).\"",
  "reactant": {
-  "smiles": "C=CCCl",
-  "name": "allyl chloride (3-chloroprop-1-ene)"
+  "smiles": "Cl",
+  "name": "hydrogen chloride (then hydroxide, then ethylene)"
  },
  "reagent": {
-  "label": "none: the same molecule, three arrows"
+  "label": "three separate cases, one arrow each"
  },
  "products": [
   {
-   "smiles": "C=CCCl",
-   "name": "allyl chloride (3-chloroprop-1-ene), the same compound",
+   "smiles": "[H+].[Cl-]",
+   "name": "H⁺ and Cl⁻ (arrow 1)",
    "stereo": "achiral",
-   "note": "Cl ends on the other end carbon, which by symmetry is the same compound."
-  }
- ],
- "intermediates": [
+   "note": "The H–Cl bond pair becomes a fourth lone pair on Cl."
+  },
   {
-   "smiles": "C=C[CH2+]",
-   "name": "allyl cation (two drawings of one ion)"
+   "smiles": "O",
+   "name": "water (arrow 2)",
+   "stereo": "achiral",
+   "note": "A lone pair of HO⁻ becomes the new O–H bond."
+  },
+  {
+   "smiles": "C[CH2+]",
+   "name": "ethyl cation (arrow 3)",
+   "stereo": "achiral",
+   "note": "The π pair becomes a new C–H bond; the other carbon is left with a +."
   }
  ],
+ "intermediates": [],
  "atomNames": {
-  "1": "C1",
-  "2": "C2",
-  "3": "C3",
-  "4": "Cl"
+  "1": "H",
+  "2": "Cl",
+  "3": "O",
+  "4": "H(O)",
+  "5": "H⁺",
+  "6": "C1",
+  "7": "C2",
+  "8": "H⁺"
  },
  "stage": {
   "species": [
    {
-    "key": "allyl",
+    "key": "HCl",
     "role": "reactant",
-    "smiles": "[CH2:1]=[CH:2][CH2:3][Cl:4]",
-    "label": "allyl chloride",
+    "smiles": "[H:1][Cl:2]",
+    "label": "HCl",
     "at": [
      0,
      0
@@ -49,93 +60,59 @@
     "style": "full"
    }
   ],
-  "state": "[CH2:1]=[CH:2][CH2:3][Cl:4]"
+  "state": "[H:1][Cl:2]"
  },
  "layers": [
   "arrows",
   "orbitals"
  ],
- "duration": 34.0,
+ "duration": 30,
  "beats": [
   {
-   "id": "b1-meet",
-   "t0": 0,
-   "t1": 3,
-   "hold": 1,
-   "kind": "look",
-   "caption": "One molecule, allyl chloride. Its electrons: the C1=C2 π pair, a pair in every bond, three lone pairs on Cl.",
-   "captionOrbitals": "The π cloud of C1=C2: the pair that a bond → bond arrow can move.",
    "arrows": [],
    "bonds": [],
    "charges": [],
    "partials": [
     {
-     "atom": 3,
+     "atom": 1,
      "sign": "+"
     },
     {
-     "atom": 4,
+     "atom": 2,
      "sign": "-"
     }
    ],
-   "orbitals": [
-    {
-     "kind": "pi",
-     "atoms": [
-      1,
-      2
-     ],
-     "side": "both",
-     "emphasis": "normal",
-     "electrons": 2
-    }
-   ],
+   "orbitals": [],
    "badges": [],
    "ghosts": [],
-   "camera": {
-    "zoom": 1.6,
-    "focus": [],
-    "tilt": 0
-   },
    "faces": {
     "show": false
    },
-   "state": "[CH2:1]=[CH:2][CH2:3][Cl:4]"
+   "id": "b1-hcl",
+   "t0": 0,
+   "t1": 3,
+   "hold": 1,
+   "kind": "look",
+   "caption": "Arrow 1, bond → atom. In water, H–Cl gives up H⁺. Cl pulls the shared pair harder, so H is δ+.",
+   "camera": {
+    "zoom": 2.1,
+    "focus": [],
+    "tilt": 0
+   },
+   "state": "[H:1][Cl:2]"
   },
   {
-   "id": "b2-break",
-   "t0": 4,
-   "t1": 8,
-   "hold": 1,
-   "kind": "step",
-   "caption": "Arrow 1, bond → atom: the C3–Cl pair moves onto Cl. The bond breaks and Cl gains a lone pair.",
-   "moves": [
-    {
-     "atoms": [
-      4
-     ],
-     "by": [
-      0.9,
-      0.35,
-      0
-     ],
-     "at": [
-      0.75,
-      1
-     ]
-    }
-   ],
    "arrows": [
     {
      "id": "a1",
      "from": {
       "bond": [
-       3,
-       4
+       1,
+       2
       ]
      },
      "to": {
-      "atom": 4
+      "atom": 2
      },
      "electrons": "pair",
      "tone": {
@@ -147,120 +124,126 @@
       "amount": 0.35
      },
      "at": [
-      0.25,
-      0.8
+      0.2,
+      0.75
      ],
-     "why": "Bond → atom: the C3–Cl pair goes onto Cl, so the bond is gone and Cl has a fourth lone pair."
+     "why": "Bond → atom: the H–Cl pair goes onto Cl, the atom that pulls harder. The bond is gone and Cl has a fourth lone pair."
     }
    ],
    "bonds": [
     {
-     "a": 3,
-     "b": 4,
+     "a": 1,
+     "b": 2,
      "action": "break",
      "order": 0
     }
    ],
    "charges": [
     {
-     "atom": 3,
+     "atom": 1,
      "charge": 1
     },
     {
-     "atom": 4,
+     "atom": 2,
      "charge": -1
     }
    ],
    "partials": [],
-   "orbitals": [
-    {
-     "kind": "p-empty",
-     "atoms": [
-      3
-     ],
-     "side": "both",
-     "emphasis": "focus",
-     "electrons": 0
-    }
-   ],
+   "orbitals": [],
    "badges": [],
    "ghosts": [],
-   "camera": {
-    "zoom": 1.6,
-    "focus": [],
-    "tilt": 0
-   },
    "faces": {
     "show": false
    },
-   "state": "[CH2:1]=[CH:2][CH2+:3].[Cl-:4]"
+   "id": "b2-break",
+   "t0": 4,
+   "t1": 8,
+   "hold": 1,
+   "kind": "step",
+   "caption": "The H–Cl pair moves onto Cl. The bond breaks: Cl keeps the pair as Cl⁻, and H is left bare as H⁺.",
+   "moves": [
+    {
+     "atoms": [
+      2
+     ],
+     "by": [
+      0.9,
+      0,
+      0
+     ],
+     "at": [
+      0.75,
+      1
+     ]
+    }
+   ],
+   "camera": {
+    "zoom": 2.1,
+    "focus": [],
+    "tilt": 0
+   },
+   "state": "[H+:1].[Cl-:2]"
   },
   {
-   "id": "b3-after1",
-   "t0": 9,
-   "t1": 12,
-   "hold": 1,
-   "kind": "look",
-   "caption": "After arrow 1: Cl⁻ has four lone pairs and a − charge. C3 has three bonds, six electrons and a +.",
    "arrows": [],
    "bonds": [],
    "charges": [],
    "partials": [],
    "orbitals": [
     {
-     "kind": "p-empty",
+     "kind": "lone-pair",
      "atoms": [
       3
      ],
      "side": "both",
-     "emphasis": "normal",
-     "electrons": 0
+     "emphasis": "focus",
+     "electrons": 2,
+     "toward": 5
     }
    ],
-   "badges": [
-    {
-     "atom": 3,
-     "text": "6 e⁻",
-     "tone": "elec"
-    },
-    {
-     "atom": 4,
-     "text": "4 pairs",
-     "tone": "nuc"
-    }
-   ],
+   "badges": [],
    "ghosts": [],
-   "camera": {
-    "zoom": 1.6,
-    "focus": [],
-    "tilt": 0
-   },
    "faces": {
     "show": false
    },
-   "state": "[CH2:1]=[CH:2][CH2+:3].[Cl-:4]"
+   "id": "b3-hydroxide",
+   "t0": 9,
+   "t1": 12,
+   "hold": 1,
+   "kind": "look",
+   "caption": "Arrow 2, lone pair → atom. Hydroxide, HO⁻, has three lone pairs on O. H⁺ has no electrons at all.",
+   "reset": {
+    "species": [
+     {
+      "key": "OH",
+      "smiles": "[H:4][O-:3]",
+      "label": "HO⁻",
+      "style": "full"
+     },
+     {
+      "key": "Hplus",
+      "smiles": "[H+:5]",
+      "label": "H⁺",
+      "style": "full"
+     }
+    ]
+   },
+   "camera": {
+    "zoom": 1.9,
+    "focus": [],
+    "tilt": 0
+   },
+   "state": "[H:4][O-:3].[H+:5]"
   },
   {
-   "id": "b4-slide",
-   "t0": 13,
-   "t1": 17,
-   "hold": 1,
-   "kind": "resonance",
-   "caption": "Arrow 2, bond → bond: the π pair slides over and makes a C2=C3 bond. Now C1 is the carbon short of electrons.",
    "arrows": [
     {
      "id": "a1",
      "from": {
-      "bond": [
-       1,
-       2
-      ]
+      "lp": 3
      },
      "to": {
-      "bond": [
-       2,
-       3
-      ]
+      "atom": 5
      },
      "electrons": "pair",
      "tone": {
@@ -272,127 +255,53 @@
       "amount": 0.35
      },
      "at": [
-      0.25,
+      0.3,
       0.85
      ],
-     "why": "Bond → bond: the C1=C2 π pair moves between C2 and C3, so C3 gets back to four bonds and C1 drops to three."
+     "why": "Lone pair → atom: a pair on O, the rich site, goes to H⁺, the poor one, and becomes the new O–H bond."
     }
    ],
    "bonds": [
     {
-     "a": 1,
-     "b": 2,
-     "action": "order",
+     "a": 3,
+     "b": 5,
+     "action": "form",
      "order": 1
-    },
-    {
-     "a": 2,
-     "b": 3,
-     "action": "order",
-     "order": 2
     }
    ],
    "charges": [
     {
-     "atom": 1,
-     "charge": 1
+     "atom": 3,
+     "charge": 0
     },
     {
-     "atom": 3,
+     "atom": 5,
      "charge": 0
     }
    ],
    "partials": [],
-   "orbitals": [
-    {
-     "kind": "pi",
-     "atoms": [
-      2,
-      3
-     ],
-     "side": "both",
-     "emphasis": "focus",
-     "electrons": 2
-    },
-    {
-     "kind": "p-empty",
-     "atoms": [
-      1
-     ],
-     "side": "both",
-     "emphasis": "focus",
-     "electrons": 0
-    }
-   ],
+   "orbitals": [],
    "badges": [],
    "ghosts": [],
-   "camera": {
-    "zoom": 1.6,
-    "focus": [],
-    "tilt": 0
-   },
    "faces": {
     "show": false
    },
-   "state": "[CH2+:1][CH:2]=[CH2:3].[Cl-:4]"
-  },
-  {
-   "id": "b5-after2",
-   "t0": 18,
-   "t1": 21,
-   "hold": 1,
-   "kind": "look",
-   "caption": "After arrow 2: no atom moved, only electrons, so the + is now drawn on C1 (Lesson 11 calls this resonance).",
-   "arrows": [],
-   "bonds": [],
-   "charges": [],
-   "partials": [],
-   "orbitals": [
-    {
-     "kind": "p-empty",
-     "atoms": [
-      1
-     ],
-     "side": "both",
-     "emphasis": "normal",
-     "electrons": 0
-    }
-   ],
-   "badges": [
-    {
-     "atom": 1,
-     "text": "6 e⁻",
-     "tone": "elec"
-    }
-   ],
-   "ghosts": [],
-   "camera": {
-    "zoom": 1.6,
-    "focus": [],
-    "tilt": 0
-   },
-   "faces": {
-    "show": false
-   },
-   "state": "[CH2+:1][CH:2]=[CH2:3].[Cl-:4]"
-  },
-  {
-   "id": "b6-bond",
-   "t0": 22,
-   "t1": 26,
+   "id": "b4-water",
+   "t0": 13,
+   "t1": 17,
    "hold": 1,
    "kind": "step",
-   "caption": "Arrow 3, lone pair → atom: a Cl⁻ lone pair becomes a new bond to C1, the electron-poor carbon.",
+   "caption": "One lone pair of O becomes a new O–H bond. HO⁻ + H⁺ → H₂O: the − and the + cancel. Nothing breaks.",
    "moves": [
     {
      "atoms": [
-      4
+      5
      ],
-     "anchor": 4,
-     "near": 1,
+     "anchor": 5,
+     "near": 3,
      "offset": [
-      -0.75,
-      -0.95,
+      0.26,
+      0.93,
       0
      ],
      "at": [
@@ -401,14 +310,79 @@
      ]
     }
    ],
+   "camera": {
+    "zoom": 1.9,
+    "focus": [],
+    "tilt": 0
+   },
+   "state": "[H:4][O:3][H:5]"
+  },
+  {
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "pi",
+     "atoms": [
+      6,
+      7
+     ],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 2
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "faces": {
+    "show": false
+   },
+   "id": "b5-ethylene",
+   "t0": 18,
+   "t1": 21,
+   "hold": 1,
+   "kind": "look",
+   "caption": "Arrow 3, bond → new bond. Ethylene’s π pair sits above and below the C=C: electron-rich. H⁺ is poor.",
+   "reset": {
+    "species": [
+     {
+      "key": "ethylene",
+      "smiles": "[CH2:6]=[CH2:7]",
+      "label": "ethylene",
+      "style": "full"
+     },
+     {
+      "key": "Hplus2",
+      "smiles": "[H+:8]",
+      "label": "H⁺",
+      "style": "full"
+     }
+    ]
+   },
+   "camera": {
+    "zoom": 1.8,
+    "focus": [],
+    "tilt": 0
+   },
+   "state": "[CH2:6]=[CH2:7].[H+:8]"
+  },
+  {
    "arrows": [
     {
      "id": "a1",
      "from": {
-      "lp": 4
+      "bond": [
+       6,
+       7
+      ]
      },
      "to": {
-      "atom": 1
+      "bond": [
+       6,
+       8
+      ]
      },
      "electrons": "pair",
      "tone": {
@@ -420,28 +394,30 @@
       "amount": 0.35
      },
      "at": [
-      0.4,
-      0.9
+      0.3,
+      0.85
      ],
-     "why": "Lone pair → atom: a pair on Cl⁻ goes to the + carbon C1 and becomes the new C1–Cl bond."
+     "why": "Bond → new bond: the π pair, the rich site, becomes a new C–H bond to H⁺. C2 drops to three bonds and a +."
     }
    ],
    "bonds": [
     {
-     "a": 1,
-     "b": 4,
+     "a": 6,
+     "b": 7,
+     "action": "order",
+     "order": 1
+    },
+    {
+     "a": 6,
+     "b": 8,
      "action": "form",
      "order": 1
     }
    ],
    "charges": [
     {
-     "atom": 1,
-     "charge": 0
-    },
-    {
-     "atom": 4,
-     "charge": 0
+     "atom": 7,
+     "charge": 1
     }
    ],
    "partials": [],
@@ -449,89 +425,82 @@
     {
      "kind": "p-empty",
      "atoms": [
-      1
+      7
      ],
      "side": "both",
      "emphasis": "focus",
      "electrons": 0
-    },
-    {
-     "kind": "lone-pair",
-     "atoms": [
-      4
-     ],
-     "side": "both",
-     "emphasis": "focus",
-     "electrons": 2,
-     "toward": 1
     }
    ],
    "badges": [],
    "ghosts": [],
-   "camera": {
-    "zoom": 1.6,
-    "focus": [],
-    "tilt": 0
-   },
    "faces": {
     "show": false
    },
-   "state": "[Cl:4][CH2:1][CH:2]=[CH2:3]"
+   "id": "b6-pi",
+   "t0": 22,
+   "t1": 26,
+   "hold": 1,
+   "kind": "step",
+   "caption": "The π pair leaves the C=C and makes a new C–H bond. The other carbon lost its share: it is now C⁺.",
+   "moves": [
+    {
+     "atoms": [
+      8
+     ],
+     "anchor": 8,
+     "near": 6,
+     "offset": [
+      0.25,
+      -1.05,
+      0
+     ],
+     "at": [
+      0,
+      0.35
+     ]
+    }
+   ],
+   "camera": {
+    "zoom": 1.8,
+    "focus": [],
+    "tilt": 0
+   },
+   "state": "[H:8][CH2:6][CH2+:7]"
   },
   {
-   "id": "b7-same",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "p-empty",
+     "atoms": [
+      7
+     ],
+     "side": "both",
+     "emphasis": "normal",
+     "electrons": 0
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "faces": {
+    "show": false
+   },
+   "id": "b7-rules",
    "t0": 27,
    "t1": 30,
-   "hold": 1,
-   "kind": "look",
-   "caption": "After arrow 3: allyl chloride again, now with Cl on C1. Same compound: the arrows only described moves.",
-   "arrows": [],
-   "bonds": [],
-   "charges": [],
-   "partials": [],
-   "orbitals": [],
-   "badges": [],
-   "ghosts": [],
-   "camera": {
-    "zoom": 1.6,
-    "focus": [],
-    "tilt": 0
-   },
-   "faces": {
-    "show": false
-   },
-   "state": "[Cl:4][CH2:1][CH:2]=[CH2:3]",
-   "relayout": {
-    "anchor": [
-     1,
-     2,
-     3
-    ]
-   }
-  },
-  {
-   "id": "b8-rules",
-   "t0": 31,
-   "t1": 34,
    "hold": 0,
    "kind": "look",
-   "caption": "The grammar: start at a lone pair or a bond; end at an atom, or between two atoms to make a bond.",
-   "arrows": [],
-   "bonds": [],
-   "charges": [],
-   "partials": [],
-   "orbitals": [],
-   "badges": [],
-   "ghosts": [],
+   "caption": "The grammar: start on electrons (dots or a line); end on an atom, or where a new bond forms.",
    "camera": {
-    "zoom": 1.6,
+    "zoom": 1.8,
     "focus": [],
     "tilt": 0
    },
-   "faces": {
-    "show": false
-   },
-   "state": "[Cl:4][CH2:1][CH:2]=[CH2:3]"
+   "state": "[H:8][CH2:6][CH2+:7]"
   }
  ],
  "stereoCallout": {
@@ -546,24 +515,24 @@
   "q": "Which of these arrows is NOT legal?",
   "options": [
    {
-    "text": "An arrow that starts on a + carbon and points at Cl⁻.",
+    "text": "An arrow that starts on H⁺ and points at a lone pair of HO⁻.",
     "correct": true,
-    "why": "Yes. A + carbon has no spare electrons to send. Arrows start at electrons: the lone pair of Cl⁻ goes to the + carbon."
+    "why": "Yes. H⁺ has no electrons to send. Arrows start at electrons: the lone pair of HO⁻ goes to H⁺."
    },
    {
-    "text": "An arrow from the C3–Cl bond onto Cl.",
+    "text": "An arrow from the H–Cl bond onto Cl.",
     "correct": false,
     "why": "That is legal (bond → atom): the pair becomes a lone pair on Cl and the bond breaks. It is arrow 1 of the scene."
    },
    {
-    "text": "An arrow from the C1=C2 π bond to between C2 and C3.",
+    "text": "An arrow from the C=C π bond to H⁺, making a new C–H bond.",
     "correct": false,
-    "why": "That is legal (bond → bond): the π pair becomes a new C2=C3 bond. It is arrow 2 of the scene."
+    "why": "That is legal (bond → new bond): the π pair becomes the new C–H bond. It is arrow 3 of the scene."
    }
   ]
  },
  "notes": [
-  "No reaction is claimed: the three arrows end on the starting compound. The ionisation and the π shift are drawn only to show what each arrow kind does.",
+  "Redone 2026-10-20 (novice review #6): each arrow kind is shown on the simple case Lesson 08 has the learner draw (s07 HO⁻ + H⁺, s08 H–Cl, s09 ethylene + H⁺), in the same order as the grammar list of s06 after the first case. The earlier allyl chloride version had Cl leave on its own and a resonance shift, too much for a first picture.",
   "Primer scene for Lesson 08 s06 (arrow grammar); reached from the lesson, not from a hub card."
  ]
 }

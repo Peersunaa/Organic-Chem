@@ -1,4 +1,4 @@
-// Mechanism scene checks (learn/scenes/): the 18 storyboards (01-16 reagent scenes, 17-18 Lesson 08 primers) in scenes/scenes/*.json, their compiled layouts in scenes/layouts/*.json, the renderer
+// Mechanism scene checks (learn/scenes/): the 19 storyboards (01-16 reagent scenes, 17-19 Lesson 08 primers) in scenes/scenes/*.json, their compiled layouts in scenes/layouts/*.json, the renderer
 // (scenes/scene-engine.js), the index (scenes/scene-index.js) and the wiring in app.js, hub-view.js, widgets/index.js and index.html.
 // Run on its own with `node tests/scenes.mjs` from learn/, or as part of run.mjs.
 //
@@ -134,7 +134,7 @@ export async function scenes({ ok: okT, eq }) {
   ok(!!schema, 'schema', 'docs/scenes/SCENE-SCHEMA.md holds the JSON Schema (section 13)');
 
   // ---- the index
-  ok(SCENES.length === 18, 'index', `18 scenes (16 reagent scenes + 2 Lesson 08 primers), found ${SCENES.length}`);
+  ok(SCENES.length === 19, 'index', `19 scenes (16 reagent scenes + 3 Lesson 08 primers), found ${SCENES.length}`);
   eq(SCENES.map((s) => s.id), fs.readdirSync(sceneDir).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).sort(), 'scenes index lists exactly the files in scenes/scenes');
   eq(fs.readdirSync(layoutDir).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).sort(), SCENES.map((s) => s.id), 'scenes: a layout for every scene');
   ok(sceneId('alkene-hx') === '01-alkene-hx' && sceneId('01-alkene-hx') === '01-alkene-hx' && sceneId('nope') === null, 'index', 'sceneId() takes the short and the full id');
@@ -183,7 +183,7 @@ export async function scenes({ ok: okT, eq }) {
     });
     ok(B[B.length - 1].hold === 0, id, 'the last beat has no hold');
     const dur = sceneDuration(scene);
-    ok(dur >= 25 && dur <= 50, id, `scene length ${dur} s is 25-50 s`);
+    ok(dur >= (entry.primer && B.length <= 4 ? 12 : 25) && dur <= 50, id, `scene length ${dur} s is 25-50 s (a short Lesson 08 primer of 3-4 beats: 12-50 s)`);
     ok(Math.abs(dur - scene.duration) < 1e-9, id, 'duration field equals the last beat end');
     ok(B.every((b, i) => b.id.startsWith('b' + (i + 1) + '-')), id, 'beat ids are numbered in order');
 
@@ -321,8 +321,8 @@ export async function scenes({ ok: okT, eq }) {
 
   // ---- placement: card -> scene, lesson step -> scene
   eq(new Set(Object.values(CARD_SCENE)).size, SCENES.filter((s) => !s.primer).length, 'scenes: every one of the 16 reagent scenes is reachable from a hub card');
-  ok(SCENES.filter((s) => !s.primer).length === 16 && SCENES.filter((s) => s.primer).every((s) => s.lesson.length && !Object.values(CARD_SCENE).includes(s.id)), 'placement', 'the primers (17, 18) hang on Lesson 08 steps, not on hub cards');
-  ok(STEP_SCENE['08/s06'] === '18-arrow-grammar' && STEP_SCENE['08/s17'] === '17-hcl-ethylene' && CARD_SCENE['alkene-hx'] === '01-alkene-hx', 'placement', 'Lesson 08 steps get their primer scene; alkene-hx keeps scene 01');
+  ok(SCENES.filter((s) => !s.primer).length === 16 && SCENES.filter((s) => s.primer).every((s) => s.lesson.length && !Object.values(CARD_SCENE).includes(s.id)), 'placement', 'the primers (17, 18, 19) hang on Lesson 08 steps, not on hub cards');
+  ok(STEP_SCENE['08/s06'] === '18-arrow-grammar' && STEP_SCENE['08/s17'] === '17-hcl-ethylene' && STEP_SCENE['08/s15'] === '19-carbocation' && CARD_SCENE['alkene-hx'] === '01-alkene-hx', 'placement', 'Lesson 08 steps get their primer scene (s15: the carbocation scene); alkene-hx keeps scene 01');
   ok(CARD_SCENE['alkyne-hx-1'] === '08-alkyne-hx' && CARD_SCENE['alkyne-hx-2'] === '08-alkyne-hx', 'cards', '08 serves alkyne-hx-1 and alkyne-hx-2');
   ok(CARD_SCENE['alkene-kmno4-base'] === '06-alkene-kmno4-cold', 'cards', '06 serves alkene-kmno4-base');
   ok(CARD_SCENE['director-activating'] === '15-directors' && CARD_SCENE['director-meta'] === '15-directors', 'cards', '15 serves director-activating and director-meta');
@@ -348,7 +348,7 @@ export async function scenes({ ok: okT, eq }) {
   void shortId; void whyLines; void captionFor; void beatAt;
 }
 
-const SKILL_OK = new Set(['markovnikov', 'stereo-addition', 'alkene-oxidation', 'alkynes', 'acetylides', 'eas', 'directors', 'dienes', 'mechanism', 'curved-arrows']);
+const SKILL_OK = new Set(['markovnikov', 'stereo-addition', 'alkene-oxidation', 'alkynes', 'acetylides', 'eas', 'directors', 'dienes', 'mechanism', 'curved-arrows', 'carbocations']);
 
 // run alone: node tests/scenes.mjs
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {

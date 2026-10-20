@@ -1,6 +1,6 @@
 # 17 · HCl adds to ethylene: the model polar reaction
 
-**Scene id** `17-hcl-ethylene` · **Hub card** `alkene-hx` (primer: the card keeps scene 01 as its own) · **Taught in** Lesson 08 s17 (also s13, s15) · **Runtime** 33 s, 8 beats · **Layers** arrows, orbitals
+**Scene id** `17-hcl-ethylene` · **Hub card** `alkene-hx` (primer: the card keeps scene 01 as its own) · **Taught in** Lesson 08 s17 (also s13; s15 has its own short scene, 19) · **Runtime** 33 s, 8 beats · **Layers** arrows, orbitals
 
 Implements [SCENE-SCHEMA.md](SCENE-SCHEMA.md). The JSON at the bottom is the source of truth; the tables are its readable view. Every state and product here was checked with RDKit (see Chemistry checks).
 

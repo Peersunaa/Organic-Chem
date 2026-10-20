@@ -1,6 +1,6 @@
 # Mechanism scenes
 
-Storyboards for 18 animated, scrubbable mechanism scenes (16 reagent scenes plus two Lesson 08 primers) in Orgo Learn (McMurry Fundamentals Ch 1–6, plus the extra midterm reactions on the hub). Each scene shows how a reagent acts on a reactant: which electrons move and why, where the new bond forms, and why the regiochemistry and stereochemistry come out as they do. There are two toggleable layers: ARROWS (curved arrows, electron pairs travelling) and ORBITALS (π clouds, empty p, σ*, bromonium, metal surface, faces).
+Storyboards for 19 animated, scrubbable mechanism scenes (16 reagent scenes plus three Lesson 08 primers) in Orgo Learn (McMurry Fundamentals Ch 1–6, plus the extra midterm reactions on the hub). Each scene shows how a reagent acts on a reactant: which electrons move and why, where the new bond forms, and why the regiochemistry and stereochemistry come out as they do. There are two toggleable layers: ARROWS (curved arrows, electron pairs travelling) and ORBITALS (π clouds, empty p, σ*, bromonium, metal surface, faces).
 
 - **[SCENE-SCHEMA.md](SCENE-SCHEMA.md)** is the contract: data model, atom identity, coordinates and camera, timing, colour, reduced motion, accessibility, a JSON Schema, and the tests to port.
 - **`NN-id.md`** holds one scene each: intent, stage, beats table, chemistry checks, stereo callout, what-if links, end quiz, notes, and the full scene object as JSON (the source of truth).
@@ -27,8 +27,9 @@ Every scene was generated from data and machine-checked with Python RDKit. The c
 | 14 | [fc-acylation](14-fc-acylation.md) | `fc-acylation` | benzene + CH₃COCl/AlCl₃ → acetophenone | 7 | 32 |
 | 15 | [directors](15-directors.md) | `director-activating`, `director-meta` | anisole o/p against nitrobenzene meta | 11 | 49 |
 | 16 | [diels-alder](16-diels-alder.md) | `diels-alder` | penta-1,3-diene + acrolein → 2-methylcyclohex-3-ene-1-carbaldehyde | 8 | 36 |
-| 17 | [hcl-ethylene](17-hcl-ethylene.md) | primer (Lesson 08 s13, s15, s17) | ethylene + HCl → chloroethane, the model polar reaction | 8 | 33 |
-| 18 | [arrow-grammar](18-arrow-grammar.md) | primer (Lesson 08 s06) | allyl chloride: bond → atom, bond → bond, lone pair → atom, back to the same compound | 8 | 34 |
+| 17 | [hcl-ethylene](17-hcl-ethylene.md) | primer (Lesson 08 s13, s17) | ethylene + HCl → chloroethane, the model polar reaction | 8 | 33 |
+| 18 | [arrow-grammar](18-arrow-grammar.md) | primer (Lesson 08 s06) | one arrow per taught case: H–Cl → H⁺ + Cl⁻ (bond → atom), HO⁻ + H⁺ → H₂O (lone pair → atom), ethylene + H⁺ → CH₃CH₂⁺ (bond → new bond) | 7 | 30 |
+| 19 | [carbocation](19-carbocation.md) | primer (Lesson 08 s15) | the flat ethyl cation, its empty p orbital, Cl⁻ bonding into it (a short primer) | 3 | 14 |
 
 ## Build order
 

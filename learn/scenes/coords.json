@@ -12370,163 +12370,328 @@
  },
  "arrow-grammar": {
   "reactants": {
-   "smiles": "[CH2]=[CH][CH2][Cl]",
+   "smiles": "[H][Cl]",
    "from": null,
-   "note": "Lesson 08 primer (scene 18): allyl chloride.",
+   "note": "Lesson 08 primer (scene 18), arrow 1: HCl.",
    "atoms": [
     {
      "idx": 0,
-     "sym": "C",
-     "x": 261.9,
-     "y": 204.0,
+     "sym": "H",
+     "x": 298.0,
+     "y": 200.0,
      "charge": 0,
      "map": 1
     },
     {
      "idx": 1,
-     "sym": "C",
-     "x": 302.4,
-     "y": 186.8,
+     "sym": "Cl",
+     "x": 342.0,
+     "y": 200.0,
      "charge": 0,
      "map": 2
-    },
-    {
-     "idx": 2,
-     "sym": "C",
-     "x": 337.6,
-     "y": 213.2,
-     "charge": 0,
-     "map": 3
-    },
-    {
-     "idx": 3,
-     "sym": "Cl",
-     "x": 378.1,
-     "y": 196.0,
-     "charge": 0,
-     "map": 4
     }
    ],
    "bonds": [
     {
      "a": 0,
      "b": 1,
-     "order": 2,
-     "stereo": null
-    },
-    {
-     "a": 1,
-     "b": 2,
-     "order": 1,
-     "stereo": null
-    },
-    {
-     "a": 2,
-     "b": 3,
      "order": 1,
      "stereo": null
     }
    ],
    "map": {
     "0": 0,
-    "1": 1,
-    "2": 2,
-    "3": 3
+    "1": 1
    }
   },
-  "cation": {
-   "smiles": "[CH2+][CH]=[CH2].[Cl-]",
+  "ions": {
+   "smiles": "[H+].[Cl-]",
    "from": "reactants",
-   "note": "allyl cation (second drawing) and Cl-.",
+   "note": "H+ and Cl- after the bond -> atom arrow.",
    "atoms": [
     {
      "idx": 0,
-     "sym": "C",
-     "x": 281.9,
-     "y": 218.3,
+     "sym": "H",
+     "x": 298.0,
+     "y": 200.0,
      "charge": 1,
      "map": 1
     },
     {
      "idx": 1,
-     "sym": "C",
-     "x": 320.0,
-     "y": 196.3,
-     "charge": 0,
-     "map": 2
-    },
-    {
-     "idx": 2,
-     "sym": "C",
-     "x": 358.1,
-     "y": 218.3,
-     "charge": 0,
-     "map": 3
-    },
-    {
-     "idx": 3,
      "sym": "Cl",
-     "x": 320.0,
-     "y": 167.0,
+     "x": 381.6,
+     "y": 200.0,
      "charge": -1,
-     "map": 4
+     "map": 2
     }
    ],
-   "bonds": [
-    {
-     "a": 0,
-     "b": 1,
-     "order": 1,
-     "stereo": null
-    },
-    {
-     "a": 1,
-     "b": 2,
-     "order": 2,
-     "stereo": null
-    }
-   ],
+   "bonds": [],
    "map": {
     "0": 0,
-    "1": 1,
-    "2": 2,
-    "3": 3
+    "1": 1
    }
   },
-  "product": {
-   "smiles": "[Cl][CH2][CH]=[CH2]",
-   "from": "cation",
-   "note": "allyl chloride again, Cl on C1.",
+  "hydroxide": {
+   "smiles": "[H][O-].[H+]",
+   "from": null,
+   "note": "arrow 2: HO- and H+.",
    "atoms": [
     {
      "idx": 0,
-     "sym": "Cl",
-     "x": 378.1,
-     "y": 196.0,
+     "sym": "H",
+     "x": 280.0,
+     "y": 200.0,
      "charge": 0,
      "map": 4
     },
     {
      "idx": 1,
-     "sym": "C",
-     "x": 337.6,
-     "y": 213.2,
+     "sym": "O",
+     "x": 324.0,
+     "y": 200.0,
+     "charge": -1,
+     "map": 3
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 403.0,
+     "y": 200.0,
+     "charge": 1,
+     "map": 5
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2
+   }
+  },
+  "water": {
+   "smiles": "[H][O][H]",
+   "from": "hydroxide",
+   "note": "water after the lone pair -> atom arrow.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "H",
+     "x": 280.0,
+     "y": 200.0,
      "charge": 0,
-     "map": 1
+     "map": 4
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 324.0,
+     "y": 200.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 365.8,
+     "y": 184.6,
+     "charge": 0,
+     "map": 5
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2
+   }
+  },
+  "ethylene": {
+   "smiles": "[CH2]=[CH2].[H+]",
+   "from": null,
+   "note": "arrow 3: ethylene and H+.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 280.0,
+     "y": 200.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 324.0,
+     "y": 200.0,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 403.0,
+     "y": 200.0,
+     "charge": 1,
+     "map": 8
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 2,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2
+   }
+  },
+  "cation": {
+   "smiles": "[H][CH2][CH2+]",
+   "from": "ethylene",
+   "note": "ethyl cation after the bond -> new bond arrow.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "H",
+     "x": 291.0,
+     "y": 153.8,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 280.0,
+     "y": 200.0,
+     "charge": 0,
+     "map": 6
     },
     {
      "idx": 2,
      "sym": "C",
-     "x": 302.4,
-     "y": 186.8,
+     "x": 324.0,
+     "y": 200.0,
+     "charge": 1,
+     "map": 7
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2
+   }
+  }
+ },
+ "carbocation-cl": {
+  "reactants": {
+   "smiles": "[CH3][CH2+].[Cl-]",
+   "from": null,
+   "note": "Lesson 08 primer (scene 19): the ethyl cation and Cl-.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 200.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 320.0,
+     "y": 200.0,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "Cl",
+     "x": 434.4,
+     "y": 173.6,
+     "charge": -1,
+     "map": 3
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2
+   }
+  },
+  "product": {
+   "smiles": "[CH3][CH2][Cl]",
+   "from": "reactants",
+   "note": "chloroethane: Cl bonded to C2 over the top face.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 200.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 320.0,
+     "y": 200.0,
      "charge": 0,
      "map": 2
     },
     {
-     "idx": 3,
-     "sym": "C",
-     "x": 261.9,
-     "y": 204.0,
+     "idx": 2,
+     "sym": "Cl",
+     "x": 320.0,
+     "y": 125.2,
      "charge": 0,
      "map": 3
     }
@@ -12543,19 +12708,12 @@
      "b": 2,
      "order": 1,
      "stereo": null
-    },
-    {
-     "a": 2,
-     "b": 3,
-     "order": 2,
-     "stereo": null
     }
    ],
    "map": {
     "0": 0,
     "1": 1,
-    "2": 2,
-    "3": 3
+    "2": 2
    }
   }
  }

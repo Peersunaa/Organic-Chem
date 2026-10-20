@@ -12,7 +12,7 @@
 // catalyst: drag the transition state down (simulating a catalyst). A second handle moves the products on purpose: ΔH must stay fixed.
 //   ask: '' hides the widget's own instruction bar (when the step prompt already says it).
 // Feedback: a wrong answer's diagnosis goes to the step's feedback box only (ctx.onResult), never twice; a right answer's reason stays under the diagram until the
-//   next answer (it is not wiped after 0.65 s) and clears that box (ctx.onProgress). Tap targets (levels, brackets, handles) are at least 44 px on a 400 px phone.
+//   next task starts (1.4 s later; the new task clears it and the step's hints, so nothing stale or give-away is left) and clears that box (ctx.onProgress). Tap targets (levels, brackets, handles) are at least 44 px on a 400 px phone.
 import { KIND_NAME, letter, steps, overallDH, brackets, gradeTask, gradeCatalyst, pathD, validate } from './energy-core.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -265,7 +265,7 @@ export default {
     }
     function result(r) {
       if (busy) return;
-      if (r.ok) { busy = true; setMsg('ok', r.why); ctx.onProgress?.(); setTimeout(advance, reducedMotion() ? 0 : 650); }
+      if (r.ok) { busy = true; setMsg('ok', r.why); ctx.onProgress?.(); setTimeout(advance, reducedMotion() ? 0 : 1400); }   // time to read the reason: the next task clears it
       else { setMsg('', ''); ctx.onResult({ ok: false, diagnosis: r.diagnosis }); }   // the step's feedback box shows the diagnosis, once
     }
     const reducedMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -279,6 +279,8 @@ export default {
       const name = s.split(':')[0];
       taskBar.innerHTML = `<span class="ed-count">Task ${ti + 1} of ${tasks.length}</span> ${askFor(tasks[ti])}`;
       answers.innerHTML = '';
+      // a new task starts clean: the last task's reason (it can give this answer away, e.g. "ΔH = ... = −40" before "is ΔH negative?") and its hints go
+      if (ti > 0) { setMsg('', ''); ctx.onProgress?.({ task: true }); }
       const choice = (opts) => {
         const row = html('div', 'ed-choices');
         opts.forEach(([v, t]) => { const b = html('button', 'btn', t); b.type = 'button'; b.addEventListener('click', () => answerChoice(v)); row.append(b); });

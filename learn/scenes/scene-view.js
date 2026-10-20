@@ -107,7 +107,9 @@ function mountScene(host, config = {}, ctx = {}) {
     const row1 = h('div', { class: 'ms-ctl' }, prevB, playB, nextB, h('label', { class: 'ms-speedlab' }, h('span', { class: 'sr-only' }, 'Speed'), speed));
     const layerBtns = ['arrows', 'orbitals', 'both'].map((k) => { const b = h('button', { type: 'button', class: 'btn small ms-layer', 'aria-pressed': String(S.layer === k), 'data-layer': k }, LAYER_LABEL[k]); b.addEventListener('click', () => setLayer(k)); return b; });
     const layerRow = h('div', { class: 'ms-layers', role: 'group', 'aria-label': 'Layers' }, h('span', { class: 'ms-layers-k' }, 'Show'), layerBtns);
-    root.append(stageWrap, capBox, line, row1, layerRow, legend());
+    // the timeline and the Play / Beat buttons stay in view under the stage (sticky), so a learner can watch and press at once (novice review 2026-10-20, #14)
+    const dock = h('div', { class: 'ms-dock' }, line, row1);
+    root.append(stageWrap, capBox, dock, layerRow, legend());
 
     // stereo callout
     if (scene.stereoCallout) {
@@ -126,7 +128,11 @@ function mountScene(host, config = {}, ctx = {}) {
     }
 
     // ---- painting
-    const sceneOpts = () => ({ layer: S.layer, caveman: cavemanOn() });
+    // text in the drawing scales with the stage: atom letters >= 14 px and notes >= 12 px on screen however narrow the stage is (novice review #7)
+    const textScale = () => { const w = stage.clientWidth || 640, k = w / 640; return { atom: Math.min(2.2, Math.max(1, 14 / (22 * k))), note: Math.min(2.4, Math.max(1, 12 / (14 * k))) }; };
+    const sceneOpts = () => ({ layer: S.layer, caveman: cavemanOn(), textScale: textScale() });
+    let lastW = 0;
+    if (typeof ResizeObserver !== 'undefined') { const ro = new ResizeObserver(() => { const w = stage.clientWidth; if (Math.abs(w - lastW) > 1 && !dead) { lastW = w; if (!S.playing) paint(); } }); ro.observe(stage); const d0 = inst.destroy; inst.destroy = () => { ro.disconnect(); d0(); }; }
     function curT() { return S.reduced ? beats[S.beat].t0 : S.t; }
     function paint() {
       const t = curT();
@@ -347,7 +353,7 @@ export function scenePage(any) {
   ];
 }
 
-/** #scenes: 18 tiles (16 reagents + the two Lesson 08 primers), each with the engine's own first frame as its thumbnail. */
+/** #scenes: 19 tiles (16 reagents + the three Lesson 08 primers), each with the engine's own first frame as its thumbnail. */
 export function scenesList() {
   const grid = h('div', { class: 'ms-grid' });
   SCENES.forEach((s) => {
@@ -358,7 +364,7 @@ export function scenesList() {
   });
   return [
     h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'How each reagent works'),
-      h('p', { class: 'lede' }, 'Sixteen short animations, one per reagent, plus two Lesson 08 primers (17 and 18: the model reaction and the three legal arrows). Scrub the timeline, switch the electron-pushing arrows and the orbitals on or off, and answer one question at the end.'),
+      h('p', { class: 'lede' }, 'Sixteen short animations, one per reagent, plus three Lesson 08 primers (17 to 19: the model reaction, the three legal arrows and the carbocation). Scrub the timeline, switch the electron-pushing arrows and the orbitals on or off, and answer one question at the end.'),
       h('div', { class: 'rx-btns' }, h('a', { class: 'btn ghost', href: '#reactions' }, 'Open the reaction cards'))),
     grid
   ];

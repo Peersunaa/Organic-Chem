@@ -1,5 +1,5 @@
-// The 18 mechanism scenes: which hub card, lesson step and weak-spot skill each one belongs to. 01-16 each animate one hub card's reagent; 17 and 18 are Lesson 08
-// PRIMERS (`primer: true`, no hub card of their own: HCl + ethylene as the model reaction, and the three legal arrows), reached from Lesson 08 steps and the #scenes list. Plain data, importable without fetching anything
+// The 19 mechanism scenes: which hub card, lesson step and weak-spot skill each one belongs to. 01-16 each animate one hub card's reagent; 17, 18 and 19 are Lesson 08
+// PRIMERS (`primer: true`, no hub card of their own: HCl + ethylene as the model reaction, the three legal arrows, and the carbocation), reached from Lesson 08 steps and the #scenes list. Plain data, importable without fetching anything
 // (app.js, hub-view.js and the tests use it); tests/scenes.mjs checks every row against the scene JSON it names.
 //   id     = the storyboard's id and file name (scenes/scenes/<id>.json, scenes/layouts/<id>.json)
 //   short  = the id without its number: the route is #scene/<short> (the full id works too)
@@ -23,8 +23,9 @@ export const SCENES = [
   { id: '14-fc-acylation', title: 'Friedel–Crafts acylation: acetophenone from benzene', reagent: 'CH₃COCl, AlCl₃', cards: ['fc-acylation'], lesson: [{ id: '13', step: 's17' }], skill: 'eas' },
   { id: '15-directors', title: 'Directors: why –OCH₃ sends E⁺ ortho/para and –NO₂ sends it meta', reagent: 'E⁺ (here Br⁺)', cards: ['director-activating', 'director-meta'], lesson: [{ id: '14', step: 's04' }, { id: '14', step: 's05' }], skill: 'directors' },
   { id: '16-diels-alder', title: 'Diels–Alder: penta-1,3-diene + acrolein', reagent: 'acrolein, heat', cards: ['diels-alder'], lesson: [], skill: 'dienes' },
-  { id: '17-hcl-ethylene', title: 'HCl adds to ethylene: the model polar reaction', reagent: 'HCl', cards: [], primer: true, lesson: [{ id: '08', step: 's17' }, { id: '08', step: 's13' }, { id: '08', step: 's15' }], skill: 'mechanism' },
-  { id: '18-arrow-grammar', title: 'Arrow grammar: the three legal arrows on one molecule', reagent: 'none (one molecule, three arrows)', cards: [], primer: true, lesson: [{ id: '08', step: 's06' }], skill: 'curved-arrows' }
+  { id: '17-hcl-ethylene', title: 'HCl adds to ethylene: the model polar reaction', reagent: 'HCl', cards: [], primer: true, lesson: [{ id: '08', step: 's17' }, { id: '08', step: 's13' }], skill: 'mechanism' },
+  { id: '18-arrow-grammar', title: 'Arrow grammar: the three legal arrows, one simple case each', reagent: 'none (three cases, one arrow each)', cards: [], primer: true, lesson: [{ id: '08', step: 's06' }], skill: 'curved-arrows' },
+  { id: '19-carbocation', title: 'The carbocation: a flat + carbon and its empty p orbital', reagent: 'Cl⁻', cards: [], primer: true, lesson: [{ id: '08', step: 's15' }], skill: 'carbocations' }
 ];
 
 export const SCENE_BY_ID = Object.fromEntries(SCENES.map((s) => [s.id, s]));

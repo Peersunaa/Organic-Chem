@@ -187,7 +187,7 @@ function recapCard(step) {
   const body = h('div', { class: 'recap-body' });
   if (r.q) body.append(rich(noMol(r.q), 'p', 'recap-q'));
   if (r.a) body.append(rich('<b>Answer:</b> ' + r.a, 'p', 'recap-a'));
-  if (r.note) body.append(rich(r.idea ? r.note : noMol(r.note), 'div', 'recap-note'));
+  if (r.note) body.append(rich(r.idea ? r.note : noMol(r.note), 'div', 'recap-note' + (r.idea ? ' idea' : '')));   // an explain step's idea keeps its paragraphs, lists and drawings as blocks
   const more = h('button', { type: 'button', class: 'recap-more', 'aria-expanded': 'false' }, 'Show all');
   more.addEventListener('click', () => { const on = body.classList.toggle('full'); more.textContent = on ? 'Show less' : 'Show all'; more.setAttribute('aria-expanded', String(on)); });
   body.append(more);

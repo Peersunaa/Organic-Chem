@@ -15,6 +15,7 @@ export const GLOSSARY = [
   { id: 'resonance', label: 'resonance', forms: ['resonance'], def: 'Describing one molecule with several valid drawings that differ only in where electrons sit; the real molecule is a blend.' },
   { id: 'delta', label: 'δ+ and δ−', forms: ['δ+', 'δ−', 'δ⁺', 'δ⁻', 'δ-'], def: 'Partial charges: δ+ marks the atom with less pull on the shared electrons, δ− the atom with more pull.' },
   { id: 'carbocation', label: 'carbocation', forms: ['carbocation', 'carbocations'], def: 'A carbon with only three bonds and a + charge (six electrons, an empty p orbital), which makes it very reactive.' },
+  { id: 'porbital', label: 'empty p orbital', forms: ['empty p orbital', 'empty p orbitals', 'p orbital', 'p orbitals'], def: 'A dumbbell-shaped orbital, one lobe above the atom and one below; on a + carbon it holds no electrons, so a pair can flow into it.' },
   { id: 'skeletal', label: 'skeletal drawing', forms: ['skeletal'], def: 'A shorthand drawing: lines are bonds, every corner or line end is a carbon, and H atoms on carbon are left out.' },
   { id: 'markovnikov', label: 'Markovnikov', forms: ['Markovnikov', 'Markovnikov’s'], def: 'The rule for HX adding to an alkene: H goes to the C=C carbon that already has more H, so the + forms on the other carbon.' },
   { id: 'regio', label: 'regiochemistry', forms: ['regiochemistry', 'regiospecific', 'regioselective'], def: 'Which place in a molecule a reaction uses when more than one is possible; “regio” means place.' },

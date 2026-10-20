@@ -7,7 +7,7 @@ import { generateFg, FG_SKILLS } from './generators-fg.js';
 import { generateNames, NAMING_SKILLS } from './generators-names.js';
 import { generateChairs, CHAIR_SKILLS } from './generators-chairs.js';
 import { generateAlkenes, ALKENE_SKILLS } from './generators-alkenes.js';
-import { generateMech, MECH_SKILLS } from './generators-mech.js';
+import { generateMech, generateMechMastery, MECH_SKILLS } from './generators-mech.js';
 import { generateMarkovnikov, MARK_SKILLS } from './generators-markovnikov.js';
 import { generateAdditions2, ADD2_SKILLS } from './generators-additions2.js';
 import { generateResonance, RES_SKILLS } from './generators-resonance.js';
@@ -210,6 +210,7 @@ export function generate(generatorId, count, { skill = null, rng = Math.random, 
   if (generatorId === 'chairs') return generateChairs(count, { skill, rng });
   if (generatorId === 'alkene-names') return generateAlkenes(count, { skill, rng });
   if (generatorId === 'mechanism-basics') return generateMech(count, { skill, rng });
+  if (generatorId === 'mechanism-mastery') return skill ? generateMech(count, { skill, rng }) : generateMechMastery(count, { rng });   // Lesson 08 mastery: arrows and energy diagrams in turn
   if (generatorId === 'markovnikov') return generateMarkovnikov(count, { skill, rng });
   if (generatorId === 'alkene-additions-2') return generateAdditions2(count, { skill, rng });
   if (generatorId === 'resonance') return generateResonance(count, { skill, rng });
@@ -236,7 +237,7 @@ export function generate(generatorId, count, { skill = null, rng = Math.random, 
   }
   return out;
 }
-export const GENERATORS = { 'reaction-mix': true, 'lewis-basic': true, 'shape-basic': true, 'acid-base': true, 'skeletal-fg': true, 'alkane-names': true, 'chairs': true, 'alkene-names': true, 'mechanism-basics': true, 'markovnikov': true, 'alkene-additions-2': true, 'resonance': true, 'alkynes': true, 'eas-basics': true, 'directors': true, 'rs': true, 'stereo-relationships': true, 'fischer': true, 'predict-product': true, 'stereo-projections': true, 'naming-levels': true, 'guess-reagent': true, 'guess-reactant': true, 'stereo-outcome': true, 'two-step': true, 'wont-work': true, 'huckel': true };
+export const GENERATORS = { 'reaction-mix': true, 'lewis-basic': true, 'shape-basic': true, 'acid-base': true, 'skeletal-fg': true, 'alkane-names': true, 'chairs': true, 'alkene-names': true, 'mechanism-basics': true, 'mechanism-mastery': true, 'markovnikov': true, 'alkene-additions-2': true, 'resonance': true, 'alkynes': true, 'eas-basics': true, 'directors': true, 'rs': true, 'stereo-relationships': true, 'fischer': true, 'predict-product': true, 'stereo-projections': true, 'naming-levels': true, 'guess-reagent': true, 'guess-reactant': true, 'stereo-outcome': true, 'two-step': true, 'wont-work': true, 'huckel': true };
 /** Which generator serves "Practise this" for a weak-spot skill. */
 export function generatorForSkill(skill) { return skill === MIX_ID ? MIX_ID : REACTION_MODE_SKILLS.includes(skill) ? skill : HUCKEL_SKILLS.includes(skill) ? 'huckel' : NAMING_LEVEL_SKILLS.includes(skill) ? 'naming-levels' : STEREO_PROJ_SKILLS.includes(skill) ? 'stereo-projections' : PREDICT_SKILLS.includes(skill) ? 'predict-product' : FISCHER_SKILLS.includes(skill) ? 'fischer' : REL_SKILLS.includes(skill) ? 'stereo-relationships' : RS_SKILLS.includes(skill) ? 'rs' : DIRECTOR_SKILLS.includes(skill) ? 'directors' : EAS_SKILLS.includes(skill) ? 'eas-basics' : ALKYNE_SKILLS.includes(skill) ? 'alkynes' : RES_SKILLS.includes(skill) ? 'resonance' : ADD2_SKILLS.includes(skill) ? 'alkene-additions-2' : MARK_SKILLS.includes(skill) ? 'markovnikov' : MECH_SKILLS.includes(skill) ? 'mechanism-basics' : ALKENE_SKILLS.includes(skill) ? 'alkene-names' : CHAIR_SKILLS.includes(skill) ? 'chairs' : NAMING_SKILLS.includes(skill) ? 'alkane-names' : FG_SKILLS.includes(skill) ? 'skeletal-fg' : ACID_SKILLS.includes(skill) ? 'acid-base' : SHAPE_SKILLS.includes(skill) ? 'shape-basic' : 'lewis-basic'; }
 

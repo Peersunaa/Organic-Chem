@@ -16,10 +16,13 @@
 //                    (immediately under prefers-reduced-motion). The dots are removed when they arrive.
 //   after:true       Lesson 08: once the arrows are right they play, then the picture turns into the AFTER state (applyArrows of config.arrows: new bonds and
 //                    lone pairs fade in, charges recomputed) with `afterNote` under it, and a "Show before / Show after" toggle (44 px) lets the learner compare.
+//   partials         [{atom, sign: "+"|"-"}]: δ+ / δ− labels on the before picture (Lesson 08 still pictures).
 //   dashLong:true    the mechanism player's mid-step pictures: a bond longer than 1.45 bond lengths is one an arrow has just made between atoms that have not
 //                    moved together yet, so it is drawn dashed ("forming") instead of as a real long bond.
-// Tap targets are sized in SCREEN pixels after layout (ResizeObserver): atoms and lone pairs get 44 px where the drawing has room (never more than half the way to a
-// neighbour), and every bond has a 44 px-wide hit band over its middle, drawn above the atoms, so both stay reachable on a 400 px phone.
+// Tap targets are sized in SCREEN pixels after layout (ResizeObserver): atoms and lone pairs get 44 px where the drawing has room (an atom never more than about a
+// third of the way to a neighbour), and every bond has a 44 px-wide hit band (square ends) that stops about 14 px short of each atom centre. Z-order, bottom to top:
+// bond bands, atoms, lone pairs: a tap on an atom's centre is always that atom, a tap on a bond's middle always that bond (novice review 2026-10-20, #1).
+// A second tap on the electrons already chosen (or on their own atom) keeps the choice and says why: an arrow ends on a DIFFERENT atom or bond (#9).
 // Charge badges are placed where they clear every lone-pair dot, bond line and atom (pushed outward until they do).
 import { NAME } from '../chem.js';
 import { SCALE, radius, P, lpCount, lpPoints, keyOf, grade, badStart, curve, describeSource, describeDest, headAtom, applyArrows } from './arrow-core.js';
@@ -41,6 +44,8 @@ export default {
     let badIdx = [];
     let lastAdded = -1;
     let chooser = null;   // the 'which carbon bonds to H?' question (regio config only)
+    let selfTap = false;  // the last tap tried to end an arrow where it started: Check explains that instead of "draw at least one arrow"
+    const SELF_MSG = 'An arrow starts on electrons and ends on a different atom or bond.';
 
     host.innerHTML = `
       <div class="lb ad">
@@ -157,6 +162,7 @@ export default {
       svg.textContent = '';
       const bondG = el('g'), hitG = el('g', { class: 'ad-hits' });
       svg.appendChild(bondG);
+      svg.appendChild(hitG);      // bond bands BELOW the atoms: the atom targets win at their centres
       // bonds
       bonds.forEach((b) => {
         const A = atoms[b.a], B = atoms[b.b];
@@ -175,8 +181,8 @@ export default {
           g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
           g.setAttribute('aria-label', `Bond between ${A.label || A.el} and ${B.label || B.el}. ${src ? 'Press to send the electrons into this bond.' : 'Press to start an arrow from the bond electrons.'}`);
           wire(g, () => tap({ kind: 'bond', bond: [b.a, b.b] }));
-          // the hit band covers the middle of the bond and sits ABOVE the atoms, so a big atom target never swallows the bond
-          const hit = el('line', { x1: x1 + (x2 - x1) * 0.24, y1: y1 + (y2 - y1) * 0.24, x2: x1 + (x2 - x1) * 0.76, y2: y1 + (y2 - y1) * 0.76, class: 'lb-hit', 'data-hit': b.a + '-' + b.b });
+          // the hit band runs between the atoms and stops ~14 screen px short of each centre (sizeHits sets its ends); it sits BELOW the atoms
+          const hit = el('line', { x1: x1 + (x2 - x1) * 0.3, y1: y1 + (y2 - y1) * 0.3, x2: x1 + (x2 - x1) * 0.7, y2: y1 + (y2 - y1) * 0.7, class: 'lb-hit', 'data-hit': b.a + '-' + b.b });
           hit.addEventListener('click', (e) => { e.stopPropagation(); tap({ kind: 'bond', bond: [b.a, b.b] }); });
           hitG.appendChild(hit);
         }
@@ -197,7 +203,6 @@ export default {
         }
         svg.appendChild(g);
       });
-      svg.appendChild(hitG);
       // lone pairs (on top of the atom hit areas so they can be tapped on their own)
       atoms.forEach((a, i) => {
         lpPts[i].forEach((p, k) => {
@@ -226,6 +231,12 @@ export default {
         g.style.pointerEvents = 'none';
         svg.appendChild(g);
       });
+      // δ+ / δ− labels (config.partials, Lesson 08 still pictures), placed like charge badges: clear of dots, bonds and atoms
+      if (view === 'before') (config.partials || []).forEach((pa) => {
+        const s = badgeSpot(pa.atom), [ax, ay] = P(atoms[pa.atom]), dx = s.cx - ax, dy = s.cy - ay, L = Math.hypot(dx, dy) || 1;
+        const cx = ax + (dx / L) * (L + 8), cy = ay + (dy / L) * (L + 8);   // "δ+" is wider than a charge badge: a little further out, clear of the dots
+        svg.appendChild(el('text', { x: cx, y: cy + 0.5, class: 'ad-delta ' + (pa.sign === '+' ? 'pos' : 'neg') }, pa.sign === '+' ? 'δ+' : 'δ−'));
+      });
       // arrows
       drawn.forEach((ar, n) => {
         const dest = destPoint(ar.to, ar.from);
@@ -249,9 +260,10 @@ export default {
       if (!w) return;
       const k = w / vbW, want = 22 / k;
       const near = atoms.map((a, i) => Math.min(9e9, ...atoms.map((o, j) => (j === i ? 9e9 : Math.hypot(o.x - a.x, o.y - a.y) * SCALE))));
+      // an atom target: 44 px where it fits, never more than ~36 % of the way to its nearest neighbour, so the middle of every bond stays the bond's
       svg.querySelectorAll('.ad-atom').forEach((g) => {
         const i = Number(g.dataset.atom), c = g.querySelector('.lb-hit-atom');
-        if (c) c.setAttribute('r', Math.max(radius(atoms[i].el) + 8, Math.min(want, near[i] * 0.48)).toFixed(1));
+        if (c) c.setAttribute('r', Math.max(radius(atoms[i].el) + 4, Math.min(want, near[i] * 0.36)).toFixed(1));
       });
       // pairs on the SAME atom may overlap (any of them starts the same arrow); pairs of different atoms never do
       const pts = [...svg.querySelectorAll('.ad-hit-lp')];
@@ -259,9 +271,19 @@ export default {
       const own = pts.map((c) => c.parentNode.dataset.lp.split('-')[0]);
       pts.forEach((c, n) => {
         const d = Math.min(9e9, ...xy.map((q, m) => (m === n || own[m] === own[n] ? 9e9 : Math.hypot(q[0] - xy[n][0], q[1] - xy[n][1]))));
-        c.setAttribute('r', Math.max(13, Math.min(want, d * 0.5, 27)).toFixed(1));
+        const [ax, ay] = P(atoms[Number(own[n])]), toCentre = Math.hypot(xy[n][0] - ax, xy[n][1] - ay) - 6;   // never over the atom's own centre: that tap is the atom
+        c.setAttribute('r', Math.max(10, Math.min(want, d * 0.5, 27, toCentre)).toFixed(1));
       });
-      svg.querySelectorAll('.ad-hits .lb-hit').forEach((l) => { l.style.strokeWidth = Math.max(30, Math.min(2 * want, 46)).toFixed(1); });
+      // bond bands: 44 px wide, square ends ~14 px short of each atom centre (at least the middle 30 % of a very short bond)
+      const stop = 14 / k;
+      svg.querySelectorAll('.ad-hits .lb-hit').forEach((l) => {
+        const [ia, ib] = l.dataset.hit.split('-').map(Number);
+        const [x1, y1] = P(atoms[ia]), [x2, y2] = P(atoms[ib]);
+        const f = Math.min(0.35, stop / (Math.hypot(x2 - x1, y2 - y1) || 1));
+        l.setAttribute('x1', (x1 + (x2 - x1) * f).toFixed(1)); l.setAttribute('y1', (y1 + (y2 - y1) * f).toFixed(1));
+        l.setAttribute('x2', (x2 - (x2 - x1) * f).toFixed(1)); l.setAttribute('y2', (y2 - (y2 - y1) * f).toFixed(1));
+        l.style.strokeWidth = Math.max(30, Math.min(2 * want, 46)).toFixed(1);
+      });
     }
     if (typeof ResizeObserver !== 'undefined') { ro = new ResizeObserver(() => sizeHits()); ro.observe(svg); }
 
@@ -284,9 +306,10 @@ export default {
           const other = rg.pi.find((c) => c !== e.idx);
           const from = { bond: [e.idx, other] }, to = { bond: [e.idx, rg.H] };
           closeChooser();
-          drawn.push({ from, to }); lastAdded = drawn.length - 1; src = null;
+          drawn.push({ from, to }); lastAdded = drawn.length - 1; src = null; selfTap = false;
           say(`Arrow added: ${addedText(from, to)}. Add another arrow or press Check.`);
           draw();
+          ctx.onProgress?.();
         });
         row.appendChild(b);
       });
@@ -308,24 +331,26 @@ export default {
         else if (t.kind === 'bond') { src = { bond: t.bond }; }
         else if (nLp[t.atom] > 0) { src = { lp: t.atom, k: 0 }; }
         else { const d = badStart(config, t.atom); say(d); ctx.onResult({ ok: false, diagnosis: d, code: 'start' }); return; }
-        say(src.bond ? `Bond electrons selected (${describeSource(config, { bond: src.bond })}). Now tap the atom that receives them.` : `Lone pair on ${atoms[src.lp].label || atoms[src.lp].el} selected. Now tap the atom that receives the electrons.`);
+        selfTap = false;
+        say(src.bond ? `Bond electrons selected (${describeSource(config, { bond: src.bond })}). Now tap the atom that receives them.` : `Lone pair on ${atoms[src.lp].label || atoms[src.lp].el} selected${t.kind === 'atom' ? ' (an arrow starts on the dots, so it starts from one of its lone pairs)' : ''}. Now tap the atom that receives the electrons.`);
         draw();
+        ctx.onProgress?.();
         return;
       }
-      // second tap: destination
-      const same = (src.lp != null && (t.kind === 'lp' && t.atom === src.lp && t.k === src.k)) || (src.bond && t.kind === 'bond' && keyOf({ bond: t.bond }) === keyOf({ bond: src.bond }));
-      if (same) { src = null; say('Arrow cancelled. Tap the electrons the arrow starts from.'); draw(); return; }
+      // second tap: destination. Ending where it starts (the same pair or bond, or the pair's own atom) keeps the choice and says why (novice review #9)
+      const same = (src.lp != null && ((t.kind === 'lp' || t.kind === 'atom') && t.atom === src.lp)) || (src.bond && t.kind === 'bond' && keyOf({ bond: t.bond }) === keyOf({ bond: src.bond }));
+      if (same) { selfTap = true; say(SELF_MSG + ' These electrons are still selected: tap where they go (or press Clear to start again).'); return; }
       const from = src.bond ? { bond: src.bond } : { lp: src.lp };
       const to = t.kind === 'bond' ? { bond: t.bond } : { atom: t.atom };
       const rgHit = config.regio && from.bond && to.atom != null && [config.regio, ...(config.regio.alt || [])].find((r) => keyOf(from) === keyOf({ bond: r.pi }) && to.atom === r.H);
       if (rgHit) { askEnd(rgHit); return; }
-      if (to.atom != null && from.lp === to.atom) { say('An arrow cannot point back to its own atom. Tap the atom that receives the electrons.'); return; }
       if (drawn.some((d) => keyOf(d.from) + '>' + keyOf(d.to) === keyOf(from) + '>' + keyOf(to))) { src = null; say('You already drew that arrow.'); draw(); return; }
       drawn.push({ from, to });
       lastAdded = drawn.length - 1;
-      src = null;
+      src = null; selfTap = false;
       say(`Arrow added: ${addedText(from, to)}. Add another arrow or press Check.`);
       draw();
+      ctx.onProgress?.();         // a stale "Draw at least one arrow" box goes as soon as an arrow exists (novice review #5)
     }
     /** "the C=C bond electrons make a new bond to H" for a bond pointed at an atom outside it (that is what the arrow means), else arrow-core's wording. */
     function addedText(from, to) {
@@ -334,10 +359,11 @@ export default {
     }
 
     host.querySelector('[data-act="undo"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn.pop(); badIdx = []; src = null; lastAdded = -1; say('Last arrow removed.'); draw(); });
-    host.querySelector('[data-act="reset"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn = []; badIdx = []; src = null; lastAdded = -1; say('Cleared. Tap the electrons the arrow starts from.'); draw(); });
+    host.querySelector('[data-act="reset"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn = []; badIdx = []; src = null; lastAdded = -1; selfTap = false; say('Cleared. Tap the electrons the arrow starts from.'); draw(); });
     host.querySelector('[data-act="check"]').addEventListener('click', () => {
       if (finished) return;
-      const r = config.judge ? config.judge(drawn) : grade(config, drawn);   // Lesson 11: config.judge(drawn) -> {ok, diagnosis, wrong?, message?} replaces grading against config.arrows (resonance-drawer)
+      let r = config.judge ? config.judge(drawn) : grade(config, drawn);   // Lesson 11: config.judge(drawn) -> {ok, diagnosis, wrong?, message?} replaces grading against config.arrows (resonance-drawer)
+      if (!r.ok && !drawn.length && selfTap) r = { ...r, code: 'self', diagnosis: `${SELF_MSG} Your last tap ended the arrow where it started. Tap the electrons first (dots or a line), then a DIFFERENT atom: the one that receives them.` };
       badIdx = r.wrong || [];
       if (r.ok) { finished = true; host.querySelector('.lb-actions').hidden = true; say(r.message || 'All arrows correct.'); }
       lastAdded = -1;
