@@ -60,7 +60,7 @@ function leadFor(card, entry, sub, v, S, o) {
   const X = haloOf(v), label = S.label, f = card.facts, adds = f.adds;
   const fam = S.family, kind = o.kind, id = card.id;
   const E = EAS[v.id];
-  const grp = v.halide ? halideText(v.halide).replace(/Cl$/, '') : E ? (GROUP_TEXT[E.group] || E.group) : '';
+  const grp = v.halide ? halideText(v.halide).replace(/Cl$/, '').replace(/^chlorocyclohexane$/, 'cyclohexyl') : E ? (GROUP_TEXT[E.group] || E.group) : '';
   const hxG = v.id === 'H2O' ? 'OH' : X;
   const sp = f.space;
   const T = {
@@ -236,7 +236,16 @@ const NITRO = {
   'O=[N+]([O-])c1ccccc1': { ringSat: 'NC1CCCCC1' },
   'Cc1ccc(cc1)[N+](=O)[O-]': { ringSat: 'CC1CCC(N)CC1', moved: 'Cc1cccc(N)c1' },
   'Clc1ccc(cc1)[N+](=O)[O-]': { ringSat: 'NC1CCC(Cl)CC1', moved: 'Nc1cccc(Cl)c1' },
-  'Cc1cccc(c1)[N+](=O)[O-]': { ringSat: 'CC1CCCC(N)C1', moved: 'Cc1ccc(N)cc1' }
+  'Cc1cccc(c1)[N+](=O)[O-]': { ringSat: 'CC1CCCC(N)C1', moved: 'Cc1ccc(N)cc1' },
+  // widened pool (each ring-saturated and moved-NH2 answer is written by hand and parsed by the tests)
+  'Cc1ccccc1[N+](=O)[O-]': { ringSat: 'CC1CCCCC1N', moved: 'Cc1cccc(N)c1' },
+  'Brc1ccc(cc1)[N+](=O)[O-]': { ringSat: 'NC1CCC(Br)CC1', moved: 'Nc1cccc(Br)c1' },
+  'COc1ccc(cc1)[N+](=O)[O-]': { ringSat: 'COC1CCC(N)CC1', moved: 'COc1cccc(N)c1' },
+  'Clc1ccccc1[N+](=O)[O-]': { ringSat: 'NC1CCCCC1Cl', moved: 'Nc1cccc(Cl)c1' },
+  'CCc1ccc(cc1)[N+](=O)[O-]': { ringSat: 'CCC1CCC(N)CC1', moved: 'CCc1cccc(N)c1' },
+  'Fc1ccc(cc1)[N+](=O)[O-]': { ringSat: 'NC1CCC(F)CC1', moved: 'Nc1cccc(F)c1' },
+  'Brc1cccc(c1)[N+](=O)[O-]': { ringSat: 'NC1CCCC(Br)C1', moved: 'Nc1ccc(Br)cc1' },
+  'OC(=O)c1ccc(cc1)[N+](=O)[O-]': { ringSat: 'NC1CCC(CC1)C(=O)O', moved: 'Nc1cccc(c1)C(=O)O' }
 };
 function solveNitro(sub) {
   const prod = reduceNitro(sub);
@@ -250,7 +259,8 @@ function solveNitro(sub) {
 }
 
 /** H2, Pd/C (1 atm) on a ring with a C=C or C≡C in the side chain. */
-const HYD_RING_ONLY = { 'C=Cc1ccccc1': 'C=CC1CCCCC1', 'C#Cc1ccccc1': 'C#CC1CCCCC1', 'CC=Cc1ccccc1': 'CC=CC1CCCCC1', 'C=CCc1ccccc1': 'C=CCC1CCCCC1' };
+const HYD_RING_ONLY = { 'C=Cc1ccccc1': 'C=CC1CCCCC1', 'C#Cc1ccccc1': 'C#CC1CCCCC1', 'CC=Cc1ccccc1': 'CC=CC1CCCCC1', 'C=CCc1ccccc1': 'C=CCC1CCCCC1',
+  'C=CCCc1ccccc1': 'C=CCCC1CCCCC1', 'CC#Cc1ccccc1': 'CC#CC1CCCCC1', 'C=C(C)c1ccccc1': 'C=C(C)C1CCCCC1' };
 function solveSideH2(sub) {
   const r = hydrogenate(sub, 'H2_Pd');
   if (!r.ok || !r.reacts) throw new Error('excluded');
@@ -283,12 +293,37 @@ const halideLabel = (x) => ({ CBr: 'CH₃Br', CCBr: 'CH₃CH₂Br', CCCBr: 'CH�
 
 // ---------------------------------------------------------------- the drill: one entry per hub card. `ex` = index of the variant the hub card's own example uses.
 const V = (id, label, extra = {}) => ({ id, label, ...extra });
-const HX_POOL = ['CC=C', 'CC(C)=C', 'CCCC=C', 'CCC(C)=C', 'CC=C(C)C', 'CC1=CCCCC1'];
-const MONO_ANY = ['c1ccccc1', 'Cc1ccccc1', 'Clc1ccccc1', 'O=[N+]([O-])c1ccccc1', 'OC(=O)c1ccccc1', 'CCc1ccccc1'];
-const FC_RINGS = ['c1ccccc1', 'Cc1ccccc1', 'Clc1ccccc1', 'CCc1ccccc1', 'COc1ccccc1'];
+// The pools below were widened (Reaction modes, 2026-10): every substrate is accepted by the engines, and tests/predict.mjs and tests/reaction-modes.mjs
+// recompute each (substrate, reagent) pair with the engines and with Python RDKit. The first entries of each pool are the original ones.
+const uniq = (...lists) => [...new Set(lists.flat())];
+const HX_POOL = ['CC=C', 'CC(C)=C', 'CCCC=C', 'CCC(C)=C', 'CC=C(C)C', 'CC1=CCCCC1',
+  'C=C', 'CCC=C', 'CCCCC=C', 'CCCC(C)=C', 'CC(C)=C(C)C', 'CCC=C(C)C', 'CC=C(C)CC', 'C1=CCCC1', 'C1=CCCCC1', 'CC1=CCCC1', 'C=C1CCCC1', 'C=C1CCCCC1',
+  'CC(C)CC=C', 'CCCCCC=C', 'C1=CCCCCC1', 'CCC(=C)CC', 'CC1=CCCCCC1'];
+const DI_ACT_DEACT = ['Cc1cccc([N+](=O)[O-])c1', 'Cc1ccccc1[N+](=O)[O-]', 'Cc1cccc(C(=O)O)c1', 'Cc1ccccc1C(=O)O', 'Cc1cccc(C(C)=O)c1', 'Cc1ccccc1C(C)=O', 'Cc1cccc(C#N)c1', 'Cc1ccc(C=O)cc1', 'Cc1cccc(C=O)c1', 'Cc1ccc(S(=O)(=O)O)cc1',
+  'Oc1cccc([N+](=O)[O-])c1', 'Oc1ccccc1[N+](=O)[O-]', 'Oc1ccc(C(=O)O)cc1', 'Oc1ccc(C(C)=O)cc1', 'Oc1ccc(C#N)cc1', 'Oc1ccc(C=O)cc1',
+  'Cc1cccc(S(=O)(=O)O)c1', 'Cc1ccccc1S(=O)(=O)O', 'Oc1cccc(C(=O)O)c1', 'Oc1ccccc1C(=O)O', 'Oc1cccc(C(C)=O)c1', 'Oc1ccccc1C(C)=O'];
+const DI_HAL_ACT = ['Cc1cccc(Cl)c1', 'Cc1ccccc1Cl', 'Cc1cccc(Br)c1', 'Cc1ccccc1Br', 'Cc1cccc(F)c1', 'Cc1ccccc1F', 'Oc1cccc(Cl)c1', 'Oc1ccccc1Cl', 'Oc1ccc(F)cc1'];
+const DI_HAL_DEACT = ['Clc1ccccc1[N+](=O)[O-]', 'Brc1ccccc1[N+](=O)[O-]', 'Fc1ccc([N+](=O)[O-])cc1', 'Clc1ccc(C#N)cc1', 'Clc1ccc(C=O)cc1', 'Fc1ccc(C(C)=O)cc1', 'Brc1ccc(C(C)=O)cc1', 'Brc1ccc(C(=O)O)cc1', 'Clc1ccc(S(=O)(=O)O)cc1', 'Fc1ccc(C(=O)O)cc1', 'Fc1ccc(C#N)cc1'];
+const MONO_ANY = ['c1ccccc1', 'Cc1ccccc1', 'Clc1ccccc1', 'O=[N+]([O-])c1ccccc1', 'OC(=O)c1ccccc1', 'CCc1ccccc1',
+  'Brc1ccccc1', 'Fc1ccccc1', 'Ic1ccccc1', 'COc1ccccc1', 'Oc1ccccc1', 'CC(=O)c1ccccc1', 'O=Cc1ccccc1', 'N#Cc1ccccc1', 'CC(C)c1ccccc1', 'COC(=O)c1ccccc1', 'CC(=O)Nc1ccccc1', 'c1ccc(cc1)-c1ccccc1', 'Cc1ccc(C)cc1', 'Cc1ccc(Cl)cc1',
+  'COc1ccc(C)cc1', 'Oc1ccc(C)cc1', 'Cc1ccc([N+](=O)[O-])cc1', 'Clc1ccc([N+](=O)[O-])cc1', 'Oc1ccc(Cl)cc1', 'Brc1ccc(C)cc1', 'Cc1ccc(C(=O)O)cc1', 'Clc1ccc(C(=O)O)cc1',
+  ...DI_ACT_DEACT, ...DI_HAL_ACT, ...DI_HAL_DEACT];
+// rings with two groups (the engines weigh the two directors: they cooperate, or the stronger activator wins; ties that give a mixture of different directions are refused)
+const DI_ACT = ['Oc1ccc(C)cc1', 'Cc1ccccc1OC', 'Cc1cccc(C)c1', 'Oc1ccc(Cl)cc1', 'Oc1ccc(Br)cc1', 'Cc1ccc(Cl)cc1', 'Brc1ccc(C)cc1', 'Oc1ccc([N+](=O)[O-])cc1', 'Cc1ccc([N+](=O)[O-])cc1', 'Cc1ccc(C(=O)O)cc1', 'Cc1ccc(C(C)=O)cc1', 'Cc1ccc(C#N)cc1'];
+const DI_HAL = ['Cc1ccc(Cl)cc1', 'Oc1ccc(Cl)cc1', 'Oc1ccc(Br)cc1', 'Clc1ccc([N+](=O)[O-])cc1', 'Brc1ccc([N+](=O)[O-])cc1', 'Clc1ccc(C(=O)O)cc1', 'Clc1ccc(C(C)=O)cc1', 'Brc1ccc(C#N)cc1'];
+const DI_META = ['Brc1ccc([N+](=O)[O-])cc1', 'Clc1ccc(C(=O)O)cc1', 'Clc1ccc(C(C)=O)cc1', 'Brc1ccc(C#N)cc1', 'Cc1ccc(C(=O)O)cc1', 'Cc1ccc(C(C)=O)cc1', 'Cc1ccc(C#N)cc1', 'Oc1ccc([N+](=O)[O-])cc1', 'Fc1ccc(C=O)cc1', ...DI_ACT_DEACT, ...DI_HAL_DEACT];
+const AMINES_FREE = ['Nc1ccccc1', 'CNc1ccccc1', 'CN(C)c1ccccc1'];   // nitration and sulfonation protonate these (amine in acid): the engine refuses them
+const FC_RINGS = ['c1ccccc1', 'Cc1ccccc1', 'Clc1ccccc1', 'CCc1ccccc1', 'COc1ccccc1',
+  'Brc1ccccc1', 'Fc1ccccc1', 'Ic1ccccc1', 'CC(C)c1ccccc1', 'c1ccc(cc1)-c1ccccc1', 'CCOc1ccccc1', 'Cc1ccc(C)cc1', 'Cc1ccc(Cl)cc1', 'COc1ccc(C)cc1', 'Clc1ccc(Cl)cc1', 'Cc1ccc(F)cc1'];
 const ALKYNE_T = ['CC#C', 'CCC#C', 'CCCC#C', 'CCCCC#C'];
-const ALKYNE_X = ['CC#CC', 'CCC#CCC', 'CCCC#C', 'CCCCC#C', 'CCCC#CCCC'];
+const ALKYNE_TERM = uniq(ALKYNE_T, ['CCCCCC#C', 'CC(C)C#C', 'CC(C)CC#C', 'CC(C)(C)C#C', 'CCCCCCC#C', 'CC(C)CCC#C']);
+const ALKYNE_SYM = ['CC#CC', 'CCC#CCC', 'CCCC#CCCC', 'CCCCC#CCCCC', 'CC(C)C#CC(C)C'];
+const ALKYNE_UNSYM = ['CC#CCC', 'CC#CCCC', 'CCC#CCCC', 'CC#CC(C)C', 'CC#CCCCC', 'CCC#CC(C)C', 'CCCC#CC(C)C', 'CC#CCCCCC'];
+const ALKYNE_X = uniq(['CC#CC', 'CCC#CCC', 'CCCC#C', 'CCCCC#C', 'CCCC#CCCC'], ALKYNE_TERM, ALKYNE_SYM, ALKYNE_UNSYM);
 const STEREO_RING = ['C1=CCCC1', 'C1=CCCCC1', 'CC1=CCCCC1', 'C/C=C/C', 'C/C=C\\C', 'C/C=C/CC'];
+// alkenes for the six stereo-aware cards (rings, E and Z, terminal and branched)
+const STEREO_POOL = uniq(STEREO_RING, ['C1=CCCCCC1', 'CC1=C(C)CCCC1', 'CC1=C(C)CCC1', 'CC1=CCCC1', 'C/C=C\\CC', 'CC/C=C/CC', 'CC/C=C\\CC', 'CC=C', 'CC(C)=C', 'C=C', 'CC=C(C)C', 'CCCC=C', 'C=C1CCCCC1',
+  'C/C=C/C(C)C', 'C/C=C\\C(C)C', 'CC/C=C/CCC', 'CC/C=C\\CCC', 'CCCCCC=C', 'CC(C)CC=C']);
 
 // ---------------------------------------------------------------- fixed-answer cards (workbook B3.1): no engine model, so the right answer is the hub card's own example
 // (card.example, then card.example2), read from the hub so the fact lives once. The wrong answers are typed here, each tagged with the fact it misses.
@@ -412,34 +447,34 @@ export const DRILL = {
   'eas-bromination': { fam: 'arene', subs: MONO_ANY, variants: [V('Br2', ''), V('Cl2', '')], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
   'eas-nitration': { fam: 'arene', subs: MONO_ANY, variants: [V('HNO3', '')], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
   'eas-sulfonation': { fam: 'arene', subs: MONO_ANY, variants: [V('SO3', '')], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
-  'fc-alkylation': { fam: 'arene', subs: FC_RINGS, variants: [V('RCl', '', { halide: 'CCCl' }), V('RCl', '', { halide: 'CCl' }), V('RCl', '', { halide: 'CC(C)Cl' }), V('RCl', '', { halide: 'CC(C)(C)Cl' })], ex: 0, solve: (s, v, rng) => solveFC(s, v, rng) },
-  'fc-acylation': { fam: 'arene', subs: FC_RINGS, variants: [V('RCOCl', '', { halide: 'CC(=O)Cl' }), V('RCOCl', '', { halide: 'CCC(=O)Cl' })], ex: 0, solve: (s, v, rng) => solveFC(s, v, rng) },
-  'director-activating': { fam: 'arene', subs: ['Cc1ccccc1', 'Oc1ccccc1', 'CCc1ccccc1', 'COc1ccccc1', 'Nc1ccccc1'], variants: [V('HNO3', '', { skip: ['Nc1ccccc1'] }), V('Br2', ''), V('Cl2', ''), V('SO3', '', { skip: ['Nc1ccccc1'] })], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
-  'director-halogen': { fam: 'arene', subs: ['Clc1ccccc1', 'Brc1ccccc1', 'Fc1ccccc1'], variants: [V('HNO3', ''), V('Br2', ''), V('Cl2', ''), V('SO3', '')], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
-  'director-meta': { fam: 'arene', subs: ['O=[N+]([O-])c1ccccc1', 'OC(=O)c1ccccc1', 'CC(=O)c1ccccc1', 'N#Cc1ccccc1', 'O=Cc1ccccc1', 'OS(=O)(=O)c1ccccc1'], variants: [V('Br2', ''), V('Cl2', ''), V('HNO3', ''), V('SO3', '')], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
-  'side-chain-kmno4': { fam: 'arene', subs: ['Cc1ccccc1', 'CCc1ccccc1', 'CC(C)c1ccccc1', 'CC(C)(C)c1ccccc1', 'Cc1ccc(Cl)cc1', 'Cc1ccc(cc1)[N+](=O)[O-]'], variants: [V('KMnO4', 'KMnO₄, H₂O (heat)')], ex: 0, solve: (s) => solveSideOx(s) },
+  'fc-alkylation': { fam: 'arene', subs: FC_RINGS, variants: [V('RCl', '', { halide: 'CCCl' }), V('RCl', '', { halide: 'CCl' }), V('RCl', '', { halide: 'CC(C)Cl' }), V('RCl', '', { halide: 'CC(C)(C)Cl' }), V('RCl', '', { halide: 'ClC1CCCCC1' })], ex: 0, solve: (s, v, rng) => solveFC(s, v, rng) },
+  'fc-acylation': { fam: 'arene', subs: FC_RINGS, variants: [V('RCOCl', '', { halide: 'CC(=O)Cl' }), V('RCOCl', '', { halide: 'CCC(=O)Cl' }), V('RCOCl', '', { halide: 'CCCC(=O)Cl' })], ex: 0, solve: (s, v, rng) => solveFC(s, v, rng) },
+  'director-activating': { fam: 'arene', subs: ['Cc1ccccc1', 'Oc1ccccc1', 'CCc1ccccc1', 'COc1ccccc1', 'Nc1ccccc1', 'CC(C)c1ccccc1', 'CCOc1ccccc1', 'CC(=O)Nc1ccccc1', 'c1ccc(cc1)-c1ccccc1', 'CNc1ccccc1', 'CN(C)c1ccccc1', 'Cc1ccc(C)cc1', 'COc1ccc(C)cc1', ...DI_ACT, ...DI_ACT_DEACT, ...DI_HAL_ACT], variants: [V('HNO3', '', { skip: AMINES_FREE }), V('Br2', ''), V('Cl2', ''), V('SO3', '', { skip: AMINES_FREE })], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
+  'director-halogen': { fam: 'arene', subs: ['Clc1ccccc1', 'Brc1ccccc1', 'Fc1ccccc1', 'Ic1ccccc1', 'Clc1ccc(Cl)cc1', 'Brc1ccc(Br)cc1', 'Fc1ccc(F)cc1', 'Brc1ccc(C)cc1', 'Cc1ccc(F)cc1', 'COc1ccc(Cl)cc1', 'COc1ccc(Br)cc1', ...DI_HAL, ...DI_HAL_ACT, ...DI_HAL_DEACT], variants: [V('HNO3', ''), V('Br2', ''), V('Cl2', ''), V('SO3', '')], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
+  'director-meta': { fam: 'arene', subs: ['O=[N+]([O-])c1ccccc1', 'OC(=O)c1ccccc1', 'CC(=O)c1ccccc1', 'N#Cc1ccccc1', 'O=Cc1ccccc1', 'OS(=O)(=O)c1ccccc1', 'COC(=O)c1ccccc1', 'Clc1ccc(cc1)[N+](=O)[O-]', 'Cc1ccc(cc1)[N+](=O)[O-]', ...DI_META], variants: [V('Br2', ''), V('Cl2', ''), V('HNO3', ''), V('SO3', '')], ex: 0, solve: (s, v, rng) => solveArene(s, v, rng) },
+  'side-chain-kmno4': { fam: 'arene', subs: ['Cc1ccccc1', 'CCc1ccccc1', 'CC(C)c1ccccc1', 'CC(C)(C)c1ccccc1', 'Cc1ccc(Cl)cc1', 'Cc1ccc(cc1)[N+](=O)[O-]', 'CCCc1ccccc1', 'CCCCc1ccccc1', 'Cc1ccc(C)cc1', 'Cc1ccc(Br)cc1', 'Cc1cccc(c1)[N+](=O)[O-]', 'Cc1ccccc1C', 'CCc1ccc(Cl)cc1', 'Cc1ccc(F)cc1'], variants: [V('KMnO4', 'KMnO₄, H₂O (heat)')], ex: 0, solve: (s) => solveSideOx(s) },
   'nitro-reduction': { fam: 'arene', subs: Object.keys(NITRO), variants: [V('Fe', 'Fe, H₃O⁺, then HO⁻')], ex: 0, solve: (s) => solveNitro(s) },
-  'side-chain-h2pd': { fam: 'arene', subs: ['C=Cc1ccccc1', 'C#Cc1ccccc1', 'CC=Cc1ccccc1', 'C=CCc1ccccc1'], variants: [V('H2', 'H₂, Pd/C (1 atm)')], ex: 0, solve: (s) => solveSideH2(s) },
+  'side-chain-h2pd': { fam: 'arene', subs: ['C=Cc1ccccc1', 'C#Cc1ccccc1', 'CC=Cc1ccccc1', 'C=CCc1ccccc1', 'C=CCCc1ccccc1', 'CC#Cc1ccccc1', 'C=C(C)c1ccccc1'], variants: [V('H2', 'H₂, Pd/C (1 atm)')], ex: 0, solve: (s) => solveSideH2(s) },
 
   'alkene-hx': { fam: 'alkene', subs: HX_POOL, variants: [V('HBr', 'HBr'), V('HCl', 'HCl')], ex: 0, solve: (s, v) => solveHX(s, v) },
   'alkene-hydration': { fam: 'alkene', subs: HX_POOL, variants: [V('H2O', 'H₂O, H₂SO₄ (cat.)')], ex: 0, solve: (s, v) => solveHX(s, v) },
-  'alkene-x2': { fam: 'alkene', subs: STEREO_RING, variants: [V('Br2', 'Br₂, CH₂Cl₂'), V('Cl2', 'Cl₂, CH₂Cl₂')], ex: 0, solve: (s, v) => solveAdd(s, v) },
-  'alkene-h2-pd': { fam: 'alkene', subs: ['CC1=C(C)CCCC1', 'CC1=C(C)CCC1', 'CC1=CCCCC1', 'CCCCC=C', 'C/C=C/C'], variants: [V('H2', 'H₂, Pd/C')], ex: 0, solve: (s, v) => solveAdd(s, v) },
-  'alkene-kmno4-base': { fam: 'alkene', subs: ['C1=CCCCC1', 'C1=CCCC1', 'CC1=CCCCC1', 'C/C=C/C', 'C/C=C\\C', 'CC=C(C)C'], variants: [V('KMnO4_OH', 'KMnO₄, OH⁻, H₂O')], ex: 0, solve: (s, v) => solveAdd(s, v) },
-  'alkene-kmno4-acid': { fam: 'alkene', subs: ['CC=C(C)C', 'CCCCC=C', 'C1=CCCCC1', 'CC1=CCCCC1', 'CC=C', 'CC/C=C/CC'], variants: [V('KMnO4_H', 'KMnO₄, H₃O⁺')], ex: 0, solve: (s, v) => solveAdd(s, v) },
-  'alkene-epoxide': { fam: 'alkene', subs: ['C/C=C/CC', 'C/C=C/C', 'C/C=C\\C', 'C1=CCCCC1', 'CC1=CCCCC1', 'CC=C(C)C'], variants: [V('RCO3H', 'RCO₃H (e.g. mCPBA)')], ex: 0, solve: (s, v) => solveAdd(s, v) },
-  'alkene-epoxide-diol': { fam: 'alkene', subs: ['C1=CCCCC1', 'C1=CCCC1', 'C/C=C/C', 'C/C=C\\C', 'CC1=CCCCC1'], variants: [V('RCO3H_H3O', 'RCO₃H, then H₃O⁺')], ex: 0, solve: (s, v) => solveAdd(s, v) },
+  'alkene-x2': { fam: 'alkene', subs: STEREO_POOL,variants: [V('Br2', 'Br₂, CH₂Cl₂'), V('Cl2', 'Cl₂, CH₂Cl₂')], ex: 0, solve: (s, v) => solveAdd(s, v) },
+  'alkene-h2-pd': { fam: 'alkene', subs: uniq(['CC1=C(C)CCCC1', 'CC1=C(C)CCC1', 'CC1=CCCCC1', 'CCCCC=C', 'C/C=C/C'], STEREO_POOL), variants: [V('H2', 'H₂, Pd/C')], ex: 0, solve: (s, v) => solveAdd(s, v) },
+  'alkene-kmno4-base': { fam: 'alkene', subs: uniq(['C1=CCCCC1', 'C1=CCCC1', 'CC1=CCCCC1', 'C/C=C/C', 'C/C=C\\C', 'CC=C(C)C'], STEREO_POOL), variants: [V('KMnO4_OH', 'KMnO₄, OH⁻, H₂O')], ex: 0, solve: (s, v) => solveAdd(s, v) },
+  'alkene-kmno4-acid': { fam: 'alkene', subs: uniq(['CC=C(C)C', 'CCCCC=C', 'C1=CCCCC1', 'CC1=CCCCC1', 'CC=C', 'CC/C=C/CC'], STEREO_POOL), variants: [V('KMnO4_H', 'KMnO₄, H₃O⁺')], ex: 0, solve: (s, v) => solveAdd(s, v) },
+  'alkene-epoxide': { fam: 'alkene', subs: uniq(['C/C=C/CC', 'C/C=C/C', 'C/C=C\\C', 'C1=CCCCC1', 'CC1=CCCCC1', 'CC=C(C)C'], STEREO_POOL), variants: [V('RCO3H', 'RCO₃H (e.g. mCPBA)')], ex: 0, solve: (s, v) => solveAdd(s, v) },
+  'alkene-epoxide-diol': { fam: 'alkene', subs: uniq(['C1=CCCCC1', 'C1=CCCC1', 'C/C=C/C', 'C/C=C\\C', 'CC1=CCCCC1'], STEREO_POOL), variants: [V('RCO3H_H3O', 'RCO₃H, then H₃O⁺')], ex: 0, solve: (s, v) => solveAdd(s, v) },
 
-  'alkyne-hx-1': { fam: 'alkyne', subs: ALKYNE_T.concat(['CCC#CCC']), variants: [V('HBr_1', ALKYNE_RXN.HBr_1.label), V('HCl_1', ALKYNE_RXN.HCl_1.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
-  'alkyne-hx-2': { fam: 'alkyne', subs: ALKYNE_T.concat(['CCC#CCC']), variants: [V('HBr_2', ALKYNE_RXN.HBr_2.label), V('HCl_2', ALKYNE_RXN.HCl_2.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
+  'alkyne-hx-1': { fam: 'alkyne', subs: uniq(ALKYNE_T, ['CCC#CCC'], ALKYNE_TERM, ALKYNE_SYM),variants: [V('HBr_1', ALKYNE_RXN.HBr_1.label), V('HCl_1', ALKYNE_RXN.HCl_1.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
+  'alkyne-hx-2': { fam: 'alkyne', subs: uniq(ALKYNE_T, ['CCC#CCC'], ALKYNE_TERM, ALKYNE_SYM),variants: [V('HBr_2', ALKYNE_RXN.HBr_2.label), V('HCl_2', ALKYNE_RXN.HCl_2.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
   'alkyne-x2-1': { fam: 'alkyne', subs: ALKYNE_X, variants: [V('Br2_1', ALKYNE_RXN.Br2_1.label), V('Cl2_1', ALKYNE_RXN.Cl2_1.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
   'alkyne-x2-2': { fam: 'alkyne', subs: ALKYNE_X, variants: [V('Br2_2', ALKYNE_RXN.Br2_2.label), V('Cl2_2', ALKYNE_RXN.Cl2_2.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
-  'alkyne-hydration': { fam: 'alkyne', subs: ['CC#C', 'CCC#C', 'CCCC#C', 'CCCCC#C', 'CCC#CCC', 'CC#CC'], variants: [V('H2O_Hg', ALKYNE_RXN.H2O_Hg.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
-  'alkyne-lindlar': { fam: 'alkyne', subs: ['CC#CC', 'CCC#CCC', 'CCCC#CCCC', 'CC#CCC', 'CCCC#C'], variants: [V('H2_Lindlar', ALKYNE_RXN.H2_Lindlar.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
-  'alkyne-h2-pd': { fam: 'alkyne', subs: ['CC#CC', 'CCCC#C', 'CCC#CCC', 'CCCC#CCCC'], variants: [V('H2_Pd', ALKYNE_RXN.H2_Pd.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
-  'alkyne-acetylide': { fam: 'alkyne', subs: ['CC#C', 'CCC#C', 'CCCC#C'], variants: [V('acetylide', '', { halide: 'CCBr' }), V('acetylide', '', { halide: 'CBr' }), V('acetylide', '', { halide: 'CCCBr' })], ex: 0, solve: (s, v) => solveAcetylide(s, v) },
+  'alkyne-hydration': { fam: 'alkyne', subs: uniq(['CC#C', 'CCC#C', 'CCCC#C', 'CCCCC#C', 'CCC#CCC', 'CC#CC'], ALKYNE_TERM, ALKYNE_SYM), variants: [V('H2O_Hg', ALKYNE_RXN.H2O_Hg.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
+  'alkyne-lindlar': { fam: 'alkyne', subs: uniq(['CC#CC', 'CCC#CCC', 'CCCC#CCCC', 'CC#CCC', 'CCCC#C'], ALKYNE_SYM, ALKYNE_UNSYM, ALKYNE_TERM), variants: [V('H2_Lindlar', ALKYNE_RXN.H2_Lindlar.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
+  'alkyne-h2-pd': { fam: 'alkyne', subs: uniq(['CC#CC', 'CCCC#C', 'CCC#CCC', 'CCCC#CCCC'], ALKYNE_SYM, ALKYNE_UNSYM, ALKYNE_TERM), variants: [V('H2_Pd', ALKYNE_RXN.H2_Pd.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
+  'alkyne-acetylide': { fam: 'alkyne', subs: ALKYNE_TERM,variants: [V('acetylide', '', { halide: 'CCBr' }), V('acetylide', '', { halide: 'CBr' }), V('acetylide', '', { halide: 'CCCBr' })], ex: 0, solve: (s, v) => solveAcetylide(s, v) },
 
-  'diene-hx': { fam: 'diene', subs: ['C=CC=C', 'CC=CC=C', 'C=C(C)C=C', 'C1=CC=CCC1', 'C1=CC=CC1'], variants: [V('HBr', 'HBr'), V('HCl', 'HCl')], ex: 0, solve: (s, v) => solveDiene(s, v) }
+  'diene-hx': { fam: 'diene', subs: ['C=CC=C', 'CC=CC=C', 'C=C(C)C=C', 'C1=CC=CCC1', 'C1=CC=CC1', 'CC=CC=CC', 'CC(C)=CC=C', 'C=C(C)C(C)=C'], variants: [V('HBr', 'HBr'), V('HCl', 'HCl')], ex: 0, solve: (s, v) => solveDiene(s, v) }
 };
 // the ten workbook B3.1 cards: fixed answers (see FIXED above)
 for (const id of Object.keys(FIXED)) DRILL[id] = fixedEntry(id);

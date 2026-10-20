@@ -4,6 +4,8 @@ import * as store from './engine/store.js';
 import { generatorForSkill } from './engine/generators.js';
 import { renderStep, renderProblems, h, rich, setIupacMode, closeMolTags } from './engine/steps.js';
 import { skillLabel } from './engine/skills.js';
+import { MODE_IDS, MODE_INFO, MODE_COUNTS, setModeCard } from './engine/generators-reaction-modes.js';
+import { HUB_BY_ID } from './engine/reaction-hub.js';
 import { LESSONS, PLANNED } from './lessons/index.js';
 import { buildHub } from './hub-view.js';
 import { buildPastpaper } from './pastpaper-view.js';
@@ -134,6 +136,7 @@ function home() {
     h('p', { class: 'muted' }, 'Every reagent on one card: what it does, a worked example, three facts and how to answer the exam question.'),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'open-reactions' }, 'Open the reaction cards'),
       h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'open-drill' }, 'Drill: predict the product'),
+      h('a', { class: 'btn ghost', href: '#reactions-practice', id: 'open-reaction-modes' }, 'Reaction modes: five ways to practise'),
       h('a', { class: 'btn ghost', href: '#lesson-17', id: 'open-lesson-17' }, 'Lesson 17: Predict the product')));
   const pp = h('section', { class: 'panel', 'aria-labelledby': 'pp-h' }, h('h2', { id: 'pp-h' }, 'Past papers'),
     h('p', { class: 'muted' }, 'The midterm questions by topic: what each one asks, the steps to answer it, and where to learn it.'),
@@ -274,8 +277,9 @@ function lessonView(L, startId) {
   show();
 }
 
-function practice(skill) {
-  setDrawStyle(['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships', 'predict-product'].includes(generatorForSkill(skill)) ? 'skeletal' : 'full');
+function practice(skill, cardId = null) {
+  if (MODE_IDS.includes(skill)) setModeCard(cardId && HUB_BY_ID[cardId] ? cardId : null);
+  setDrawStyle((['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships', 'predict-product'].includes(generatorForSkill(skill)) || MODE_IDS.includes(generatorForSkill(skill))) ? 'skeletal' : 'full');
   const host = h('div', { class: 'step' });
   const card = h('article', { class: 'card' }, host);
   const ctx = {
@@ -284,7 +288,7 @@ function practice(skill) {
     win: (sk) => store.logWin(sk),
     done: () => host.append(h('a', { class: 'btn primary', href: '#home' }, 'Back to home'))
   };
-  mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Practise: ' + skillLabel(skill))), card);
+  mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: MODE_IDS.includes(skill) ? '#reactions-practice' : '#home' }, MODE_IDS.includes(skill) ? '← Reaction modes' : '← Home'), h('h1', { class: 'ltitle' }, 'Practise: ' + skillLabel(skill)), cardId && HUB_BY_ID[cardId] ? h('p', { class: 'muted small', id: 'practice-card' }, 'Only this reagent: ' + HUB_BY_ID[cardId].reagent) : null), card);
   chemP.then(() => { renderProblems({ count: 3, generator: generatorForSkill(skill), skill }, ctx, host); setIupacMode(store.getIupac()); });
 }
 
@@ -294,6 +298,17 @@ function hub(anchor) {
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Reactions'),
     h('p', { class: 'lede' }, 'One card for each reagent. Read the three facts, look at the example, then use the steps on a question.'),
     h('a', { class: 'btn primary', href: '#practise-predict-product', id: 'drill-predict' }, 'Drill: predict the product')), buildHub(chemP, anchor));
+}
+
+// ---------------------------------------------------------------- Reaction modes (landing page of the five practice modes)
+function reactionsPractice() {
+  setDrawStyle('skeletal');
+  const modes = MODE_IDS.map((id) => h('a', { class: 'rm-mode', href: '#practise-' + id, id: 'rm-' + id },
+    h('span', { class: 'rm-count' }, `${MODE_COUNTS[id]} problems`), h('b', {}, MODE_INFO[id].label), h('span', { class: 'muted small' }, MODE_INFO[id].blurb)));
+  mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Reaction modes'),
+    h('p', { class: 'lede' }, 'Five ways to practise the reagent cards. Every product is worked out by the same engines as the lessons; each wrong answer tells you the fact it misses.'),
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn ghost', href: '#reactions', id: 'rm-cards' }, 'Open the reaction cards'), h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'rm-predict' }, 'Drill: predict the product'))),
+    h('div', { class: 'rm-grid' }, modes));
 }
 
 // ---------------------------------------------------------------- Past papers
@@ -321,6 +336,8 @@ function route() {
   if (hash === 'reactions') return hub();
   if ((m = /^reactions\/([a-z0-9-]+)$/.exec(hash))) return hub(m[1]);
   if (hash === 'pastpaper') return pastpaper();
+  if (hash === 'reactions-practice') return reactionsPractice();
+  if ((m = /^practise-guess-reagent\/([a-z0-9-]+)$/.exec(hash))) return practice('guess-reagent', m[1]);
   if (hash === 'glossary') return glossary();
   if ((m = /^practise-([a-z0-9-]+)$/.exec(hash))) return practice(m[1]);
   home();

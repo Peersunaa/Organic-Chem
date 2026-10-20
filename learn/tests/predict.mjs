@@ -85,7 +85,11 @@ export async function predict({ ok, eq }) {
     const e = DRILL[id];
     if (e.fixed) {   // fixed-answer card: one substrate per hub example
       eq(e.subs, [HUB_BY_ID[id].example, HUB_BY_ID[id].example2].filter(Boolean).map((x) => x.substrate), `${id}: fixed entry has one substrate per hub example`);
-    } else ok(e.subs.length >= 3 && e.subs.length <= 6, `${id}: 3 to 6 substrates (${e.subs.length})`);
+      ok(new Set(e.subs.map((x) => canon(x))).size === e.subs.length, `${id}: no substrate listed twice`);
+    } else {
+      ok(new Set(e.subs.map((x) => canon(x))).size === e.subs.length, `${id}: no substrate listed twice (as different SMILES of one compound)`);
+      ok(e.subs.length >= 3 && e.subs.length <= 80, `${id}: 3 to 80 substrates (${e.subs.length}; the pools were widened for the reaction modes)`);
+    }
   }
   eq(DRILL_IDS.filter((id) => DRILL[id].fixed).sort(), ['alkene-hydroboration', 'alkyne-hydroboration', 'amine-in-acid', 'benzylic-bromination', 'birch', 'clemmensen', 'desulfonation', 'diels-alder', 'oxidation-cr', 'oxidation-pcc'], 'the ten B3.1 cards are the fixed-answer drill entries');
   const app = fs.readFileSync(path.join(HERE, '..', 'app.js'), 'utf8');
