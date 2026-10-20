@@ -5,7 +5,9 @@ import { generatorForSkill } from './engine/generators.js';
 import { practiceConfig } from './engine/naming-custom.js';
 import { renderStep, renderProblems, h, rich, setIupacMode, closeMolTags } from './engine/steps.js';
 import { skillLabel } from './engine/skills.js';
-import { MODE_IDS, MODE_INFO, MODE_COUNTS, setModeCard } from './engine/generators-reaction-modes.js';
+import { MODE_IDS, MODE_INFO, setModeCard } from './engine/generators-reaction-modes.js';
+import * as RX from './engine/reactions-custom.js';
+import { reactionSettingsCard } from './reactions-settings-view.js';
 import { HUB_BY_ID } from './engine/reaction-hub.js';
 import { LESSONS, PLANNED } from './lessons/index.js';
 import { buildHub } from './hub-view.js';
@@ -287,18 +289,25 @@ function lessonView(L, startId) {
 
 function practice(skill, cardId = null) {
   if (MODE_IDS.includes(skill)) setModeCard(cardId && HUB_BY_ID[cardId] ? cardId : null);
-  setDrawStyle((['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships', 'predict-product'].includes(generatorForSkill(skill)) || generatorForSkill(skill) === 'huckel' || MODE_IDS.includes(generatorForSkill(skill))) ? 'skeletal' : 'full');
+  const rxPage = RX.PRACTICE_MODES.includes(skill) || skill === RX.MIX_ID;   // a reaction practice page: it has the settings card (except the one limited to a hub card)
+  const rxLimited = rxPage && !!(cardId && HUB_BY_ID[cardId] && skill === 'guess-reagent');
+  if (rxPage && !rxLimited) RX.beginReactionSession(); else RX.endReactionSession();
+  setDrawStyle((['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships', 'predict-product'].includes(generatorForSkill(skill)) || generatorForSkill(skill) === 'huckel' || MODE_IDS.includes(generatorForSkill(skill)) || rxPage) ? 'skeletal' : 'full');
   const host = h('div', { class: 'step' });
   const card = h('article', { class: 'card' }, host);
   const ctx = {
     lessonId: 'practice',
-    mistake: (sk, stepId, diagnosis) => logSlip({ skill: sk, stepId, lessonId: 'practice', diagnosis }),
-    win: (sk) => store.logWin(sk),
-    done: () => host.append(h('a', { class: 'btn primary', href: '#home' }, 'Back to home'))
+    mistake: (sk, stepId, diagnosis, card) => logSlip({ skill: sk, stepId, lessonId: 'practice', diagnosis, card }),
+    win: (sk, card) => store.logWin(sk, card),
+    done: () => host.append(h('a', { class: 'btn primary', href: rxPage ? '#reactions-practice' : '#home' }, rxPage ? 'Back to reaction modes' : 'Back to home'))
   };
-  mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: MODE_IDS.includes(skill) ? '#reactions-practice' : '#home' }, MODE_IDS.includes(skill) ? '← Reaction modes' : '← Home'), h('h1', { class: 'ltitle' }, 'Practise: ' + skillLabel(skill)), cardId && HUB_BY_ID[cardId] ? h('p', { class: 'muted small', id: 'practice-card' }, 'Only this reagent: ' + HUB_BY_ID[cardId].reagent) : null), card);
-  const pc = skill === 'naming-levels' ? practiceConfig() : { count: 3, timer: 0 };   // the naming drill's settings choose the count and the timer
-  chemP.then(() => { renderProblems({ count: pc.count, timer: pc.timer, generator: generatorForSkill(skill), skill }, ctx, host); setIupacMode(store.getIupac()); });
+  const again = () => window.dispatchEvent(new Event('hashchange'));   // Start: this page again, with the settings now in force
+  const toMix = () => { if (location.hash === '#practise-' + RX.MIX_ID) again(); else location.hash = '#practise-' + RX.MIX_ID; };
+  const rxCard = rxPage && !rxLimited ? reactionSettingsCard({ where: skill === RX.MIX_ID ? 'mix' : 'practice', playId: skill, onStart: again, onStartMix: toMix }) : null;
+  const title = skill === RX.MIX_ID ? 'Mixed reaction session' : skillLabel(skill);
+  mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: rxPage ? '#reactions-practice' : '#home' }, rxPage ? '← Reaction modes' : '← Home'), h('h1', { class: 'ltitle' }, 'Practise: ' + title), cardId && HUB_BY_ID[cardId] ? h('p', { class: 'muted small', id: 'practice-card' }, 'Only this reagent: ' + HUB_BY_ID[cardId].reagent) : null, rxLimited ? h('p', { class: 'muted small' }, h('a', { href: '#practise-guess-reagent' }, 'Practise every reagent, with the settings')) : null), rxCard, card);
+  const pc = skill === 'naming-levels' ? practiceConfig() : rxPage && !rxLimited ? RX.practiceConfig() : { count: 3, timer: 0 };   // the naming drill's and the reaction pages' settings choose the count and the timer
+  chemP.then(() => { renderProblems({ count: pc.count, endless: pc.endless, timer: pc.timer, generator: generatorForSkill(skill), skill }, ctx, host); setIupacMode(store.getIupac()); });
 }
 
 // ---------------------------------------------------------------- Reaction hub
@@ -309,15 +318,20 @@ function hub(anchor) {
     h('a', { class: 'btn primary', href: '#practise-predict-product', id: 'drill-predict' }, 'Drill: predict the product')), buildHub(chemP, anchor));
 }
 
-// ---------------------------------------------------------------- Reaction modes (landing page of the five practice modes)
+// ---------------------------------------------------------------- Reaction modes (landing page of the six practice modes, with their settings)
 function reactionsPractice() {
   setDrawStyle('skeletal');
-  const modes = MODE_IDS.map((id) => h('a', { class: 'rm-mode', href: '#practise-' + id, id: 'rm-' + id },
-    h('span', { class: 'rm-count' }, `${MODE_COUNTS[id]} problems`), h('b', {}, MODE_INFO[id].label), h('span', { class: 'muted small' }, MODE_INFO[id].blurb)));
+  const info = (id) => MODE_INFO[id] || { label: RX.PRACTICE_LABEL[id], blurb: RX.PRACTICE_BLURB[id] };
+  const counts = RX.reactionCounts();
+  const countText = (n) => (n ? `${n.toLocaleString('en')} problem${n === 1 ? '' : 's'}` : 'None for these settings');
+  const modes = RX.PRACTICE_MODES.map((id) => h('a', { class: 'rm-mode' + (counts[id] ? '' : ' rm-zero'), href: '#practise-' + id, id: 'rm-' + id, 'data-mode': id },
+    h('span', { class: 'rm-count', 'aria-live': 'polite' }, countText(counts[id])), h('b', {}, info(id).label), h('span', { class: 'muted small' }, info(id).blurb)));
+  const refresh = (S) => { const c = RX.reactionCounts(S); modes.forEach((a) => { const n = c[a.dataset.mode]; a.classList.toggle('rm-zero', !n); a.firstChild.textContent = countText(n); }); };
+  const card = reactionSettingsCard({ where: 'landing', playId: RX.MIX_ID, onChange: refresh, onStartMix: () => { location.hash = '#practise-' + RX.MIX_ID; } });
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Reaction modes'),
-    h('p', { class: 'lede' }, 'Five ways to practise the reagent cards. Every product is worked out by the same engines as the lessons; each wrong answer tells you the fact it misses.'),
+    h('p', { class: 'lede' }, 'Six ways to practise the reagent cards. Every product is worked out by the same engines as the lessons; each wrong answer tells you the fact it misses.'),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn ghost', href: '#reactions', id: 'rm-cards' }, 'Open the reaction cards'), h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'rm-predict' }, 'Drill: predict the product'))),
-    h('div', { class: 'rm-grid' }, modes));
+    card, h('div', { class: 'rm-grid' }, modes));
 }
 
 // ---------------------------------------------------------------- Past papers

@@ -754,6 +754,22 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 .rm-mode b { font-size: 1.0625rem; line-height: 1.4; }
 .rm-count { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--accent); }
 @media (min-width: 640px) { .rm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* reaction settings card: the naming card's chips, plus the grouped card chooser, a count line on each mode tile and the notice */
+.rs-card .nl-chip { min-width: 0; overflow-wrap: anywhere; }
+.rs-cardstoggle { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--s-3); width: 100%; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--ink); font: inherit; text-align: left; cursor: pointer; touch-action: manipulation; }
+.rs-cardstoggle:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: var(--focus-off); border-radius: var(--r-sm); }
+.rs-cardstoggle[aria-expanded="true"] .nl-chev { transform: translateY(2px) rotate(-135deg); }
+.rs-cards { display: grid; gap: var(--s-3); min-width: 0; padding: var(--s-3); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-2); }
+.rs-cards[hidden] { display: none; }
+.rs-glabel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.rs-gbtns { display: inline-flex; gap: var(--s-2); }
+.rs-mini { min-height: 36px; min-width: 52px; padding: 0 var(--s-3); border-radius: var(--r-md); border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: 0; text-transform: none; cursor: pointer; touch-action: manipulation; }
+.rs-mini:hover { border-color: var(--accent-line); background: var(--surface-2); }
+.rs-mini:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: var(--focus-off); }
+.rs-card .btn[disabled] { opacity: .5; cursor: not-allowed; }
+.rm-zero .rm-count { color: var(--muted); }
+.rs-end { justify-self: start; margin-top: var(--s-2); }
+@media (prefers-reduced-motion: reduce) { .rs-cardstoggle .nl-chev { transition: none; } }
 .hub-jumprow { display: flex; gap: var(--s-2); align-items: stretch; min-width: 0; } .hub-jumprow .hub-q { flex: 1 1 0; min-width: 0; } .hub-practise { flex: none; }
 /* home panels + drill option cards (new screens, same card rhythm as the lessons) */
 .side .panel { padding: var(--s-4); box-shadow: var(--elev-1); }

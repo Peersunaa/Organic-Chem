@@ -663,6 +663,8 @@ let lastKey = null;
 let modeCard = null;
 /** Limit the "which reagent?" mode to one reaction-hub card (the hub's "Practise this reagent" button); null = every card. */
 export function setModeCard(cardId) { modeCard = cardId && GUESS_REAGENT_CARDS.includes(cardId) ? cardId : null; }
+/** The card the "which reagent?" mode is limited to right now (null = none): the practice settings step aside while one is set. */
+export const getModeCard = () => modeCard;
 function randomCombo(rng, cards) {
   for (let t = 0; t < 400; t++) {
     const cardId = pick(rng, cards), e = DRILL[cardId];

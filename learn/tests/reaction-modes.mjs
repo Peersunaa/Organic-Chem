@@ -8,7 +8,8 @@
 //  (5) stereo-outcome: the label of the engine product (stereocentres, meso, racemic, one C=C geometry, cis/trans) is read back in Python RDKit (centres, achiral, E/Z, ring cis/trans in 3D);
 //  (6) two-step: the right pair composes the engines to the shown final product; every wrong pair is run on the engines and either fails at a step or ends at a different compound;
 //  (7) wont-work: 15 to 25 curated cases; every option of every case is checked with the engine (or the hub card) that the case names; problems take 3 that work and 1 that fails;
-//  (8) the counts: how many problems each mode can make, and the distinct (substrate, reagent, product) triples; MODE_COUNTS must equal them.
+//  (8) the counts: how many problems each mode can make, and the distinct (substrate, reagent, product) triples; MODE_COUNTS must equal them;
+//  (9) the settings of the six reaction practice pages (reactionSettings below): static pools equal the builders, 120 seeded settings combinations, relaxation, presets, mixed sessions, live counts.
 // Run on its own with `node learn/tests/reaction-modes.mjs`, or as part of run.mjs.
 import { ready, canon, rdkit, analyze } from '../engine/chem.js';
 import { execFileSync } from 'node:child_process';
@@ -18,7 +19,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { HUB_BY_ID } from '../engine/reaction-hub.js';
 import { generate, generatorForSkill, GENERATORS } from '../engine/generators.js';
-import { DRILL } from '../engine/generators-predict.js';
+import { DRILL, drillCombos, solveCard, problemFor } from '../engine/generators-predict.js';
+import * as C from '../engine/reactions-custom.js';
+import * as A from '../engine/reaction-attrs.js';
+import { POOL_DATA } from '../engine/reaction-pools.js';
 import * as R from '../engine/reactions.js';
 import { CARDS, applyCard } from '../engine/synthesis.js';
 import { ACID, reaction as acidReaction } from '../engine/acidbase.js';
@@ -380,12 +384,15 @@ export async function reactionModes({ ok, eq }) {
   // ---- (8) counts
   const rng0 = () => 0.5;
   const eng = M.allCombos();
-  const nReagent = eng.filter((c) => M.buildGuessReagent(c, rng0)).length;
-  const nReactant = eng.filter((c) => M.buildGuessReactant(c, rng0)).length;
-  const nStereo = M.allCombos(M.STEREO_CARDS).filter((c) => M.buildStereoOutcome(c, rng0)).length;
+  const okReagent = eng.filter((c) => M.buildGuessReagent(c, rng0)), okReactant = eng.filter((c) => M.buildGuessReactant(c, rng0));
+  const okStereo = M.allCombos(M.STEREO_CARDS).map((c) => ({ c, p: M.buildStereoOutcome(c, rng0) })).filter((x) => x.p);
+  const nReagent = okReagent.length, nReactant = okReactant.length, nStereo = okStereo.length;
+  const okChains = [];
   let nChains = 0; const chainTriples = new Set();
   for (const tpl of M.TEMPLATES) for (const ch of M.chainsOf(tpl)) {
-    if (!M.buildTwoStep(ch, rng0)) continue;
+    const tp = M.buildTwoStep(ch, rng0);
+    if (!tp) continue;
+    okChains.push({ ch, p: tp });
     nChains++;
     const run = chainRun(ch.start, [{ card: ch.a.cardId, reagent: ch.a.v.id, halide: ch.a.v.halide || null }, { card: ch.b.cardId, reagent: ch.b.v.id, halide: ch.b.v.halide || null }]);
     chainTriples.add(`${canon(ch.start)}|${ch.a.cardId}:${ch.a.v.id}:${ch.a.v.halide || ''}>${ch.b.cardId}:${ch.b.v.id}:${ch.b.v.halide || ''}|${keyOf(run.final).join('.')}`);
@@ -400,7 +407,336 @@ export async function reactionModes({ ok, eq }) {
   ok(single.size >= 1000, `at least 1000 distinct single-step (substrate, reagent, product) triples (${single.size})`);
   ok(chainTriples.size >= 500, `at least 500 distinct two-step (substrate, reagent pair, product) triples (${chainTriples.size})`);
   ok(triples >= 1500, `at least 1500 distinct (substrate, reagent, product) triples in all (${triples})`);
+  await reactionSettings({ ok, eq }, { okReagent, okReactant, okStereo, okChains });
   return { counts, triples, single: single.size, chains: chainTriples.size, wrongReagents, wrongStarts, stats, tstats: { fail: tstats.fail, differ: tstats.differ, swapped: tstats.swapped, templates: tstats.templates.size }, cases: M.WONT_CASES.map((c) => c.id) };
+}
+
+// ======================================================================================================================================
+// The settings of the six reaction practice pages (engine/reactions-custom.js, engine/reaction-attrs.js, engine/reaction-pools.js, reactions-settings-view.js)
+//   (1) wiring: card families, labels, groups, curated-case tags, router, CSS, generators; (2) the static pools equal what the builders can make, row for row, with the right stereo tag;
+//   (3) the substrate class is read back with RDKit; (4) 120 seeded settings combinations: every problem satisfies the filters in force, or the page reports the relaxation;
+//   (5) the relaxation order; (6) presets round-trip; (7) the mixed session interleaves the modes; (8) live counts equal the filtered pool sizes (10 random settings);
+//   (9) weak-spot weighting, endless and timer, the card markup, the lessons left alone.
+// ======================================================================================================================================
+async function reactionSettings({ ok, eq }, built) {
+  const { okReagent, okReactant, okStereo, okChains } = built;
+  const appSrc = fs.readFileSync(path.join(HERE, '..', 'app.js'), 'utf8');
+  const stepsSrc = fs.readFileSync(path.join(HERE, '..', 'engine', 'steps.js'), 'utf8');
+  const indexHtml = fs.readFileSync(path.join(HERE, '..', 'index.html'), 'utf8');
+  const MODES6 = ['predict-product', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work'];
+  const FAM = A.FAMILY_OF;
+  const choose3 = (n) => (n * (n - 1) * (n - 2)) / 6;
+  const rng0 = () => 0.5;
+  store.resetAll();
+
+  // ---- (1) wiring
+  eq(C.PRACTICE_MODES, MODES6, 'six practice modes (the predict drill and the five reaction modes)');
+  eq(A.CARD_IDS.length, 38, '38 hub cards');
+  eq(A.FAMILY_IDS.length, 9, 'nine reagent families');
+  eq(A.SUBSTRATE_IDS, ['alkenes', 'cycloalkenes', 'alkynes', 'dienes', 'arenes', 'alcohols'], 'six substrate classes');
+  ok(A.CARD_IDS.every((id) => FAM[id] && A.FAMILY_IDS.includes(FAM[id]) && A.CARD_LABEL[id] && A.CARD_LABEL[id].length <= 24), 'every card has a family and a short label');
+  ok(A.FAMILY_IDS.every((f) => A.CARD_IDS.some((id) => FAM[id] === f)), 'every family has at least one card');
+  eq(Object.keys(FAM).length, 38, 'the family table has exactly the 38 cards');
+  eq(A.CARD_GROUPS.flatMap((g) => g.cards).sort(), A.CARD_IDS.slice().sort(), 'the card groups hold every card once');
+  eq(A.CARD_GROUPS.map((g) => g.cards.length), [18, 9, 9, 2], 'groups: aromatics 18, alkenes 9, alkynes 9, dienes 2');
+  const FAM_SPOT = { 'alkene-hx': 'hx', 'alkene-hydration': 'hx', 'diene-hx': 'hx', 'alkene-x2': 'x2', 'alkene-epoxide-diol': 'x2', 'alkene-h2-pd': 'syn', 'alkene-kmno4-base': 'syn', 'alkene-epoxide': 'syn',
+    'alkene-kmno4-acid': 'oxid', 'oxidation-pcc': 'oxid', 'oxidation-cr': 'oxid', 'alkyne-lindlar': 'alkyne', 'alkyne-acetylide': 'alkyne', 'eas-nitration': 'eas', 'fc-acylation': 'eas', 'director-meta': 'directors',
+    'side-chain-kmno4': 'sidechain', 'nitro-reduction': 'sidechain', 'clemmensen': 'hubonly', 'diels-alder': 'hubonly', 'alkyne-hydroboration': 'hubonly' };
+  for (const [id, f] of Object.entries(FAM_SPOT)) eq(FAM[id], f, `${id} is in the ${f} family`);
+  eq(A.CARD_IDS.filter((id) => FAM[id] === 'hubonly').every((id) => DRILL[id].fixed), true, 'hub-only facts are cards with no engine model');
+  ok(M.WONT_CASES.every((c) => C.WONT_META[c.id] && A.SUBSTRATE_IDS.includes(C.WONT_META[c.id].cls) && ['easy', 'medium', 'hard'].includes(C.WONT_META[c.id].diff)), 'every curated case is tagged with a substrate class and a difficulty');
+  eq(C.RELAX_ORDER, ['difficulty', 'stereo', 'substrates', 'families', 'cards'], 'relaxation order: least important first');
+  ok(generatorForSkill(C.MIX_ID) === C.MIX_ID && GENERATORS[C.MIX_ID] === true, 'the mixed session has its own generator');
+  ok(/import \{ reactionSettingsCard \} from '\.\/reactions-settings-view\.js'/.test(appSrc) && /reactionSettingsCard\(\{ where: 'landing'/.test(appSrc) && /where: skill === RX\.MIX_ID \? 'mix' : 'practice'/.test(appSrc), 'app.js mounts the settings card on the landing page and on every practice page');
+  ok(/RX\.beginReactionSession\(\)/.test(appSrc) && /RX\.practiceConfig\(\)/.test(appSrc) && /endless: pc\.endless/.test(appSrc), 'the practice page reads the count, timer and endless choice from the settings');
+  ok(/\^practise-\(\[a-z0-9-\]\+\)\$/.test(appSrc) && /'#practise-' \+ RX\.MIX_ID/.test(appSrc), 'the mixed session is served by the same #practise-<skill> route');
+  ok(/\/\* reaction settings card/.test(indexHtml) && /\.rs-card\b/.test(indexHtml) && /\.rs-cardstoggle\b/.test(indexHtml) && /\.rs-mini\b/.test(indexHtml), 'CSS block for the reaction settings card');
+  ok(/cfg\.endless === true/.test(stepsSrc) && /rs-end/.test(stepsSrc) && /ctx\.mistake\(p\.skill, 'mastery', opt && opt\.lead \? opt\.lead : why, p\.card\)/.test(stepsSrc), 'the problem runner has an endless mode and logs slips against the card');
+  const view = fs.readFileSync(path.join(HERE, '..', 'reactions-settings-view.js'), 'utf8');
+  ok(/export function reactionSettingsCard/.test(view) && /C\.settingsCardHtml/.test(view) && /dataset\.gall/.test(view), 'the settings view paints the pure card markup');
+  ok(C.isUnfiltered(C.defaultSettings()) && C.defaultSettings().count === 10 && C.defaultSettings().timer === 0 && C.defaultSettings().modes.length === 0 && C.defaultSettings().weak === false, 'defaults: no filter, 10 problems, no timer, no mixed modes, no weighting');
+  const ns = C.normalizeSettings({ substrates: ['bogus'], families: [], cards: ['nope', 'alkene-hx'], stereo: 'x', difficulty: 'z', modes: ['wont-work', 'bad', 'guess-reagent'], count: 7, timer: 5, weak: 'yes' });
+  eq([ns.substrates.length, ns.families.length, ns.cards, ns.stereo, ns.difficulty, ns.modes, ns.count, ns.timer, ns.weak], [6, 9, ['alkene-hx'], 'any', '', ['guess-reagent', 'wont-work'], 10, 0, false], 'normalizeSettings repairs every field (and keeps the modes in order)');
+  eq(C.normalizeSettings({ count: 0 }).count, 0, 'count 0 means endless');
+  eq(C.normalizeSettings(null).count, 10, 'normalizeSettings(null) gives the defaults');
+  // storage under ui.reactions
+  C.setCurrentSettings({ substrates: ['alkenes'], count: 20, timer: 90 });
+  eq(store.getUi('reactions').substrates, ['alkenes'], 'the settings live in the store as ui.reactions');
+  eq([C.currentSettings().count, C.currentSettings().timer, C.practiceConfig().endless], [20, 90, false], 'currentSettings and practiceConfig read ui.reactions');
+  C.setCurrentSettings({ count: 0 });
+  eq(C.practiceConfig(), { count: 0, endless: true, timer: 0 }, 'count 0 is endless in the practice config');
+  store.resetAll();
+
+  // ---- (2) the static pools equal what the builders can make
+  const subKey = (cardId, sub, v) => `${cardId}|${sub}|${DRILL[cardId].variants.indexOf(v)}`;
+  const stOf = (cardId, sub, v) => A.productStereo(M.solveForModes(cardId, sub, v).products);
+  const poolMap = (mode) => {
+    const m = new Map(), dup = [];
+    for (const [cardId, rows] of Object.entries(POOL_DATA[mode])) for (let i = 0; i < rows.length; i += 3) {
+      const k = `${cardId}|${DRILL[cardId].subs[rows[i]]}|${rows[i + 1]}`;
+      if (m.has(k)) dup.push(k);
+      m.set(k, rows[i + 2] === 1);
+    }
+    return { m, dup };
+  };
+  const okPredict = [];
+  for (const c of drillCombos()) {
+    let p = null;
+    try { p = problemFor(c.card, c.sub, c.variant, rng0); } catch (e) { p = null; }
+    if (p) okPredict.push({ cardId: c.card, sub: c.sub, v: c.variant, st: A.productStereo(solveCard(c.card, c.sub, c.variant, rng0).products) });
+  }
+  const lists = {
+    'predict-product': okPredict,
+    'guess-reagent': okReagent.map((c) => ({ ...c, st: stOf(c.cardId, c.sub, c.v) })),
+    'guess-reactant': okReactant.map((c) => ({ ...c, st: stOf(c.cardId, c.sub, c.v) })),
+    'stereo-outcome': okStereo.map((x) => ({ ...x.c, st: x.p.stereo.C !== 'none' }))
+  };
+  for (const mode of Object.keys(lists)) {
+    const want = new Map(lists[mode].map((c) => [subKey(c.cardId, c.sub, c.v), c.st]));
+    const { m, dup } = poolMap(mode);
+    eq(dup, [], `${mode}: the pool has no repeated row`);
+    eq([...m.keys()].sort(), [...want.keys()].sort(), `${mode}: the static pool is exactly what the builder can make (${want.size} problems)`);
+    eq([...m].filter(([k, v]) => want.get(k) !== v).length, 0, `${mode}: every pool row carries the right stereo tag`);
+  }
+  {
+    const want = new Map(okChains.map(({ ch, p }) => [`${ch.t.id}|${ch.start}|${DRILL[ch.t.A].variants.indexOf(ch.a.v)}|${DRILL[ch.t.B].variants.indexOf(ch.b.v)}`, A.productStereo(p.products)]));
+    const got = new Map();
+    for (const [tid, rows] of Object.entries(POOL_DATA['two-step'])) for (let i = 0; i < rows.length; i += 4) got.set(`${tid}|${DRILL[M.TEMPLATE_BY_ID[tid].A].subs[rows[i]]}|${rows[i + 1]}|${rows[i + 2]}`, rows[i + 3] === 1);
+    eq([...got.keys()].sort(), [...want.keys()].sort(), `two-step: the static pool is exactly the chains the builder can make (${want.size})`);
+    eq([...got].filter(([k, v]) => want.get(k) !== v).length, 0, 'two-step: every pool row carries the right stereo tag');
+  }
+  eq(C.poolItems('wont-work').reduce((n, it) => n + it.n, 0), M.MODE_COUNTS['wont-work'], 'wont-work: the cases stand for the mode count');
+  for (const m of ['guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step']) eq(C.poolItems(m).length, M.MODE_COUNTS[m], `${m}: the pool is MODE_COUNTS long`);
+  ok(C.poolItems('predict-product').length === okPredict.length && okPredict.length >= 1500, `predict-product: ${okPredict.length} problems`);
+  // stereo tags read back on known cases
+  for (const [prods, want] of [[['BrC1CCCCC1Br'], true], [['CC(C)Br'], false], [['CC(Br)CC'], true], [['C/C=C/C'], true], [['CC=C'], false], [['CCCC'], false], [['CC(C)Br', 'CC(Br)CC'], true]]) eq(A.productStereo(prods), want, `productStereo ${prods.join(' + ')} is ${want}`);
+
+  // ---- (3) the substrate class, read back with RDKit
+  const nMatch = (smi, sma) => { const m = rdkit().get_mol(smi), q = rdkit().get_qmol(sma); try { return JSON.parse(m.get_substruct_matches(q)).length; } finally { m.delete(); q.delete(); } };
+  const rdClass = (smi) => {
+    if (nMatch(smi, '[CX4;!$(C=O)][OX2H]')) return 'alcohols';
+    if (nMatch(smi, 'a')) return 'arenes';
+    if (nMatch(smi, 'C#C')) return 'alkynes';
+    const n = nMatch(smi, 'C=C');
+    return n >= 2 ? 'dienes' : n === 1 ? (nMatch(smi, 'C=@C') ? 'cycloalkenes' : 'alkenes') : 'alkenes';
+  };
+  const allSubs = [...new Set(A.CARD_IDS.flatMap((id) => DRILL[id].subs))];
+  const badClass = allSubs.filter((s) => A.substrateClass(s) !== rdClass(s));
+  eq(badClass, [], `substrateClass agrees with RDKit on all ${allSubs.length} substrates`);
+  eq(new Set(allSubs.map(A.substrateClass)).size, 6, 'all six substrate classes occur in the pools');
+  const tiers = { easy: 0, medium: 0, hard: 0 };
+  allSubs.forEach((s) => { tiers[A.difficultyOf(s)]++; });
+  ok(tiers.easy > 20 && tiers.medium > 5 && tiers.hard >= 2, `difficulty tiers all occur (${JSON.stringify(tiers)})`);
+  eq([A.difficultyOf('CC=C'), A.difficultyOf('c1ccccc1'), A.difficultyOf('Cc1ccccc1'), A.difficultyOf('CC(C)=C(C)C'), A.difficultyOf('CC1=C(C)CCCC1')], ['easy', 'easy', 'easy', 'hard', 'hard'], 'difficulty: textbook substrates are easy, crowded ones hard');
+  const diffOf = (c) => A.difficultyOf(c);
+
+  // ---- (4) 120 seeded settings combinations
+  const rs = mulberry32(20261020);
+  const pickR = (a) => a[Math.floor(rs() * a.length)];
+  const subset = (arr, min = 1) => { const a = arr.filter(() => rs() < 0.45); return a.length >= min ? a : min ? [pickR(arr)] : []; };
+  const randSettings = () => C.normalizeSettings({
+    substrates: rs() < 0.55 ? subset(A.SUBSTRATE_IDS) : undefined, families: rs() < 0.5 ? subset(A.FAMILY_IDS) : undefined, cards: rs() < 0.35 ? subset(A.CARD_IDS) : undefined,
+    stereo: pickR(A.STEREO_IDS), difficulty: pickR(A.DIFF_IDS), modes: rs() < 0.5 ? subset(MODES6, 0) : [], weak: rs() < 0.3, count: pickR(C.COUNT_IDS), timer: pickR(C.TIMER_IDS)
+  });
+  const hasStereo = (p) => (p.skill === 'stereo-outcome' ? p.stereo.C !== 'none' : p.skill === 'wont-work' ? false : A.productStereo(p.products));
+  const stat = { asked: 0, relaxed: 0, skipped: 0, problems: 0, byMode: {}, filtered: 0 };
+  const problemOk = (p, F, res, t) => {
+    ok(res.modes.includes(p.skill), `${t}: ${p.skill} is one of the modes in play (${res.modes.join()})`);
+    const cards = [p.card, p.card2].filter(Boolean);
+    ok(cards.some((c) => F.cards.includes(c) && F.families.includes(FAM[c])), `${t}: a card of the problem (${cards.join()}) is a chosen card in a chosen family`);
+    const cls = p.skill === 'wont-work' ? C.WONT_META[p.caseId].cls : rdClass(p.substrate);
+    ok(F.substrates.includes(cls), `${t}: substrate class ${cls} is chosen`);
+    const dif = p.skill === 'wont-work' ? C.WONT_META[p.caseId].diff : diffOf(p.substrate);
+    ok(!F.difficulty || dif === F.difficulty, `${t}: difficulty ${dif} is the one asked`);
+    const st = hasStereo(p);
+    ok(F.stereo === 'any' || (F.stereo === 'has') === st, `${t}: stereo ${st} matches the "${F.stereo}" filter`);
+    ok(p.options.filter((o) => o.correct).length === 1 && p.options.length >= 3 && p.options.length <= 4, `${t}: ${p.skill}/${p.card} has one right option of 3-4 (${p.options.length} options, ${p.options.filter((o) => o.correct).length} right)`);
+    eq(p.relaxed, res.relaxed, `${t}: the problem records what was relaxed`);
+    eq(p.settingsNote, res.message, `${t}: the problem carries the notice`);
+  };
+  C.endReactionSession();
+  const rngG = mulberry32(77);
+  for (let i = 0; i < 120; i++) {
+    const S = randSettings();
+    const playId = pickR([...MODES6, C.MIX_ID]);
+    const res = C.resolveReactions(S, playId);
+    const F = res.eff, t = `combo #${i} (${playId}, ${C.summaryOf(S)})`;
+    stat.asked++;
+    if (res.relaxed.length) { stat.relaxed++; ok(res.message.length > 30 && res.changes.length === res.relaxed.length && res.relaxed.every((k) => C.RELAX_ORDER.includes(k)), `${t}: the relaxation is reported`); }
+    else eq(F, C.filterOf(S), `${t}: nothing relaxed means the filter is the one asked`);
+    if (res.skipped.length) { stat.skipped++; ok(res.message.length > 20 && res.skipped.every((m) => !res.modes.includes(m)), `${t}: a left-out mode is reported`); }
+    if (!isUnfilteredF(F)) stat.filtered++;
+    ok(res.modes.length >= 1, `${t}: some mode has a problem`);
+    const ps = C.generateReactions(playId, 3, { rng: rngG, settings: S });
+    eq(ps.length, 3, `${t}: three problems`);
+    ps.forEach((p, j) => { stat.problems++; stat.byMode[p.skill] = (stat.byMode[p.skill] || 0) + 1; problemOk(p, F, res, `${t} #${j}`); });
+  }
+  function isUnfilteredF(F) { return F.substrates.length === 6 && F.families.length === 9 && F.cards.length === 38 && F.stereo === 'any' && F.difficulty === ''; }
+  ok(stat.relaxed >= 8 && stat.asked - stat.relaxed >= 40, `the 120 combinations include ${stat.relaxed} relaxed and ${stat.asked - stat.relaxed} met as asked`);
+  ok(stat.skipped >= 5, `${stat.skipped} combinations left a mode out`);
+  ok(stat.filtered >= 80, `${stat.filtered} combinations really filtered`);
+  ok(MODES6.every((m) => stat.byMode[m] > 0), `every mode produced problems (${JSON.stringify(stat.byMode)})`);
+
+  // ---- (5) the relaxation order
+  const relax = (raw, play) => C.resolveReactions(C.normalizeSettings(raw), play);
+  eq(relax({ substrates: ['arenes'], families: ['x2'] }, 'guess-reagent').relaxed, ['substrates'], 'arenes with the X₂ family: the substrate class goes (it is less important than the family)');
+  eq(relax({ stereo: 'has' }, 'wont-work').relaxed, ['stereo'], 'wont-work has no stereo to show: the stereo filter goes');
+  eq(relax({ substrates: ['alcohols'], difficulty: 'hard' }, 'predict-product').relaxed, ['difficulty'], 'no hard alcohol: difficulty goes first');
+  eq(relax({ substrates: ['alcohols'], families: ['x2'], cards: ['alkyne-hx-1'] }, 'guess-reagent').relaxed, ['substrates', 'families'], 'when no single setting frees a problem, they go together in order');
+  const r3 = relax({ substrates: ['alcohols'], families: ['x2'], cards: ['alkyne-hx-1'] }, 'guess-reagent');
+  ok(/Substrate class: Alcohols \(oxidation cards\) → all/.test(r3.message) && /Reagent family: X₂ \(anti\) → all/.test(r3.message) && r3.changes.length === 2, `the notice names each change: ${r3.message}`);
+  eq(relax({ substrates: ['alkenes'], stereo: 'has', difficulty: 'hard' }, 'stereo-outcome').relaxed, ['difficulty'], 'the first relaxed setting is the least important (no hard alkene has stereo)');
+  const meetable = relax({ substrates: ['alkenes'], stereo: 'has' }, 'stereo-outcome');
+  eq([meetable.relaxed, meetable.skipped, meetable.message], [[], [], ''], 'settings that can be met report nothing');
+  const mixRes = relax({ substrates: ['arenes'], modes: ['guess-reagent', 'stereo-outcome'] }, C.MIX_ID);
+  eq([mixRes.relaxed, mixRes.skipped, mixRes.modes], [[], ['stereo-outcome'], ['guess-reagent']], 'a mixed-session mode with nothing to ask is left out, not relaxed');
+  ok(/What stereochemistry forms\? has no problem for these settings, so the session leaves it out/.test(mixRes.message), `and the notice says so: ${mixRes.message}`);
+  const allDead = relax({ substrates: ['alcohols'], stereo: 'has', difficulty: 'hard', families: ['hubonly'], cards: ['clemmensen'] }, 'two-step');
+  ok(allDead.modes.includes('two-step') && allDead.relaxed.length >= 1, 'an impossible stack of settings still ends with a problem to ask');
+
+  // ---- (6) presets round-trip
+  store.resetAll();
+  eq(C.listPresets().map((p) => p.name), ['Alkenes only', 'Aromatics only', 'Stereo outcomes', 'Everything mixed'], 'the four built-in presets');
+  const ao = C.loadPreset('Aromatics only', { count: 20, timer: 60 }), ke = C.loadPreset('Alkenes only'), so = C.loadPreset('Stereo outcomes'), em = C.loadPreset('Everything mixed');
+  eq([ao.substrates, ao.count, ao.timer, ao.preset], [['arenes'], 20, 60, 'Aromatics only'], 'Aromatics only: arenes, and the count and timer already chosen are kept');
+  eq(ke.substrates, ['alkenes', 'cycloalkenes'], 'Alkenes only: alkenes and cycloalkenes');
+  eq([so.stereo, so.modes], ['has', ['stereo-outcome']], 'Stereo outcomes: only where the product has stereo, in the stereo mode');
+  eq([em.modes, C.isUnfiltered(em)], [MODES6, true], 'Everything mixed: all six modes, no filter');
+  ok(C.reactionCounts(ao)['stereo-outcome'] === 0 && C.reactionCounts(ao)['guess-reagent'] > 500, 'Aromatics only: counts follow the preset');
+  const mine = C.normalizeSettings({ substrates: ['alkynes', 'dienes'], families: ['hx', 'alkyne'], cards: ['alkyne-hx-1', 'diene-hx', 'alkene-hx'], stereo: 'none', difficulty: 'easy', modes: ['two-step', 'guess-reactant'], count: 5, timer: 90, weak: true });
+  eq(C.savePreset('My mix', mine), { ok: true, name: 'My mix' }, 'a preset saves');
+  eq(C.listPresets().map((p) => p.name).slice(4), ['My mix'], 'it is listed after the built-ins');
+  eq(C.loadPreset('my mix'), { ...mine, preset: 'My mix' }, 'it loads back equal (every field), whatever the case of the name');
+  ok(!C.loadPreset('My mix').builtin, 'saved presets are not built-in');
+  eq(C.savePreset('Alkenes only', mine).ok, false, 'a built-in name cannot be taken');
+  eq(C.savePreset('  ', mine).ok, false, 'a name is required');
+  C.savePreset('My mix', C.normalizeSettings({ count: 20 }));
+  eq([C.listPresets().length, C.loadPreset('My mix').count], [5, 20], 'saving under the same name replaces it');
+  eq(C.deletePreset('Aromatics only'), false, 'a built-in cannot be deleted');
+  eq(C.deletePreset('My mix'), true, 'a saved preset deletes');
+  eq([C.listPresets().length, C.loadPreset('My mix')], [4, null], 'and is gone');
+  const stored = JSON.parse(JSON.stringify(store.getUi('reactions-presets') || []));
+  eq(stored, [], 'nothing left in ui.reactions-presets');
+  const ch = C.changeSettings(C.loadPreset('Aromatics only'), { stereo: 'has' });
+  eq([ch.preset, ch.stereo], [undefined, 'has'], 'changing a filter leaves the preset name');
+  eq(C.changeSettings(C.loadPreset('Aromatics only'), { count: 5 }).preset, 'Aromatics only', 'changing the count keeps it');
+
+  // ---- (7) the mixed session interleaves the modes
+  const mixS = C.normalizeSettings({ modes: ['guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step'] });
+  C.endReactionSession();
+  const seq = C.generateReactions(C.MIX_ID, 12, { rng: mulberry32(5), settings: mixS }).map((p) => p.skill);
+  eq(seq, Array.from({ length: 12 }, (_, i) => mixS.modes[i % 4]), 'a mixed session takes the chosen modes in turn');
+  C.endReactionSession();
+  const one = [];
+  for (let i = 0; i < 8; i++) one.push(C.generateReactions(C.MIX_ID, 1, { rng: mulberry32(100 + i), settings: mixS })[0].skill);
+  eq(one, Array.from({ length: 8 }, (_, i) => mixS.modes[i % 4]), 'one problem at a time (as the practice page asks) continues the same rotation');
+  C.endReactionSession();
+  const all6 = C.generateReactions(C.MIX_ID, 12, { rng: mulberry32(6), settings: C.loadPreset('Everything mixed') }).map((p) => p.skill);
+  eq(all6, [...MODES6, ...MODES6], 'Everything mixed: all six modes in turn');
+  eq(C.generateReactions(C.MIX_ID, 6, { rng: mulberry32(7), settings: C.normalizeSettings({}) }).map((p) => p.skill), MODES6, 'a mixed session with no mode chosen uses all six');
+  C.endReactionSession();
+  const skipS = C.normalizeSettings({ substrates: ['arenes'], modes: ['guess-reagent', 'stereo-outcome', 'two-step'] });
+  eq(C.generateReactions(C.MIX_ID, 6, { rng: mulberry32(8), settings: skipS }).map((p) => p.skill), ['guess-reagent', 'two-step', 'guess-reagent', 'two-step', 'guess-reagent', 'two-step'], 'a mode with nothing to ask drops out of the rotation');
+  C.endReactionSession();
+  // the same cards never twice in a row inside a mode
+  const run = C.generateReactions('guess-reagent', 40, { rng: mulberry32(9), settings: C.normalizeSettings({}) });
+  ok(run.every((p, i) => i === 0 || p.card !== run[i - 1].card), 'a card is never asked twice in a row');
+  ok(new Set(run.map((p) => p.card)).size >= 12, `40 problems visit ${new Set(run.map((p) => p.card)).size} different cards`);
+  C.endReactionSession();
+
+  // ---- (8) live counts equal the filtered pool sizes
+  const indItems = {
+    'predict-product': okPredict.map((c) => ({ cards: [c.cardId], sub: c.sub, st: c.st })),
+    'guess-reagent': lists['guess-reagent'].map((c) => ({ cards: [c.cardId], sub: c.sub, st: c.st })),
+    'guess-reactant': lists['guess-reactant'].map((c) => ({ cards: [c.cardId], sub: c.sub, st: c.st })),
+    'stereo-outcome': lists['stereo-outcome'].map((c) => ({ cards: [c.cardId], sub: c.sub, st: c.st })),
+    'two-step': okChains.map(({ ch, p }) => ({ cards: [ch.t.A, ch.t.B], sub: ch.start, st: A.productStereo(p.products) }))
+  };
+  for (const list of Object.values(indItems)) for (const it of list) { it.cls = rdClass(it.sub); it.diff = diffOf(it.sub); it.n = 1; }
+  indItems['wont-work'] = M.WONT_CASES.map((c) => ({ cards: [c.card], cls: C.WONT_META[c.id].cls, diff: C.WONT_META[c.id].diff, st: false, n: choose3(c.works.length) * c.fails.length }));
+  const passInd = (it, F) => F.substrates.includes(it.cls) && it.cards.some((c) => F.cards.includes(c) && F.families.includes(FAM[c])) && (F.stereo === 'any' || (F.stereo === 'has') === it.st) && (!F.difficulty || it.diff === F.difficulty);
+  eq(C.reactionCounts(C.defaultSettings()), M.MODE_COUNTS['wont-work'] && { 'predict-product': okPredict.length, 'guess-reagent': M.MODE_COUNTS['guess-reagent'], 'guess-reactant': M.MODE_COUNTS['guess-reactant'], 'stereo-outcome': M.MODE_COUNTS['stereo-outcome'], 'two-step': M.MODE_COUNTS['two-step'], 'wont-work': M.MODE_COUNTS['wont-work'] }, 'unfiltered counts: the pools in full');
+  const rc = mulberry32(31415);
+  let nonzero = 0, zero = 0;
+  for (let i = 0; i < 10; i++) {
+    const S = C.normalizeSettings({
+      substrates: rc() < 0.7 ? A.SUBSTRATE_IDS.filter(() => rc() < 0.5) : undefined, families: rc() < 0.6 ? A.FAMILY_IDS.filter(() => rc() < 0.5) : undefined,
+      cards: rc() < 0.4 ? A.CARD_IDS.filter(() => rc() < 0.5) : undefined, stereo: A.STEREO_IDS[Math.floor(rc() * 3)], difficulty: A.DIFF_IDS[Math.floor(rc() * 4)]
+    });
+    const F = C.filterOf(S), got = C.reactionCounts(S);
+    const want = Object.fromEntries(MODES6.map((m) => [m, indItems[m].filter((it) => passInd(it, F)).reduce((n, it) => n + it.n, 0)]));
+    eq(got, want, `live counts #${i} equal the filtered pool sizes (${C.summaryOf(S)})`);
+    eq(C.reactionCounts(S), got, `live counts #${i} are stable (cached)`);
+    Object.values(want).forEach((n) => { if (n) nonzero++; else zero++; });
+  }
+  ok(nonzero >= 15 && zero >= 3, `the 10 count checks cover non-empty (${nonzero}) and empty (${zero}) modes`);
+  for (const m of MODES6) {
+    const F = C.filterOf(C.normalizeSettings({ substrates: ['arenes'] }));
+    eq(C.countFor(m, F), indItems[m].filter((it) => passInd(it, F)).reduce((n, it) => n + it.n, 0), `${m}: the arenes count`);
+  }
+
+  // ---- (9) weak spots, the card, the lessons
+  store.resetAll();
+  for (let i = 0; i < 3; i++) store.logMistake({ skill: 'guess-reagent', stepId: 'mastery', lessonId: 'practice', diagnosis: 'x', card: 'alkene-x2' });
+  store.logMistake({ skill: 'guess-reagent', stepId: 'mastery', lessonId: 'practice', diagnosis: 'x' });
+  ok(store.cardScores()['alkene-x2'] > 2 && Object.keys(store.cardScores()).length === 1, 'the mistake log gives a score per card (a slip logged without a card counts for none)');
+  ok(C.hasWeakData(), 'weak data is found');
+  const share = (settings, n, seed) => { C.endReactionSession(); const ps = C.generateReactions('guess-reagent', n, { rng: mulberry32(seed), settings }); return ps.filter((p) => p.card === 'alkene-x2').length / n; };
+  const plain = share(C.normalizeSettings({}), 200, 11), weighted = share(C.normalizeSettings({ weak: true }), 200, 11);
+  ok(weighted > 0.15 && weighted > 3 * plain, `weighting toward weak spots: alkene-x2 is ${(weighted * 100).toFixed(0)}% of problems, against ${(plain * 100).toFixed(0)}% without it`);
+  store.logWin('guess-reagent', 'alkene-x2'); store.logWin('guess-reagent', 'alkene-x2'); store.logWin('guess-reagent', 'alkene-x2'); store.logWin('guess-reagent', 'alkene-x2');
+  ok(!store.cardScores()['alkene-x2'] || store.cardScores()['alkene-x2'] < 1.5, 'practising a card right lowers its weak-spot score');
+  store.resetAll();
+  eq(store.cardScores(), {}, 'no slips, no scores');
+  eq(C.hasWeakData(), false, 'no weak data after a reset');
+  // the filters hold on the real route (generate with a skill) and not in the lessons (no skill)
+  C.setCurrentSettings({ substrates: ['arenes'], modes: ['guess-reagent', 'predict-product'] });
+  C.beginReactionSession();
+  const viaSkill = generate('predict-product', 12, { skill: 'predict-product', rng: mulberry32(3) });
+  ok(viaSkill.every((p) => A.substrateClass(p.substrate) === 'arenes'), 'generate(predict-product, skill) obeys the stored settings');
+  const viaMix = generate(C.MIX_ID, 6, { skill: C.MIX_ID, rng: mulberry32(4) });
+  eq(viaMix.map((p) => p.skill), ['predict-product', 'guess-reagent', 'predict-product', 'guess-reagent', 'predict-product', 'guess-reagent'], 'generate(reaction-mix) is the rotation of the chosen modes');
+  const lesson = generate('predict-product', 80, { rng: mulberry32(5) });
+  ok(lesson.some((p) => A.substrateClass(p.substrate) !== 'arenes'), 'a lesson (no skill) is not filtered by the settings');
+  const lessonModes = generate('guess-reagent', 80, { rng: mulberry32(5) });
+  ok(lessonModes.some((p) => A.substrateClass(p.substrate) !== 'arenes'), 'the plain mode generator is not filtered either');
+  // the settings are read once when a session starts: a change waits for Start
+  C.setCurrentSettings({ substrates: ['alkynes'] });
+  ok(generate('guess-reagent', 6, { skill: 'guess-reagent', rng: mulberry32(6) }).every((p) => A.substrateClass(p.substrate) === 'arenes'), 'a change in the card does not alter the session in progress');
+  C.beginReactionSession();
+  ok(generate('guess-reagent', 6, { skill: 'guess-reagent', rng: mulberry32(6) }).every((p) => A.substrateClass(p.substrate) === 'alkynes'), 'Start picks the new settings up');
+  // a hub card limits "which reagent?" and the settings step aside
+  M.setModeCard('eas-nitration');
+  ok(generate('guess-reagent', 5, { skill: 'guess-reagent', rng: mulberry32(7) }).every((p) => p.card === 'eas-nitration'), 'the hub card limit wins over the settings');
+  M.setModeCard(null);
+  C.endReactionSession();
+  store.resetAll();
+
+  // ---- the card markup
+  const S0 = C.defaultSettings();
+  const html = C.settingsCardHtml(S0, { open: true, where: 'practice' });
+  const chips = (g) => (html.match(new RegExp(`data-g="${g}"`, 'g')) || []).length;
+  eq([chips('substrates'), chips('families'), chips('cards'), chips('stereo'), chips('difficulty'), chips('modes'), chips('count'), chips('timer'), chips('weak')], [6, 9, 38, 3, 4, 6, 4, 3, 1], 'the card has a chip for every choice (38 cards)');
+  eq([(html.match(/data-gall=/g) || []).length, (html.match(/data-gnone=/g) || []).length], [4, 4], 'each card group has All and None');
+  ok(['Alkenes only', 'Aromatics only', 'Stereo outcomes', 'Everything mixed'].every((n) => html.includes(`data-preset="${n}"`)), 'the four built-in presets are chips');
+  ok(html.includes('aria-expanded="true"') && !/id="rs-body" hidden/.test(html) && /id="rs-cards" hidden/.test(html), 'open card, cards list closed until asked');
+  ok(/id="rs-body" hidden/.test(C.settingsCardHtml(S0, { open: false })) && /aria-expanded="false"/.test(C.settingsCardHtml(S0, { open: false })), 'a closed card hides its body');
+  ok(/class="btn primary nl-start">Start</.test(html) && /rs-startmix"\s+disabled/.test(html), 'practice page: Start, and the mixed session needs a mode');
+  const withModes = C.settingsCardHtml(C.normalizeSettings({ modes: ['wont-work', 'two-step'] }), { open: true, where: 'practice' });
+  ok(/rs-startmix">Start mixed session \(2 modes\)/.test(withModes), 'the mixed-session button counts the chosen modes');
+  ok(!/nl-start/.test(C.settingsCardHtml(S0, { open: true, where: 'landing' })) && /btn primary rs-startmix/.test(C.settingsCardHtml(S0, { open: true, where: 'landing' })), 'landing page: the mixed-session button only');
+  ok(!/rs-startmix/.test(C.settingsCardHtml(S0, { open: true, where: 'mix' })) && /nl-start/.test(C.settingsCardHtml(S0, { open: true, where: 'mix' })), 'mixed session page: Start only');
+  const sel = C.normalizeSettings({ substrates: ['arenes'], stereo: 'has', difficulty: 'hard', count: 0, timer: 60, weak: true, cards: ['eas-nitration', 'alkene-hx'] });
+  const html2 = C.settingsCardHtml(sel, { open: true, where: 'practice', report: C.resolveReactions(sel, 'guess-reagent'), dirty: true, error: 'Oops <b>', hasWeakData: false });
+  const pressed = (g, v) => new RegExp(`data-g="${g}" data-v="${v}" aria-pressed="true"`).test(html2);
+  ok(pressed('substrates', 'arenes') && !pressed('substrates', 'alkenes') && pressed('stereo', 'has') && pressed('difficulty', 'hard') && pressed('count', '0') && pressed('timer', '60') && pressed('weak', '1') && pressed('cards', 'eas-nitration') && !pressed('cards', 'eas-bromination'), 'chips show what is chosen (aria-pressed)');
+  ok(/Individual cards <span class="nl-hint">2 of 38/.test(html2) && /Changed: press Start/.test(html2) && /class="nl-err"[^>]*>Oops &lt;b&gt;/.test(html2) && /No slips logged against a card yet/.test(html2), 'the cards count, the dirty note, the escaped error and the weak-spot note');
+  ok(/class="nl-note rs-note"/.test(html2) && /These settings cannot all be met/.test(html2), 'a relaxation notice is shown above the settings');
+  ok(/Aromatics only|Custom/.test(C.summaryOf(sel)) && /endless/.test(C.summaryOf(sel)) && /60 s each/.test(C.summaryOf(sel)) && /weak spots/.test(C.summaryOf(sel)), 'the collapsed card summarises the settings');
+  const named = C.settingsCardHtml(C.loadPreset('Aromatics only'), { open: true });
+  ok(/data-preset="Aromatics only" aria-pressed="true"/.test(named), 'the loaded preset is shown as chosen');
+  const saved = C.settingsCardHtml(S0, { open: true, presets: [...C.listPresets(), { name: 'Mine <x>', builtin: false }] });
+  ok(/data-del="Mine &lt;x&gt;"/.test(saved) && /aria-label="Delete preset Mine &lt;x&gt;"/.test(saved), 'saved presets carry a delete button and are escaped');
 }
 
 // run alone: node learn/tests/reaction-modes.mjs

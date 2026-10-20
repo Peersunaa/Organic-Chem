@@ -96,7 +96,7 @@ export async function predict({ ok, eq }) {
   ok(/\^practise-\(\[a-z0-9-\]\+\)\$/.test(app), 'router serves #practise-<skill>');
   ok(/id: 'drill-predict'/.test(app) && (app.match(/#practise-predict-product/g) || []).length >= 3, 'the hub, the home Reactions panel and the weak-spot panel link to #practise-predict-product');
   ok(/'stereo-relationships', 'predict-product'\]\.includes\(generatorForSkill\(skill\)\)/.test(app), 'the practice view draws the drill skeletal');
-  ok(/mistake: \(sk, stepId, diagnosis\) => (?:store\.logMistake|logSlip)\(\{ skill: sk, stepId, lessonId: 'practice', diagnosis \}\)/.test(app), 'practice logs every slip with its skill');
+  ok(/mistake: \(sk, stepId, diagnosis(?:, card)?\) => (?:store\.logMistake|logSlip)\(\{ skill: sk, stepId, lessonId: 'practice', diagnosis(?:, card)? \}\)/.test(app), 'practice logs every slip with its skill');
   store.resetAll();
   store.logMistake({ skill: 'predict-product', stepId: 'mastery', lessonId: 'practice', diagnosis: 'x' });
   ok(store.weakSpots().some((w) => w.skill === 'predict-product'), 'a predict-product slip shows up as a weak spot');

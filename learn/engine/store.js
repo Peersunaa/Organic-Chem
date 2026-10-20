@@ -31,15 +31,15 @@ export function setProgress(id, patch) {
   save();
 }
 
-export function logMistake({ skill, stepId, lessonId, diagnosis }) {
+export function logMistake({ skill, stepId, lessonId, diagnosis, card }) {
   const s = st();
-  s.log.push({ skill, stepId, lessonId, diagnosis, t: Date.now() });
+  s.log.push(card ? { skill, stepId, lessonId, diagnosis, card, t: Date.now() } : { skill, stepId, lessonId, diagnosis, t: Date.now() });
   if (s.log.length > 400) s.log.splice(0, s.log.length - 400);
   save();
 }
-export function logWin(skill) {
+export function logWin(skill, card) {
   const s = st();
-  s.wins.push({ skill, t: Date.now() });
+  s.wins.push(card ? { skill, card, t: Date.now() } : { skill, t: Date.now() });
   if (s.wins.length > 400) s.wins.splice(0, s.wins.length - 400);
   save();
 }
@@ -68,6 +68,18 @@ export function weakSpots(now = Date.now()) {
 export function skillScores(now = Date.now()) {
   const out = {};
   for (const m of Object.values(skillMap(now))) if (m.score > 0.3 && m.count > 0) out[m.skill] = m.score;
+  return out;
+}
+
+/** { cardId: score } for every reaction card with a positive weak-spot score (same decay as skillScores; a slip or win counts for the card only when it was logged with one): the reaction practice settings weight by this. */
+export function cardScores(now = Date.now()) {
+  const s = st();
+  const w = (t) => Math.pow(0.5, (now - t) / (7 * DAY));
+  const map = {};
+  for (const e of s.log) if (e.card) map[e.card] = (map[e.card] || 0) + w(e.t);
+  for (const e of s.wins) if (e.card && map[e.card] !== undefined) map[e.card] -= 0.7 * w(e.t);
+  const out = {};
+  for (const k of Object.keys(map)) if (map[k] > 0.3) out[k] = map[k];
   return out;
 }
 

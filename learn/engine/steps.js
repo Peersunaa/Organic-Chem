@@ -354,7 +354,8 @@ const RENDER = {
 
 /** Mastery / practice player: `count` fresh generated problems, each must be answered correctly. */
 export function renderProblems(cfg, ctx, host) {
-  const need = cfg.count || 3;
+  const endless = cfg.endless === true;                // the reaction practice settings: no fixed number, the learner ends the session
+  const need = endless ? Infinity : (cfg.count || 3);
   let got = 0;
   host.append(h('p', { class: 'eyebrow' }, cfg.skill ? 'Practise' : 'Mastery check'));
   const stage = h('div', { class: 'stage' });
@@ -366,7 +367,7 @@ export function renderProblems(cfg, ctx, host) {
   const stopTimer = () => { if (tick) { clearInterval(tick); tick = null; } };
   function show() {
     stopTimer();
-    bar.textContent = `Problem ${Math.min(got + 1, need)} of ${need}. Each one is generated fresh.`;
+    bar.textContent = endless ? `Problem ${got + 1}. Endless: end the session whenever you like.` : `Problem ${Math.min(got + 1, need)} of ${need}. Each one is generated fresh.`;
     stage.innerHTML = '';
     const p = generate(cfg.generator || 'lewis-basic', 1, { skill: cfg.skill || null })[0];
     const step = { id: 'mastery', skill: p.skill, hints: p.hints, worked: null };
@@ -387,7 +388,7 @@ export function renderProblems(cfg, ctx, host) {
     };
     const onWrong = (why, opt) => {
       wrong++;
-      ctx.mistake(p.skill, 'mastery', opt && opt.lead ? opt.lead : why);
+      ctx.mistake(p.skill, 'mastery', opt && opt.lead ? opt.lead : why, p.card);
       fb.className = 'fb bad'; fb.textContent = '';
       if (opt && opt.lead) {
         // a drill answer: the one specific line first, the longer reason behind "Why?", and a way back to the card (and its lesson step)
@@ -408,7 +409,7 @@ export function renderProblems(cfg, ctx, host) {
       }
     };
     const onRight = (note) => {
-      if (wrong === 0) ctx.win(p.skill);
+      if (wrong === 0) ctx.win(p.skill, p.card);
       fb.className = 'fb ok'; if (p.deriveHtml) { fb.textContent = ''; fb.append(rich('Correct. ' + p.deriveHtml, 'span')); } else fb.textContent = 'Correct. ' + p.derive;
       if (note) fb.append(h('p', { class: 'style-note' }, note));
       hints.innerHTML = '';
@@ -462,6 +463,11 @@ export function renderProblems(cfg, ctx, host) {
       WIDGETS['lewis-builder'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
     }
     card.append(fb, hints);
+    if (endless) {
+      const end = h('button', { type: 'button', class: 'btn small ghost rs-end' }, 'End session');
+      end.addEventListener('click', () => { stopTimer(); bar.textContent = `Session over: ${got} correct.`; stage.innerHTML = ''; stage.append(h('div', { class: 'fb ok' }, h('p', {}, `${got} problem${got === 1 ? '' : 's'} solved.`))); ctx.done(); });
+      card.append(end);
+    }
     if (cfg.timer > 0) {
       let left = cfg.timer;
       const clock = h('p', { class: 'nl-timer', role: 'timer' });
@@ -473,7 +479,7 @@ export function renderProblems(cfg, ctx, host) {
         left--; paint();
         if (left <= 0) {
           stopTimer(); clock.textContent = 'Time is up.';
-          ctx.mistake(p.skill, 'mastery', 'Time ran out on a naming question.');
+          ctx.mistake(p.skill, 'mastery', p.card || p.skill === 'predict-product' ? 'Time ran out on a reaction question.' : 'Time ran out on a naming question.', p.card);
           fb.className = 'fb bad'; fb.textContent = 'Time is up. Here is the worked answer; the next one is a fresh problem.';
           const ans = p.kind === 'input' ? `The answer is ${p.answer}. ` : p.kind === 'choice' ? `The answer is ${p.answer || ''}. ` : '';
           hints.innerHTML = ''; hints.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), p.deriveHtml ? rich(ans + p.deriveHtml, 'span') : ans + (p.derive || '')));
