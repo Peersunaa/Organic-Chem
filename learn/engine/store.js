@@ -3,7 +3,7 @@ const KEY = 'orgo-learn-v1';
 const DAY = 86400000;
 let state = null;
 
-function fresh() { return { v: 1, iupac: 'new', caveman: false, progress: {}, log: [], wins: [], ui: {} }; }
+function fresh() { return { v: 1, iupac: 'new', caveman: false, progress: {}, log: [], wins: [], ui: {}, mock: { bp: null, current: null, last: null, history: [] } }; }
 
 function load() {
   try {
@@ -45,8 +45,8 @@ export function logWin(skill) {
 }
 export function getLog() { return st().log.slice(); }
 
-/** Skills ranked by recent mistakes (half-life one week), reduced by recent correct practice. */
-export function weakSpots(now = Date.now()) {
+/** Every skill with its decayed mistake score ({ skill: { skill, score, count, last } }), before any filtering or ranking. */
+function skillMap(now) {
   const s = st();
   const w = (t) => Math.pow(0.5, (now - t) / (7 * DAY));
   const map = {};
@@ -57,7 +57,22 @@ export function weakSpots(now = Date.now()) {
     m.last = e;
   }
   for (const e of s.wins) if (map[e.skill]) map[e.skill].score -= 0.7 * w(e.t);
-  return Object.values(map).filter((m) => m.score > 0.3 && m.count > 0).sort((a, b) => b.score - a.score).slice(0, 5);
+  return map;
 }
+/** Skills ranked by recent mistakes (half-life one week), reduced by recent correct practice. */
+export function weakSpots(now = Date.now()) {
+  return Object.values(skillMap(now)).filter((m) => m.score > 0.3 && m.count > 0).sort((a, b) => b.score - a.score).slice(0, 5);
+}
+
+/** { skill: score } for every skill with a positive weak-spot score (all of them, not only the top five): the mock midterm weights its sections with this. */
+export function skillScores(now = Date.now()) {
+  const out = {};
+  for (const m of Object.values(skillMap(now))) if (m.score > 0.3 && m.count > 0) out[m.skill] = m.score;
+  return out;
+}
+
+/** Mock midterm: { bp (the editable blueprint), current (the open sitting), last (the latest marked paper), history (small table of attempts) }. */
+export function getMock() { const m = st().mock; return m ? { bp: m.bp || null, current: m.current || null, last: m.last || null, history: Array.isArray(m.history) ? m.history.slice() : [] } : { bp: null, current: null, last: null, history: [] }; }
+export function setMock(patch) { const s = st(); s.mock = Object.assign(getMock(), patch); if (s.mock.history.length > 20) s.mock.history.splice(0, s.mock.history.length - 20); save(); }
 
 export function resetAll() { state = fresh(); save(); }

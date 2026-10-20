@@ -10,6 +10,7 @@ import { HUB_BY_ID } from './engine/reaction-hub.js';
 import { LESSONS, PLANNED } from './lessons/index.js';
 import { buildHub } from './hub-view.js';
 import { buildPastpaper } from './pastpaper-view.js';
+import { mockView } from './mock-view.js';
 import { momentFor } from './engine/stereo-moments.js';
 import { stereoBlock } from './stereo-view.js';
 import * as voice from './engine/voice.js';
@@ -142,10 +143,16 @@ function home() {
   const pp = h('section', { class: 'panel', 'aria-labelledby': 'pp-h' }, h('h2', { id: 'pp-h' }, 'Past papers'),
     h('p', { class: 'muted' }, 'The midterm questions by topic: what each one asks, the steps to answer it, and where to learn it.'),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#pastpaper', id: 'open-pastpaper' }, 'Open past papers')));
+  const mk = store.getMock(), mkOpen = mk.current && mk.current.status === 'open';
+  const mkLeft = mkOpen ? Math.max(0, Math.round((mk.current.startedAt + mk.current.minutes * 60000 - Date.now()) / 60000)) : 0;
+  const mockPanel = h('section', { class: 'panel', 'aria-labelledby': 'mock-h' }, h('h2', { id: 'mock-h' }, 'Mock midterm'),
+    h('p', { class: 'muted' }, mkOpen ? `A paper is in progress, about ${mkLeft} min left on the clock.` : 'A timed paper in the midterm’s own mix of sections, fresh molecules every time, marked at the end with the fact you missed and where to learn it.'),
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#mock', id: 'open-mock' }, mkOpen ? 'Resume the paper' : 'Open the mock midterm'),
+      !mkOpen && mk.last ? h('a', { class: 'btn ghost', href: '#mock/script', id: 'open-mock-script' }, 'My last marked script') : null));
   const gl = h('section', { class: 'panel', 'aria-labelledby': 'gl-h' }, h('h2', { id: 'gl-h' }, 'Glossary'),
     h('p', { class: 'muted' }, `${GLOSSARY.length} short definitions: nucleophile, sp³, resonance, R/S and more. In a lesson, tap any dotted word to see its meaning.`),
     h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#glossary', id: 'open-glossary' }, 'Open the glossary')));
-  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, rx, pp, gl, panel)));
+  mount(header(), hero, h('div', { class: 'cols' }, lessons, h('div', { class: 'side' }, rx, pp, mockPanel, gl, panel)));
   const op = document.getElementById('open-practice');
   if (op) op.addEventListener('click', () => { const t = panel.querySelector('summary') || panel; panel.scrollIntoView?.({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); t.focus?.({ preventScroll: true }); });
 }
@@ -280,7 +287,7 @@ function lessonView(L, startId) {
 
 function practice(skill, cardId = null) {
   if (MODE_IDS.includes(skill)) setModeCard(cardId && HUB_BY_ID[cardId] ? cardId : null);
-  setDrawStyle((['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships', 'predict-product'].includes(generatorForSkill(skill)) || MODE_IDS.includes(generatorForSkill(skill))) ? 'skeletal' : 'full');
+  setDrawStyle((['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships', 'predict-product'].includes(generatorForSkill(skill)) || generatorForSkill(skill) === 'huckel' || MODE_IDS.includes(generatorForSkill(skill))) ? 'skeletal' : 'full');
   const host = h('div', { class: 'step' });
   const card = h('article', { class: 'card' }, host);
   const ctx = {
@@ -318,7 +325,13 @@ function pastpaper() {
   mount(header(), h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Past papers, by topic'),
     h('p', { class: 'lede' }, 'Each midterm question from the workbook, in plain words, with the steps to answer it and a link to where you learn it.'),
     h('p', { class: 'muted small' }, 'This page covers only the sections on this midterm (A1, A2, A3, A5 HBr, B1, B2, B3, B4, B6).'),
-    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'pp-reactions' }, 'Reactions'), h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'pp-drill' }, 'Drill'))), buildPastpaper(chemP));
+    h('div', { class: 'rx-btns' }, h('a', { class: 'btn primary', href: '#reactions', id: 'pp-reactions' }, 'Reactions'), h('a', { class: 'btn ghost', href: '#practise-predict-product', id: 'pp-drill' }, 'Drill'), h('a', { class: 'btn ghost', href: '#mock', id: 'pp-mock' }, 'Mock midterm'))), buildPastpaper(chemP));
+}
+
+// ---------------------------------------------------------------- Mock midterm (start screen, sitting, marked script: mock-view.js)
+function mock(which) {
+  const env = { mount, header, chemP, setDrawStyle, rerun: (w) => mockView(w, env) };
+  mockView(which, env);
 }
 
 // ---------------------------------------------------------------- Glossary
@@ -338,6 +351,7 @@ function route() {
   if (hash === 'reactions') return hub();
   if ((m = /^reactions\/([a-z0-9-]+)$/.exec(hash))) return hub(m[1]);
   if (hash === 'pastpaper') return pastpaper();
+  if ((m = /^mock(?:\/(script))?$/.exec(hash))) return mock(m[1] ? 'script' : 'main');
   if (hash === 'reactions-practice') return reactionsPractice();
   if ((m = /^practise-guess-reagent\/([a-z0-9-]+)$/.exec(hash))) return practice('guess-reagent', m[1]);
   if (hash === 'glossary') return glossary();

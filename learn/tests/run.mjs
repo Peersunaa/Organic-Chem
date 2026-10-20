@@ -46,6 +46,7 @@ import { reactionModes } from './reaction-modes.mjs';
 import { stereoProjections } from './stereo-projections.mjs';
 import { namingLevels } from './naming-levels.mjs';
 import { pastpaper } from './pastpaper.mjs';
+import { mock } from './mock.mjs';
 import { stereoMoments } from './stereo-moments.mjs';
 import { player } from './player.mjs';
 import { voice } from './voice.mjs';
@@ -53,7 +54,7 @@ import { text } from './text.mjs';
 import { figures } from './figures.mjs';
 import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product', 'stereo-projections', 'naming-levels', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product', 'stereo-projections', 'naming-levels', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work', 'aromaticity']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -1197,6 +1198,9 @@ await namingLevels({ ok, eq });
 
 // ---- Past-paper walkthrough: every item has its fields, every lesson/hub link resolves, scope and section order, router, home panel, CSS block (tests/pastpaper.mjs)
 await pastpaper({ ok, eq });
+
+// ---- Mock midterm: blueprint sums, 20 seeded papers, weighting toward weak spots (+-50%, total unchanged), marking, resume, history, the Hückel generator, wiring (tests/mock.mjs)
+await mock({ ok, eq });
 
 // ---- 3D stereo moments: every moment maps to a real step and a real model whose geometry matches its caption (tests/stereo-moments.mjs)
 await stereoMoments({ ok, eq });
