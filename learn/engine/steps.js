@@ -434,6 +434,7 @@ export function renderProblems(cfg, ctx, host) {
   const bar = h('p', { class: 'muted count' });
   host.insertBefore(bar, stage);
 
+  const recent = [];                                 // signatures of the last problems of a question type's practice (no verbatim repeats)
   let tick = null;                                   // the per-question timer (cfg.timer seconds; the naming drill's settings choose it)
   const stopTimer = () => { if (tick) { clearInterval(tick); tick = null; } };
   function show() {
@@ -441,7 +442,12 @@ export function renderProblems(cfg, ctx, host) {
     bar.textContent = cfg.status ? cfg.status() : endless ? `Problem ${got + 1}. Endless: end the session whenever you like.` : cfg.extra ? `Extra practice, problem ${tally.shown + 1}. Each one is generated fresh; none of it changes your result.` : `Problem ${tally.shown + 1}: ${got} of ${need} right first try so far. Each one is generated fresh, and only a right first answer counts.`;
     stage.innerHTML = '';
     const src = cfg.next ? cfg.next() : cfg;
-    const p = generate(src.generator || 'lewis-basic', 1, { skill: src.skill || null, settings: src.settings || null, tasks: src.tasks || null })[0];
+    let p = generate(src.generator || 'lewis-basic', 1, { skill: src.skill || null, settings: src.settings || null, tasks: src.tasks || null })[0];
+    if (cfg.next) {   // a question type's practice: not the same question (prompt + molecule + choices) as any of the last eight (student test 2026-10-21, #7)
+      const sig = (q) => JSON.stringify([q.prompt, q.smiles, q.answer, (q.options || []).map((o) => o.smiles || o.text).sort()]);
+      for (let t = 0; t < 12 && recent.includes(sig(p)); t++) { const s2 = cfg.next(); p = generate(s2.generator || 'lewis-basic', 1, { skill: s2.skill || null, settings: s2.settings || null, tasks: s2.tasks || null })[0]; }
+      recent.push(sig(p)); if (recent.length > 8) recent.shift();
+    }
     if (cfg.next && p.visual && !Array.isArray(p.visual) && p.visual.widget === 'naming-levels-bar') delete p.visual;   // a question type pins its own naming settings: the drill's settings card stays on the drill page
     const step = { id: 'mastery', skill: p.skill, hints: p.hints, worked: null };
     const card = h('div', { class: 'problem' });
@@ -454,7 +460,7 @@ export function renderProblems(cfg, ctx, host) {
     const hints = h('div', { class: 'hints' });
     let wrong = 0, settled = false, told = false;
     const ft = firstTry();
-    const settle = (counted) => { if (told) return; told = true; if (cfg.onSettled) cfg.onSettled(counted, p); };   // once per problem
+    const settle = (counted) => { if (told) return; told = true; if (cfg.onSettled) cfg.onSettled(counted, p); if (cfg.status) bar.textContent = cfg.status(); };   // once per problem; the run counter repaints at once
     const advance = (ok) => {                          // ok: this problem COUNTS (its first answer was right)
       settled = true; stopTimer();
       const btn = h('button', { type: 'button', class: 'btn primary' }, ok ? (got + 1 >= need ? 'Finish' : 'Next problem') : 'Try another');

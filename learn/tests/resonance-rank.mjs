@@ -111,7 +111,7 @@ export async function resonanceRank({ ok, eq }) {
       eq(canon(p.direction === 'to-skeletal' ? right.smiles : condensedToSmiles(plain(right.text))), canon(target), `${w}: the right option is the target molecule`);
       if (p.direction === 'to-skeletal') {
         ok(p.smiles === null && p.prompt.startsWith('Which skeletal drawing is this condensed formula? ') && p.options.every((o) => o.smiles && /^Option [A-D]$/.test(o.text)), `${w}: drawn options, condensed text in the prompt`);
-        eq(plain(p.prompt.split('? ')[1]), p.condensed, `${w}: the prompt shows the condensed formula`);
+        eq(plain(p.prompt.split('? ')[1]).replace(/≡/g, '#'), p.condensed, `${w}: the prompt shows the condensed formula`);   // the page shows a triple bond as ≡
       } else {
         ok(p.smiles === target && p.prompt === 'Which condensed formula matches this drawing?' && p.options.every((o) => !o.smiles && o.text), `${w}: the drawing is shown, the options are text`);
       }

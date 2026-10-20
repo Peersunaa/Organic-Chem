@@ -23,17 +23,20 @@ export function usable(p) {
   if (p.kind === 'choice') return Array.isArray(p.options) && p.options.filter((o) => o.correct).length === 1;
   return false;
 }
-const key = (p) => JSON.stringify([p.prompt, p.smiles, p.answer, (p.options || []).map((o) => o.text || o.smiles)]);
+const key = (p) => JSON.stringify([p.prompt, p.smiles, p.answer, (p.options || []).map((o) => o.text || o.smiles).sort()]);
+/** The SHAPE of a problem (its prompt with numbers and names blanked, its skill): the three examples of a type should show three different shapes when the source can make them (student test 2026-10-21, #2). */
+const shape = (p) => p.skill + '|' + String(p.prompt || p.promptHtml || '').replace(/<[^>]+>/g, '').replace(/[0-9]+(\.[0-9]+)?/g, '#').replace(/[a-z0-9,()\-]*(ane|ene|yne|ol|al|one|ate|ide|ine|acid|ion|ium)/gi, '~').slice(0, 80);
+const molOf = (p) => p.smiles || (p.extra ? JSON.stringify(p.extra) : '') || (p.equation ? JSON.stringify(p.equation) : '');
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   await ready();
   const seeds = {};
   for (const t of TYPES) {
     if (only.length && !only.includes(t.id)) { seeds[t.id] = OLD[t.id] || []; continue; }
-    const dead = new Set(), got = [], seen = new Set();
+    const dead = new Set(), got = [], seen = new Set(), shapes = new Set(), mols = new Set();
     for (let i = 0; i < 3; i++) {
       let done = false;
-      for (let k = 0; k < t.sources.length && !done; k++) {
+      for (let pass = 0; pass < 2 && !done; pass++) for (let k = 0; k < t.sources.length && !done; k++) {
         const si = (i + k) % t.sources.length;
         if (dead.has(si)) continue;
         for (let seed = 1; seed <= MAX_SEED && !done; seed++) {
@@ -43,7 +46,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
             continue;
           }
           if (!usable(p) || seen.has(key(p))) continue;
-          seen.add(key(p)); got.push({ src: si, seed }); done = true;
+          // first pass over the seeds: a new shape AND a new molecule; if none is found by MAX_SEED, the fallback pass below accepts any unseen problem
+          if (pass === 0 && (shapes.has(shape(p)) || (molOf(p) && mols.has(molOf(p))))) continue;
+          seen.add(key(p)); shapes.add(shape(p)); mols.add(molOf(p)); got.push({ src: si, seed }); done = true;
         }
       }
     }

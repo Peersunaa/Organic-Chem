@@ -30,6 +30,9 @@ function bar(done, total, label) {
   return h('span', { class: 'ms-bar', role: 'img', 'aria-label': label }, h('i', { style: `width:${total ? Math.round((done / total) * 100) : 0}%` }));
 }
 const overallText = (p) => `${p.mastered} of ${p.total} types mastered`;
+const marksText = (n) => `${n} mark${n === 1 ? '' : 's'}`;
+/** The midterm's section codes, for the legend on the course page. */
+const SECTION_LEGEND = 'A1 naming · A2 stereochemistry · A3 chairs and conformations · A5 HBr addition · B1 fix the name · B2 Hückel · B3 reactions · B4 directors and resonance · B6 stereocontrol · any = can turn up inside any part.';
 
 // ================================================================================================ the course page
 function coursePage() {
@@ -37,13 +40,16 @@ function coursePage() {
   const live = liveTypes();
   const lhead = h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'Question-type mastery'),
     h('p', { class: 'lede' }, 'Every kind of question the midterm can ask, in exam-weight order. Learn to recognise it, follow the procedure, see what earns each mark, then practise until you get five in a row right first time.'),
-    h('div', { class: 'ms-overall' }, h('p', { class: 'ms-overall-t', id: 'ms-overall' }, overallText(P)), bar(P.mastered, P.total, `${P.pct}% of the question types mastered`)));
+    h('div', { class: 'ms-overall' }, h('p', { class: 'ms-overall-t', id: 'ms-overall' }, overallText(P)), bar(P.mastered, P.total, `${P.pct}% of the question types mastered`)),
+    h('div', { class: 'ms-how', id: 'ms-how' },
+      h('p', {}, h('b', {}, 'Start at the top and work down.'), ' The ladder is in exam-weight order, so the first types carry the most marks. A type takes about 10 to 15 minutes: read it, go through the three examples, then practise until five in a row are right first time. The five dots on each row are your current run; the last two groups are the Chapter 1 and 2 foundations, a quick refresher if a step above feels unfamiliar.'),
+      h('p', { class: 'small muted' }, h('b', {}, 'The chips: '), SECTION_LEGEND)));
   const groups = GROUPS.filter((g) => live.some((t) => t.group === g.id)).map((g) => {
     const rows = live.filter((t) => t.group === g.id).map((t) => {
       const s = MS.getState(t.id);
       return h('li', {}, h('a', { class: 'ms-type' + (s.mastered ? ' is-m' : ''), href: '#master/' + t.id, id: 'ms-type-' + t.id },
-        h('span', { class: 'ms-t' }, h('b', {}, t.title), h('span', { class: 'ms-chips' }, h('span', { class: 'chip' }, sectionText(t)), h('span', { class: 'chip' }, `${t.weight} marks`))),
-        h('span', { class: 'ms-st' }, dots(s), s.mastered ? h('span', { class: 'chip ok' }, 'Mastered') : null, s.best ? h('span', { class: 'ms-best muted small' }, `best run ${s.best}`) : null)));
+        h('span', { class: 'ms-t' }, h('b', {}, t.title), h('span', { class: 'ms-chips' }, h('span', { class: 'chip' }, sectionText(t)), h('span', { class: 'chip' }, marksText(t.weight)))),
+        h('span', { class: 'ms-st' }, dots(s), s.mastered ? h('span', { class: 'chip ok' }, 'Mastered') : null, s.best ? h('span', { class: 'ms-best muted small' }, `best run ${s.best} in a row`) : null)));
     });
     const gp = P.groups[g.id];
     return h('section', { class: 'ms-group', 'aria-labelledby': 'ms-g-' + g.id },
@@ -68,6 +74,8 @@ function exampleCard(p, k) {
   else if (p.kind !== 'builder' && p.kind !== 'polarity' && p.kind !== 'arrows' && p.kind !== 'groupfind' && p.kind !== 'cip' && p.smiles) card.append(molFigure(p.smiles, '', { highlight: p.highlight }));
   if (p.equation) card.append(equationRow(p.equation));
   if (p.visual && !isSettingsBar(p.visual)) mountVisual(card, p.visual);   // the naming drill's settings bar belongs to its own page, not to a worked example
+  // act first: the choices, the answer and the worked line sit behind one tap, so the question can be tried in the head before it is given away (student test 2026-10-21, #10)
+  const reveal = h('details', { class: 'fb-more ms-reveal' }, h('summary', {}, 'Show the answer and the working'));
   if (p.kind === 'choice') {
     const list = h('div', { class: 'opts' + (p.options.some((o) => o.smiles) ? ' mols' : ''), role: 'group', 'aria-label': 'The choices, with the right one marked' });
     p.options.forEach((o) => {
@@ -75,12 +83,13 @@ function exampleCard(p, k) {
       if (o.correct) b.append(h('span', { class: 'sr-only' }, ' (the right answer)'));
       list.append(b);
     });
-    card.append(list);
+    reveal.append(list);
   } else {
     const also = (p.accept || []).filter((a) => typeof a === 'string' && a !== String(p.answer)).slice(0, 3);
-    card.append(h('p', { class: 'ms-answer' }, h('b', {}, 'Answer: '), answerText(p), also.length ? h('span', { class: 'muted small' }, ` (also accepted: ${also.join(', ')})`) : null));
+    reveal.append(h('p', { class: 'ms-answer' }, h('b', {}, 'Answer: '), answerText(p), also.length ? h('span', { class: 'muted small' }, ` (also accepted: ${also.join(', ')})`) : null));
   }
-  card.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), p.deriveHtml ? rich(p.deriveHtml, 'span') : p.derive));
+  reveal.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), p.deriveHtml ? rich(p.deriveHtml, 'span') : p.derive));
+  card.append(reveal);
   return card;
 }
 
@@ -102,7 +111,7 @@ function practicePanel(type, chemP) {
   const banner = h('div', { class: 'ms-banner', id: 'ms-banner', 'aria-live': 'polite' });
   const host = h('div', { class: 'step' });
   const card = h('article', { class: 'card ms-card', hidden: 'hidden' }, host);
-  const panel = h('section', { class: 'panel ms-practise', 'aria-labelledby': 'ms-pr-h' },
+  const panel = h('section', { class: 'panel ms-practise', id: 'ms-practice', 'aria-labelledby': 'ms-pr-h' },
     h('h2', { id: 'ms-pr-h' }, 'Practise to mastery'),
     h('div', { class: 'ms-streak' }, strip, run, mastered),
     h('p', { class: 'muted' }, `Five first-try answers in a row, and the type is mastered; a miss resets the run.`),
@@ -171,10 +180,13 @@ function linksRow(type) {
 // ================================================================================================ one type's page
 function typePage(type, chemP) {
   const g = GROUP_BY_ID[type.group];
+  // the practice sits under four panels: one tap scrolls there (a hash link would change the route)
+  const jump = h('button', { type: 'button', class: 'btn small ghost', id: 'ms-jump' }, 'Jump to the practice');
+  jump.addEventListener('click', () => { const el = document.getElementById('ms-practice'); if (el) { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); const b = document.getElementById('ms-start'); if (b) b.focus({ preventScroll: true }); } });
   const lhead = h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#master' }, '← Mastery course'),
     h('p', { class: 'eyebrow' }, `${g.title} · Chapter ${type.chapter} · ${sectionText(type)}`),
     h('h1', { class: 'ltitle' }, type.title),
-    h('div', { class: 'ms-top' }, h('span', { class: 'chip' }, `${type.weight} marks`), h('span', { class: 'chip ok', id: 'ms-mastered-top', hidden: MS.getState(type.id).mastered ? null : 'hidden' }, 'Mastered')));
+    h('div', { class: 'ms-top' }, h('span', { class: 'chip' }, marksText(type.weight)), h('span', { class: 'chip ok', id: 'ms-mastered-top', hidden: MS.getState(type.id).mastered ? null : 'hidden' }, 'Mastered'), jump));
   const list = (tag, items) => h(tag, { class: 'ms-ul' }, items.map((x) => h('li', {}, rich(x, 'span'))));
   const panel = (id, title, ...kids) => h('section', { class: 'panel', 'aria-labelledby': id }, h('h2', { id }, title), ...kids);
   const recognise = panel('ms-rec-h', 'Recognise it', rich(type.recognise, 'p'), list('ul', type.cues));

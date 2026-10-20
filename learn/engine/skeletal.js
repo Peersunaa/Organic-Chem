@@ -76,7 +76,7 @@ export function condensedToSmiles(text) {
     const pend = [];
     while (st.i < s.length && s[st.i] !== ')') {
       const c = s[st.i];
-      if (c === '=' || c === '#') { order = c === '=' ? 2 : 3; st.i++; continue; }
+      if (c === '=' || c === '#' || c === '≡') { order = c === '=' ? 2 : 3; st.i++; continue; }   // ≡ is how the page shows a triple bond
       if (c === '(') {
         const start = st.i + 1;
         let depth = 1, j = start;
@@ -214,4 +214,4 @@ export function condensedOf(smiles) {
   return ranked[0].str;
 }
 /** Plain digits -> subscript digits, for display. */
-export const subscriptDigits = (s) => String(s).replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[d]);
+export const subscriptDigits = (s) => String(s).replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[d]).replace(/#/g, '≡');   // for display: a triple bond reads as ≡, never as the SMILES #
