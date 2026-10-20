@@ -72,6 +72,23 @@ export function piCloud(molblock, height = 0.95, radius = 0.5) {
   return { center: c, normal, spheres };
 }
 
+/**
+ * Lesson 08: the empty p orbital of a flat carbocation, as two translucent coral blobs standing above and below the + carbon (the plane's normal), plus the unit normal
+ * (pointing up the screen, +y) so a label can sit above the top blob. Computed from the molblock: `center` = the + carbon's atom index, `ref` = two of its neighbours.
+ * Returns {center, normal, spheres:[{x,y,z,r}]}.
+ */
+export function pLobes(molblock, center, ref) {
+  const lines = molblock.split('\n');
+  const P = (i) => { const l = lines[4 + i]; return [parseFloat(l.slice(0, 10)), parseFloat(l.slice(10, 20)), parseFloat(l.slice(20, 30))]; };
+  const c = P(center), u = P(ref[0]).map((v, k) => v - c[k]), w = P(ref[1]).map((v, k) => v - c[k]);
+  let n = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]];
+  const len = Math.hypot(...n) || 1; n = n.map((v) => v / len);
+  if (n[1] < 0) n = n.map((v) => -v);
+  const spheres = [];
+  for (const side of [1, -1]) [[0.85, 0.4], [1.35, 0.52], [1.85, 0.4]].forEach(([d, r]) => spheres.push({ x: c[0] + side * d * n[0], y: c[1] + side * d * n[1], z: c[2] + side * d * n[2], r }));
+  return { center: c, normal: n, spheres };
+}
+
 export default {
   id: 'model3d',
   mount(host, config) {
@@ -116,7 +133,16 @@ export default {
           views.appendChild(box);
           const v = $3Dmol.createViewer(box, { backgroundAlpha: 0, antialias: true });
           v.addModel(models[id].molblock, 'sdf');
-          if (config.labels && id === config.mol) for (const [idx, text] of Object.entries(config.labels)) { const at = v.selectedAtoms({ index: Number(idx) })[0]; if (at) v.addLabel(text, { fontSize: 14, backgroundOpacity: 0.6, position: at }); }
+          // labels: { atomIndex: 'text' } on the atom, or { atomIndex: { text, up } } `up` angstroms above it along the flat plane's normal (config.lobes), so an atom hidden in the middle of the model still has a readable label
+          if (config.labels && id === config.mol) for (const [idx, lab] of Object.entries(config.labels)) {
+            const at = v.selectedAtoms({ index: Number(idx) })[0];
+            if (!at) continue;
+            const text = typeof lab === 'string' ? lab : lab.text;
+            let position = at;
+            if (typeof lab === 'object' && lab.up && config.lobes) { const n = pLobes(models[id].molblock, config.lobes.center, config.lobes.ref).normal; position = { x: at.x + n[0] * lab.up, y: at.y + n[1] * lab.up, z: at.z + n[2] * lab.up }; }
+            v.addLabel(text, { fontSize: 14, backgroundOpacity: 0.6, position });
+          }
+          if (config.lobes && id === config.mol) pLobes(models[id].molblock, config.lobes.center, config.lobes.ref).spheres.forEach((sp) => v.addSphere({ center: { x: sp.x, y: sp.y, z: sp.z }, radius: sp.r, color: 0xe2614a, alpha: 0.92 }));
           v.zoomTo();
           viewers.push(v);
         });
@@ -133,6 +159,7 @@ export default {
         if (k !== 0) return;
         try {
           v.removeAllShapes();
+          if (config.lobes) pLobes(models[config.mol].molblock, config.lobes.center, config.lobes.ref).spheres.forEach((sp) => v.addSphere({ center: { x: sp.x, y: sp.y, z: sp.z }, radius: sp.r, color: 0xe2614a, alpha: 0.92 }));
           if (piOn) piCloud(models[config.mol].molblock).spheres.forEach((sp) => v.addSphere({ center: { x: sp.x, y: sp.y, z: sp.z }, radius: sp.r, color: 0x2bb3c0, alpha: 0.32 }));
           v.render();
         } catch (e) { /* shapes are optional */ }

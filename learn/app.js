@@ -168,6 +168,8 @@ function home() {
 const noMol = (s) => String(s || '').replace(/<mol\b[^>]*?(?:label="([^"]*)")?[^>]*>\s*<\/mol>/g, (m, l) => (l ? ' ' + l : '')).replace(/<\/?p>/g, ' ').trim();
 const MINUS = (v) => (typeof v === 'number' && v < 0 ? '−' + -v : String(v));
 function recapOf(step) {
+  // a step may word its own recap (a "what you learned" line): its stem or text can name controls that are not on the next screen (novice re-test 3, finding 1)
+  if (step.recap) return { q: step.recap.q || '', a: step.recap.a || '', note: step.recap.note || '', idea: !!step.recap.idea };
   const correct = (step.options || []).find((o) => o.correct);
   const ans = (o) => (!o ? '' : o.text || o.label || (o.smiles ? `<mol smiles="${o.smiles}"></mol>` : ''));
   switch (step.type) {

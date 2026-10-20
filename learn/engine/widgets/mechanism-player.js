@@ -3,7 +3,7 @@
 // config: { mech, mode?: 'draw' | 'watch', modes?: ['draw'|'watch', ...] (one per step, overrides mode), drawing?: 'auto' | 'full' | 'skeletal', whatIf?: false }
 // whatIf:false (Lesson 08) hides the what-if row, so the first mechanism of the course does not jump to Br2 or hydration (Lesson 10 / 09 words).
 // endLabel:false (Lesson 08) leaves out the step's label line under "What happened" at the end of a step: the lesson's own closing line follows, so the outcome is
-//   said once, not three times (novice re-test 2026-10-20, N5).
+//   said once, not three times (novice re-test 2026-10-20, N5); the "Mechanism complete." line is left out too (novice re-test 3).
 // A tap on a playback picture says what moves it (Next / Back): every tap acts or explains.
 //
 // watch step: press-to-advance. Each press of Next moves exactly ONE arrow: the curve is drawn, two electron dots travel along it, the bond or lone pair it breaks
@@ -284,7 +284,7 @@ export default {
         busy = false;
         showState(j + 1, prev);
       }
-      if (n === N - 1 && c === step.arrows.length && !reported && !alt) { reported = true; prompt.textContent = 'Mechanism complete.'; ctx.onResult({ ok: true }); }
+      if (n === N - 1 && c === step.arrows.length && !reported && !alt) { reported = true; prompt.textContent = config.endLabel === false ? '' : 'Mechanism complete.'; ctx.onResult({ ok: true }); }   // in a lesson (endLabel:false) "What happened" and the lesson's closing line say it: once
     }
 
     async function doNext() {

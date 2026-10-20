@@ -175,7 +175,7 @@ function gradeCore(config, drawnRaw) {
     const d = drawn[wrong[0]];
     const sameFrom = exp.find((e) => keyOf(e.from) === keyOf(d.from));
     if (sameFrom) {
-      return { ok: false, code: 'dest', wrong, missing, diagnosis: `This arrow starts in the right place, but it points ${describeDest(config, d.from, d.to)}. ${sameFrom.note || `The electrons need to end up ${sameFrom.to.bond && findBond(config.bonds, sameFrom.to.bond[0], sameFrom.to.bond[1]) < 0 ? `as a new bond between ${atomName(config, sameFrom.to.bond[0])} and ${atomName(config, sameFrom.to.bond[1])}` : describeDest(config, sameFrom.from, sameFrom.to)}.`}` };
+      return { ok: false, code: 'dest', wrong, missing, diagnosis: `This arrow starts in the right place, but it points ${describeDest(config, d.from, d.to)}. ${sameFrom.note || `The electrons need to end up ${sameFrom.to.atom != null ? 'at ' + atomName(config, sameFrom.to.atom) : sameFrom.to.bond && findBond(config.bonds, sameFrom.to.bond[0], sameFrom.to.bond[1]) < 0 ? `as a new bond between ${atomName(config, sameFrom.to.bond[0])} and ${atomName(config, sameFrom.to.bond[1])}` : describeDest(config, sameFrom.from, sameFrom.to)}.`}` };
     }
     if (d.from.bond) {
       const rev = exp.find((e) => e.from.lp != null && e.to.atom != null && d.from.bond.includes(e.to.atom));

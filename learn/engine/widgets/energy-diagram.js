@@ -218,7 +218,7 @@ export default {
         if (revealed.has(i)) g.append(svgEl('text', { x: X(i), y: tagPos(l, i, l.E) + (l.kind === 'TS' ? -14 : 14), class: 'ed-kind', 'text-anchor': 'middle' }, KIND_NAME[l.kind]));
         if (mode === 'view' && config.notes && config.notes[i]) g.append(svgEl('text', { x: X(i), y: tagPos(l, i, l.E) + (l.kind === 'TS' ? -14 : 14) * (revealed.has(i) ? 2 : 1), class: 'ed-kind ed-noteword', 'text-anchor': 'middle' }, config.notes[i]));
         if (needTap && !done.has(ti)) {
-          g.append(svgEl('circle', { cx: X(i), cy: Y(l.E), r: 26, class: 'ed-hit' }));
+          g.append(svgEl('circle', { cx: X(i), cy: Y(l.E), r: 29, class: 'ed-hit' }));
           g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
           g.setAttribute('aria-label', `Level ${letter(i)}${l.label ? ', ' + l.label : ''}`);
           const go = () => answerTap(i);

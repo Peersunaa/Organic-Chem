@@ -181,9 +181,11 @@ function hSide(dirs) {
 }
 /** Where the charge badge of an atom goes: upper right when that corner is free, else the free corner that clears the atom's own text (symbol and H count) and its bonds
  *  (the + of a CH₂⁺ never sits on the "CH₂", novice re-test 2026-10-20, N9). */
-function chargeSpot(a, lab, x, y, dirs) {
+function chargeSpot(a, lab, x, y, dirs, pAxis = false) {
   const fs = 22 * TA, r = 7.5 * TA + 2;
   const boxes = [];
+  // an empty p orbital drawn on this atom: its two lobes stand above and below it, so keep the badge clear of that column too
+  if (pAxis) boxes.push([x - 14 * TA, y - 52 * TA, x + 14 * TA, y + 52 * TA]);
   if (lab) {
     const symW = fs * 0.62 * a.s.length, base = y + fs * 0.34;
     boxes.push([x - symW / 2, base - fs * 0.74, x + symW / 2, base + 2]);
@@ -196,7 +198,7 @@ function chargeSpot(a, lab, x, y, dirs) {
   }
   const hits = (cx, cy) => boxes.some(([x0, y0, x1, y1]) => cx + r > x0 && cx - r < x1 && cy + r > y0 && cy - r < y1);
   const C = [-Math.PI / 4, (-3 * Math.PI) / 4, Math.PI / 4, (3 * Math.PI) / 4, -Math.PI / 2, Math.PI / 2, 0, Math.PI];
-  for (const d of [24, 30, 36]) for (const t of C) {
+  for (const d of [24, 30, 36, 42]) for (const t of C) {
     if (angSep(t, dirs) < 0.5) continue;
     const cx = x + Math.cos(t) * d * TA, cy = y + Math.sin(t) * d * TA;
     if (!hits(cx, cy)) return [cx, cy];
@@ -339,10 +341,13 @@ function orbitalSvg(o, ctx) {
         body = `<circle cx="${f1(x - 3)}" cy="${f1(y - 3)}" r="${f1(0.5 * SC * k)}" fill="var(--bad)" fill-opacity=".08" stroke="var(--bad)" stroke-width="2" stroke-dasharray="5 4"/>`;
       } else {
         const only = o.side === 'top' ? 'up' : o.side === 'bottom' ? 'down' : null;
-        body = G.pOrbital(x, y, -90, { empty: true, color: 'bad', size: clamp(k, 0.8, 1.4) });
+        // the lobes start just beyond the atom's label (the "CH₂" text), so the dashed outline never runs through the letters (novice re-test 3, N9)
+        const a0 = ctx.atoms && ctx.atoms.get(o.atoms[0]);
+        const gap = a0 && labelled(a0, ctx.nbrs(o.atoms[0]).length) ? 13 * TA : 0;
+        body = G.pOrbital(x, y, -90, { empty: true, color: 'bad', size: clamp(k, 0.8, 1.4), gap });
         if (only) body = `<g style="clip-path:inset(${only === 'up' ? '0 0 50% 0' : '50% 0 0 0'})">${body}</g>`;
       }
-      return `<g class="ms-orb" opacity="${EMPH[o.emphasis]}" ${dash}>${body}${lab(x, y - 0.6 * SC * k * Math.max(st, 0.55) - 26)}</g>`;
+      return `<g class="ms-orb" opacity="${EMPH[o.emphasis]}" ${dash}>${body}${lab(x, y - 0.6 * SC * k * Math.max(st, 0.55) - 26 - 13 * TA)}</g>`;
     }
     case 'lone-pair': {
       const [x, y] = S(o.atoms[0]);
@@ -594,6 +599,8 @@ export function renderScene(scene, layout, t, opts = {}) {
   }
 
   // ---- atoms: labels, lone pairs, charges
+  const pEmptyOn = new Set();   // atoms that carry an empty p orbital in some beat of this scene (stable per scene, so a badge does not jump between beats)
+  scene.beats.forEach((bt) => (bt.orbitals || []).forEach((o) => { if (o.kind === 'p-empty' && o.plane !== 'y') o.atoms.forEach((id) => pEmptyOn.add(id)); }));
   const lpArrows = arrows.filter((a) => a.from.lp != null);
   const atomSvgs = [];
   const chargeWin = stat ? 1 : smooth(p, 0.85, 1);
@@ -647,7 +654,7 @@ export function renderScene(scene, layout, t, opts = {}) {
     }
     // charge
     const c0 = a0 ? a0.c : 0, c1 = a1 ? a1.c : 0;
-    const [cx, cy] = c0 || c1 ? chargeSpot(a, lab, q[0], q[1], dirs) : [0, 0];
+    const [cx, cy] = c0 || c1 ? chargeSpot(a, lab, q[0], q[1], dirs, showOrbitals && pEmptyOn.has(id)) : [0, 0];
     if (c0 === c1) { if (c1) out.push(`<g opacity="${op}">${chargeSvg(cx, cy, c1, TA)}</g>`); } else {
       if (c0) out.push(`<g opacity="${f1((1 - chargeWin) * op * 100) / 100}">${chargeSvg(cx, cy, c0, TA)}</g>`);
       if (c1) out.push(`<g opacity="${f1(chargeWin * op * 100) / 100}">${chargeSvg(cx, cy, c1, TA)}</g>`);

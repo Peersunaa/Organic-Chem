@@ -93,7 +93,7 @@ function edgeOnModel(mb, centre, ref, tiltDeg) {
   const unit = (a) => { const m = Math.hypot(...a); return a.map((v) => v / m); };
   const c = P(centre), u = sub(P(ref[0]), c), w = sub(P(ref[1]), c);
   const ey = unit(cross(u, w)), ex = unit(sub(u, ey.map((v) => v * dot(u, ey)))), ez = cross(ex, ey);
-  const t = (tiltDeg * Math.PI) / 180, ph = Math.PI / 2;   // in-plane turn: one methyl toward the viewer, the other two left and right
+  const t = (tiltDeg * Math.PI) / 180, ph = 0;   // no in-plane turn: one methyl points right, the other two sit left (one in front, one behind), so nothing hides the + carbon in the middle (novice re-test 3, N8)
   const out = L.slice();
   for (let i = 0; i < n; i++) {
     const d = sub(P(i), c);
@@ -295,7 +295,8 @@ export default {
       id: 's13', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'Draw step 1. Draw both arrows and press Check; then press Next to watch each pair of electrons move.',
       config: { mech: HCL_STEP1, mode: 'draw', whatIf: false, endLabel: false },
-      confirm: 'Step 1 drawn and watched. The next screens look at the + carbon it leaves behind.',
+      confirm: 'Next: the + carbon that step 1 leaves behind.',
+      recap: { q: 'Step 1 of HCl + ethylene.', note: 'Two arrows: the π bond reaches the H of HCl, and the H–Cl pair leaves with Cl. That leaves CH₃CH₂⁺ and Cl⁻.' },
       hints: ['Two arrows: one makes the new C–H bond, one breaks the H–Cl bond.', 'Arrow 1: tap the C=C, then the H of HCl. Arrow 2: tap the H–Cl line, then Cl.'],
       hintsFor: { dest: ['Each start is right; check where each one ends. The π pair ends on the H of HCl; the H–Cl pair ends on Cl.', 'Starts right. π pair to H; H–Cl pair to Cl.'] },
       worked: 'Arrow 1: from the C=C bond to the H of HCl (the new C–H bond). Arrow 2: from the H–Cl bond onto Cl. That gives CH₃CH₂⁺ and Cl⁻.'
@@ -316,10 +317,11 @@ export default {
       reveal: 'Six electrons: two short of an octet. That is what makes a <b>carbocation</b> electron-poor.'
     },
     {
-      caveman: {"html":"<p><b>Carbocation</b>: real. + C: three bonds, six electrons, no lone pair: <b>flat</b> (sp², one plane, 120°).</p><p><b>Empty p orbital</b>: lobe above, lobe below, empty: pair comes in. Model (CH₃)₃C⁺ edge-on: one flat sheet. Scene: lobes.</p>"}, // CAVEMAN
+      caveman: {"html":"<p><b>Carbocation</b>: real. + C: three bonds, six electrons, no lone pair: <b>flat</b> (sp², one plane, 120°).</p><p><b>Empty p orbital</b>: lobe above, lobe below, empty: pair comes in. Model (CH₃)₃C⁺ edge-on: flat sheet; coral blobs = empty p.</p>"}, // CAVEMAN
       id: 's15', type: 'explain', skill: 'carbocations',
-      html: '<p>A <b>carbocation</b> is a real species. Its + carbon has three bonds, six electrons and no lone pair, so it is <b>flat</b>: <b>sp²</b>, three groups in one plane, 120° apart.</p><p>Its unused orbital is an <b>empty p orbital</b>: a dumbbell up through the carbon, one lobe above the plane and one below, with no electrons: room for an incoming pair. The (CH₃)₃C⁺ model below is edge-on: four carbons, one flat sheet. “Watch the scene” shows the lobes.</p>',
-      visual: { widget: 'model3d', config: { mol: EDGE_ID, highlight: [1], labels: { 1: 'C⁺' } } }
+      html: '<p>A <b>carbocation</b> is a real species. Its + carbon has three bonds, six electrons and no lone pair, so it is <b>flat</b>: <b>sp²</b>, three groups in one plane, 120° apart.</p><p>Its unused orbital is an <b>empty p orbital</b>: a dumbbell through the carbon, one lobe above the plane and one below, no electrons: room for an incoming pair. In the (CH₃)₃C⁺ model below the flat sheet is edge-on and the coral blobs are the empty p orbital.</p>',
+      recap: { idea: true, note: '<p>A <b>carbocation</b> is a real species. Its + carbon has three bonds, six electrons and no lone pair, so it is <b>flat</b> (<b>sp²</b>: three groups in one plane, 120° apart).</p><p>Its unused orbital is an <b>empty p orbital</b>: one lobe above the plane, one below, no electrons: room for an incoming pair.</p>' },
+      visual: { widget: 'model3d', config: { mol: EDGE_ID, highlight: [1], lobes: { center: 1, ref: [0, 2] }, labels: { 1: { text: 'C⁺', up: 3.1 } } } }
     },
     {
       caveman: {"prompt": "Cl⁻ meets CH₃CH₂⁺. Which arrow joins?", "reveal": "Lone pair → atom: Cl⁻ pair into empty p orbital: C–Cl. Product CH₃CH₂Cl.", "options": [{"why": "Yes. Cl⁻ rich, C⁺ poor (six): lone pair → atom makes C–Cl."}, {"why": "C⁺ has no spare pair. Start at electrons: Cl⁻."}, {"why": "Cl⁻ already rich. Poor partner: + carbon."}, {"why": "Every new bond needs a pair; arrow shows source: Cl⁻ lone pair."}]}, // CAVEMAN
@@ -342,6 +344,7 @@ export default {
       reaction: { reactants: MECH['hcl-ethylene'].reactants, products: MECH['hcl-ethylene'].products },
       config: { mech: MECH['hcl-ethylene'], modes: ['watch', 'draw'], whatIf: false, endLabel: false },
       confirm: 'The whole mechanism, in two steps. Every arrow ran from an electron-rich site to an electron-poor one.',
+      recap: { q: 'HCl + ethylene, both steps.', note: 'Two steps: the π bond reaches the H of HCl and Cl leaves as Cl⁻, then a lone pair of Cl⁻ fills the empty p orbital of the + carbon. Every arrow ran from an electron-rich site to an electron-poor one.' },
       hints: ['Step 2 has one arrow. Start at the electron-rich partner.', 'Tap a lone pair on Cl⁻, then tap the + carbon.'],
       hintsFor: { dest: ['Your start is right: a lone pair on Cl⁻. End it on the + carbon, the one with only three bonds.', 'Start right. End on + carbon.'] },
       worked: 'Step 1 plays on its own. Step 2: tap a lone pair on Cl⁻, then tap the + carbon. The pair becomes the C–Cl bond: CH₃CH₂Cl.'
@@ -408,6 +411,7 @@ export default {
       caveman: {"prompt": "Diagram for HCl + ethylene. Find each part.", "worked": "Hill tops B, D: transition states. Valley C: carbocation with Cl⁻. B higher: step 1 slow.", "hints": ["Hill top: transition state. Valley: intermediate.", "Transition states B, D. Intermediate C. Higher: B."]}, // CAVEMAN
       id: 's23', type: 'try', skill: 'energy-diagram', widget: 'energy-diagram',
       prompt: 'This is the diagram for HCl + ethylene. Find each part.',
+      aside: '<p><b>From step 22:</b> a hill top is a <b>transition state</b> (the brief peak a step has to climb). A valley between two hills is an <b>intermediate</b> (a real, short-lived species: here the carbocation). Letters are only names for the levels.</p>',
       config: { levels: HCL_ETHYLENE_LEVELS, mode: 'tasks', tasks: ['ts', 'intermediate', { task: 'rds', ask: 'Tap the hill top of the slower step.' }], caption: 'Illustrative energies, not measured values.' },
       confirm: 'Hill tops B and D are transition states; the valley C is the carbocation intermediate; B is the higher hill, so step 1 is the slow step.',
       hints: ['A hill top is a transition state. A valley between two hills is an intermediate.', 'The transition states are B and D. The intermediate is C. The higher hill top is B.'],

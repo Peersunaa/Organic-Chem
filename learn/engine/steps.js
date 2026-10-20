@@ -397,7 +397,7 @@ const RENDER = {
   mastery(step, ctx, host) {
     // back on a check that is already passed (Back, then Continue): say so, so a fresh "0 of 3" does not read as lost progress (novice review #13)
     if (ctx.passed) host.append(h('p', { class: 'fb ok mastery-passed' }, 'You have already passed this check, so Continue stays open. The problems below are extra practice.'));
-    renderProblems(step.mastery || { count: 3, generator: 'lewis-basic' }, ctx, host);
+    renderProblems({ ...(step.mastery || { count: 3, generator: 'lewis-basic' }), extra: !!ctx.passed }, ctx, host);   // extra: a check already passed, so the bar says "extra practice" and no "0 of 3" reads as lost progress
   },
 
   useit(step, ctx, host) {
@@ -434,7 +434,7 @@ export function renderProblems(cfg, ctx, host) {
   const stopTimer = () => { if (tick) { clearInterval(tick); tick = null; } };
   function show() {
     stopTimer();
-    bar.textContent = endless ? `Problem ${got + 1}. Endless: end the session whenever you like.` : `Problem ${tally.shown + 1}: ${got} of ${need} right first try so far. Each one is generated fresh, and only a right first answer counts.`;
+    bar.textContent = endless ? `Problem ${got + 1}. Endless: end the session whenever you like.` : cfg.extra ? `Extra practice, problem ${tally.shown + 1}. Each one is generated fresh; none of it changes your result.` : `Problem ${tally.shown + 1}: ${got} of ${need} right first try so far. Each one is generated fresh, and only a right first answer counts.`;
     stage.innerHTML = '';
     const p = generate(cfg.generator || 'lewis-basic', 1, { skill: cfg.skill || null })[0];
     const step = { id: 'mastery', skill: p.skill, hints: p.hints, worked: null };

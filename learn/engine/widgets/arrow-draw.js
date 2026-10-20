@@ -205,7 +205,9 @@ export default {
         const g = el('g', { class: 'lb-atom ad-atom', 'data-atom': i });
         g.appendChild(el('circle', { cx: x, cy: y, r, class: 'lb-disc' }));
         g.appendChild(el('text', { x, y: y + 0.5, class: 'lb-el' }, a.el));
-        g.appendChild(el('circle', { cx: x, cy: y, r: r + 8, class: 'lb-hit-atom' }));
+        const hitC = el('circle', { cx: x, cy: y, r: r + 8, class: 'lb-hit-atom' });
+        g.appendChild(hitC);
+        if (!finished) hitC.addEventListener('click', (e) => { e.stopPropagation(); tapNear(e, { kind: 'atom', atom: i }); });
         if (!finished) {
           g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
           g.setAttribute('aria-label', `${NAME[a.el] || a.el} atom${a.label ? ' (' + a.label + ')' : ''}, ${nLp[i]} lone pair${nLp[i] === 1 ? '' : 's'}. ${src ? 'Press to send the electrons to this atom.' : 'Press to start an arrow here.'}`);
@@ -241,8 +243,8 @@ export default {
         if (finished) g.style.pointerEvents = 'none';
         else {
           // the + or − beside an atom is the obvious thing to tap for "the positive carbon": it taps that atom
-          g.appendChild(el('circle', { cx, cy, r: 13, class: 'ad-chg-hit' }));
-          g.addEventListener('click', (e) => { e.stopPropagation(); tap({ kind: 'atom', atom: i }); });
+          g.appendChild(el('circle', { cx, cy, r: 22, class: 'ad-chg-hit', 'data-atom': i }));
+          g.addEventListener('click', (e) => { e.stopPropagation(); tapNear(e, { kind: 'atom', atom: i }); });
         }
         svg.appendChild(g);
       });
@@ -274,12 +276,13 @@ export default {
       const w = svg.getBoundingClientRect().width;
       if (!w) return;
       const k = w / vbW, want = 22 / k;
-      const near = atoms.map((a, i) => Math.min(9e9, ...atoms.map((o, j) => (j === i ? 9e9 : Math.hypot(o.x - a.x, o.y - a.y) * SCALE))));
-      // an atom target: 44 px where it fits, never more than ~36 % of the way to its nearest neighbour, so the middle of every bond stays the bond's
+      // an atom target and a + / − badge target are 44 px circles in screen pixels EVEN in a dense drawing, layered above the bond bands; where two circles overlap, the tap
+      // goes to the nearer centre (tapNear), so a crowded corner still resolves to the atom the finger was on (novice re-test 3, N4)
       svg.querySelectorAll('.ad-atom').forEach((g) => {
         const i = Number(g.dataset.atom), c = g.querySelector('.lb-hit-atom');
-        if (c) c.setAttribute('r', Math.max(radius(atoms[i].el) + 4, Math.min(want, near[i] * 0.36)).toFixed(1));
+        if (c) c.setAttribute('r', Math.max(radius(atoms[i].el) + 4, want).toFixed(1));
       });
+      svg.querySelectorAll('.ad-chg-hit').forEach((c) => c.setAttribute('r', want.toFixed(1)));
       // pairs on the SAME atom may overlap (any of them starts the same arrow); pairs of different atoms never do
       const pts = [...svg.querySelectorAll('.ad-hit-lp')];
       const xy = pts.map((c) => [Number(c.getAttribute('cx')), Number(c.getAttribute('cy'))]);
@@ -289,15 +292,16 @@ export default {
         const [ax, ay] = P(atoms[Number(own[n])]), toCentre = Math.hypot(xy[n][0] - ax, xy[n][1] - ay) - 6;   // never over the atom's own centre: that tap is the atom
         c.setAttribute('r', Math.max(10, Math.min(want, d * 0.5, 27, toCentre)).toFixed(1));
       });
-      // bond bands: 44 px wide, square ends ~14 px short of each atom centre (at least the middle 30 % of a very short bond)
-      const stop = 14 / k;
+      // bond bands: 44 px wide, square ends where the atom circles end (about 22 px short of each centre), never leaving less than 14 px of free bond in the middle
       svg.querySelectorAll('.ad-hits .lb-hit').forEach((l) => {
         const [ia, ib] = l.dataset.hit.split('-').map(Number);
         const [x1, y1] = P(atoms[ia]), [x2, y2] = P(atoms[ib]);
-        const f = Math.min(0.35, stop / (Math.hypot(x2 - x1, y2 - y1) || 1));
+        const lenPx = (Math.hypot(x2 - x1, y2 - y1) || 1) * k;
+        // the band stops where the two atom circles (22 px) begin, but always leaves at least 14 px of free bond in the middle
+        const f = Math.max(0.1, Math.min(0.35, Math.min(22, (lenPx - 14) / 2) / lenPx));
         l.setAttribute('x1', (x1 + (x2 - x1) * f).toFixed(1)); l.setAttribute('y1', (y1 + (y2 - y1) * f).toFixed(1));
         l.setAttribute('x2', (x2 - (x2 - x1) * f).toFixed(1)); l.setAttribute('y2', (y2 - (y2 - y1) * f).toFixed(1));
-        l.style.strokeWidth = Math.max(30, Math.min(2 * want, 46)).toFixed(1);
+        l.style.strokeWidth = Math.max(30, Math.min(2 * want, 60)).toFixed(1);
       });
     }
     if (typeof ResizeObserver !== 'undefined') { ro = new ResizeObserver(() => sizeHits()); ro.observe(svg); }
@@ -384,6 +388,20 @@ export default {
       draw(); ctx.onProgress?.({ task: true });
     });
     host.querySelector('[data-act="reset"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn = []; badIdx = []; src = null; lastAdded = -1; selfTap = false; say('Cleared. Tap the electrons the arrow starts from.'); draw(); ctx.onProgress?.({ task: true }); });
+    /** A tap on an atom circle or a badge circle (both 44 px): the target whose centre is nearest, measured against its own circle, so overlapping circles in a dense drawing
+     *  never steal each other's taps. Lone-pair circles take part too (a badge circle may reach over a pair of dots). Falls back to `dflt`. */
+    function tapNear(e, dflt) {
+      const ctm = svg.getScreenCTM && svg.getScreenCTM();
+      if (!ctm || chooser) { tap(dflt); return; }
+      const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      const q = pt.matrixTransform(ctm.inverse());
+      let best = null;
+      const put = (norm, t) => { if (norm <= 1 && (!best || norm < best.norm)) best = { norm, t }; };
+      svg.querySelectorAll('.lb-hit-atom').forEach((c) => { const i = Number(c.parentNode.dataset.atom); put(Math.hypot(q.x - Number(c.getAttribute('cx')), q.y - Number(c.getAttribute('cy'))) / Number(c.getAttribute('r')), { kind: 'atom', atom: i }); });
+      svg.querySelectorAll('.ad-chg-hit').forEach((c) => { const i = Number(c.dataset.atom); const d = Math.hypot(q.x - Number(c.getAttribute('cx')), q.y - Number(c.getAttribute('cy'))) / Number(c.getAttribute('r')); put(d * 1.05, { kind: 'atom', atom: i }); });
+      svg.querySelectorAll('.ad-hit-lp').forEach((c) => { const [i, k] = c.parentNode.dataset.lp.split('-').map(Number); put(Math.hypot(q.x - Number(c.getAttribute('cx')), q.y - Number(c.getAttribute('cy'))) / Number(c.getAttribute('r')) * 0.9, { kind: 'lp', atom: i, k }); });
+      tap(best ? best.t : dflt);
+    }
     // a tap on the background: the nearest target within ~30 screen px, else one line saying what can be tapped
     function nearestTarget(x, y) {
       let best = null;

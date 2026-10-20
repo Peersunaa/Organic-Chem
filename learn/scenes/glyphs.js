@@ -53,14 +53,14 @@ export function piCloud(x1, y1, x2, y2, opts = {}) {
 
 /** A single p orbital on the atom at (x,y), axis pointing along `angle`. opts.empty: dashed outline and no fill (an empty p orbital). */
 export function pOrbital(x, y, angle = -90, opts = {}) {
-  const { empty = false, size = 1, color = 'accent', cls = 'g-p' } = opts;
+  const { empty = false, size = 1, color = 'accent', cls = 'g-p', gap = 0 } = opts;   // gap: each lobe starts this far from the atom centre (clears a label drawn on the atom)
   const L = 26 * size, W = 8.5 * size;
   const col = pick(color, 'accent');
   const attrs = empty
     ? `fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"`
     : `fill="${col}" fill-opacity="0.2" stroke="${col}" stroke-width="2"`;
   return `<g class="${cls}${empty ? ' is-empty' : ''}" transform="translate(${n1(x)} ${n1(y)}) rotate(${n1(angle)})">` +
-    `<path d="${lobe(L, W)}" ${attrs}/><path d="${lobe(L, W)}" transform="rotate(180)" ${attrs}/></g>`;
+    `<path d="${lobe(L, W)}" transform="translate(${n1(gap)} 0)" ${attrs}/><path d="${lobe(L, W)}" transform="rotate(180) translate(${n1(gap)} 0)" ${attrs}/></g>`;
 }
 
 /** A lone pair on the atom at (x,y): two amber dots a short way out along `angle`. */

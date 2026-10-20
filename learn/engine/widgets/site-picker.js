@@ -65,7 +65,7 @@ export default {
       const ask = document.createElement('p');
       ask.className = 'sp-ask';
       const RW = WORDS[config.words] || WORDS.names;
-      ask.innerHTML = `<span class="ed-count">${k + 1} of ${config.items.length}</span> Tap the <b>${RW[item.role]}</b> atom of <b>${S.label}</b>.`;
+      ask.innerHTML = `<span class="ed-count">${k + 1} of ${config.items.length}</span> Tap the <b>${RW[item.role]}</b> atom of <b${S.label.length <= 12 ? ' style="white-space:nowrap"' : ''}>${S.label}</b>.`;   // a short formula such as H–Br never breaks at its dash (novice re-test 3, finding 3)
       const stage = document.createElement('div');
       stage.className = 'gf-stage sp-stage';
       stage.innerHTML = pick.svg;

@@ -103,7 +103,7 @@ async function headLesson(file) {
   let src;
   try { src = execFileSync('git', ['show', `HEAD:learn/lessons/${file}`], { cwd: LEARN, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] }); } catch (e) { return null; }
   const abs = pathToFileURL(LEARN + path.sep).href;
-  src = src.replace(/from '\.\.\/(engine|lessons)\//g, (m, d) => `from '${abs}${d}/`);
+  src = src.replace(/from '\.\.\/(engine|lessons|data)\//g, (m, d) => `from '${abs}${d}/`);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cave-head-'));
   const tmp = path.join(dir, file.replace(/\.js$/, '.mjs'));
   fs.writeFileSync(tmp, src);
