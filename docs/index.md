@@ -14,6 +14,9 @@ One line per page. A fresh session should read this first, then the page it need
 
 - `scenes/README.md`, `scenes/SCENE-SCHEMA.md`, `scenes/NN-*.md`: the animated mechanism scenes: house style, JSON schema, and 16 storyboards (each ends with its scene JSON, copied verbatim into `learn/scenes/scenes/`).
 
+- `superpowers/specs/2026-10-21-reaction-builder-design.md`: the substrate × reagent builder with the professor's EAS rules (`study-guide/prof/`).
+- `superpowers/specs/2026-10-21-mastery-course-design.md`: the question-type mastery course (`#master`), decisions and build plan. NEXT TO BUILD.
+
 ## Reviews
 - `reviews/2026-10-20-novice-review.md`: first zero-background student test (grades 2.5–4) that drove Track T.
 - `reviews/2026-10-20-novice-review-2.md`: the re-test after the fixes.
@@ -31,8 +34,8 @@ One line per page. A fresh session should read this first, then the page it need
 - Git identity is not configured in this repo: commit with `-c user.name=Peersunaa -c user.email=peera.sunny@gmail.com`.
 - Local preview: `python3 -m http.server 8765` from `learn/`; stale module caches happen, verify with a fresh `import('./x.js?v=1')`.
 
-## Later additions (2026-10-20)
-- Lesson 17 Predict the product; `#practise-stereo-projections`; `#practise-naming-levels` with a settings card and systematic name forms; `#reactions-practice` (five modes + settings); `#mock` midterm from `learn/data/mock-blueprint.js`; `#scenes` animated mechanisms; caveman voice everywhere; `study-guide/past-paper-study-guide.pdf` (untracked, rebuild with `python3 study-guide/build_guide.py`).
+## Later additions (2026-10-20/21)
+- Lesson 17 Predict the product; `#practise-stereo-projections`; `#practise-naming-levels` with a settings card and systematic name forms; `#reactions-practice` (five modes + settings); `#mock` midterm from `learn/data/mock-blueprint.js`; `#scenes` animated mechanisms (19 incl. Lesson 8 primers); caveman voice everywhere; Lesson 8 rebuilt (5/5 on student test); `#build` reaction builder; `#table` reaction tables (+ PDFs); `study-guide/past-paper-study-guide.pdf` (untracked, rebuild with `python3 study-guide/build_guide.py`).
 
 ## Backlog (post-midterm)
 - Standalone lesson tests 07–14 hit an import cycle (WIDGETS before init) unless steps.js is preloaded; the full runner is fine.
