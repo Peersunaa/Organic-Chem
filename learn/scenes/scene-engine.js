@@ -171,6 +171,38 @@ const rOf = (a, lab) => (a.s === 'H' ? 10 * TA : lab ? 14 * TA : 6);
 
 /** Atom text: the symbol, then its H and the count as a subscript, on the free side of the atom: right (OH, NH2, CH3), else left, above or below, whichever is
  *  farthest from the bonds. `dirs` = the directions (radians, screen) of the atom's bonds. */
+const angSep = (t, dirs) => (dirs.length ? Math.min(...dirs.map((d) => { const z = Math.abs(t - d) % (Math.PI * 2); return z > Math.PI ? Math.PI * 2 - z : z; })) : Math.PI);
+/** Which side of the symbol the H count is written on: 'r', 'l', 'u' or 'd' (the side farthest from the bonds, right preferred). */
+function hSide(dirs) {
+  const slots = [['r', 0, 0.45], ['l', Math.PI, 0.1], ['u', -Math.PI / 2, 0.05], ['d', Math.PI / 2, 0]];
+  let best = slots[0], bs = -1;
+  slots.forEach((sl) => { const sc = angSep(sl[1], dirs) + sl[2]; if (sc > bs) { bs = sc; best = sl; } });
+  return best[0];
+}
+/** Where the charge badge of an atom goes: upper right when that corner is free, else the free corner that clears the atom's own text (symbol and H count) and its bonds
+ *  (the + of a CH₂⁺ never sits on the "CH₂", novice re-test 2026-10-20, N9). */
+function chargeSpot(a, lab, x, y, dirs) {
+  const fs = 22 * TA, r = 7.5 * TA + 2;
+  const boxes = [];
+  if (lab) {
+    const symW = fs * 0.62 * a.s.length, base = y + fs * 0.34;
+    boxes.push([x - symW / 2, base - fs * 0.74, x + symW / 2, base + 2]);
+    if ((a.h || 0) > 0 && a.s !== 'H') {
+      const k = hSide(dirs), w = fs * 0.82 * (a.h > 1 ? 1.25 : 0.75);
+      if (k === 'r') boxes.push([x + symW / 2, base - fs * 0.62, x + symW / 2 + w, base + fs * 0.25]);
+      else if (k === 'l') boxes.push([x - symW / 2 - w, base - fs * 0.62, x - symW / 2, base + fs * 0.25]);
+      else { const b2 = base + (k === 'u' ? -fs * 0.95 : fs * 0.95); boxes.push([x - w / 2, b2 - fs * 0.62, x + w / 2, b2 + fs * 0.25]); }
+    }
+  }
+  const hits = (cx, cy) => boxes.some(([x0, y0, x1, y1]) => cx + r > x0 && cx - r < x1 && cy + r > y0 && cy - r < y1);
+  const C = [-Math.PI / 4, (-3 * Math.PI) / 4, Math.PI / 4, (3 * Math.PI) / 4, -Math.PI / 2, Math.PI / 2, 0, Math.PI];
+  for (const d of [24, 30, 36]) for (const t of C) {
+    if (angSep(t, dirs) < 0.5) continue;
+    const cx = x + Math.cos(t) * d * TA, cy = y + Math.sin(t) * d * TA;
+    if (!hits(cx, cy)) return [cx, cy];
+  }
+  return [x + (lab ? 17 : 11) * TA, y - (lab ? 17 : 13) * TA];
+}
 function labelSvg(a, x, y, dirs, fs, op) {
   const sym = a.s, h = a.h || 0;
   const fsH = fs * 0.82;
@@ -179,11 +211,7 @@ function labelSvg(a, x, y, dirs, fs, op) {
   let out = `<text x="${f1(x)}" y="${f1(base)}" text-anchor="middle" font-size="${fs}" font-weight="${sym === 'H' ? 500 : 700}" fill="var(--ink)">${esc(sym)}</text>`;
   if (h > 0 && sym !== 'H') {
     const sub = h > 1 ? `<tspan dy="${f1(fs * 0.22)}" font-size="${f1(fsH * 0.75)}">${h}</tspan>` : '';
-    const sep = (t) => (dirs.length ? Math.min(...dirs.map((d) => { const z = Math.abs(t - d) % (Math.PI * 2); return z > Math.PI ? Math.PI * 2 - z : z; })) : Math.PI);
-    const slots = [['r', 0, 0.45], ['l', Math.PI, 0.1], ['u', -Math.PI / 2, 0.05], ['d', Math.PI / 2, 0]];
-    let best = slots[0], bs = -1;
-    slots.forEach((sl) => { const sc = sep(sl[1]) + sl[2]; if (sc > bs) { bs = sc; best = sl; } });
-    const k = best[0];
+    const k = hSide(dirs);
     if (k === 'r') out += `<text x="${f1(x + symW / 2 + 1)}" y="${f1(base)}" text-anchor="start" font-size="${f1(fsH)}" font-weight="600" fill="var(--ink)">H${sub}</text>`;
     else if (k === 'l') out += `<text x="${f1(x - symW / 2 - 1)}" y="${f1(base)}" text-anchor="end" font-size="${f1(fsH)}" font-weight="600" fill="var(--ink)">H${sub}</text>`;
     else out += `<text x="${f1(x)}" y="${f1(base + (k === 'u' ? -fs * 0.95 : fs * 0.95))}" text-anchor="middle" font-size="${f1(fsH)}" font-weight="600" fill="var(--ink)">H${sub}</text>`;
@@ -375,14 +403,15 @@ const sameBond = (bond, x, y) => (bond[0] === x && bond[1] === y) || (bond[0] ==
 
 /** Everything about beat i at time t that the drawing needs. */
 function buildFrame(scene, layout, t, opts) {
-  const { i, p: pRaw } = beatAt(scene, t);
+  const { i, p: pRaw, raw } = beatAt(scene, t);
   const stat = !!opts.static;
   const p = stat ? 1 : pRaw;
   const beat = scene.beats[i], lb = layout.beats[i];
   const prev = i > 0 ? layout.beats[i - 1] : { atoms: layout.stage0.atoms, bonds: layout.stage0.bonds, pos1: layout.stage0.pos, ghosts: [], forms: [] };
-  let cam = stat ? camEnd(scene, layout, i) : camAt(scene, layout, i, p);
+  // a reset beat cross-fades two whole pictures, each in its own framing (the old one is drawn with its own camera), so the new one does not pan in from the old framing
+  let cam = stat || lb.reset ? camEnd(scene, layout, i) : camAt(scene, layout, i, p);
   if (opts.thumb) { const e = camEnd(scene, layout, i); cam = { ...e, k: Math.max(e.k, Math.min(1.9, e.kfit)) }; }
-  return { i, p, beat, lb, prev, stat, pos: posAt(lb, p), cam };
+  return { i, p, raw, beat, lb, prev, stat, pos: posAt(lb, p), cam };
 }
 
 export function renderScene(scene, layout, t, opts = {}) {
@@ -391,7 +420,7 @@ export function renderScene(scene, layout, t, opts = {}) {
   const showOrbitals = layer === 'both' || layer === 'orbitals';
   TA = (opts.textScale && opts.textScale.atom) || 1; TN = (opts.textScale && opts.textScale.note) || 1;
   const fr = buildFrame(scene, layout, t, opts);
-  const { i, p, beat, lb, prev, stat, cam, pos } = fr;
+  const { i, p, raw, beat, lb, prev, stat, cam, pos } = fr;
   const proj = projector(cam);
   const reset = lb.reset;
   const parts = [];
@@ -494,11 +523,14 @@ export function renderScene(scene, layout, t, opts = {}) {
   const gOf = (id) => { const a = A1.get(id) || A0.get(id); return labelled(a, degOf(id)) ? (a.s === 'H' ? 10 : 15) : 0; };
   const tilt0 = cam.tilt < 0.45;
   if (reset) {
-    // cross-fade: old picture out, new picture in, over the first 10 %
-    const g = stat ? 1 : smooth(p, 0, 0.1);
+    // cross-fade: old picture out, new picture in, over the first 6 % of the beat in LINEAR time (the eased p barely moves at the start, which left the old
+    // picture alone on screen for a third of a second: novice re-test N9)
+    const g = stat ? 1 : smooth(raw, 0, 0.06);
     const oldPos = lb.posOld || lb.pos0;
     const Sold = {}; Object.keys(oldPos).forEach((id) => { Sold[id] = proj(oldPos[id]); });
-    if (g < 1) parts.push(`<g opacity="${f1((1 - g) * 100) / 100}">${structSvg(prev.atoms.map((a) => ({ ...a, st: a.st })), prev.bonds, Sold, { fs: 22 })}</g>`);
+    // the old picture is the very frame the last beat ended on (labels, lone pairs, charges, its own camera), so scrubbing onto a new case never shows a bare fragment (N9)
+    if (g < 1 && i > 0 && !opts._inner) parts.push(`<g opacity="${f1((1 - g) * 100) / 100}">${renderScene(scene, layout, scene.beats[i].t0 - 1e-4, { ...opts, _inner: true })}</g>`);
+    else if (g < 1) parts.push(`<g opacity="${f1((1 - g) * 100) / 100}">${structSvg(prev.atoms.map((a) => ({ ...a, st: a.st })), prev.bonds, Sold, { fs: 22 })}</g>`);
   }
   (reset ? lb.bonds.map(([a, b, o]) => ({ a, b, o0: o, o1: o })) : [...bondMap.values()]).forEach((e) => {
     const P1 = scr[e.a], P2 = scr[e.b];
@@ -532,7 +564,7 @@ export function renderScene(scene, layout, t, opts = {}) {
     if (formingNow && w > 0.02) bondSvgs.push(`<g opacity="${f1((1 - w) * 100) / 100}">${G.bondGhost(x1, y1, x2, y2, { state: 'forming', static: true })}</g>`);
     if (breakingNow && w > 0.02) bondSvgs.push(`<g opacity="${f1((1 - w) * 100) / 100}">${G.bondGhost(x1, y1, x2, y2, { state: 'breaking', static: true })}</g>`);
   });
-  const gNew = reset ? (stat ? 1 : smooth(p, 0, 0.1)) : 1;
+  const gNew = reset ? (stat ? 1 : smooth(raw, 0, 0.06)) : 1;
   parts.push(`<g class="ms-bonds" opacity="${gNew}">${bondSvgs.join('')}</g>`);
 
   // ---- motion trails
@@ -615,12 +647,12 @@ export function renderScene(scene, layout, t, opts = {}) {
     }
     // charge
     const c0 = a0 ? a0.c : 0, c1 = a1 ? a1.c : 0;
-    const cx = q[0] + (lab ? 17 : 11) * TA, cy = q[1] - (lab ? 17 : 13) * TA;
+    const [cx, cy] = c0 || c1 ? chargeSpot(a, lab, q[0], q[1], dirs) : [0, 0];
     if (c0 === c1) { if (c1) out.push(`<g opacity="${op}">${chargeSvg(cx, cy, c1, TA)}</g>`); } else {
       if (c0) out.push(`<g opacity="${f1((1 - chargeWin) * op * 100) / 100}">${chargeSvg(cx, cy, c0, TA)}</g>`);
       if (c1) out.push(`<g opacity="${f1(chargeWin * op * 100) / 100}">${chargeSvg(cx, cy, c1, TA)}</g>`);
     }
-    if (c0 || c1) takenAt.set(id, (takenAt.get(id) || []).concat(-Math.PI / 4));
+    if (c0 || c1) takenAt.set(id, (takenAt.get(id) || []).concat(Math.atan2(cy - q[1], cx - q[0])));
     if (out.length) atomSvgs.push(`<g class="ms-atom" data-id="${id}">${out.join('')}</g>`);
   });
   parts.push(`<g class="ms-atoms" opacity="${gNew}">${atomSvgs.join('')}</g>`);
@@ -705,6 +737,7 @@ export function renderScene(scene, layout, t, opts = {}) {
   // ---- resonance forms row (top band)
   if ((lb.forms || []).length) parts.push(formsSvg(lb, pos, fin));
 
+  if (opts._inner) return parts.join('');   // the cross-fade of a reset beat embeds this frame inside the next one
   const title = esc(scene.title);
   const font = 'style="font-family:var(--body,system-ui,sans-serif)"';
   if (opts.thumb) return `<svg class="ms-svg" viewBox="0 0 ${W} ${H}" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" ${font}>${parts.join('')}</svg>`;

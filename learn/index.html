@@ -156,6 +156,7 @@ a.lesson:hover { background: var(--surface-2); } a.lesson:focus-visible { outlin
 .ws .btn { justify-self: start; }
 
 /* lesson player */
+.mastery-passed { margin-bottom: var(--s-3); }
 .recap-slot:empty { display: none; } .recap-slot { margin-bottom: var(--s-4); }
 .recap { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--r-xs) var(--r-md) var(--r-md) var(--r-xs); background: var(--surface-2); padding: 0 var(--s-4); }
 .recap summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--accent); }
@@ -169,6 +170,7 @@ a.lesson:hover { background: var(--surface-2); } a.lesson:focus-visible { outlin
 /* the key idea of an explain step (it may hold drawings, rows of equations, lists): every paragraph is its own row that wraps inside the card, never runs into the next (novice review 2026-10-20, #4) */
 .recap-body { grid-template-columns: minmax(0, 1fr); min-width: 0; } .recap-body > * { min-width: 0; }
 .recap-note.idea { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.recap-body:not(.full) .recap-note.idea { display: grid; -webkit-line-clamp: none; max-height: 12rem; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent); mask-image: linear-gradient(to bottom, #000 78%, transparent); }   /* a long key idea is cut at about eight lines, with Show all (novice re-test #4) */
 .recap-note.idea p { display: block; margin: 0; } .recap-note.idea p + p::before { content: none; }
 .recap-note.idea :is(ol, ul) { margin: 0; padding-left: 1.25rem; display: grid; gap: 4px; }
 .recap-note.idea span[style*="nowrap"] { max-width: 100%; white-space: normal !important; }
@@ -377,6 +379,9 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 .ad-forming .lb-line { stroke-dasharray: 5 6; opacity: .75; }
 .ad-delta { font: 600 17px/1 var(--mono); text-anchor: middle; dominant-baseline: central; pointer-events: none; } .ad-delta.pos { fill: var(--bad); } .ad-delta.neg { fill: var(--accent); }
 .ad-ba { display: flex; justify-content: flex-end; } .ad-ba[hidden] { display: none; }
+.ad:not(.ad-preset) .ad-status { min-height: calc(3 * var(--lh-small)); margin: 0; }   /* the status line keeps its height, so Undo / Clear / Check do not jump as it changes (novice review #9) */
+.ad-tapnote { margin: 0; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--ink-2); } .ad-tapnote[hidden] { display: none; }
+.ad-svg.ad-wait { opacity: .45; } .ad-chgtap { cursor: pointer; } .ad-chg-hit { fill: transparent; }   /* the open 'which carbon?' question dims the drawing (N1); a tap on + or − is a tap on its atom (N4) */
 /* equilibrium-arrow widget */
 .eq { display: grid; gap: var(--s-3); width: 100%; }
 .eq-step { font-weight: 600; color: var(--muted); }
@@ -480,6 +485,8 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 .ed-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); font-size: var(--fs-small); line-height: var(--lh-small); color: var(--muted); } .ed-legend:empty { display: none; } .ed-legend b { font-family: var(--mono); color: var(--ink); }
 .ed-choices { display: flex; flex-wrap: wrap; gap: var(--s-2); } .ed-choices .btn { flex: 1 1 150px; }
 .ed-msg { margin: 0; }
+.ed-note { margin: 0; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--ink-2); } .ed-note[hidden] { display: none; }
+.ed-noteword { fill: var(--ink-2); font-weight: 700; }
 .ed-handle { cursor: ns-resize; outline: none; touch-action: none; } .ed-hhit { fill: transparent; } .ed-hdot { fill: var(--electron); stroke: var(--surface); stroke-width: 2.5; }
 .ed-harr { stroke: var(--ink); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; } .ed-handle:focus .ed-hdot, .ed-handle:hover .ed-hdot { stroke: var(--accent); stroke-width: 3.5; }
 .ed-read { margin: 0; font: 600 var(--fs-small)/var(--lh-small) var(--mono); text-align: center; } .ed-ghost-txt { font: 12px var(--body); fill: var(--muted); } .ed-valtxt { font: 700 12px var(--mono); fill: var(--ink); }
@@ -487,6 +494,10 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 .ed-answers { display: grid; gap: var(--s-2); } .ed-answers:empty { display: none; }
 .sp { display: grid; gap: var(--s-3); min-width: 0; } .sp-ask { margin: 0; } .sp-stage { padding: var(--s-2); }
 .sp-msg { margin: 0; }
+.sp-note { margin: 0; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--ink-2); } .sp-note[hidden] { display: none; }
+.gf-atom.sp-bondhit { height: 44px; margin: 0; border-radius: 22px; }   /* the whole C=C, both lines and the gap (N6); width and angle are set inline */
+.gf-atom.sp-bondhit::before { inset: 6px 4px; border-radius: 16px; }
+.gf-atom.sp-off { cursor: default; }
 .sp-stage .gf-atom:not(:disabled)::before { border: 2px dashed var(--line-strong); }
 .sp-stage .gf-atom:not(:disabled):is(:hover, :focus-visible)::before { border: 2px solid var(--accent); }
 .sp-stage .gf-atom.bad::before { border: 2px solid var(--bad); }
@@ -918,11 +929,11 @@ h3 { font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(
 /* mechanism scenes */
 .ms { display: grid; gap: var(--s-3); min-width: 0; width: 100%; max-width: 780px; margin-inline: auto; }
 .ms-loading { margin: 0; }
-.ms-stagewrap { width: min(100%, calc(58vh * 1.6)); margin-inline: auto; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface-2); overflow: hidden; min-width: 0; }
+.ms-stagewrap { width: min(100%, calc(58vh * 1.6), calc((100vh - 190px) * 1.6)); cursor: pointer; margin-inline: auto; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface-2); overflow: hidden; min-width: 0; }
 .ms-stagewrap:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: var(--focus-off); }
 .ms-stage { aspect-ratio: 640 / 400; width: 100%; }
 .ms-stage svg { display: block; width: 100%; height: 100%; }
-.ms-dock { position: sticky; bottom: 0; z-index: 2; display: grid; gap: var(--s-2); padding: var(--s-2) 0; background: var(--surface); box-shadow: 0 -1px 0 var(--line); }   /* timeline + Play stay on screen with the stage (novice review #14) */
+.ms-dock { display: grid; gap: var(--s-2); padding: 0; background: var(--surface); }   /* timeline + Play right under the stage, never over it; the stage is capped so both fit one screen (novice re-test N3) */
 .ms-capbox { display: grid; gap: var(--s-1); min-width: 0; }
 .ms-count { margin: 0; font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--muted); }
 .ms-cap { margin: 0; min-height: 4.5rem; font-size: 1rem; line-height: 1.5rem; color: var(--ink); }

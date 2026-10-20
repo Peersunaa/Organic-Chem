@@ -23,7 +23,12 @@
 // third of the way to a neighbour), and every bond has a 44 px-wide hit band (square ends) that stops about 14 px short of each atom centre. Z-order, bottom to top:
 // bond bands, atoms, lone pairs: a tap on an atom's centre is always that atom, a tap on a bond's middle always that bond (novice review 2026-10-20, #1).
 // A second tap on the electrons already chosen (or on their own atom) keeps the choice and says why: an arrow ends on a DIFFERENT atom or bond (#9).
-// Charge badges are placed where they clear every lone-pair dot, bond line and atom (pushed outward until they do).
+// Charge badges are placed where they clear every lone-pair dot, bond line and atom (pushed outward until they do). A tap on a badge is a tap on its atom (novice re-test N4).
+// Every tap acts or explains (novice re-test 2026-10-20): a tap on the drawing's background goes to the nearest target within about 30 screen px (so a crowded corner,
+// a gap between two hydrogens or the space beside a + still reaches an atom); farther away, the status line says what can be tapped. A picture (preset) or a finished
+// drawing says so in one line (config.tapNote overrides the picture's line, e.g. the mechanism player's "press Next").
+// The "which carbon bonds to H?" question is modal: while it is open the drawing is dimmed, taps and Check only point at the buttons (N1), so a half-specified arrow can
+// never be graded. Undo and Clear tell the step (ctx.onProgress({task:true})) so its old verdict and hints go with the arrow they were about (N2).
 import { NAME } from '../chem.js';
 import { SCALE, radius, P, lpCount, lpPoints, keyOf, grade, badStart, curve, describeSource, describeDest, headAtom, applyArrows } from './arrow-core.js';
 import { freeAngles } from './lewis-core.js';
@@ -46,11 +51,13 @@ export default {
     let chooser = null;   // the 'which carbon bonds to H?' question (regio config only)
     let selfTap = false;  // the last tap tried to end an arrow where it started: Check explains that instead of "draw at least one arrow"
     const SELF_MSG = 'An arrow starts on electrons and ends on a different atom or bond.';
+    const CHOOSE_MSG = 'First pick which carbon bonds to H: use the buttons under the drawing (or Cancel).';
 
     host.innerHTML = `
-      <div class="lb ad">
+      <div class="lb ad${preset ? ' ad-preset' : ''}">
         <svg class="lb-svg ad-svg" role="group" aria-label="Curved arrow workspace"></svg>
         <p class="lb-help ad-status" aria-live="polite">${preset ? (config.caption || '') : 'Tap the electrons the arrow starts from (a pair of dots or a bond), then tap where they go.'}</p>
+        <p class="ad-tapnote" aria-live="polite" hidden></p>
         <div class="ad-ba" hidden><button type="button" class="btn ghost small" data-act="ba" aria-pressed="false">Show before</button></div>
         <div class="lb-actions"${preset ? ' hidden' : ''}>
           <button type="button" class="btn ghost" data-act="undo">Undo arrow</button>
@@ -79,6 +86,9 @@ export default {
     recalc();
     const vbW = maxX - minX;
     const say = (t) => { status.textContent = t; };
+    const tapNote = host.querySelector('.ad-tapnote');
+    const note = (t) => { tapNote.textContent = t; tapNote.hidden = false; };
+    const doneMsg = () => (config.after ? 'All arrows are right: nothing more to tap. The button below switches between the before and after pictures.' : 'All arrows are right: nothing more to tap here.');
     const bondEnds = (b) => { const A = atoms[b.a], B = atoms[b.b]; return [P(A), P(B)]; };
 
     function srcPoint(from, toward) {
@@ -225,10 +235,15 @@ export default {
       atoms.forEach((a, i) => {
         if (!a.charge) return;
         const { cx, cy } = badgeSpot(i);
-        const g = el('g', { class: 'lb-atom' });
+        const g = el('g', { class: 'lb-atom' + (finished ? '' : ' ad-chgtap') });
         g.appendChild(el('circle', { cx, cy, r: 9, class: 'lb-chg' }));
         g.appendChild(el('text', { x: cx, y: cy + 0.5, class: 'lb-chgt' }, a.charge > 0 ? '+' : '−'));
-        g.style.pointerEvents = 'none';
+        if (finished) g.style.pointerEvents = 'none';
+        else {
+          // the + or − beside an atom is the obvious thing to tap for "the positive carbon": it taps that atom
+          g.appendChild(el('circle', { cx, cy, r: 13, class: 'ad-chg-hit' }));
+          g.addEventListener('click', (e) => { e.stopPropagation(); tap({ kind: 'atom', atom: i }); });
+        }
         svg.appendChild(g);
       });
       // δ+ / δ− labels (config.partials, Lesson 08 still pictures), placed like charge badges: clear of dots, bonds and atoms
@@ -292,7 +307,7 @@ export default {
       g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } else if (e.key === 'Escape' && src) { src = null; say('Arrow cancelled.'); draw(); } });
     }
 
-    function closeChooser() { if (chooser) { chooser.remove(); chooser = null; } }
+    function closeChooser() { if (chooser) { chooser.remove(); chooser = null; } svg.classList.remove('ad-wait'); }
     function askEnd(rg = config.regio) {
       closeChooser();
       chooser = document.createElement('div');
@@ -318,14 +333,16 @@ export default {
       row.appendChild(cancel);
       chooser.appendChild(row);
       host.querySelector('.ad').insertBefore(chooser, host.querySelector('.lb-actions'));
-      say(`The π electrons form a new bond to H. Which carbon of the ${rg.bondWord === 'triple bond' ? 'C≡C' : 'C=C'} does H bond to?`);
+      svg.classList.add('ad-wait');
+      say(`The π electrons form a new bond to H. Which carbon of the ${rg.bondWord === 'triple bond' ? 'C≡C' : 'C=C'} does H bond to? Answer with the buttons below before you go on.`);
       row.querySelector('button').focus({ preventScroll: true });
+      chooser.scrollIntoView?.({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' });
     }
 
     function tap(t) {
-      if (finished) return;
+      if (finished) { note(doneMsg()); return; }
+      if (chooser) { say(CHOOSE_MSG); chooser.querySelector('button')?.focus({ preventScroll: true }); return; }   // modal: the open question is answered first (N1)
       badIdx = [];
-      if (chooser) closeChooser();
       if (!src) {
         if (t.kind === 'lp') { src = { lp: t.atom, k: t.k }; }
         else if (t.kind === 'bond') { src = { bond: t.bond }; }
@@ -358,10 +375,40 @@ export default {
       return `${describeSource(config, from)} ${describeDest(config, from, to)}`;
     }
 
-    host.querySelector('[data-act="undo"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn.pop(); badIdx = []; src = null; lastAdded = -1; say('Last arrow removed.'); draw(); });
-    host.querySelector('[data-act="reset"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn = []; badIdx = []; src = null; lastAdded = -1; selfTap = false; say('Cleared. Tap the electrons the arrow starts from.'); draw(); });
+    // Undo and Clear: the step's last verdict and hints were about the arrows that are now gone, so they go too (ctx.onProgress({task:true}), N2)
+    host.querySelector('[data-act="undo"]').addEventListener('click', () => {
+      if (finished) return;
+      const had = chooser || src ? 'sel' : drawn.length ? 'arrow' : '';
+      closeChooser(); if (had === 'arrow') drawn.pop(); badIdx = []; src = null; lastAdded = -1; selfTap = false;
+      say(had === 'sel' ? 'Selection cancelled. Tap the electrons the arrow starts from.' : had === 'arrow' ? (drawn.length ? 'Last arrow removed.' : 'Last arrow removed. Tap the electrons the next arrow starts from.') : 'There is no arrow to remove yet. Tap the electrons the arrow starts from.');
+      draw(); ctx.onProgress?.({ task: true });
+    });
+    host.querySelector('[data-act="reset"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn = []; badIdx = []; src = null; lastAdded = -1; selfTap = false; say('Cleared. Tap the electrons the arrow starts from.'); draw(); ctx.onProgress?.({ task: true }); });
+    // a tap on the background: the nearest target within ~30 screen px, else one line saying what can be tapped
+    function nearestTarget(x, y) {
+      let best = null;
+      const put = (d, t) => { if (!best || d < best.d) best = { d, t }; };
+      atoms.forEach((a, i) => { const [ax, ay] = P(a); put(Math.hypot(x - ax, y - ay) - radius(a.el) * 0.5, { kind: 'atom', atom: i }); });
+      lpPts.forEach((pts, i) => pts.forEach((p, k) => put(Math.hypot(x - p.x, y - p.y), { kind: 'lp', atom: i, k })));
+      bonds.forEach((b) => { const [p1, p2] = bondEnds(b); put(segDist(x, y, p1[0], p1[1], p2[0], p2[1]) + 6, { kind: 'bond', bond: [b.a, b.b] }); });
+      return best;
+    }
+    svg.addEventListener('click', (e) => {
+      if (!preset && !finished && e.target.closest && e.target.closest('.ad-atom, .ad-lp, .ad-bond, .lb-hit, .ad-chgtap')) return;   // a live target handles its own tap
+      if (preset) { note(config.tapNote || 'This picture is for looking at: there is nothing to tap here.'); return; }
+      if (finished) { note(doneMsg()); return; }
+      if (chooser) { say(CHOOSE_MSG); return; }
+      const r = svg.getBoundingClientRect(), ctm = svg.getScreenCTM && svg.getScreenCTM();
+      if (r.width && ctm) {
+        const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+        const q = pt.matrixTransform(ctm.inverse()), best = nearestTarget(q.x, q.y);
+        if (best && best.d <= 30 * (vbW / r.width)) { tap(best.t); return; }
+      }
+      say(src ? 'Nothing to tap there. Tap the atom (a letter) or the bond (a line) the electrons go to.' : 'Nothing to tap there. Tap a pair of dots (a lone pair) or a line (a bond) to start an arrow.');
+    });
     host.querySelector('[data-act="check"]').addEventListener('click', () => {
       if (finished) return;
+      if (chooser) { say(CHOOSE_MSG); chooser.querySelector('button')?.focus({ preventScroll: true }); return; }   // never grade a half-drawn arrow (N1)
       let r = config.judge ? config.judge(drawn) : grade(config, drawn);   // Lesson 11: config.judge(drawn) -> {ok, diagnosis, wrong?, message?} replaces grading against config.arrows (resonance-drawer)
       if (!r.ok && !drawn.length && selfTap) r = { ...r, code: 'self', diagnosis: `${SELF_MSG} Your last tap ended the arrow where it started. Tap the electrons first (dots or a line), then a DIFFERENT atom: the one that receives them.` };
       badIdx = r.wrong || [];

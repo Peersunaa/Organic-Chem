@@ -8,7 +8,9 @@
 //
 // Controls: the timeline scrubber (a range input with a 44 px thumb and a tick at every beat), Play / Pause, Prev beat / Next beat (each plays that beat and stops at its end),
 // speed 0.5x / 1x / 1.5x, the layer switch (Arrows / Orbitals / Both), a legend, the stereo callout, one end quiz and chips to the what-if scenes.
-// Keys: Space play / pause, Left / Right previous / next beat, Home / End first / last beat. Touch: drag the scrubber.
+// Keys: Space play / pause, Left / Right previous / next beat, Home / End first / last beat. Touch: drag the scrubber; a tap on the stage plays or pauses.
+// Layout: the timeline and the Play / Beat buttons sit right UNDER the stage (never over it, at any width), and the stage is capped so that stage + controls fit one
+// screen (index.html .ms-stagewrap); novice re-test 2026-10-20, N3.
 // prefers-reduced-motion: nothing tweens; each beat is one still frame (its end state, arrows drawn), the scrubber steps beat by beat and Play advances a beat every few seconds.
 import { h } from '../engine/steps.js';
 import { cavemanOn, onVoiceChange } from '../engine/voice.js';
@@ -107,9 +109,9 @@ function mountScene(host, config = {}, ctx = {}) {
     const row1 = h('div', { class: 'ms-ctl' }, prevB, playB, nextB, h('label', { class: 'ms-speedlab' }, h('span', { class: 'sr-only' }, 'Speed'), speed));
     const layerBtns = ['arrows', 'orbitals', 'both'].map((k) => { const b = h('button', { type: 'button', class: 'btn small ms-layer', 'aria-pressed': String(S.layer === k), 'data-layer': k }, LAYER_LABEL[k]); b.addEventListener('click', () => setLayer(k)); return b; });
     const layerRow = h('div', { class: 'ms-layers', role: 'group', 'aria-label': 'Layers' }, h('span', { class: 'ms-layers-k' }, 'Show'), layerBtns);
-    // the timeline and the Play / Beat buttons stay in view under the stage (sticky), so a learner can watch and press at once (novice review 2026-10-20, #14)
+    // the timeline and the Play / Beat buttons sit directly under the stage, so a learner can watch and press at once (#14) without them covering the picture (N3)
     const dock = h('div', { class: 'ms-dock' }, line, row1);
-    root.append(stageWrap, capBox, dock, layerRow, legend());
+    root.append(stageWrap, dock, capBox, layerRow, legend());
 
     // stereo callout
     if (scene.stereoCallout) {
@@ -234,6 +236,7 @@ function mountScene(host, config = {}, ctx = {}) {
 
     // ---- events
     playB.addEventListener('click', toggle);
+    stageWrap.addEventListener('click', toggle);   // a tap on the picture plays or pauses it (every tap on the stage acts)
     prevB.addEventListener('click', prevBeat);
     nextB.addEventListener('click', nextBeat);
     speed.addEventListener('change', () => { S.speed = SPEED = Number(speed.value); if (S.reduced && S.playing) stepTimer(); });

@@ -5,9 +5,13 @@
 //   words:'rich' (Lesson 08, before the names are taught) asks for the "electron-rich" / "electron-poor" atom and words every diagnosis that way.
 // A wrong tap's diagnosis goes to the step's feedback box only (ctx.onResult), never twice; a right tap shows its reason here and clears that box (ctx.onProgress).
 // Every tappable atom wears a faint dashed ring, so a learner can see the letters are buttons.
+// A C=C is one target along its whole length (both lines and the gap between them), not only its π marker (novice re-test 2026-10-20, N6).
+// Every tap acts or explains: a tap on the picture's background, or on an atom once the molecule is done, gets one line under the picture.
+// The reason under a right tap has its glossary terms tappable (Lewis acid, carbonyl: N7).
 import { svgPick, analyze, NAME, rdkit } from '../chem.js';
 import { SITES, siteRules } from '../mechanisms.js';
 import { lonePairGroup } from '../lp-draw.js';
+import { annotateLine } from '../glossary.js';
 
 const WORDS = { names: { nuc: 'nucleophilic', elec: 'electrophilic' }, rich: { nuc: 'electron-rich', elec: 'electron-poor' } };
 const NEED = { nuc: 'electron-rich: a lone pair, a π bond or a negative charge', elec: 'electron-poor: positive, δ+, or short of an octet' };
@@ -72,15 +76,34 @@ export default {
       stage.querySelector('svg')?.setAttribute('aria-label', `${S.label}. Tap an atom.`);
       const msg = document.createElement('p');
       msg.className = 'sp-msg'; msg.setAttribute('aria-live', 'polite');
+      const note = document.createElement('p');
+      note.className = 'sp-note'; note.setAttribute('aria-live', 'polite'); note.hidden = true;
+      const say = (t) => { note.textContent = t; note.hidden = false; };
       const row = document.createElement('div');
       row.className = 'lb-actions';
-      root.append(ask, stage, msg, row);
+      root.append(ask, stage, note, msg, row);
       let settled = false;
       // a skeletal drawing shows no letter at a carbon: the button says "C" so the learner knows what it is (novice review 2026-10-20, #2)
       const label = (b, i) => { const a = info.atoms[i]; if (a.sym === 'C' && !a.fc && !keep) { const t = document.createElement('span'); t.className = 'sp-el'; t.textContent = 'C'; t.setAttribute('aria-hidden', 'true'); b.append(t); } };
       // a C=C double bond is a target of its own (either line or the gap between them): the π bond IS the rich site, so tapping it counts as either carbon
       const piBonds = info.bonds.filter((bd) => bd.bo === 2 && bd.atoms.every((j) => info.atoms[j].sym === 'C'));
       if (piBonds.length) ask.innerHTML = ask.innerHTML.replace(/ atom of <b>/, ' atom (or the C=C bond, marked π) of <b>');
+      // the whole C=C (lines and gap): a 44 px-tall capsule from carbon to carbon, under the atom buttons (they win at the carbons themselves)
+      const vbW = pick.w || 300, vbH = pick.h || 190;
+      piBonds.forEach((bd) => {
+        const [i, j] = bd.atoms, P1 = pick.pts[i], P2 = pick.pts[j];
+        if (!P1 || !P2) return;
+        const dx = P2.x - P1.x, dy = (P2.y - P1.y) * (vbH / vbW);           // in % of the stage WIDTH, so the angle and length are true on screen
+        const cap = document.createElement('button');
+        cap.type = 'button'; cap.className = 'gf-atom sp-bondhit';
+        cap.style.left = (P1.x + P2.x) / 2 + '%'; cap.style.top = (P1.y + P2.y) / 2 + '%';
+        cap.style.width = `calc(${Math.hypot(dx, dy).toFixed(2)}% + 22px)`;
+        cap.style.transform = `translate(-50%, -50%) rotate(${(Math.atan2(dy, dx) * 180 / Math.PI).toFixed(1)}deg)`;
+        cap.setAttribute('aria-label', `The C=C double bond of ${S.label}`);
+        cap.dataset.atom = String(i);
+        stage.append(cap);
+        wireTap(cap, i);
+      });
       piBonds.forEach((bd) => {
         const [i, j] = bd.atoms, P1 = pick.pts[i], P2 = pick.pts[j];
         if (!P1 || !P2) return;
@@ -103,16 +126,25 @@ export default {
         wireTap(b, i);
         stage.append(b);
       });
+      const doneLine = () => (k === config.items.length - 1 ? 'This molecule is done: press Done below.' : 'This molecule is done: press Next molecule below.');
+      // the background of the picture (no atom there): say what can be tapped
+      stage.addEventListener('click', (e) => {
+        if (e.target.closest && e.target.closest('button')) return;
+        if (locked) { say('All done here: press Continue below.'); return; }
+        say(settled ? doneLine() : `Nothing to tap there. Tap one of the atoms (the letters${piBonds.length ? ', or the C=C bond' : ''}).`);
+      });
       function wireTap(b, i) {
         b.addEventListener('click', () => {
-          if (settled || locked) return;
+          if (locked) { say('All done here: press Continue below.'); return; }
+          if (settled) { say(doneLine()); return; }   // the atoms stay tappable (a disabled button would swallow the tap in silence)
+          note.hidden = true;
           const r = grade(item, i, config.words);
           if (r.ok) {
             ctx.onProgress?.();
             settled = true;
-            stage.querySelectorAll('.gf-atom').forEach((x) => { x.disabled = true; });
+            stage.querySelectorAll('.gf-atom').forEach((x) => { x.setAttribute('aria-disabled', 'true'); x.classList.add('sp-off'); });
             b.classList.add('lock'); b.setAttribute('aria-pressed', 'true');
-            msg.className = 'sp-msg ok'; msg.textContent = r.why;
+            msg.className = 'sp-msg ok'; msg.textContent = r.why; annotateLine(msg);
             const next = document.createElement('button');
             next.type = 'button'; next.className = 'btn primary';
             const last = k === config.items.length - 1;

@@ -169,7 +169,7 @@ for (const L of LESSONS) {
     for (const o of s.options || []) if (o.smiles && !o.raw) ok(canon(o.smiles) !== null, `${t} option smiles ${o.smiles} parses`);
     if (s.config && s.config.target) ok(canon(s.config.target) !== null, `${t} target parses`);
     if (s.derive && s.derive.smiles) ok(canon(s.derive.smiles) !== null, `${t} derive smiles parses`);
-    if (s.visual) ok((s.visual.widget === 'model3d' && models[s.visual.config.mol]) || (s.visual.widget === 'newman-rotator' && NR.MOLS[s.visual.config.mol] && models[s.visual.config.mol]) || (s.visual.widget === 'chair-flip' && CC.CHAIRS[s.visual.config.model]) || (s.visual.widget === 'energy-diagram' && Array.isArray(s.visual.config.levels)) || (s.visual.widget === 'arrow-draw' && s.visual.config.preset === true && Array.isArray(s.visual.config.atoms) && s.visual.config.atoms.length > 0) || (s.visual.widget === 'fischer-quiz' && (s.visual.config.figures || [s.visual.config]).every((f) => FISCHER_BY_ID[f.entry])), `${t} visual model exists`);
+    if (s.visual) [].concat(s.visual).forEach((v) => ok((v.widget === 'model3d' && models[v.config.mol]) || (v.widget === 'newman-rotator' && NR.MOLS[v.config.mol] && models[v.config.mol]) || (v.widget === 'chair-flip' && CC.CHAIRS[v.config.model]) || (v.widget === 'energy-diagram' && Array.isArray(v.config.levels)) || (v.widget === 'arrow-draw' && v.config.preset === true && Array.isArray(v.config.atoms) && v.config.atoms.length > 0) || (v.widget === 'fischer-quiz' && (v.config.figures || [v.config]).every((f) => FISCHER_BY_ID[f.entry])), `${t} visual model exists`));   // a visual may be several panels (Lesson 08 s06, s18)
     // options
     if (s.type === 'predict' || s.type === 'choice') {
       ok(s.options.filter((o) => o.correct).length === 1, `${t} exactly one correct option`);
@@ -199,7 +199,7 @@ for (const L of LESSONS) {
         if (s.derive.value !== undefined) ok(s.derive.value === val, `${t} derive.value ${s.derive.value} == recomputed ${val}`);
       } else if (s.type === 'predict') ok(s.options.find((o) => o.correct).text === String(s.derive.value) && s.derive.value === val, `${t} predict answer recomputed (${val})`);
     }
-    if (s.visual && s.visual.config.compare) ok(models[s.visual.config.compare], `${t} compare model exists`);
+    if (s.visual && !Array.isArray(s.visual) && s.visual.config.compare) ok(models[s.visual.config.compare], `${t} compare model exists`);
     if (s.type === 'worked') s.moves.forEach((m, i) => {
       if (!m.check) return;
       const val = recompute(m.check);

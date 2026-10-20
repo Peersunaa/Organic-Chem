@@ -2,6 +2,9 @@
 //
 // config: { mech, mode?: 'draw' | 'watch', modes?: ['draw'|'watch', ...] (one per step, overrides mode), drawing?: 'auto' | 'full' | 'skeletal', whatIf?: false }
 // whatIf:false (Lesson 08) hides the what-if row, so the first mechanism of the course does not jump to Br2 or hydration (Lesson 10 / 09 words).
+// endLabel:false (Lesson 08) leaves out the step's label line under "What happened" at the end of a step: the lesson's own closing line follows, so the outcome is
+//   said once, not three times (novice re-test 2026-10-20, N5).
+// A tap on a playback picture says what moves it (Next / Back): every tap acts or explains.
 //
 // watch step: press-to-advance. Each press of Next moves exactly ONE arrow: the curve is drawn, two electron dots travel along it, the bond or lone pair it breaks
 //             fades out and the one it makes fades in, then the picture HOLDS with a "why" line under it (the arrow's `why`, else the step's label). When every arrow of
@@ -108,7 +111,7 @@ export default {
       return r;
     }
     // mid-step pictures keep every atom in place, so a bond an arrow has just made can be long: dashLong draws it dashed (forming), never as a real long bond
-    const mountScene = (box, atoms, bonds, arrows, mid = false) => arrowDraw.mount(box, { atoms, bonds, arrows, preset: true, dashLong: mid }, { onResult() {} });
+    const mountScene = (box, atoms, bonds, arrows, mid = false) => arrowDraw.mount(box, { atoms, bonds, arrows, preset: true, dashLong: mid, tapNote: 'This picture moves when you press Next below (Back goes one arrow back).' }, { onResult() {} });
     /** Over-full atoms (the H of H-Br while it is bonding to carbon, a Br with two bonds and three lone pairs ...) are in the middle of the step: no charge badge for them. */
     function hideMidCharges(box, st) {
       if (!st.mid || !st.mid.length) return;
@@ -168,7 +171,7 @@ export default {
         if (!reduceMotion() && from) box.classList.add('mp-fade');
         mountScene(box, sc.atoms, sc.bonds, []);
         out.append(h('p', 'mp-changes', `<b>What happened.</b> ${changeSentence(step)}.`));
-        if (step.label !== whyOf(step, step.arrows.length - 1)) out.append(h('p', 'mp-label', step.label));   // no second copy of the same sentence
+        if (config.endLabel !== false && step.label !== whyOf(step, step.arrows.length - 1)) out.append(h('p', 'mp-label', step.label));   // no second copy of the same sentence
         out.append(figs(step));
         wiSlot = null;
         if (n === N - 1 && config.whatIf !== false) { wiSlot = h('div', 'mp-wi'); out.append(wiSlot); paintWhatIf(); }

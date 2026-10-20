@@ -49,6 +49,7 @@ export const GLOSSARY = [
   { id: 'cip', label: 'CIP priority', forms: ['CIP'], cs: true, def: 'The ranking of the groups on an atom by atomic number, higher first (Cahn–Ingold–Prelog rules).' },
   { id: 'rs', label: 'R/S', forms: ['R/S', 'R and S'], cs: true, def: 'Labels for a stereocentre: lowest priority away from you, 1 → 2 → 3 clockwise is R and anticlockwise is S.' },
   { id: 'synanti', label: 'syn / anti', forms: ['syn', 'anti'], def: 'Syn means two groups add to the same face of a double bond; anti means they add to opposite faces.' },
+  { id: 'carbonyl', label: 'carbonyl group', forms: ['carbonyl'], def: 'A carbon double-bonded to an oxygen, C=O, as in acetone; O pulls on the shared pairs, so the carbon is δ+.' },
   { id: 'lewisacid', label: 'Lewis acid', forms: ['Lewis acid', 'Lewis acids'], def: 'A species that accepts a pair of electrons (it has an empty orbital), such as BF₃, AlCl₃ or FeBr₃.' },
   { id: 'lewisbase', label: 'Lewis base', forms: ['Lewis base', 'Lewis bases'], def: 'A species that donates a pair of electrons, usually from a lone pair, such as NH₃ or H₂O.' },
   { id: 'pka', label: 'pKa', forms: ['pKa'], cs: true, def: 'A number for acid strength, equal to −log Ka: the lower the pKa, the stronger the acid.' },
@@ -157,9 +158,16 @@ export function annotate(root, seen, scoped = false) {
       const pop = makePop(g);
       const btn = h('button', { type: 'button', class: 'gl-term', 'aria-expanded': 'false', 'aria-controls': pop.id, 'data-term': g.id }, mid.nodeValue);
       mid.replaceWith(btn);
+      // a comma or full stop right after the term stays on the term's line (a button is a break opportunity, so ", electrophilic" could start a line: N7)
+      let rest = after;
+      if (/^[,.;:!?)\]]/.test(after.nodeValue)) {
+        rest = after.splitText(1);
+        const nw = h('span', { class: 'gl-nw' });
+        btn.replaceWith(nw); nw.append(btn, after);
+      }
       placePop(btn, pop);
       seen.add(g.id); made.push(btn);
-      node = after;
+      node = rest;
       if (!node.nodeValue.trim()) break;
     }
   }
@@ -243,6 +251,7 @@ export function injectStyle() {
   const s = document.createElement('style');
   s.id = 'gl-style';
   s.textContent = `
+.gl-nw{white-space:nowrap}
 .gl-term{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;border-bottom:1.5px dotted var(--accent,#0a727c);position:relative;text-align:inherit;letter-spacing:inherit}
 .gl-term::after{content:"";position:absolute;left:50%;top:50%;width:calc(100% + 8px);height:calc(100% + 28px);min-width:44px;min-height:44px;transform:translate(-50%,-50%)}
 .gl-term:hover{background:var(--accent-soft,rgba(10,114,124,.09))}

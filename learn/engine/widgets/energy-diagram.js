@@ -13,6 +13,9 @@
 //   ask: '' hides the widget's own instruction bar (when the step prompt already says it).
 // Feedback: a wrong answer's diagnosis goes to the step's feedback box only (ctx.onResult), never twice; a right answer's reason stays under the diagram until the
 //   next task starts (1.4 s later; the new task clears it and the step's hints, so nothing stale or give-away is left) and clears that box (ctx.onProgress). Tap targets (levels, brackets, handles) are at least 44 px on a 400 px phone.
+// notes  (view mode): { levelIndex: text } written beside a level, e.g. { 1: 'step 1', 2: 'the carbocation', 3: 'step 2' }; with reveal:true every level also
+//   shows its kind (transition state, intermediate ...), so a picture names B, C and D before any task asks for them (novice re-test 2026-10-20, N10).
+// Every tap acts or explains: a tap that is not on a target (the background, a level when the task wants a bracket, a picture in view mode) gets one line under the diagram.
 import { KIND_NAME, letter, steps, overallDH, brackets, gradeTask, gradeCatalyst, pathD, validate } from './energy-core.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -66,7 +69,10 @@ export default {
     const answers = html('div', 'ed-answers');
     const msg = html('p', 'ed-msg');
     msg.setAttribute('aria-live', 'polite');
-    root.append(taskBar, svg, legend, answers, msg);
+    const note = html('p', 'ed-note');
+    note.setAttribute('aria-live', 'polite'); note.hidden = true;
+    const say = (t) => { note.textContent = t; note.hidden = false; };
+    root.append(taskBar, svg, note, legend, answers, msg);
     if (config.caption) root.append(html('p', 'ed-cap muted small', config.caption));
     host.append(root);
 
@@ -80,6 +86,10 @@ export default {
       svg.append(svgEl('text', { x: (ML + W - MR) / 2, y: H - 8, class: 'ed-axtxt', 'text-anchor': 'middle' }, 'Reaction progress'));
     }
     const tagPos = (l, i, E) => (l.kind === 'TS' ? Y(E) - 14 : Y(E) + 19);
+
+    // a tap that no target took (each target stops its own click): one line on what can be tapped
+    let offTarget = () => 'This diagram is for reading: there is nothing to tap here.';
+    svg.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('.ed-mark.tap, .ed-br, .ed-handle')) return; say(offTarget()); });
 
     // ================================================================ catalyst mode
     if (mode === 'catalyst') {
@@ -153,6 +163,7 @@ export default {
         });
       }
       drag(tsH, 'ts'); drag(pH, 'p');
+      offTarget = () => (locked ? 'Done: press Continue below.' : 'Drag the round handles (the hill top or the products), then press Check.');
       reset.addEventListener('click', () => { if (locked) return; cur.ts = levels[1].E; cur.p = levels[N - 1].E; msg.textContent = ''; msg.className = 'ed-msg'; paint(); });
       check.addEventListener('click', () => {
         if (locked) return;
@@ -205,6 +216,7 @@ export default {
         const tag = letter(i) + (config.showValues ? ` · ${l.E}` : '');
         g.append(svgEl('text', { x: X(i), y: tagPos(l, i, l.E), class: 'ed-tag', 'text-anchor': 'middle' }, tag));
         if (revealed.has(i)) g.append(svgEl('text', { x: X(i), y: tagPos(l, i, l.E) + (l.kind === 'TS' ? -14 : 14), class: 'ed-kind', 'text-anchor': 'middle' }, KIND_NAME[l.kind]));
+        if (mode === 'view' && config.notes && config.notes[i]) g.append(svgEl('text', { x: X(i), y: tagPos(l, i, l.E) + (l.kind === 'TS' ? -14 : 14) * (revealed.has(i) ? 2 : 1), class: 'ed-kind ed-noteword', 'text-anchor': 'middle' }, config.notes[i]));
         if (needTap && !done.has(ti)) {
           g.append(svgEl('circle', { cx: X(i), cy: Y(l.E), r: 26, class: 'ed-hit' }));
           g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
@@ -264,7 +276,8 @@ export default {
       next();
     }
     function result(r) {
-      if (busy) return;
+      if (busy) { say('Right. The next task starts in a moment.'); return; }
+      note.hidden = true;
       if (r.ok) { busy = true; setMsg('ok', r.why); ctx.onProgress?.(); setTimeout(advance, reducedMotion() ? 0 : 1400); }   // time to read the reason: the next task clears it
       else { setMsg('', ''); ctx.onResult({ ok: false, diagnosis: r.diagnosis }); }   // the step's feedback box shows the diagnosis, once
     }
@@ -291,6 +304,15 @@ export default {
       else if (name === 'nsteps') choice([1, 2, 3, 4].filter((n) => n <= 4).map((n) => [n, String(n)]));
       draw();
     }
+    offTarget = () => {
+      if (mode === 'view' || !tasks.length) return 'This diagram is for reading: there is nothing to tap here.';
+      if (ti >= tasks.length) return 'All tasks done: press Continue below.';
+      if (busy) return 'Right. The next task starts in a moment.';
+      const name = spec().split(':')[0];
+      if (name === 'eact' || name === 'dh') return 'Nothing to tap there. Tap one of the numbered brackets (1, 2, 3 …).';
+      if (name === 'ts' || name === 'intermediate' || name === 'rds') return 'Nothing to tap there. Tap one of the dots on the curve (a hill top or a valley).';
+      return 'Answer with the buttons under the diagram.';
+    };
     drawLegend();
     if (mode === 'view' || !tasks.length) { taskBar.hidden = true; draw(); }
     else next();

@@ -177,13 +177,17 @@ function grader(step, ctx, host) {
     get wrongCount() { return wrong; },
     get slipped() { return ft.slipped; },
     // `shown`: the text to display when it differs from the diagnosis that is logged (the caveman copy of an option's why)
-    wrong(diagnosis, shown) {
+    // `code`: the widget's kind of slip (arrow-draw: 'dest', 'source', 'extra', 'missing' ...). A step may key Hint 1 to it with
+    //   hintsFor: { code: [normal, caveman] }, so a learner whose START was right is not told where to start (novice re-test 2026-10-20, N2).
+    wrong(diagnosis, shown, code) {
       wrong++; ft.wrong();
       ctx.mistake(step.skill, step.id, diagnosis);
       say('bad', shown != null ? shown : diagnosis);
       hints.innerHTML = '';
       const hs = step.hints || [];
-      if (wrong >= 1 && hs[0]) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 1 '), sayHint(step, 0)));
+      const keyed = code && step.hintsFor && step.hintsFor[code];
+      if (wrong >= 1 && keyed) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 1 '), tAuto(keyed[0], keyed[1])));
+      else if (wrong >= 1 && hs[0]) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 1 '), sayHint(step, 0)));
       if (wrong >= 2 && hs[1]) hints.append(h('p', { class: 'hint' }, h('b', {}, 'Hint 2 '), sayHint(step, 1)));
       if (wrong >= 3 && step.worked) {
         hints.append(h('div', { class: 'worked-box' }, h('b', {}, 'Worked answer '), rich(cvSay(step, 'worked'), 'span')));
@@ -274,8 +278,9 @@ function mountVisual(host, visual) {
 
 const RENDER = {
   explain(step, ctx, host) {
+    if (step.visual && step.visualFirst) mountVisual(host, step.visual);   // `visualFirst`: the picture comes before the words (Lesson 08: arrows and the energy diagram)
     host.append(h('div', { class: 'explain' }, rich(cvSay(step, 'html'))));
-    if (step.visual) mountVisual(host, step.visual);
+    if (step.visual && !step.visualFirst) mountVisual(host, step.visual);
     ctx.done();
   },
 
@@ -337,7 +342,7 @@ const RENDER = {
     host.append(box);
     const g = grader(step, ctx, host);
     WIDGETS[step.widget].mount(box, step.config, {
-      onResult(r) { if (r.ok) g.right(step.confirm || 'Correct.'); else g.wrong(r.diagnosis); },
+      onResult(r) { if (r.ok) g.right(step.confirm || 'Correct.'); else g.wrong(r.diagnosis, undefined, r.code); },
       onProgress(o) { g.clear(o); }        // o.task: the widget moved to a new sub-task (next molecule, next question): its hints go too
     });
   },
@@ -389,7 +394,11 @@ const RENDER = {
     next();
   },
 
-  mastery(step, ctx, host) { renderProblems(step.mastery || { count: 3, generator: 'lewis-basic' }, ctx, host); },
+  mastery(step, ctx, host) {
+    // back on a check that is already passed (Back, then Continue): say so, so a fresh "0 of 3" does not read as lost progress (novice review #13)
+    if (ctx.passed) host.append(h('p', { class: 'fb ok mastery-passed' }, 'You have already passed this check, so Continue stays open. The problems below are extra practice.'));
+    renderProblems(step.mastery || { count: 3, generator: 'lewis-basic' }, ctx, host);
+  },
 
   useit(step, ctx, host) {
     const u = step.useIt;
@@ -502,7 +511,8 @@ export function renderProblems(cfg, ctx, host) {
     } else if (p.kind === 'arrows') {
       const box = h('div', { class: 'widget' });
       card.append(box);
-      WIDGETS['arrow-draw'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); } });
+      // a new tap clears the old verdict; Undo / Clear ({task:true}) clear its hints too, so nothing on screen is about arrows that are gone (novice re-test N2)
+      WIDGETS['arrow-draw'].mount(box, p.config, { onResult(r) { if (settled) return; if (r.ok) onRight(); else onWrong(r.diagnosis); }, onProgress(o) { if (settled) return; fb.className = 'fb'; fb.textContent = ''; if (o && o.task) hints.innerHTML = ''; } });
     } else if (p.kind === 'widget') {
       // Lesson 09: any widget by name (p.widget, p.config); it reports {ok} like the others
       const box = h('div', { class: 'widget' });

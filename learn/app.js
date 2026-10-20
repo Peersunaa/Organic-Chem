@@ -191,7 +191,8 @@ function recapCard(step) {
   const more = h('button', { type: 'button', class: 'recap-more', 'aria-expanded': 'false' }, 'Show all');
   more.addEventListener('click', () => { const on = body.classList.toggle('full'); more.textContent = on ? 'Show less' : 'Show all'; more.setAttribute('aria-expanded', String(on)); });
   body.append(more);
-  if (r.idea) { body.classList.add('full'); more.hidden = true; }   // the key idea of an explain step is never cut off: the next step may need a number from it
+  // the key idea of an explain step shows in full up to about eight lines; a longer one (the four reaction kinds with eight drawings) is cut there with "Show all",
+  // so the next question is never pushed below the fold (novice re-test 2026-10-20, #4)
   requestAnimationFrame(() => { if (![...body.querySelectorAll('.recap-q, .recap-note')].some((e) => e.scrollHeight > e.clientHeight + 1)) more.hidden = true; });
   const d = h('details', { class: 'recap' }, h('summary', {}, r.idea ? 'Last step: the key idea' : 'Last step'), body);
   if (recapOpen) d.open = true;
@@ -246,6 +247,7 @@ function lessonView(L, startId) {
   let prereq; // the "what you need from earlier lessons" card (built once per visit, so a toggle survives Back / Continue)
   const ctxFor = (step) => ({
     lessonId: L.id,
+    passed: done.has(step.id),   // the step was finished before (mastery says so instead of looking like lost progress)
     mistake: (skill, stepId, diagnosis) => logSlip({ skill, stepId, lessonId: L.id, diagnosis }),
     win: (skill) => store.logWin(skill),
     done: () => {

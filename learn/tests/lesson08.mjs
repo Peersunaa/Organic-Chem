@@ -19,6 +19,7 @@ import { checkInput } from '../engine/steps.js';
 import { skillLabel, skillRule } from '../engine/skills.js';
 import * as R from '../engine/reactions.js';
 import { STEP_SCENE } from '../scenes/scene-index.js';
+import models from '../data/3d/models.js';
 
 function mulberry32(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function htmlStrings(o, out = []) {
@@ -520,11 +521,19 @@ export async function lesson08({ ok, eq }) {
       // s07: an O–H bond arrow is not needed, and the message fits HO⁻ + H⁺ (nothing breaks), not "which bond has to break" (novice review #8)
       const extra = arrow.grade(c1, [{ from: { bond: [0, 1] }, to: { atom: 2 } }]);
       ok(!extra.ok && /no bond breaks/.test(extra.diagnosis) && !/has to break/.test(extra.diagnosis), `${t} s07 an O–H bond arrow gets the HO⁻ + H⁺ message`);
-      // s06 shows arrow 1 drawn, on NH₃ + H⁺ (a case the learner does not draw later)
-      const v6 = S('s06').visual.config;
-      eq(arrow.validate(v6), [], `${t} s06 picture: the drawn arrow is legal`);
-      ok(v6.preset && v6.arrows.length === 1 && v6.arrows[0].from.lp != null && v6.arrows[0].to.atom != null, `${t} s06 picture is arrow 1, lone pair → atom`);
-      eq(canon(buildMolblock(arrow.applyArrows(v6))), canon('[NH4+]'), `${t} s06 picture: the arrow gives NH₄⁺`);
+      // s06 shows all three arrows drawn, each on a case the learner does not draw later (NH₃ + H⁺, H–Br, but-2-ene + H⁺), picture before the words (novice re-test #6)
+      const vs6 = S('s06').visual, [v6, v6b, v6c] = vs6.map((v) => v.config);
+      ok(Array.isArray(vs6) && vs6.length === 3 && S('s06').visualFirst === true, `${t} s06 pictures all three arrows, above the words`);
+      vs6.forEach((v, k) => eq(arrow.validate(v.config), [], `${t} s06 picture ${k + 1}: the drawn arrow is legal`));
+      ok(v6.preset && v6.arrows.length === 1 && v6.arrows[0].from.lp != null && v6.arrows[0].to.atom != null, `${t} s06 picture 1 is arrow 1, lone pair → atom`);
+      eq(canon(buildMolblock(arrow.applyArrows(v6))), canon('[NH4+]'), `${t} s06 picture 1: the arrow gives NH₄⁺`);
+      ok(v6b.arrows[0].from.bond && v6b.arrows[0].to.atom != null && v6b.arrows[0].from.bond.includes(v6b.arrows[0].to.atom), `${t} s06 picture 2 is arrow 2, bond → atom`);
+      eq(canon(buildMolblock(arrow.applyArrows(v6b))), canon('[H+].[Br-]'), `${t} s06 picture 2: H–Br → H⁺ + Br⁻`);
+      ok(v6c.arrows[0].from.bond && v6c.arrows[0].to.bond && arrow.findBond(v6c.bonds, ...v6c.arrows[0].to.bond) < 0, `${t} s06 picture 3 is arrow 3, bond → new bond`);
+      eq(canon(buildMolblock({ atoms: v6c.atoms.map((a) => ({ ...a, charge: a.charge || 0 })), bonds: v6c.bonds })), canon('C/C=C/C.[H+]'), `${t} s06 picture 3 starts from (E)-but-2-ene + H⁺ (symmetric: nothing about step 20 given away)`);
+      eq(canon(buildMolblock(arrow.applyArrows(v6c))), canon('CC[CH+]C'), `${t} s06 picture 3: the arrow gives the 2-butyl cation`);
+      // a slip whose start was right gets a Hint 1 about the end, not about the start (novice re-test N2)
+      ['s07', 's08', 's09', 's13', 's17'].forEach((id) => ok(S(id).hintsFor && Array.isArray(S(id).hintsFor.dest) && S(id).hintsFor.dest.length === 2 && /right/.test(S(id).hintsFor.dest[0]), `${t} ${id}: Hint 1 for a right start and a wrong end (normal + caveman)`));
     }
     // ---- the pictures before the predicts of part 3 (novice review #12)
     {
@@ -545,7 +554,18 @@ export async function lesson08({ ok, eq }) {
       ok(M.MECH['hcl-ethylene'].steps.every((st) => st.arrows.every((a) => a.why)), `${t} a why line on every arrow of HCl + ethylene`);
       eq(analyze('C[CH2+]').atoms.find((a) => a.fc === 1).electrons, 6, `${t} s14: the + carbon of CH3CH2+ has 6 electrons (RDKit)`);
       eq(S('s14').options.find((o) => o.correct).text, '6', `${t} s14 answer is the computed 6`);
-      ok(S('s15').visual && S('s15').visual.widget === 'model3d' && S('s15').visual.config.mol === 'tert-butyl-cation', `${t} s15 shows the solid 3D tert-butyl cation`);
+      ok(S('s15').visual && S('s15').visual.widget === 'model3d' && S('s15').visual.config.mol === 'tert-butyl-cation-edge-on', `${t} s15 shows the solid 3D tert-butyl cation, edge-on`);
+      {
+        // the edge-on copy: same SMILES, same atoms in the same order, the four carbons in one plane whose normal is (almost) the screen's y axis (novice re-test N8)
+        const a = models['tert-butyl-cation'], b = models['tert-butyl-cation-edge-on'];
+        ok(b && b.smiles === a.smiles && canon(b.molblock) === canon(a.molblock), `${t} s15 edge-on model is the same molecule`);
+        const xyz = (mb, i) => { const l = mb.split('\n')[4 + i]; return [0, 10, 20].map((k) => parseFloat(l.slice(k, k + 10))); };
+        const sub = (u, v) => u.map((x, k) => x - v[k]), cr = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+        const c = xyz(b.molblock, 1), n = cr(sub(xyz(b.molblock, 0), c), sub(xyz(b.molblock, 2), c)), m = Math.hypot(...n);
+        ok(Math.abs(n[1]) / m > 0.9 && Math.abs(n[1]) / m < 0.97, `${t} s15 edge-on model: the carbon plane is horizontal, tilted about 20° toward the viewer (${(Math.acos(Math.abs(n[1]) / m) * 180 / Math.PI).toFixed(1)}°)`);
+        const d = (i, j) => Math.hypot(...sub(xyz(a.molblock, i), xyz(a.molblock, j))) - Math.hypot(...sub(xyz(b.molblock, i), xyz(b.molblock, j)));
+        ok([[0, 1], [1, 2], [2, 3], [4, 9], [0, 12]].every(([i, j]) => Math.abs(d(i, j)) < 1e-3), `${t} s15 edge-on model: only rotated (distances kept)`);
+      }
       ok(/empty p orbital/.test(S('s15').html) && /flat/.test(S('s15').html), `${t} s15: flat, empty p orbital`);
       ok(/lone pair on Cl⁻ to the \+ carbon/.test(S('s16').options.find((o) => o.correct).text), `${t} s16: Cl⁻ lone pair → C⁺`);
     }
@@ -557,6 +577,24 @@ export async function lesson08({ ok, eq }) {
       const pred = R.predict('CC=C', 'HCl');
       ok(pred.outcome === 'markovnikov' && pred.products.length === 1 && canon(pred.products[0]) === canon('CC(C)Cl'), `${t} s20: propene + HCl gives 2-chloropropane (reaction engine)`);
       ok(/2-chloropropane/.test(S('s20').options.find((o) => o.correct).text) && /2°/.test(S('s20').options.find((o) => o.correct).text), `${t} s20 correct option is the 2° route`);
+      // the predicts that were text only now show their molecules (novice re-test #12)
+      const mol = (c) => canon(buildMolblock({ atoms: c.atoms.map((a) => ({ ...a, charge: a.charge || 0 })), bonds: c.bonds }));
+      const one = (id) => S(id).visual && S(id).visual.config;
+      ok(one('s05') && one('s05').arrows.length === 0 && mol(one('s05')) === canon('N.[H+]'), `${t} s05 shows NH₃ and H⁺, no arrow (the question is where it starts)`);
+      ok(one('s12') && one('s12').arrows.length === 1 && mol(one('s12')) === canon('C=C.Cl'), `${t} s12 shows the first arrow on ethylene + HCl`);
+      ok(one('s14') && mol(one('s14')) === canon('C[CH2+]'), `${t} s14 shows CH₃CH₂⁺`);
+      ok(Array.isArray(S('s18').visual) && S('s18').visual.map((v) => mol(v.config)).join(' ') === ['[CH3+]', 'C[CH2+]', 'C[C+](C)C'].map(canon).join(' '), `${t} s18 shows the three cations`);
+      ok(one('s20') && mol(one('s20')) === canon('C=CC.Cl') && one('s20').partials.length === 2, `${t} s20 shows propene and HCl with δ+ / δ−`);
+      ['s05', 's12', 's14', 's20'].forEach((id) => eq(arrow.validate(one(id)), [], `${t} ${id} picture is a valid structure`));
+      S('s18').visual.forEach((v, k) => eq(arrow.validate(v.config), [], `${t} s18 picture ${k + 1} is a valid structure`));
+      // the energy diagram of s22 names its parts on the picture, which comes first (N10)
+      const v22 = S('s22').visual.config;
+      ok(S('s22').visualFirst && v22.reveal === true && v22.notes[2] === 'the carbocation' && /step 1/.test(v22.notes[1]) && /step 2/.test(v22.notes[3]), `${t} s22 labels the valley "the carbocation" and the hills step 1 / step 2`);
+      ok(EC.steps(v22.levels)[0].ts === 1 && v22.levels[2].kind === 'I', `${t} s22 notes sit on the right levels (B = step 1 hill top, C = the intermediate)`);
+      // the outcome of steps 13 / 17 is said once (N5)
+      ok(S('s13').config.endLabel === false && S('s17').config.endLabel === false && !/Press Next/.test(S('s13').confirm), `${t} s13 / s17: no label repeat, no stale "Press Next" in the closing line`);
+      // the right option of each s10 move is not always the longest (#12)
+      ok(!S('s10').moves.every((m) => { const c = m.options.find((o) => o.correct).text.length; return m.options.every((o) => o.correct || o.text.length < c); }), `${t} s10: the right option is not always the longest`);
     }
     // ---- part 5: energy diagrams (answers recomputed from the levels)
     {

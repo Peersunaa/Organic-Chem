@@ -7,6 +7,7 @@
 // tests: atoms and charge balance, and applying the arrows gives the products. Energy-diagram answers are computed from the levels; the numbers are illustrative.
 import { MECH, HCL_STEP1, GRAMMAR, kindMove, RULE_CASES, HCL_ETHYLENE_LEVELS } from '../engine/mechanisms.js';
 import { applyArrows } from '../engine/widgets/arrow-core.js';
+import models from '../data/3d/models.js';
 
 // ---- the wrong mechanisms of the "spot the broken rule" step (data in engine/mechanisms.js; the product of case 2 is what those arrows really give)
 const RC = RULE_CASES;
@@ -40,11 +41,71 @@ const PIC_CATION_CL = {
   arrows: [], preset: true,
   caption: 'After step 1: the carbocation CH₃CH₂⁺ (the + carbon has three bonds and six electrons) and Cl⁻ (four lone pairs, a − charge).'
 };
-// ---- arrow 1 drawn on a case the learner does not draw later (NH₃ + H⁺), shown in the grammar step itself (novice review #6)
+// ---- the three legal arrows, each drawn on a case the learner does not draw later, shown in the grammar step itself (novice review #6, re-test: all three, picture first)
 const PIC_ARROW1 = {
   atoms: RC.fromProton.atoms, bonds: RC.fromProton.bonds, arrows: [{ from: { lp: 0 }, to: { atom: 4 } }], preset: true,
-  caption: 'Arrow 1 drawn: it starts on the lone pair of N (the dots) and ends on H⁺. That pair becomes a new N–H bond: NH₃ + H⁺ → NH₄⁺.'
+  caption: 'Starts on the lone pair of N (the dots), ends on H⁺: a new N–H bond. NH₃ + H⁺ → NH₄⁺.'
 };
+const PIC_ARROW2 = {
+  atoms: [{ el: 'H', x: 0, y: 0 }, { el: 'Br', x: 1, y: 0 }], bonds: [{ a: 0, b: 1, order: 1 }], arrows: [{ from: { bond: [0, 1] }, to: { atom: 1 } }], preset: true,
+  caption: 'Starts on the H–Br bond (the line), ends on Br: the bond breaks. H–Br → H⁺ + Br⁻.'
+};
+// but-2-ene + H⁺ (symmetric, so it gives nothing away about which end H prefers: that is step 20)
+const PIC_ARROW3 = {
+  atoms: [{ el: 'C', x: 0, y: 0 }, { el: 'C', x: 1, y: 0 }, { el: 'C', x: -0.5, y: 0.87 }, { el: 'C', x: 1.5, y: -0.87 }, { el: 'H', x: -0.5, y: -0.87 }, { el: 'H', x: 1.5, y: 0.87 },
+    { el: 'H', x: -1, y: 1.74 }, { el: 'H', x: 0.14, y: 1.64 }, { el: 'H', x: -1.48, y: 0.7 }, { el: 'H', x: 2, y: -1.74 }, { el: 'H', x: 2.48, y: -0.7 }, { el: 'H', x: 0.86, y: -1.64 },
+    { el: 'H', x: -0.6, y: -2.1, charge: 1 }],
+  bonds: [{ a: 0, b: 1, order: 2 }, { a: 0, b: 2, order: 1 }, { a: 1, b: 3, order: 1 }, { a: 0, b: 4, order: 1 }, { a: 1, b: 5, order: 1 }, { a: 2, b: 6, order: 1 }, { a: 2, b: 7, order: 1 },
+    { a: 2, b: 8, order: 1 }, { a: 3, b: 9, order: 1 }, { a: 3, b: 10, order: 1 }, { a: 3, b: 11, order: 1 }],
+  arrows: [{ from: { bond: [0, 1] }, to: { bond: [0, 12] } }], preset: true,
+  caption: 'Starts on the C=C of but-2-ene, ends on H⁺: the π pair becomes a new C–H bond, and the other carbon is left with a +.'
+};
+// ---- still pictures for the predicts that were text only (novice re-test #12): the molecules each question is about, nothing that gives the answer away
+const PIC_NH3_H = { atoms: RC.fromProton.atoms, bonds: RC.fromProton.bonds, arrows: [], preset: true, caption: 'NH₃ and H⁺. A pair of dots is a lone pair (two electrons on one atom); a line is a bond (a shared pair). H⁺ has neither.' };
+const PIC_ARROW_HCL = { ...PIC_HCL_ETHYLENE, arrows: [{ from: { bond: [0, 1] }, to: { bond: [0, 6] } }], caption: 'The first arrow drawn: the π pair starts a new C–H bond to the H of HCl. That H is still bonded to Cl.' };
+const PIC_ETHYL = { atoms: PIC_CATION_CL.atoms.slice(0, 7), bonds: PIC_CATION_CL.bonds, arrows: [], preset: true, caption: 'CH₃CH₂⁺. The + carbon (right) has three bonds and no dots: no lone pair.' };
+const cation = (atoms, bonds) => ({ widget: 'arrow-draw', config: { atoms, bonds, arrows: [], preset: true } });
+const PIC_THREE_CATIONS = [
+  { title: 'CH₃⁺', ...cation([{ el: 'C', x: 0, y: 0, charge: 1 }, { el: 'H', x: 0, y: -1 }, { el: 'H', x: 0.87, y: 0.5 }, { el: 'H', x: -0.87, y: 0.5 }], [{ a: 0, b: 1, order: 1 }, { a: 0, b: 2, order: 1 }, { a: 0, b: 3, order: 1 }]) },
+  { title: 'CH₃CH₂⁺', ...cation(PIC_CATION_CL.atoms.slice(0, 7), PIC_CATION_CL.bonds) },
+  { title: '(CH₃)₃C⁺', ...cation(
+    [{ el: 'C', x: 0, y: 0, charge: 1 }, { el: 'C', x: 0, y: -1 }, { el: 'C', x: 0.87, y: 0.5 }, { el: 'C', x: -0.87, y: 0.5 },
+      { el: 'H', x: 0, y: -2 }, { el: 'H', x: 0.94, y: -1.34 }, { el: 'H', x: -0.94, y: -1.34 }, { el: 'H', x: 1.73, y: 1 }, { el: 'H', x: 1.63, y: -0.14 }, { el: 'H', x: 0.69, y: 1.48 },
+      { el: 'H', x: -1.73, y: 1 }, { el: 'H', x: -1.63, y: -0.14 }, { el: 'H', x: -0.69, y: 1.48 }],
+    [{ a: 0, b: 1, order: 1 }, { a: 0, b: 2, order: 1 }, { a: 0, b: 3, order: 1 }, { a: 1, b: 4, order: 1 }, { a: 1, b: 5, order: 1 }, { a: 1, b: 6, order: 1 },
+      { a: 2, b: 7, order: 1 }, { a: 2, b: 8, order: 1 }, { a: 2, b: 9, order: 1 }, { a: 3, b: 10, order: 1 }, { a: 3, b: 11, order: 1 }, { a: 3, b: 12, order: 1 }]) }
+];
+const PIC_PROPENE_HCL = {
+  atoms: [{ el: 'C', x: 0, y: 0 }, { el: 'C', x: 1, y: 0 }, { el: 'C', x: 1.5, y: -0.87 }, { el: 'H', x: -0.5, y: 0.87 }, { el: 'H', x: -0.5, y: -0.87 }, { el: 'H', x: 1.5, y: 0.87 },
+    { el: 'H', x: 2, y: -1.74 }, { el: 'H', x: 2.48, y: -0.7 }, { el: 'H', x: 0.86, y: -1.64 }, { el: 'H', x: -1, y: -2 }, { el: 'Cl', x: -2, y: -2.55 }],
+  bonds: [{ a: 0, b: 1, order: 2 }, { a: 1, b: 2, order: 1 }, { a: 0, b: 3, order: 1 }, { a: 0, b: 4, order: 1 }, { a: 1, b: 5, order: 1 }, { a: 2, b: 6, order: 1 }, { a: 2, b: 7, order: 1 },
+    { a: 2, b: 8, order: 1 }, { a: 9, b: 10, order: 1 }],
+  arrows: [], preset: true, partials: [{ atom: 9, sign: '+' }, { atom: 10, sign: '-' }],
+  caption: 'Propene and HCl. The two carbons of the C=C differ: the left one (CH₂) holds two H; the right one (CH) holds one H and the CH₃.'
+};
+// ---- the 3D tert-butyl cation turned so its plane is horizontal and seen almost edge-on (tilted 20°), with the empty p orbital's axis pointing up the screen
+//      (novice re-test N8: the stock model came up tilted, so its flatness did not show). Same atoms, same order, only rotated.
+function edgeOnModel(mb, centre, ref, tiltDeg) {
+  const L = mb.split('\n'), n = parseInt(L[3].slice(0, 3), 10);
+  const P = (i) => [0, 10, 20].map((k) => parseFloat(L[4 + i].slice(k, k + 10)));
+  const sub = (a, b) => a.map((v, k) => v - b[k]), dot = (a, b) => a.reduce((t, v, k) => t + v * b[k], 0);
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const unit = (a) => { const m = Math.hypot(...a); return a.map((v) => v / m); };
+  const c = P(centre), u = sub(P(ref[0]), c), w = sub(P(ref[1]), c);
+  const ey = unit(cross(u, w)), ex = unit(sub(u, ey.map((v) => v * dot(u, ey)))), ez = cross(ex, ey);
+  const t = (tiltDeg * Math.PI) / 180, ph = Math.PI / 2;   // in-plane turn: one methyl toward the viewer, the other two left and right
+  const out = L.slice();
+  for (let i = 0; i < n; i++) {
+    const d = sub(P(i), c);
+    let x = dot(d, ex), y = dot(d, ey), z = dot(d, ez);
+    [x, z] = [x * Math.cos(ph) - z * Math.sin(ph), x * Math.sin(ph) + z * Math.cos(ph)];
+    [y, z] = [y * Math.cos(t) - z * Math.sin(t), y * Math.sin(t) + z * Math.cos(t)];
+    out[4 + i] = [x, y, z].map((v) => v.toFixed(4).padStart(10)).join('') + L[4 + i].slice(30);
+  }
+  return out.join('\n');
+}
+const EDGE_ID = 'tert-butyl-cation-edge-on';
+if (!models[EDGE_ID] && models['tert-butyl-cation']) models[EDGE_ID] = { smiles: models['tert-butyl-cation'].smiles, molblock: edgeOnModel(models['tert-butyl-cation'].molblock, 1, [0, 2], 20) };
 
 export default {
   id: '08', slug: 'mechanisms', title: 'How mechanisms work', minutes: 35,
@@ -113,13 +174,15 @@ export default {
         { text: 'On the positive atom, because the + is what attracts the pair', why: 'A + atom pulls electrons in, so it is the target. An arrow never starts on an atom that has no electrons to send.' },
         { text: 'On any atom, as long as the arrow points at the other molecule', why: 'The arrow tracks one particular pair of electrons. It must start on that pair: a lone pair or a bond.' }
       ],
-      reveal: 'An arrow starts on the electrons and ends where they go. That gives exactly <b>three legal arrows</b>, and the next screen shows them.'
+      reveal: 'An arrow starts on the electrons and ends where they go. That gives exactly <b>three legal arrows</b>, and the next screen shows them.',
+      visual: { widget: 'arrow-draw', config: PIC_NH3_H }
     },
     {
-      caveman: {"html": "<p><b>Arrow grammar.</b> Start at pair, end where pair goes. Three legal:</p><ol><li><b>Lone pair → atom</b>: new bond.</li><li><b>Bond → atom</b>: bond breaks; new lone pair.</li><li><b>Bond → new bond</b>: pair bonds to other atom.</li></ol><p>Never from H⁺ or + atom. Arrow 1 drawn below.</p>"}, // CAVEMAN
+      caveman: {"html": "<p><b>Arrow grammar.</b> Start at pair, end where pair goes. Three legal:</p><ol><li><b>Lone pair → atom</b>: new bond.</li><li><b>Bond → atom</b>: bond breaks; new lone pair.</li><li><b>Bond → new bond</b>: pair bonds to other atom.</li></ol><p>Never from H⁺ or + atom. Pictures above: one per arrow.</p>"}, // CAVEMAN
       id: 's06', type: 'explain', skill: 'curved-arrows',
-      html: '<p><b>Arrow grammar.</b> An arrow starts at a pair and ends where it goes. Three arrows are legal:</p><ol><li><b>Lone pair → atom</b>: the pair becomes a new bond to that atom.</li><li><b>Bond → atom</b>: the bond breaks; its pair becomes a lone pair on that atom.</li><li><b>Bond → new bond</b>: the pair leaves its bond and bonds to another atom.</li></ol><p>Never start on H⁺ or a + atom: nothing there to move. Arrow 1 is drawn below.</p>',
-      visual: { widget: 'arrow-draw', config: PIC_ARROW1 }
+      html: '<p><b>Arrow grammar.</b> An arrow starts at a pair and ends where it goes. Three arrows are legal:</p><ol><li><b>Lone pair → atom</b>: the pair becomes a new bond to that atom.</li><li><b>Bond → atom</b>: the bond breaks; its pair becomes a lone pair on that atom.</li><li><b>Bond → new bond</b>: the pair leaves its bond and bonds to another atom.</li></ol><p>Never start on H⁺ or a + atom: nothing there to move. Each is pictured above.</p>',
+      visualFirst: true,
+      visual: [{ title: 'Arrow 1: lone pair → atom', widget: 'arrow-draw', config: PIC_ARROW1 }, { title: 'Arrow 2: bond → atom', widget: 'arrow-draw', config: PIC_ARROW2 }, { title: 'Arrow 3: bond → new bond', widget: 'arrow-draw', config: PIC_ARROW3 }]
     },
     {
       caveman: {"prompt": "Arrow 1, <b>lone pair → atom</b>. HO⁻ meets H⁺. Draw arrow making O–H bond.", "worked": "Tap O lone pair, then H⁺: HO⁻ + H⁺ → H₂O.", "hints": ["Start at electrons: dots on O (HO⁻ rich).", "Tap any dots on O, then H⁺."]}, // CAVEMAN
@@ -129,6 +192,7 @@ export default {
       config: grammarStep('lpToAtom'),
       confirm: 'Lone pair → atom: the pair became the new O–H bond, and HO⁻ became H₂O. Press “Show before” to compare the two pictures.',
       hints: ['Start where the electrons are: the dots on O. HO⁻ is the electron-rich partner.', 'Tap any pair of dots on O, then tap H⁺.'],
+      hintsFor: { dest: ['Your start is right: a lone pair on O. Now the end: H⁺, the H with no electrons at all, not the H already bonded to O.', 'Start right. End on H⁺, not H on O.'] },
       worked: 'Tap a lone pair on O, then tap H⁺. The pair becomes the new O–H bond: HO⁻ + H⁺ → H₂O.'
     },
     {
@@ -139,6 +203,7 @@ export default {
       config: grammarStep('bondToAtom'),
       confirm: 'Bond → atom: the bond broke and its pair became a lone pair on Cl. H–Cl → H⁺ + Cl⁻.',
       hints: ['The electrons are in the bond: start on the line between H and Cl.', 'Tap the H–Cl line, then tap Cl (the more electronegative atom keeps the pair).'],
+      hintsFor: { dest: ['Your start is right: the H–Cl line. Now the end: the pair stays on the atom that pulls harder, Cl (3.0 against 2.1).', 'Start right. End on Cl: pulls harder.'] },
       worked: 'Tap the H–Cl bond, then tap Cl. The bond pair becomes the fourth lone pair on Cl: Cl⁻, and H is left with no electrons as H⁺.'
     },
     {
@@ -149,6 +214,7 @@ export default {
       config: grammarStep('bondToBond'),
       confirm: 'Bond → new bond: the π pair became a C–H bond, and the other carbon, which lost its share of that pair, is left with a + charge.',
       hints: ['The electron-rich part of ethylene is the π bond: start on the C=C line.', 'Tap the C=C, then tap H⁺ (the H with the + charge).'],
+      hintsFor: { dest: ['Your start is right: the C=C. Now the end: the electron-poor partner, H⁺ (the H with the + charge).', 'Start right. End on H⁺.'] },
       worked: 'Tap the C=C bond, then tap H⁺. The π pair becomes a new C–H bond; the carbon that lost its share is now C⁺: CH₃CH₂⁺.'
     },
     {
@@ -160,10 +226,10 @@ export default {
           ask: 'NH₃ picks up H⁺. This student started the arrow on the H⁺. What is wrong?',
           visual: sceneOf(RC.fromProton),
           options: [
-            { text: 'The arrow starts on H⁺, which has no electrons. Arrows start at a lone pair or a bond.', correct: true, why: 'Yes. H⁺ is a bare proton with no electrons to move. The arrow should start on the lone pair of nitrogen and end on H⁺.' },
-            { text: 'H⁺ should be drawn with a lone pair of its own', why: 'H⁺ has lost its only electron. Giving it a lone pair would turn it into a hydride ion, H⁻, a different species.' },
-            { text: 'Arrows have to run from left to right on the page', why: 'The direction on the page does not matter. What matters is that the arrow starts at electrons and ends at the atom or bond that receives them.' },
-            { text: 'Ammonia has no electrons that it could give', why: 'Nitrogen in NH₃ has one lone pair, and that is exactly where the arrow should start.' }
+            { text: 'It starts on H⁺, which has no electrons; an arrow must start at a lone pair or a bond', correct: true, why: 'Yes. H⁺ is a bare proton with no electrons to move. The arrow should start on the lone pair of nitrogen and end on H⁺.' },
+            { text: 'H⁺ should be drawn with a lone pair of its own, so it has a pair to send', why: 'H⁺ has lost its only electron. Giving it a lone pair would turn it into a hydride ion, H⁻, a different species.' },
+            { text: 'Arrows have to run from left to right on the page, and this one runs the other way', why: 'The direction on the page does not matter. What matters is that the arrow starts at electrons and ends at the atom or bond that receives them.' },
+            { text: 'Ammonia has no electrons that it could give, so no arrow can start on its N', why: 'Nitrogen in NH₃ has one lone pair, and that is exactly where the arrow should start.' }
           ]
         },
         {
@@ -173,10 +239,10 @@ export default {
             { title: 'The student’s product', widget: 'arrow-draw', config: { atoms: fiveProduct.atoms, bonds: fiveProduct.bonds, arrows: [], preset: true } }
           ],
           options: [
-            { text: 'Carbon ends up with five bonds (ten electrons). The C–Cl bond has to break, with a second arrow to Cl.', correct: true, why: 'Yes. Carbon can have only eight electrons (four bonds). When O bonds to C, the C–Cl pair must leave with Cl as Cl⁻.' },
-            { text: 'The arrow starts at the wrong lone pair of oxygen', why: 'Oxygen’s lone pair is the right place to start: it makes the new O–C bond. The trouble is what happens at carbon.' },
-            { text: 'Hydroxide cannot give electrons to anything', why: 'Hydroxide is a good electron donor: it is negative and has lone pairs. The problem is the five bonds on carbon.' },
-            { text: 'The oxygen should keep its negative charge', why: 'After it shares a lone pair, oxygen has two bonds and two lone pairs: neutral. The charge to worry about is on carbon, which has too many bonds.' }
+            { text: 'Carbon ends up with five bonds (ten electrons): the C–Cl bond must break, with an arrow to Cl', correct: true, why: 'Yes. Carbon can have only eight electrons (four bonds). When O bonds to C, the C–Cl pair must leave with Cl as Cl⁻.' },
+            { text: 'The arrow starts at the wrong lone pair of oxygen: it should use the pair facing away from carbon', why: 'Oxygen’s lone pair is the right place to start: it makes the new O–C bond. The trouble is what happens at carbon.' },
+            { text: 'Hydroxide cannot give electrons to anything, because its − charge holds them on oxygen', why: 'Hydroxide is a good electron donor: it is negative and has lone pairs. The problem is the five bonds on carbon.' },
+            { text: 'The oxygen should keep its negative charge after the new O–C bond forms, so the charge is wrong', why: 'After it shares a lone pair, oxygen has two bonds and two lone pairs: neutral. The charge to worry about is on carbon, which has too many bonds.' }
           ]
         },
         {
@@ -184,10 +250,10 @@ export default {
           visual: sceneOf(RC.lostCharge),
           equation: { reactants: RC.lostCharge.reactants, products: RC.lostCharge.studentProducts },
           options: [
-            { text: 'Charge is not conserved. The left side is −1 but the right side adds up to 0: Cl must be Cl⁻, because it kept the H–Cl pair.', correct: true, why: 'Yes. Charge is conserved in every step. Chlorine gains the bonding pair as a fourth lone pair, so it is Cl⁻ and the total stays −1.' },
-            { text: 'A third arrow is missing from the drawing', why: 'Two arrows are all this step needs: the lone pair forms the new O–H bond, and the H–Cl pair moves onto Cl.' },
-            { text: 'The water should be written as H₃O⁺ instead', why: 'Oxygen made one new bond but began with a negative charge, so it ends up neutral: H₂O. Writing H₃O⁺ would give the wrong charge again.' },
-            { text: 'Cl should end up with five bonds', why: 'Cl never has more than one bond here, and five would break the octet rule. The error is the missing negative charge.' }
+            { text: 'Charge is not conserved: the left side is −1, the right side 0. Cl kept the pair, so it is Cl⁻', correct: true, why: 'Yes. Charge is conserved in every step. Chlorine gains the bonding pair as a fourth lone pair, so it is Cl⁻ and the total stays −1.' },
+            { text: 'A third arrow is missing from the drawing: one from the new O–H bond back onto oxygen', why: 'Two arrows are all this step needs: the lone pair forms the new O–H bond, and the H–Cl pair moves onto Cl.' },
+            { text: 'The water should be written as H₃O⁺ instead, because oxygen gained a bond to hydrogen', why: 'Oxygen made one new bond but began with a negative charge, so it ends up neutral: H₂O. Writing H₃O⁺ would give the wrong charge again.' },
+            { text: 'Cl should end up with five bonds, because it keeps the pair and must share it again', why: 'Cl never has more than one bond here, and five would break the octet rule. The error is the missing negative charge.' }
           ]
         }
       ],
@@ -215,6 +281,7 @@ export default {
       answerable: 'The aside says H holds two electrons; s08 drew bond → atom; s02 says Cl pulls the H–Cl pair harder.',
       prompt: 'As the π pair forms the new C–H bond, that H would hold four electrons, but H can hold only two. What must the second arrow do?',
       aside: '<p>From Lesson 01: hydrogen is full with two electrons, which is one bond.</p>',
+      visual: { widget: 'arrow-draw', config: PIC_ARROW_HCL },
       options: [
         { text: 'Send the H–Cl bond pair onto Cl, so the H–Cl bond breaks', correct: true, why: 'Yes. Bond → atom: the old bond breaks and its pair stays on Cl, the atom that pulls harder. H keeps only its new bond to carbon.' },
         { text: 'Send the H–Cl bond pair onto one of the two carbons of the C=C', why: 'Cl pulls harder on that pair (Lesson 02), so Cl keeps it. And the carbon that just took the H already has four bonds: one more pair there would give it five.' },
@@ -227,9 +294,10 @@ export default {
       caveman: {"prompt": "Draw step 1: both arrows, Check, then Next to watch.", "worked": "Arrow 1: C=C → H of HCl. Arrow 2: H–Cl bond → Cl. Gives CH₃CH₂⁺, Cl⁻.", "hints": ["Two arrows: make C–H, break H–Cl.", "1: C=C then H. 2: H–Cl line then Cl."]}, // CAVEMAN
       id: 's13', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'Draw step 1. Draw both arrows and press Check; then press Next to watch each pair of electrons move.',
-      config: { mech: HCL_STEP1, mode: 'draw', whatIf: false },
-      confirm: 'Both arrows are right. Press Next to watch them; the next screens look at the + carbon they leave behind.',
+      config: { mech: HCL_STEP1, mode: 'draw', whatIf: false, endLabel: false },
+      confirm: 'Step 1 drawn and watched. The next screens look at the + carbon it leaves behind.',
       hints: ['Two arrows: one makes the new C–H bond, one breaks the H–Cl bond.', 'Arrow 1: tap the C=C, then the H of HCl. Arrow 2: tap the H–Cl line, then Cl.'],
+      hintsFor: { dest: ['Each start is right; check where each one ends. The π pair ends on the H of HCl; the H–Cl pair ends on Cl.', 'Starts right. π pair to H; H–Cl pair to Cl.'] },
       worked: 'Arrow 1: from the C=C bond to the H of HCl (the new C–H bond). Arrow 2: from the H–Cl bond onto Cl. That gives CH₃CH₂⁺ and Cl⁻.'
     },
     {
@@ -238,6 +306,7 @@ export default {
       answerable: 'Counting rule in the aside (Lesson 01): each bond is two electrons, a lone pair two more.',
       prompt: 'Count the electrons around the + carbon of CH₃CH₂⁺. It has three bonds and no lone pair.',
       aside: '<p>Each bond is one shared pair: 2 electrons. A lone pair is 2 more.</p>',
+      visual: { widget: 'arrow-draw', config: PIC_ETHYL },
       options: [
         { text: '6', correct: true, why: 'Yes. Three bonds × 2 electrons = 6, and no lone pair. Two short of an octet: that is why the + carbon is so electron-poor.' },
         { text: '8', why: 'Eight would need a fourth bond or a lone pair. This carbon has three bonds only: 3 × 2 = 6.' },
@@ -247,10 +316,10 @@ export default {
       reveal: 'Six electrons: two short of an octet. That is what makes a <b>carbocation</b> electron-poor.'
     },
     {
-      caveman: {"html":"<p><b>Carbocation</b>: real. + C: three bonds, six electrons, no lone pair: <b>flat</b> (sp², one plane, 120°).</p><p><b>Empty p orbital</b>: lobe above, lobe below, empty: pair comes in. Turn (CH₃)₃C⁺ edge-on. Scene: lobes.</p>"}, // CAVEMAN
+      caveman: {"html":"<p><b>Carbocation</b>: real. + C: three bonds, six electrons, no lone pair: <b>flat</b> (sp², one plane, 120°).</p><p><b>Empty p orbital</b>: lobe above, lobe below, empty: pair comes in. Model (CH₃)₃C⁺ edge-on: one flat sheet. Scene: lobes.</p>"}, // CAVEMAN
       id: 's15', type: 'explain', skill: 'carbocations',
-      html: '<p>A <b>carbocation</b> is a real species. Its + carbon has three bonds, six electrons and no lone pair, so it is <b>flat</b>: <b>sp²</b>, three groups in one plane, 120° apart.</p><p>Its unused orbital is an <b>empty p orbital</b>: a dumbbell up through the carbon, one lobe above the plane and one below, with no electrons: room for an incoming pair. Turn (CH₃)₃C⁺ edge-on to see it is flat; “Watch the scene” shows the empty lobes.</p>',
-      visual: { widget: 'model3d', config: { mol: 'tert-butyl-cation', highlight: [1], labels: { 1: 'C⁺' } } }
+      html: '<p>A <b>carbocation</b> is a real species. Its + carbon has three bonds, six electrons and no lone pair, so it is <b>flat</b>: <b>sp²</b>, three groups in one plane, 120° apart.</p><p>Its unused orbital is an <b>empty p orbital</b>: a dumbbell up through the carbon, one lobe above the plane and one below, with no electrons: room for an incoming pair. The (CH₃)₃C⁺ model below is edge-on: four carbons, one flat sheet. “Watch the scene” shows the lobes.</p>',
+      visual: { widget: 'model3d', config: { mol: EDGE_ID, highlight: [1], labels: { 1: 'C⁺' } } }
     },
     {
       caveman: {"prompt": "Cl⁻ meets CH₃CH₂⁺. Which arrow joins?", "reveal": "Lone pair → atom: Cl⁻ pair into empty p orbital: C–Cl. Product CH₃CH₂Cl.", "options": [{"why": "Yes. Cl⁻ rich, C⁺ poor (six): lone pair → atom makes C–Cl."}, {"why": "C⁺ has no spare pair. Start at electrons: Cl⁻."}, {"why": "Cl⁻ already rich. Poor partner: + carbon."}, {"why": "Every new bond needs a pair; arrow shows source: Cl⁻ lone pair."}]}, // CAVEMAN
@@ -271,9 +340,10 @@ export default {
       id: 's17', type: 'try', skill: 'mechanism', widget: 'mechanism-player',
       prompt: 'The whole mechanism. Press Next to replay step 1 one arrow at a time; then draw step 2 yourself.',
       reaction: { reactants: MECH['hcl-ethylene'].reactants, products: MECH['hcl-ethylene'].products },
-      config: { mech: MECH['hcl-ethylene'], modes: ['watch', 'draw'], whatIf: false },
-      confirm: 'Two steps: (1) π bond → H with H–Cl → Cl gives the carbocation; (2) a Cl⁻ lone pair → C⁺ gives chloroethane. Every arrow ran from rich to poor.',
+      config: { mech: MECH['hcl-ethylene'], modes: ['watch', 'draw'], whatIf: false, endLabel: false },
+      confirm: 'The whole mechanism, in two steps. Every arrow ran from an electron-rich site to an electron-poor one.',
       hints: ['Step 2 has one arrow. Start at the electron-rich partner.', 'Tap a lone pair on Cl⁻, then tap the + carbon.'],
+      hintsFor: { dest: ['Your start is right: a lone pair on Cl⁻. End it on the + carbon, the one with only three bonds.', 'Start right. End on + carbon.'] },
       worked: 'Step 1 plays on its own. Step 2: tap a lone pair on Cl⁻, then tap the + carbon. The pair becomes the C–Cl bond: CH₃CH₂Cl.'
     },
 
@@ -283,6 +353,7 @@ export default {
       id: 's18', type: 'predict', skill: 'carbocations',
       answerable: 'The prompt says carbon groups lend density to the + carbon; everyday reasoning: more helpers = steadier.',
       prompt: 'Carbon groups (CH₃, CH₂ …) are slightly electron-rich: each one can lend a little electron density to a + carbon right next to it. Which carbocation is the most stable?',
+      visual: PIC_THREE_CATIONS,
       options: [
         { text: '(CH₃)₃C⁺: three carbon groups lend to the + carbon', correct: true, why: 'Yes. Three neighbours each lend a little electron density, so the + is softened the most: the most stable cation.' },
         { text: 'CH₃CH₂⁺: one carbon group lends to the + carbon', why: 'One neighbour helps only a little. (CH₃)₃C⁺ has three carbon groups lending, so it is steadier.' },
@@ -294,13 +365,15 @@ export default {
     {
       caveman: {"html":"<p><b>3° > 2° > 1°.</b> Count C on C⁺ (Lesson 05). Alkyl group (CH₃) pushes density to poor C along σ bond: <b>inductive effect</b>.</p><p>Steadier cation: cheaper, forms faster. H goes to C=C end leaving <b>more stable</b> cation.</p>"}, // CAVEMAN
       id: 's19', type: 'explain', skill: 'carbocations',
-      html: '<p><b>Cation stability: 3° > 2° > 1°.</b> Count the carbons bonded to the C⁺ (Lesson 05). Each <b>alkyl group</b> (a carbon group such as CH₃) pushes a little electron density to the poor carbon through the single <b>σ bond</b> joining them: the <b>inductive effect</b>.</p><p>A steadier cation takes less energy to make, so it forms faster. So H adds to the end of a C=C that leaves the <b>more stable</b> cation behind.</p>'
+      html: '<p><b>Cation stability: 3° > 2° > 1°.</b> Count the carbons bonded to the C⁺ (Lesson 05). Each <b>alkyl group</b> (a carbon group such as CH₃) pushes a little electron density to the poor carbon through the <b>σ bond</b> (single bond) joining them: the <b>inductive effect</b>.</p><p>A steadier cation takes less energy to make, so it forms faster. So H adds to the end of a C=C that leaves the <b>more stable</b> cation behind.</p>'
     },
     {
       caveman: {"prompt": "Propene CH₃CH=CH₂ + HCl. H bonds either C=C carbon. Which cation, product?", "reveal": "H goes to carbon with more H: + on more substituted carbon. Lesson 09 names it.", "options": [{"why": "Yes. H on end C: + on middle C, two C neighbours (2°). 2° wins; Cl⁻ bonds there."}, {"why": "+ on end carbon, one neighbour (1°). 2° steadier, forms faster."}, {"why": "Not equal: 2° beats 1°. Faster path wins: one major product."}, {"why": "HCl adds in two steps: H first, then Cl⁻ onto cation. 2° cation decides."}]}, // CAVEMAN
       id: 's20', type: 'predict', skill: 'carbocations',
       answerable: 's18-s19: 2° beats 1°, and the faster (steadier-cation) path wins; s16 says Cl⁻ bonds where the + is.',
       prompt: 'Propene, CH₃CH=CH₂, meets HCl. H can bond to either carbon of the C=C. Which cation forms, and which product do you get?',
+      aside: '<p><b>Reading the names:</b> the number says which carbon of the three-carbon chain holds the Cl. <b>2-chloropropane</b> (CH₃CHClCH₃) has it on the middle carbon; <b>1-chloropropane</b> (CH₃CH₂CH₂Cl) on an end carbon.</p>',
+      visual: { widget: 'arrow-draw', config: PIC_PROPENE_HCL },
       options: [
         { text: 'H on the end CH₂ leaves a 2° cation in the middle: 2-chloropropane, CH₃CHClCH₃', correct: true, why: 'Yes. H on the end carbon leaves the + on the middle carbon, which has two carbon neighbours (2°). The 2° cation wins, and Cl⁻ bonds there.' },
         { text: 'H on the middle CH leaves a 1° cation at the end: 1-chloropropane, CH₃CH₂CH₂Cl', why: 'That leaves the + on the end carbon, with only one carbon neighbour (1°). The 2° cation is steadier and forms faster.' },
@@ -327,8 +400,9 @@ export default {
     {
       caveman: {"html": "<p><b>Energy diagram.</b> Up = energy; left to right = reaction forward.</p><p><b>Hill top</b> = <b>transition state</b>: bonds half-made, gone instantly. <b>Valley</b> between hills = <b>intermediate</b>: real, brief (carbocation). <b>Higher hill</b> = <b>slower step</b>.</p>"}, // CAVEMAN
       id: 's22', type: 'explain', skill: 'energy-diagram',
-      html: '<p><b>Reading an energy diagram.</b> Up the side is energy. Left to right is the reaction going forward.</p><p>Each <b>hill top</b> is a <b>transition state</b>: bonds half-made and half-broken, gone in an instant. A <b>valley</b> between two hills is an <b>intermediate</b>: a real species that lasts a moment (here the carbocation). The <b>higher hill</b> belongs to the <b>slower step</b>.</p>',
-      visual: { widget: 'energy-diagram', config: { levels: HCL_ETHYLENE_LEVELS, mode: 'view', caption: 'HCl + ethylene. Illustrative energies, not measured values.' } }
+      html: '<p><b>Reading an energy diagram</b> (above). Up the side is energy. Left to right is the reaction going forward.</p><p>Each <b>hill top</b> is a <b>transition state</b>: bonds half-made and half-broken, gone in an instant. A <b>valley</b> between two hills is an <b>intermediate</b>: a real species that lasts a moment (here the carbocation). The <b>higher hill</b> belongs to the <b>slower step</b>.</p>',
+      visualFirst: true,
+      visual: { widget: 'energy-diagram', config: { levels: HCL_ETHYLENE_LEVELS, mode: 'view', reveal: true, notes: { 1: 'step 1', 2: 'the carbocation', 3: 'step 2' }, caption: 'HCl + ethylene: A reactants, B and D the hill tops of step 1 and step 2, C the carbocation valley, E the product. Illustrative energies, not measured values.' } }
     },
     {
       caveman: {"prompt": "Diagram for HCl + ethylene. Find each part.", "worked": "Hill tops B, D: transition states. Valley C: carbocation with Cl⁻. B higher: step 1 slow.", "hints": ["Hill top: transition state. Valley: intermediate.", "Transition states B, D. Intermediate C. Higher: B."]}, // CAVEMAN
@@ -362,14 +436,14 @@ export default {
       html: '<p>Reactions come in four kinds, sorted by counting molecules on each side of the arrow. (Skeletal drawings: each corner or line end is a C; H on C is not drawn.)</p><p><b>Addition</b> (2 → 1)<br><span style="display:inline-block;white-space:nowrap"><mol smiles="C1=CCCCC1" label="cyclohexene"></mol> + HCl</span> <span style="display:inline-block;white-space:nowrap">→ <mol smiles="ClC1CCCCC1" label="chlorocyclohexane"></mol></span></p><p><b>Elimination</b> (1 → 2)<br><span style="display:inline-block;white-space:nowrap"><mol smiles="OC1CCCCC1" label="cyclohexanol"></mol> →</span> <span style="display:inline-block;white-space:nowrap"><mol smiles="C1=CCCCC1" label="cyclohexene"></mol> + H₂O</span></p><p><b>Substitution</b> (2 → 2, parts swap)<br><span style="display:inline-block;white-space:nowrap"><mol smiles="CCBr" label="bromoethane"></mol> + HO⁻</span> <span style="display:inline-block;white-space:nowrap">→ <mol smiles="CCO" label="ethanol"></mol> + Br⁻</span></p><p><b>Rearrangement</b> (1 → 1, same formula)<br><span style="display:inline-block;white-space:nowrap"><mol smiles="C=CCC" label="but-1-ene"></mol> →</span> <span style="display:inline-block;white-space:nowrap"><mol smiles="CC=CC" label="but-2-ene"></mol> (isomer)</span><br>Acid moves the C=C one carbon along: McMurry’s example.</p>'
     },
     {
-      caveman: {"problem": "Sort four: count both sides; 1 → 1: compare formulas.", "rule": "Addition: 2 → 1. Elimination: 1 → 2 (H₂O or HCl off). Substitution: 2 → 2. Rearrangement: 1 → 1, same formula.", "moves": [{"ask": "Ethylene + bromine. Kind?", "options": [{"why": "Yes. 2 → 1 (CH₂=CH₂ + Br₂ → BrCH₂CH₂Br): joined, nothing left."}, {"why": "Elimination: ONE reactant splits. Here: 2 reactants, 1 product."}, {"why": "Substitution: two in, two out. Here: 2 reactants, 1 product."}, {"why": "Rearrangement: ONE in, ONE out. Here: 2 reactants, 1 product."}]}, {"ask": "Propan-2-ol loses water, acid catalyst. Kind?", "options": [{"why": "Addition: ONE product. Here: 1 reactant, 2 products."}, {"why": "Yes. 1 → 2 (CH₃CH(OH)CH₃ → CH₃CH=CH₂ + H₂O): split."}, {"why": "Substitution: two in, two out. Here: 1 reactant, 2 products."}, {"why": "Rearrangement: ONE in, ONE out. Here: 1 reactant, 2 products."}]}, {"ask": "Cyanide meets bromomethane. Kind?", "options": [{"why": "Addition: ONE product. Here: 2 reactants, 2 products."}, {"why": "Elimination: ONE reactant splits. Here: 2 reactants, 2 products."}, {"why": "Yes. 2 → 2 (CH₃Br + CN⁻ → CH₃CN + Br⁻): swapped parts."}, {"why": "Rearrangement: ONE in, ONE out. Here: 2 reactants, 2 products."}]}, {"ask": "3-Methylbut-1-ene, acid, becomes 2-methylbut-2-ene. Kind?", "options": [{"why": "Addition: two join into one. Here: 1 reactant, 1 product."}, {"why": "Elimination: ONE reactant splits. Here: 1 reactant, 1 product."}, {"why": "Substitution: two in, two out. Here: 1 reactant, 1 product."}, {"why": "Yes. 1 → 1 (CH₂=CHCH(CH₃)₂ → (CH₃)₂C=CHCH₃): same formula, isomer."}]}]}, // CAVEMAN
+      caveman: {"problem": "Sort four: count both sides; 1 → 1: compare formulas.", "rule": "Addition: 2 → 1. Elimination: 1 → 2 (H₂O or HCl off). Substitution: 2 → 2. Rearrangement: 1 → 1, same formula.", "moves": [{"ask": "Ethylene + bromine. Kind?", "options": [{"why": "Yes. 2 → 1 (CH₂=CH₂ + Br₂ → BrCH₂CH₂Br): joined, nothing left."}, {"why": "Elimination: ONE reactant splits. Here: 2 reactants, 1 product."}, {"why": "Substitution: two in, two out. Here: 2 reactants, 1 product."}, {"why": "Rearrangement: ONE in, ONE out. Here: 2 reactants, 1 product."}]}, {"ask": "Propan-2-ol, CH₃CH(OH)CH₃, loses water, acid. Kind?", "options": [{"why": "Addition: ONE product. Here: 1 reactant, 2 products."}, {"why": "Yes. 1 → 2 (CH₃CH(OH)CH₃ → CH₃CH=CH₂ + H₂O): split."}, {"why": "Substitution: two in, two out. Here: 1 reactant, 2 products."}, {"why": "Rearrangement: ONE in, ONE out. Here: 1 reactant, 2 products."}]}, {"ask": "Cyanide meets bromomethane. Kind?", "options": [{"why": "Addition: ONE product. Here: 2 reactants, 2 products."}, {"why": "Elimination: ONE reactant splits. Here: 2 reactants, 2 products."}, {"why": "Yes. 2 → 2 (CH₃Br + CN⁻ → CH₃CN + Br⁻): swapped parts."}, {"why": "Rearrangement: ONE in, ONE out. Here: 2 reactants, 2 products."}]}, {"ask": "CH₂=CHCH(CH₃)₂, acid, becomes (CH₃)₂C=CHCH₃. Kind?", "options": [{"why": "Addition: two join into one. Here: 1 reactant, 1 product."}, {"why": "Elimination: ONE reactant splits. Here: 1 reactant, 1 product."}, {"why": "Substitution: two in, two out. Here: 1 reactant, 1 product."}, {"why": "Yes. 1 → 1 (CH₂=CHCH(CH₃)₂ → (CH₃)₂C=CHCH₃): same formula, isomer."}]}]}, // CAVEMAN
       id: 's27', type: 'worked', skill: 'reaction-types',
       problem: 'Sort these four reactions. Count the reactants and the products; when it is one to one, compare the formulas.',
       moves: [
         kindMove('br2-ethylene', 'Ethylene reacts with bromine. What kind of reaction is this?'),
-        kindMove('propanol-dehydration', 'Propan-2-ol loses water in the presence of an acid catalyst. What kind of reaction is this?'),
+        kindMove('propanol-dehydration', 'Propan-2-ol, CH₃CH(OH)CH₃, loses water in the presence of an acid catalyst. What kind of reaction is this?'),
         kindMove('bromomethane-cyanide', 'Cyanide ion meets bromomethane. What kind of reaction is this?'),
-        kindMove('methylbutene-isomerization', '3-Methylbut-1-ene is treated with an acid catalyst and becomes 2-methylbut-2-ene. What kind of reaction is this?')
+        kindMove('methylbutene-isomerization', '3-Methylbut-1-ene, CH₂=CHCH(CH₃)₂, is treated with an acid catalyst and becomes 2-methylbut-2-ene, (CH₃)₂C=CHCH₃. What kind of reaction is this?')
       ],
       rule: '<b>Addition</b>: 2 → 1, nothing left over. <b>Elimination</b>: 1 → 2, a small molecule such as H₂O or HCl comes off. <b>Substitution</b>: 2 → 2, parts swapped. <b>Rearrangement</b>: 1 → 1, same formula, new structure.'
     },
@@ -381,9 +455,9 @@ export default {
       html: '<p>Now the names. An electron-rich site that gives a pair is a <b>nucleophile</b> (“nucleus-lover”: it seeks a + centre). An electron-poor site that takes a pair is an <b>electrophile</b> (“electron-lover”).</p><p>Every arrow you drew ran from a nucleophile to an electrophile: π bond → H, Cl⁻ → C⁺. Lesson 03’s names fit too: a nucleophile acts as a <b>Lewis base</b>, an electrophile as a <b>Lewis acid</b>.</p>'
     },
     {
-      caveman: {"prompt": "Same skill, new names. Tap atom asked: nucleophilic = rich, electrophilic = poor.", "worked": "Acetone: O, then C=O carbon (δ+). Water: O, then either H (δ+). CH₃CH₂⁺: + carbon.", "hints": ["Nucleophilic: pair to give. Electrophilic: short (δ+, +, under octet).", "Acetone: O, then C=O carbon. Water: O, then H. CH₃CH₂⁺: + C."]}, // CAVEMAN
+      caveman: {"prompt": "New names. Tap atom: nucleophilic = rich, electrophilic = poor. Acetone CH₃COCH₃: C=O.", "worked": "Acetone: O, then C=O carbon (δ+). Water: O, then either H (δ+). CH₃CH₂⁺: + carbon.", "hints": ["Nucleophilic: pair to give. Electrophilic: short (δ+, +, under octet).", "Acetone: O, then C=O carbon. Water: O, then H. CH₃CH₂⁺: + C."]}, // CAVEMAN
       id: 's29', type: 'try', skill: 'nuc-elec', widget: 'site-picker',
-      prompt: 'Same skill, new names. Tap the atom each question names: nucleophilic means electron-rich, electrophilic means electron-poor.',
+      prompt: 'Same skill, new names. Tap the atom each question names: nucleophilic means electron-rich, electrophilic means electron-poor. Acetone, CH₃COCH₃, has a carbonyl group: a C=O.',
       config: { items: [{ id: 'acetone', role: 'nuc' }, { id: 'acetone', role: 'elec' }, { id: 'water', role: 'nuc' }, { id: 'water', role: 'elec' }, { id: 'ethylcation', role: 'elec' }] },
       confirm: 'One molecule can be both: acetone’s O is nucleophilic and its C=O carbon electrophilic; water’s O gives pairs and its δ+ H can be taken as H⁺. CH₃CH₂⁺ is all electrophile.',
       hints: ['Nucleophilic = has a pair to give (lone pair, π bond, − charge). Electrophilic = short of electrons (δ+, +, under an octet).', 'Acetone: O (nucleophilic), the C=O carbon (electrophilic). Water: O, then either H. CH₃CH₂⁺: the + carbon.'],
