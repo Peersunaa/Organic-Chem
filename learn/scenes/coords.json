@@ -1,0 +1,12184 @@
+{
+ "_meta": {
+  "viewBox": [
+   640,
+   400
+  ],
+  "bondPx": 44.0,
+  "note": "x,y in SVG px (y down). atom.map = atom-map number shared by all stages of a reaction; atom.mv = this atom is a mover in this stage (excluded from the drift check). stage.from = the stage whose positions it inherits. Parse the stage smiles with removeHs=false: atom idx = parse order. Bond a is the narrow end of a wedge/dash.",
+  "scales": {
+   "alkene-hx": 44.0,
+   "alkene-hydration": 44.0,
+   "alkene-x2": 44.0,
+   "alkene-h2-pd": 44.0,
+   "alkene-epoxide": 44.0,
+   "alkene-kmno4-base": 44.0,
+   "alkene-hydroboration": 44.0,
+   "alkyne-hx": 44.0,
+   "alkyne-hydration": 44.0,
+   "alkyne-lindlar": 44.0,
+   "alkyne-acetylide": 44.0,
+   "eas-bromination": 44.0,
+   "eas-nitration": 44.0,
+   "fc-acylation": 44.0,
+   "director-anisole": 44.0,
+   "director-nitrobenzene": 44.0,
+   "diels-alder": 44.0
+  }
+ },
+ "alkene-hx": {
+  "reactants": {
+   "smiles": "[CH3][C]([CH3])=[CH2].[H][Br]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 181.7,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 298.0,
+     "y": 219.8,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 276.0,
+     "y": 257.9,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 342.0,
+     "y": 219.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 342.0,
+     "y": 123.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "Br",
+     "x": 342.0,
+     "y": 79.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5
+   }
+  },
+  "carbocation": {
+   "smiles": "[CH3][C+]([CH3])[CH2][H].[Br-]",
+   "from": "reactants",
+   "note": "H has moved to the CH2 carbon; Br- is free.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 181.7,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 298.0,
+     "y": 219.8,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 276.0,
+     "y": 257.9,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 342.0,
+     "y": 219.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 364.0,
+     "y": 257.9,
+     "charge": 0,
+     "map": 5,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "Br",
+     "x": 298.0,
+     "y": 321.0,
+     "charge": -1,
+     "map": 6,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5
+   }
+  },
+  "product": {
+   "smiles": "[CH3][C]([CH3])([Br])[CH2][H]",
+   "from": "carbocation",
+   "note": "2-bromo-2-methylpropane.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 181.7,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 298.0,
+     "y": 219.8,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 276.0,
+     "y": 257.9,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "Br",
+     "x": 320.0,
+     "y": 257.9,
+     "charge": 0,
+     "map": 6,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 342.0,
+     "y": 219.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 364.0,
+     "y": 257.9,
+     "charge": 0,
+     "map": 5
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 4,
+    "4": 5,
+    "5": 3
+   }
+  }
+ },
+ "alkene-hydration": {
+  "reactants": {
+   "smiles": "[CH3][C]1=[CH][CH2][CH2][CH2][CH2]1.[H][O+]([H])[H]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 248.9,
+     "y": 193.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 270.9,
+     "y": 231.4,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 314.9,
+     "y": 231.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 336.9,
+     "y": 269.5,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 314.9,
+     "y": 307.6,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 270.9,
+     "y": 307.6,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 248.9,
+     "y": 269.5,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 380.2,
+     "y": 166.0,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 8,
+     "sym": "O",
+     "x": 411.3,
+     "y": 134.9,
+     "charge": 1,
+     "map": 9
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 453.8,
+     "y": 146.3,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 10,
+     "sym": "H",
+     "x": 400.0,
+     "y": 92.4,
+     "charge": 0,
+     "map": 11
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10
+   }
+  },
+  "carbocation": {
+   "smiles": "[CH3][C+]1[CH]([H])[CH2][CH2][CH2][CH2]1.[O]([H])[H].[O]([H])[H]",
+   "from": "reactants",
+   "note": "H3O+ gave H+ to C3 (left as H2O). A second water approaches the cation.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 248.9,
+     "y": 193.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 270.9,
+     "y": 231.4,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 314.9,
+     "y": 231.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "H",
+     "x": 336.9,
+     "y": 193.3,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 336.9,
+     "y": 269.5,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 314.9,
+     "y": 307.6,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 270.9,
+     "y": 307.6,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 248.9,
+     "y": 269.5,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 8,
+     "sym": "O",
+     "x": 411.3,
+     "y": 134.9,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 453.8,
+     "y": 146.3,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 10,
+     "sym": "H",
+     "x": 400.0,
+     "y": 92.4,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 11,
+     "sym": "O",
+     "x": 230.0,
+     "y": 143.6,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 12,
+     "sym": "H",
+     "x": 255.2,
+     "y": 107.6,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 13,
+     "sym": "H",
+     "x": 186.2,
+     "y": 139.8,
+     "charge": 0,
+     "map": 14
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 13,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 3,
+    "8": 8,
+    "9": 9,
+    "10": 10
+   }
+  },
+  "oxonium": {
+   "smiles": "[CH3][C]1([O+]([H])[H])[CH]([H])[CH2][CH2][CH2][CH2]1",
+   "from": "carbocation",
+   "note": "Water oxygen has bonded to the cation carbon.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 248.9,
+     "y": 193.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 270.9,
+     "y": 231.4,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 226.9,
+     "y": 231.4,
+     "charge": 1,
+     "map": 12,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "H",
+     "x": 204.9,
+     "y": 193.3,
+     "charge": 0,
+     "map": 13,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 204.9,
+     "y": 269.5,
+     "charge": 0,
+     "map": 14,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 314.9,
+     "y": 231.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 336.9,
+     "y": 193.3,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 336.9,
+     "y": 269.5,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 314.9,
+     "y": 307.6,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 270.9,
+     "y": 307.6,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 248.9,
+     "y": 269.5,
+     "charge": 0,
+     "map": 7
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 5,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "6": 10,
+    "7": 6
+   }
+  },
+  "product": {
+   "smiles": "[CH3][C]1([O][H])[CH]([H])[CH2][CH2][CH2][CH2]1.[H+]",
+   "from": "oxonium",
+   "note": "Alcohol; H+ is lost to the solvent.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 248.9,
+     "y": 193.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 270.9,
+     "y": 231.4,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 226.9,
+     "y": 231.4,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 3,
+     "sym": "H",
+     "x": 204.9,
+     "y": 193.3,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 314.9,
+     "y": 231.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 336.9,
+     "y": 193.3,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 336.9,
+     "y": 269.5,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 314.9,
+     "y": 307.6,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 270.9,
+     "y": 307.6,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 248.9,
+     "y": 269.5,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 10,
+     "sym": "H",
+     "x": 204.9,
+     "y": 269.5,
+     "charge": 1,
+     "map": 14
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 4,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 5
+   }
+  }
+ },
+ "alkene-x2": {
+  "reactants": {
+   "smiles": "[CH]1=[CH][CH2][CH2][CH2][CH2]1.[Br][Br]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 282.6,
+     "y": 220.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 326.6,
+     "y": 220.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 348.6,
+     "y": 258.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 326.6,
+     "y": 296.5,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 282.6,
+     "y": 296.5,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 260.6,
+     "y": 258.4,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "Br",
+     "x": 304.6,
+     "y": 132.3,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "Br",
+     "x": 304.6,
+     "y": 88.3,
+     "charge": 0,
+     "map": 8
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+   }
+  },
+  "bromonium": {
+   "smiles": "[CH]12[Br+][CH]1[CH2][CH2][CH2][CH2]2.[Br-]",
+   "from": "reactants",
+   "note": "Br+ bridges both carbons on the top face; Br- is the nucleophile.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 282.6,
+     "y": 220.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "Br",
+     "x": 304.6,
+     "y": 182.2,
+     "charge": 1,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.6,
+     "y": 220.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 348.6,
+     "y": 258.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 326.6,
+     "y": 296.5,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 282.6,
+     "y": 296.5,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 260.6,
+     "y": 258.4,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 7,
+     "sym": "Br",
+     "x": 379.4,
+     "y": 311.7,
+     "charge": -1,
+     "map": 8,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": "wedge"
+    },
+    {
+     "a": 2,
+     "b": 1,
+     "order": 1,
+     "stereo": "wedge"
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 1,
+    "7": 7
+   }
+  },
+  "product": {
+   "smiles": "[Br][C@H]1[C@H]([Br])[CH2][CH2][CH2][CH2]1",
+   "from": "bromonium",
+   "note": "trans-1,2-dibromocyclohexane (one enantiomer).",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "Br",
+     "x": 260.6,
+     "y": 182.2,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 282.6,
+     "y": 220.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.6,
+     "y": 220.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "Br",
+     "x": 348.6,
+     "y": 182.2,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 348.6,
+     "y": 258.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 326.6,
+     "y": 296.5,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 282.6,
+     "y": 296.5,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 260.6,
+     "y": 258.4,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 1,
+     "b": 0,
+     "order": 1,
+     "stereo": "wedge"
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": "dash"
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 1,
+    "1": 2,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 0,
+    "7": 3
+   }
+  }
+ },
+ "alkene-h2-pd": {
+  "reactants": {
+   "smiles": "[CH3][C]1=[C]([CH3])[CH2][CH2][CH2][CH2]1.[H][H]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 287.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 309.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 353.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 375.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 375.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 353.0,
+     "y": 109.1,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 309.0,
+     "y": 109.1,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 287.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 309.0,
+     "y": 290.9,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 353.0,
+     "y": 290.9,
+     "charge": 0,
+     "map": 10
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9
+   }
+  },
+  "adsorbed": {
+   "smiles": "[CH3][C]1=[C]([CH3])[CH2][CH2][CH2][CH2]1.[H].[H]",
+   "from": "reactants",
+   "note": "H-H bond broken: two H atoms on the Pd surface, below the ring.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 287.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 309.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 353.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 375.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 375.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 353.0,
+     "y": 109.1,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 309.0,
+     "y": 109.1,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 287.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 309.0,
+     "y": 260.1,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 353.0,
+     "y": 260.1,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9
+   }
+  },
+  "product": {
+   "smiles": "[CH3][C@@]1([H])[C@]([CH3])([H])[CH2][CH2][CH2][CH2]1",
+   "from": "adsorbed",
+   "note": "cis-1,2-dimethylcyclohexane (meso): both H added to the same face.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 287.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 309.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 265.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 353.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 375.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 331.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 375.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 353.0,
+     "y": 109.1,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 309.0,
+     "y": 109.1,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 287.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 8
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": "wedge"
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": "wedge"
+    },
+    {
+     "a": 3,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 4,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 9,
+    "8": 2,
+    "9": 5
+   }
+  }
+ },
+ "alkene-epoxide": {
+  "reactants": {
+   "smiles": "[CH3]/[CH]=[CH]\\[CH3].[CH3][C](=[O])[O][O][H]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 282.3,
+     "y": 76.9,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 304.3,
+     "y": 115.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 348.3,
+     "y": 115.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 370.3,
+     "y": 76.9,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 313.7,
+     "y": 323.1,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 332.5,
+     "y": 283.3,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 6,
+     "sym": "O",
+     "x": 376.4,
+     "y": 279.7,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 7,
+     "sym": "O",
+     "x": 307.5,
+     "y": 247.2,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 8,
+     "sym": "O",
+     "x": 326.3,
+     "y": 207.4,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 301.2,
+     "y": 171.2,
+     "charge": 0,
+     "map": 12
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9
+   }
+  },
+  "product": {
+   "smiles": "[CH3][C@@H]1[O][C@@H]1[CH3].[CH3][C](=[O])[O][H]",
+   "from": "reactants",
+   "note": "cis-2,3-dimethyloxirane (meso) and the carboxylic acid; O is delivered to one face.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 282.3,
+     "y": 76.9,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 304.3,
+     "y": 115.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 326.3,
+     "y": 153.1,
+     "charge": 0,
+     "map": 11,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 348.3,
+     "y": 115.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 370.3,
+     "y": 76.9,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 313.7,
+     "y": 323.1,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 332.5,
+     "y": 283.3,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 7,
+     "sym": "O",
+     "x": 376.4,
+     "y": 279.7,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 8,
+     "sym": "O",
+     "x": 307.5,
+     "y": 247.2,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 263.6,
+     "y": 250.8,
+     "charge": 0,
+     "map": 12,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 1,
+     "b": 0,
+     "order": 1,
+     "stereo": "wedge"
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": "wedge"
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 8,
+    "7": 7,
+    "8": 2,
+    "9": 9
+   }
+  }
+ },
+ "alkene-kmno4-base": {
+  "reactants": {
+   "smiles": "[CH]1=[CH][CH2][CH2][CH2][CH2]1.[O-][Mn](=[O])(=[O])=[O]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 220.2,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 320.0,
+     "y": 220.2,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 342.0,
+     "y": 258.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 320.0,
+     "y": 296.4,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 276.0,
+     "y": 296.4,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 254.0,
+     "y": 258.3,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "O",
+     "x": 339.8,
+     "y": 103.6,
+     "charge": -1,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "Mn",
+     "x": 298.0,
+     "y": 127.8,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 8,
+     "sym": "O",
+     "x": 276.0,
+     "y": 169.6,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 9,
+     "sym": "O",
+     "x": 320.0,
+     "y": 169.6,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 10,
+     "sym": "O",
+     "x": 256.2,
+     "y": 103.6,
+     "charge": 0,
+     "map": 11
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 10,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10
+   }
+  },
+  "manganate-ester": {
+   "smiles": "[CH]12[O][Mn](=[O])([O-])[O][CH]1[CH2][CH2][CH2][CH2]2",
+   "from": "reactants",
+   "note": "Both O atoms add to the same face: a five-membered cyclic ester.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 220.2,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 262.4,
+     "y": 178.3,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "Mn",
+     "x": 298.0,
+     "y": 152.5,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 327.4,
+     "y": 119.8,
+     "charge": 0,
+     "map": 11,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "O",
+     "x": 268.6,
+     "y": 119.8,
+     "charge": -1,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "O",
+     "x": 333.6,
+     "y": 178.3,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 320.0,
+     "y": 220.2,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 342.0,
+     "y": 258.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 320.0,
+     "y": 296.4,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 276.0,
+     "y": 296.4,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 254.0,
+     "y": 258.3,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": "wedge"
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 5,
+     "order": 1,
+     "stereo": "wedge"
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 6,
+    "2": 7,
+    "3": 8,
+    "4": 9,
+    "5": 10,
+    "6": 4,
+    "7": 2,
+    "8": 1,
+    "9": 5,
+    "10": 3
+   }
+  },
+  "product": {
+   "smiles": "[C@@H]1([O][H])[C@H]([O][H])[CH2][CH2][CH2][CH2]1",
+   "from": "manganate-ester",
+   "note": "cis-cyclohexane-1,2-diol (meso). Mn left as MnO2 (not drawn).",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 220.2,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 254.0,
+     "y": 182.1,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 276.0,
+     "y": 144.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 320.0,
+     "y": 220.2,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "O",
+     "x": 342.0,
+     "y": 182.1,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 386.0,
+     "y": 182.1,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 342.0,
+     "y": 258.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 320.0,
+     "y": 296.4,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 276.0,
+     "y": 296.4,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 254.0,
+     "y": 258.3,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": "dash"
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": "dash"
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 3,
+    "2": 6,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "8": 1,
+    "9": 4
+   }
+  }
+ },
+ "alkene-hydroboration": {
+  "reactants": {
+   "smiles": "[CH3][C]1=[CH][CH2][CH2][CH2][CH2]1.[B]([H])([H])[H]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 265.0,
+     "y": 170.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 287.0,
+     "y": 208.1,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 331.0,
+     "y": 208.1,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 353.0,
+     "y": 246.2,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 331.0,
+     "y": 284.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 287.0,
+     "y": 284.3,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 265.0,
+     "y": 246.2,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "B",
+     "x": 331.0,
+     "y": 155.3,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 287.0,
+     "y": 155.3,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 353.0,
+     "y": 117.9,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 10,
+     "sym": "H",
+     "x": 309.0,
+     "y": 115.7,
+     "charge": 0,
+     "map": 11
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10
+   }
+  },
+  "organoborane": {
+   "smiles": "[CH3][C]1([H])[CH]([B]([H])[H])[CH2][CH2][CH2][CH2]1",
+   "from": "reactants",
+   "note": "Syn addition: H on C2 and B on C3 add to the same face (here the bottom); CH3 is on the other face.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 265.0,
+     "y": 170.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 287.0,
+     "y": 208.1,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 243.0,
+     "y": 208.1,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 331.0,
+     "y": 208.1,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "B",
+     "x": 353.0,
+     "y": 170.0,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 397.0,
+     "y": 170.0,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 331.0,
+     "y": 131.9,
+     "charge": 0,
+     "map": 11,
+     "mv": true
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 353.0,
+     "y": 246.2,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 331.0,
+     "y": 284.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 287.0,
+     "y": 284.3,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 265.0,
+     "y": 246.2,
+     "charge": 0,
+     "map": 7
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": "dash"
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": "dash"
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 7,
+    "4": 8,
+    "5": 9,
+    "6": 10,
+    "7": 4,
+    "8": 2,
+    "9": 5,
+    "10": 6
+   }
+  },
+  "product": {
+   "smiles": "[CH3][C@@]1([H])[C@H]([O][H])[CH2][CH2][CH2][CH2]1",
+   "from": "organoborane",
+   "note": "H2O2, NaOH replaces B by OH with retention: trans-2-methylcyclohexanol.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 265.0,
+     "y": 170.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 287.0,
+     "y": 208.1,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 243.0,
+     "y": 208.1,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 331.0,
+     "y": 208.1,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "O",
+     "x": 353.0,
+     "y": 170.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 397.0,
+     "y": 170.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 353.0,
+     "y": 246.2,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 331.0,
+     "y": 284.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 287.0,
+     "y": 284.3,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 265.0,
+     "y": 246.2,
+     "charge": 0,
+     "map": 7
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": "dash"
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": "dash"
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "8": 2
+   }
+  }
+ },
+ "alkyne-hx": {
+  "reactants": {
+   "smiles": "[CH3][C]#[C][H].[H][Br]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 254.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 298.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 342.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "H",
+     "x": 386.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 342.0,
+     "y": 142.1,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "Br",
+     "x": 342.0,
+     "y": 98.1,
+     "charge": 0,
+     "map": 5
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 3,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5
+   }
+  },
+  "vinyl-cation": {
+   "smiles": "[CH3][C+]=[C]([H])[H].[Br-]",
+   "from": "reactants",
+   "note": "Linear vinyl cation on C2 (sp, empty p orbital); H went to C3.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 254.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 298.0,
+     "y": 238.9,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 342.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "H",
+     "x": 364.0,
+     "y": 277.0,
+     "charge": 0,
+     "map": 6,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 364.0,
+     "y": 200.7,
+     "charge": 0,
+     "map": 4,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "Br",
+     "x": 298.0,
+     "y": 340.1,
+     "charge": -1,
+     "map": 5,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5
+   }
+  },
+  "bromoalkene": {
+   "smiles": "[CH3][C]([Br])=[C]([H])[H].[H][Br]",
+   "from": "vinyl-cation",
+   "note": "2-bromopropene. A second HBr approaches the C=C.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 254.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 298.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "Br",
+     "x": 320.0,
+     "y": 277.0,
+     "charge": 0,
+     "map": 5,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 320.0,
+     "y": 200.7,
+     "charge": 0,
+     "map": 3,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 364.0,
+     "y": 200.7,
+     "charge": 0,
+     "map": 6,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 298.0,
+     "y": 162.6,
+     "charge": 0,
+     "map": 4,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 320.0,
+     "y": 103.9,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "Br",
+     "x": 320.0,
+     "y": 59.9,
+     "charge": 0,
+     "map": 8
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 2
+   }
+  },
+  "carbocation-2": {
+   "smiles": "[CH3][C+]([Br])[CH2][H].[Br-]",
+   "from": "bromoalkene",
+   "note": "Cation stabilised by the lone pair on Br.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 254.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 298.0,
+     "y": 238.9,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "Br",
+     "x": 320.0,
+     "y": 277.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 320.0,
+     "y": 200.7,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 364.0,
+     "y": 200.7,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "Br",
+     "x": 298.0,
+     "y": 340.1,
+     "charge": -1,
+     "map": 8,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "5": 2
+   }
+  },
+  "dibromide": {
+   "smiles": "[CH3][C]([Br])([Br])[CH2][H]",
+   "from": "carbocation-2",
+   "note": "2,2-dibromopropane (gem-dibromide).",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 254.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 298.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "Br",
+     "x": 320.0,
+     "y": 277.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 3,
+     "sym": "Br",
+     "x": 342.0,
+     "y": 238.9,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 320.0,
+     "y": 200.7,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 364.0,
+     "y": 200.7,
+     "charge": 0,
+     "map": 7
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 4,
+    "5": 2
+   }
+  }
+ },
+ "alkyne-hydration": {
+  "reactants": {
+   "smiles": "[C]([H])#[C][CH2][CH2][CH2][CH3].[O]([H])[H]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 254.0,
+     "y": 235.9,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 210.0,
+     "y": 235.9,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 298.0,
+     "y": 235.9,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 342.0,
+     "y": 235.9,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 364.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 408.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 430.0,
+     "y": 159.7,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 7,
+     "sym": "O",
+     "x": 298.0,
+     "y": 147.9,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 336.1,
+     "y": 125.9,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 259.9,
+     "y": 125.9,
+     "charge": 0,
+     "map": 9
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 3,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9
+   }
+  },
+  "enol": {
+   "smiles": "[C]([H])([H])=[C]([O][H])[CH2][CH2][CH2][CH3]",
+   "from": "reactants",
+   "note": "Markovnikov: OH on C2, H on C1. The enol is C=C-OH.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 1,
+     "mv": true
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 298.0,
+     "y": 159.7,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 232.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 298.0,
+     "y": 235.9,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "O",
+     "x": 276.0,
+     "y": 274.1,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 232.0,
+     "y": 274.1,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 342.0,
+     "y": 235.9,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 364.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 408.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 430.0,
+     "y": 159.7,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 4,
+    "8": 5,
+    "9": 2
+   }
+  },
+  "ketone": {
+   "smiles": "[C]([H])([H])([H])[C](=[O])[CH2][CH2][CH2][CH3]",
+   "from": "enol",
+   "note": "Keto-enol tautomerism: the O-H hydrogen moves to C1. Hexan-2-one.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 298.0,
+     "y": 159.7,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 232.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 3,
+     "sym": "H",
+     "x": 254.0,
+     "y": 159.7,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 298.0,
+     "y": 235.9,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 5,
+     "sym": "O",
+     "x": 276.0,
+     "y": 274.1,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 342.0,
+     "y": 235.9,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 364.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 408.0,
+     "y": 197.8,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 430.0,
+     "y": 159.7,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 4,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 5,
+    "8": 3,
+    "9": 2
+   }
+  }
+ },
+ "alkyne-lindlar": {
+  "reactants": {
+   "smiles": "[CH3][CH2][C]#[C][CH2][CH3].[H][H]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 232.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 254.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 298.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 342.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 386.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 408.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 298.0,
+     "y": 290.9,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 342.0,
+     "y": 290.9,
+     "charge": 0,
+     "map": 8
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 3,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+   }
+  },
+  "adsorbed": {
+   "smiles": "[CH3][CH2][C]#[C][CH2][CH3].[H].[H]",
+   "from": "reactants",
+   "note": "H atoms on the Lindlar catalyst surface, below the alkyne.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 232.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 254.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 298.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 342.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 386.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 408.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 298.0,
+     "y": 260.1,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 342.0,
+     "y": 260.1,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 3,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+   }
+  },
+  "product": {
+   "smiles": "[CH3][CH2]/[C]([H])=[C](/[H])[CH2][CH3]",
+   "from": "adsorbed",
+   "note": "cis (Z) alkene: both H added to the same face; the two ethyl groups end up together.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 232.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 1,
+     "mv": true
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 276.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 2,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 298.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "H",
+     "x": 276.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 342.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 364.0,
+     "y": 223.4,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 364.0,
+     "y": 147.2,
+     "charge": 0,
+     "map": 5,
+     "mv": true
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 342.0,
+     "y": 109.1,
+     "charge": 0,
+     "map": 6,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 4,
+    "4": 6,
+    "5": 7,
+    "6": 3,
+    "7": 5
+   }
+  }
+ },
+ "alkyne-acetylide": {
+  "reactants": {
+   "smiles": "[CH3][C]#[C][H].[NH2-]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 205.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 249.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 293.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "H",
+     "x": 337.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 4,
+     "sym": "N",
+     "x": 390.9,
+     "y": 168.0,
+     "charge": -1,
+     "map": 4
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 3,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4
+   }
+  },
+  "acetylide": {
+   "smiles": "[CH3][C]#[C-].[NH2][H].[CH3][Br]",
+   "from": "reactants",
+   "note": "NH2- took the terminal H; the acetylide carbon is a nucleophile. CH3Br approaches for SN2 (backside of the C-Br bond).",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 205.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 249.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 293.1,
+     "y": 232.0,
+     "charge": -1,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "N",
+     "x": 390.9,
+     "y": 168.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 434.9,
+     "y": 168.0,
+     "charge": 0,
+     "map": 5,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 381.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 6,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "Br",
+     "x": 425.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 3,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 4,
+    "4": 3
+   }
+  },
+  "product": {
+   "smiles": "[CH3][C]#[C][CH3].[Br-]",
+   "from": "acetylide",
+   "note": "but-2-yne; Br- has left.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 205.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 249.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 293.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 337.1,
+     "y": 232.0,
+     "charge": 0,
+     "map": 6,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "Br",
+     "x": 425.1,
+     "y": 232.0,
+     "charge": -1,
+     "map": 7
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 3,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2
+   }
+  }
+ },
+ "eas-bromination": {
+  "reactants": {
+   "smiles": "[c]1([H])[cH][cH][cH][cH][cH]1.[Br+]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 266.5,
+     "y": 191.8,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 266.5,
+     "y": 147.8,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 228.3,
+     "y": 213.8,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 228.3,
+     "y": 257.8,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 266.5,
+     "y": 279.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 304.6,
+     "y": 257.8,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 304.6,
+     "y": 213.8,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 7,
+     "sym": "Br",
+     "x": 338.0,
+     "y": 120.2,
+     "charge": 1,
+     "map": 7
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 6,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+   }
+  },
+  "sigma-1": {
+   "smiles": "[C]1([H])([Br])[CH+][CH]=[CH][CH]=[CH]1",
+   "from": "reactants",
+   "note": "Resonance form 1: positive charge on ring carbon C2.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 266.5,
+     "y": 191.8,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 294.7,
+     "y": 158.1,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "Br",
+     "x": 238.2,
+     "y": 158.1,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 228.3,
+     "y": 213.8,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 228.3,
+     "y": 257.8,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 266.5,
+     "y": 279.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 304.6,
+     "y": 257.8,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 304.6,
+     "y": 213.8,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 2
+   }
+  },
+  "sigma-2": {
+   "smiles": "[C]1([H])([Br])[CH]=[CH][CH+][CH]=[CH]1",
+   "from": "sigma-1",
+   "note": "Resonance form 2: positive charge on ring carbon C4.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 266.5,
+     "y": 191.8,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 294.7,
+     "y": 158.1,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 2,
+     "sym": "Br",
+     "x": 238.2,
+     "y": 158.1,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 228.3,
+     "y": 213.8,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 228.3,
+     "y": 257.8,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 266.5,
+     "y": 279.8,
+     "charge": 1,
+     "map": 4
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 304.6,
+     "y": 257.8,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 304.6,
+     "y": 213.8,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 2
+   }
+  },
+  "sigma-3": {
+   "smiles": "[C]1([H])([Br])[CH]=[CH][CH]=[CH][CH+]1",
+   "from": "sigma-2",
+   "note": "Resonance form 3: positive charge on ring carbon C6.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 266.5,
+     "y": 191.8,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 294.7,
+     "y": 158.1,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 2,
+     "sym": "Br",
+     "x": 238.2,
+     "y": 158.1,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 228.3,
+     "y": 213.8,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 228.3,
+     "y": 257.8,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 266.5,
+     "y": 279.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 304.6,
+     "y": 257.8,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 304.6,
+     "y": 213.8,
+     "charge": 1,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 3,
+    "3": 4,
+    "4": 5,
+    "5": 6,
+    "6": 7,
+    "7": 2
+   }
+  },
+  "product": {
+   "smiles": "[c]1([Br])[cH][cH][cH][cH][cH]1.[H+]",
+   "from": "sigma-3",
+   "note": "H+ lost from the sp3 carbon: aromatic ring restored.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 266.5,
+     "y": 191.8,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "Br",
+     "x": 266.5,
+     "y": 147.8,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 228.3,
+     "y": 213.8,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 228.3,
+     "y": 257.8,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 266.5,
+     "y": 279.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 304.6,
+     "y": 257.8,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 304.6,
+     "y": 213.8,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 411.7,
+     "y": 235.8,
+     "charge": 1,
+     "map": 8,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 6,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 7,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 1
+   }
+  }
+ },
+ "eas-nitration": {
+  "reactants": {
+   "smiles": "[c]1([H])[cH][cH][cH][cH][cH]1.[O]=[N+]=[O]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 283.2,
+     "y": 207.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 283.2,
+     "y": 163.3,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 245.1,
+     "y": 229.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 245.1,
+     "y": 273.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 283.2,
+     "y": 295.3,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 321.3,
+     "y": 273.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 321.3,
+     "y": 229.3,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 7,
+     "sym": "O",
+     "x": 323.7,
+     "y": 104.7,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 8,
+     "sym": "N",
+     "x": 354.8,
+     "y": 135.8,
+     "charge": 1,
+     "map": 9
+    },
+    {
+     "idx": 9,
+     "sym": "O",
+     "x": 385.9,
+     "y": 166.9,
+     "charge": 0,
+     "map": 11
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9
+   }
+  },
+  "sigma-1": {
+   "smiles": "[C]1([H])([N+](=[O])[O-])[CH+][CH]=[CH][CH]=[CH]1",
+   "from": "reactants",
+   "note": "Resonance form 1: positive charge on ring carbon C2.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 283.2,
+     "y": 207.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 311.5,
+     "y": 173.6,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "N",
+     "x": 254.9,
+     "y": 173.6,
+     "charge": 1,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 270.0,
+     "y": 132.3,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "O",
+     "x": 211.6,
+     "y": 181.3,
+     "charge": -1,
+     "map": 11,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 245.1,
+     "y": 229.3,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 245.1,
+     "y": 273.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 283.2,
+     "y": 295.3,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 321.3,
+     "y": 273.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 321.3,
+     "y": 229.3,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 3,
+    "8": 2,
+    "9": 4
+   }
+  },
+  "sigma-2": {
+   "smiles": "[C]1([H])([N+](=[O])[O-])[CH]=[CH][CH+][CH]=[CH]1",
+   "from": "sigma-1",
+   "note": "Resonance form 2: positive charge on ring carbon C4.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 283.2,
+     "y": 207.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 311.5,
+     "y": 173.6,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 2,
+     "sym": "N",
+     "x": 254.9,
+     "y": 173.6,
+     "charge": 1,
+     "map": 9
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 270.0,
+     "y": 132.3,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 4,
+     "sym": "O",
+     "x": 211.6,
+     "y": 181.3,
+     "charge": -1,
+     "map": 11
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 245.1,
+     "y": 229.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 245.1,
+     "y": 273.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 283.2,
+     "y": 295.3,
+     "charge": 1,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 321.3,
+     "y": 273.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 321.3,
+     "y": 229.3,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 3,
+    "8": 2,
+    "9": 4
+   }
+  },
+  "sigma-3": {
+   "smiles": "[C]1([H])([N+](=[O])[O-])[CH]=[CH][CH]=[CH][CH+]1",
+   "from": "sigma-2",
+   "note": "Resonance form 3: positive charge on ring carbon C6.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 283.2,
+     "y": 207.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 311.5,
+     "y": 173.6,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 2,
+     "sym": "N",
+     "x": 254.9,
+     "y": 173.6,
+     "charge": 1,
+     "map": 9
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 270.0,
+     "y": 132.3,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 4,
+     "sym": "O",
+     "x": 211.6,
+     "y": 181.3,
+     "charge": -1,
+     "map": 11
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 245.1,
+     "y": 229.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 245.1,
+     "y": 273.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 283.2,
+     "y": 295.3,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 321.3,
+     "y": 273.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 321.3,
+     "y": 229.3,
+     "charge": 1,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 3,
+    "8": 2,
+    "9": 4
+   }
+  },
+  "product": {
+   "smiles": "[c]1([N+](=[O])[O-])[cH][cH][cH][cH][cH]1.[H+]",
+   "from": "sigma-3",
+   "note": "Nitrobenzene; H+ lost.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 283.2,
+     "y": 207.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "N",
+     "x": 283.2,
+     "y": 163.3,
+     "charge": 1,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 321.3,
+     "y": 141.3,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 245.1,
+     "y": 141.3,
+     "charge": -1,
+     "map": 11,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 245.1,
+     "y": 229.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 245.1,
+     "y": 273.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 283.2,
+     "y": 295.3,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 321.3,
+     "y": 273.3,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 321.3,
+     "y": 229.3,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 428.4,
+     "y": 251.3,
+     "charge": 1,
+     "map": 8,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 8,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 9,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 2,
+    "8": 1,
+    "9": 3
+   }
+  }
+ },
+ "fc-acylation": {
+  "reactants": {
+   "smiles": "[c]1([H])[cH][cH][cH][cH][cH]1.[CH3][C](=[O])[Cl].[Al]([Cl])([Cl])[Cl]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 222.4,
+     "y": 233.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 222.4,
+     "y": 189.0,
+     "charge": 0,
+     "map": 15
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 184.3,
+     "y": 255.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 184.3,
+     "y": 299.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 222.4,
+     "y": 321.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 260.5,
+     "y": 299.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 260.5,
+     "y": 255.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 291.0,
+     "y": 149.4,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 329.1,
+     "y": 171.4,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 9,
+     "sym": "O",
+     "x": 329.1,
+     "y": 215.4,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 10,
+     "sym": "Cl",
+     "x": 367.2,
+     "y": 149.4,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 11,
+     "sym": "Al",
+     "x": 451.1,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 12,
+     "sym": "Cl",
+     "x": 489.2,
+     "y": 79.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 13,
+     "sym": "Cl",
+     "x": 413.0,
+     "y": 79.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 14,
+     "sym": "Cl",
+     "x": 451.1,
+     "y": 145.0,
+     "charge": 0,
+     "map": 14
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 13,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 14,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14
+   }
+  },
+  "acylium": {
+   "smiles": "[c]1([H])[cH][cH][cH][cH][cH]1.[CH3][C]#[O+].[Cl][Al-]([Cl])([Cl])[Cl]",
+   "from": "reactants",
+   "note": "AlCl3 pulls Cl- off: the acylium ion CH3-C#O+ (linear) and AlCl4-.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 222.4,
+     "y": 233.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 222.4,
+     "y": 189.0,
+     "charge": 0,
+     "map": 15
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 184.3,
+     "y": 255.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 184.3,
+     "y": 299.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 222.4,
+     "y": 321.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 260.5,
+     "y": 299.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 260.5,
+     "y": 255.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 373.1,
+     "y": 171.4,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 329.1,
+     "y": 171.4,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 9,
+     "sym": "O",
+     "x": 285.1,
+     "y": 171.4,
+     "charge": 1,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 10,
+     "sym": "Cl",
+     "x": 489.2,
+     "y": 123.0,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 11,
+     "sym": "Al",
+     "x": 451.1,
+     "y": 101.0,
+     "charge": -1,
+     "map": 11
+    },
+    {
+     "idx": 12,
+     "sym": "Cl",
+     "x": 489.2,
+     "y": 79.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 13,
+     "sym": "Cl",
+     "x": 413.0,
+     "y": 79.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 14,
+     "sym": "Cl",
+     "x": 451.1,
+     "y": 145.0,
+     "charge": 0,
+     "map": 14
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 3,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 13,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 14,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14
+   }
+  },
+  "sigma-1": {
+   "smiles": "[C]1([H])([C](=[O])[CH3])[CH+][CH]=[CH][CH]=[CH]1.[Cl][Al-]([Cl])([Cl])[Cl]",
+   "from": "acylium",
+   "note": "Resonance form 1: positive charge on ring carbon C2.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 222.4,
+     "y": 233.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 250.7,
+     "y": 199.3,
+     "charge": 0,
+     "map": 15,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 194.2,
+     "y": 199.3,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 209.2,
+     "y": 157.9,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 150.8,
+     "y": 206.9,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 184.3,
+     "y": 255.0,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 184.3,
+     "y": 299.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 222.4,
+     "y": 321.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 260.5,
+     "y": 299.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 260.5,
+     "y": 255.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 10,
+     "sym": "Cl",
+     "x": 489.2,
+     "y": 123.0,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 11,
+     "sym": "Al",
+     "x": 451.1,
+     "y": 101.0,
+     "charge": -1,
+     "map": 11
+    },
+    {
+     "idx": 12,
+     "sym": "Cl",
+     "x": 489.2,
+     "y": 79.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 13,
+     "sym": "Cl",
+     "x": 413.0,
+     "y": 79.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 14,
+     "sym": "Cl",
+     "x": 451.1,
+     "y": 145.0,
+     "charge": 0,
+     "map": 14
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 13,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 14,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 4,
+    "8": 2,
+    "9": 3,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14
+   }
+  },
+  "sigma-2": {
+   "smiles": "[C]1([H])([C](=[O])[CH3])[CH]=[CH][CH+][CH]=[CH]1.[Cl][Al-]([Cl])([Cl])[Cl]",
+   "from": "sigma-1",
+   "note": "Resonance form 2: positive charge on ring carbon C4.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 222.4,
+     "y": 233.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 250.7,
+     "y": 199.3,
+     "charge": 0,
+     "map": 15
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 194.2,
+     "y": 199.3,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 209.2,
+     "y": 157.9,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 150.8,
+     "y": 206.9,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 184.3,
+     "y": 255.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 184.3,
+     "y": 299.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 222.4,
+     "y": 321.0,
+     "charge": 1,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 260.5,
+     "y": 299.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 260.5,
+     "y": 255.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 10,
+     "sym": "Cl",
+     "x": 489.2,
+     "y": 123.0,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 11,
+     "sym": "Al",
+     "x": 451.1,
+     "y": 101.0,
+     "charge": -1,
+     "map": 11
+    },
+    {
+     "idx": 12,
+     "sym": "Cl",
+     "x": 489.2,
+     "y": 79.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 13,
+     "sym": "Cl",
+     "x": 413.0,
+     "y": 79.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 14,
+     "sym": "Cl",
+     "x": 451.1,
+     "y": 145.0,
+     "charge": 0,
+     "map": 14
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 13,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 14,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 4,
+    "8": 2,
+    "9": 3,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14
+   }
+  },
+  "sigma-3": {
+   "smiles": "[C]1([H])([C](=[O])[CH3])[CH]=[CH][CH]=[CH][CH+]1.[Cl][Al-]([Cl])([Cl])[Cl]",
+   "from": "sigma-2",
+   "note": "Resonance form 3: positive charge on ring carbon C6.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 222.4,
+     "y": 233.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "H",
+     "x": 250.7,
+     "y": 199.3,
+     "charge": 0,
+     "map": 15
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 194.2,
+     "y": 199.3,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 209.2,
+     "y": 157.9,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 150.8,
+     "y": 206.9,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 184.3,
+     "y": 255.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 184.3,
+     "y": 299.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 222.4,
+     "y": 321.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 260.5,
+     "y": 299.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 260.5,
+     "y": 255.0,
+     "charge": 1,
+     "map": 6
+    },
+    {
+     "idx": 10,
+     "sym": "Cl",
+     "x": 489.2,
+     "y": 123.0,
+     "charge": 0,
+     "map": 10
+    },
+    {
+     "idx": 11,
+     "sym": "Al",
+     "x": 451.1,
+     "y": 101.0,
+     "charge": -1,
+     "map": 11
+    },
+    {
+     "idx": 12,
+     "sym": "Cl",
+     "x": 489.2,
+     "y": 79.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 13,
+     "sym": "Cl",
+     "x": 413.0,
+     "y": 79.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 14,
+     "sym": "Cl",
+     "x": 451.1,
+     "y": 145.0,
+     "charge": 0,
+     "map": 14
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 13,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 14,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 5,
+    "3": 6,
+    "4": 7,
+    "5": 8,
+    "6": 9,
+    "7": 4,
+    "8": 2,
+    "9": 3,
+    "10": 10,
+    "11": 11,
+    "12": 12,
+    "13": 13,
+    "14": 14
+   }
+  },
+  "product": {
+   "smiles": "[c]1([C](=[O])[CH3])[cH][cH][cH][cH][cH]1.[H+]",
+   "from": "sigma-3",
+   "note": "Acetophenone; H+ lost (AlCl3 is regenerated, not drawn).",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 222.4,
+     "y": 233.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 222.4,
+     "y": 189.0,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 260.5,
+     "y": 167.0,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 184.3,
+     "y": 167.0,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 184.3,
+     "y": 255.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 184.3,
+     "y": 299.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 222.4,
+     "y": 321.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 260.5,
+     "y": 299.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 260.5,
+     "y": 255.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 367.6,
+     "y": 277.0,
+     "charge": 1,
+     "map": 15,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 8,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 9,
+    "2": 4,
+    "3": 5,
+    "4": 6,
+    "5": 7,
+    "6": 8,
+    "7": 3,
+    "8": 1,
+    "9": 2
+   }
+  }
+ },
+ "director-anisole": {
+  "reactants": {
+   "smiles": "[c]1([O][CH3])[c]([H])[c]([H])[c]([H])[cH][cH]1.[Br+]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 11,
+     "sym": "Br",
+     "x": 420.1,
+     "y": 211.0,
+     "charge": 1,
+     "map": 31
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 10,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11
+   }
+  },
+  "ortho-1": {
+   "smiles": "[C]1([O][CH3])=[CH][CH]=[C]([H])[C+]([H])[C]1([H])[Br]",
+   "from": "reactants",
+   "note": "Attack at the ortho carbon (C2). Positive charge on ring carbon C3.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 1,
+     "map": 3
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 10,
+     "sym": "H",
+     "x": 235.0,
+     "y": 147.7,
+     "charge": 0,
+     "map": 22,
+     "mv": true
+    },
+    {
+     "idx": 11,
+     "sym": "Br",
+     "x": 206.7,
+     "y": 196.6,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 9,
+    "4": 10,
+    "5": 7,
+    "6": 8,
+    "7": 5,
+    "8": 6,
+    "9": 4,
+    "10": 3,
+    "11": 11
+   }
+  },
+  "ortho-2": {
+   "smiles": "[C]1([O][CH3])=[CH][CH+][C]([H])=[C]([H])[C]1([H])[Br]",
+   "from": "ortho-1",
+   "note": "Attack at the ortho carbon (C2). Positive charge on ring carbon C5.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 1,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 10,
+     "sym": "H",
+     "x": 235.0,
+     "y": 147.7,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 11,
+     "sym": "Br",
+     "x": 206.7,
+     "y": 196.6,
+     "charge": 0,
+     "map": 31
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 9,
+    "4": 10,
+    "5": 7,
+    "6": 8,
+    "7": 5,
+    "8": 6,
+    "9": 4,
+    "10": 3,
+    "11": 11
+   }
+  },
+  "ortho-3": {
+   "smiles": "[C+]1([O][CH3])[C]([H])([Br])[C]([H])=[C]([H])[CH]=[CH]1",
+   "from": "ortho-2",
+   "note": "Attack at the ortho carbon (C2). Positive charge on ring carbon C1 (the carbon that carries OCH3).",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 1,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 235.0,
+     "y": 147.7,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "Br",
+     "x": 206.7,
+     "y": 196.6,
+     "charge": 0,
+     "map": 31
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 8,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 5
+   }
+  },
+  "ortho-oxo": {
+   "smiles": "[C]1(=[O+][CH3])[C]([H])([Br])[C]([H])=[C]([H])[CH]=[CH]1",
+   "from": "ortho-3",
+   "note": "Extra form: the O lone pair shares the charge (C=O+). Every atom has an octet.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 1,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 235.0,
+     "y": 147.7,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "Br",
+     "x": 206.7,
+     "y": 196.6,
+     "charge": 0,
+     "map": 31
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 8,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 6,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 5
+   }
+  },
+  "product-ortho": {
+   "smiles": "[c]1([O][CH3])[c]([Br])[c]([H])[c]([H])[cH][cH]1.[H+]",
+   "from": "ortho-3",
+   "note": "H+ lost: ortho-substituted product.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "Br",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 11,
+     "sym": "H",
+     "x": 433.3,
+     "y": 211.0,
+     "charge": 1,
+     "map": 22,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 10,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 11,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 4
+   }
+  },
+  "para-1": {
+   "smiles": "[C]1([O][CH3])=[CH][CH+][C]([H])([Br])[C]([H])=[C]1[H]",
+   "from": "reactants",
+   "note": "Attack at the para carbon (C4). Positive charge on ring carbon C5.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 1,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 259.8,
+     "y": 288.7,
+     "charge": 0,
+     "map": 24,
+     "mv": true
+    },
+    {
+     "idx": 7,
+     "sym": "Br",
+     "x": 316.4,
+     "y": 288.7,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 11,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 10,
+    "4": 11,
+    "5": 8,
+    "6": 9,
+    "7": 5,
+    "8": 6,
+    "9": 4,
+    "10": 3,
+    "11": 7
+   }
+  },
+  "para-2": {
+   "smiles": "[C+]1([O][CH3])[C]([H])=[C]([H])[C]([H])([Br])[CH]=[CH]1",
+   "from": "para-1",
+   "note": "Attack at the para carbon (C4). Positive charge on ring carbon C1 (the carbon that carries OCH3).",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 1,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 259.8,
+     "y": 288.7,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 9,
+     "sym": "Br",
+     "x": 316.4,
+     "y": 288.7,
+     "charge": 0,
+     "map": 31
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 10,
+    "10": 11,
+    "11": 9
+   }
+  },
+  "para-oxo": {
+   "smiles": "[C]1(=[O+][CH3])[C]([H])=[C]([H])[C]([H])([Br])[CH]=[CH]1",
+   "from": "para-2",
+   "note": "Extra form: the O lone pair shares the charge (C=O+). Every atom has an octet.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 1,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 259.8,
+     "y": 288.7,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 9,
+     "sym": "Br",
+     "x": 316.4,
+     "y": 288.7,
+     "charge": 0,
+     "map": 31
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 10,
+    "10": 11,
+    "11": 9
+   }
+  },
+  "para-3": {
+   "smiles": "[C]1([O][CH3])=[C]([H])[C+]([H])[C]([H])([Br])[CH]=[CH]1",
+   "from": "para-2",
+   "note": "Attack at the para carbon (C4). Positive charge on ring carbon C3.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 1,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 259.8,
+     "y": 288.7,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 9,
+     "sym": "Br",
+     "x": 316.4,
+     "y": 288.7,
+     "charge": 0,
+     "map": 31
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 10,
+    "10": 11,
+    "11": 9
+   }
+  },
+  "product-para": {
+   "smiles": "[c]1([O][CH3])[c]([H])[c]([H])[c]([Br])[cH][cH]1.[H+]",
+   "from": "para-3",
+   "note": "H+ lost: para-substituted product.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "Br",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 11,
+     "sym": "H",
+     "x": 433.3,
+     "y": 211.0,
+     "charge": 1,
+     "map": 24,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 10,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 11,
+    "9": 9,
+    "10": 10,
+    "11": 8
+   }
+  },
+  "meta-1": {
+   "smiles": "[C]1([O][CH3])=[CH][CH]=[C]([H])[C]([H])([Br])[C+]1[H]",
+   "from": "reactants",
+   "note": "Attack at the meta carbon (C3). Positive charge on ring carbon C2.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 206.7,
+     "y": 225.4,
+     "charge": 0,
+     "map": 23,
+     "mv": true
+    },
+    {
+     "idx": 9,
+     "sym": "Br",
+     "x": 235.0,
+     "y": 274.3,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 11,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 10,
+    "4": 11,
+    "5": 7,
+    "6": 8,
+    "7": 5,
+    "8": 6,
+    "9": 4,
+    "10": 3,
+    "11": 9
+   }
+  },
+  "meta-2": {
+   "smiles": "[C]1([O][CH3])=[C]([H])[C]([H])([Br])[C]([H])=[CH][CH+]1",
+   "from": "meta-1",
+   "note": "Attack at the meta carbon (C3). Positive charge on ring carbon C6.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 206.7,
+     "y": 225.4,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 7,
+     "sym": "Br",
+     "x": 235.0,
+     "y": 274.3,
+     "charge": 0,
+     "map": 31
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 1,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 7
+   }
+  },
+  "meta-3": {
+   "smiles": "[C]1([O][CH3])=[C]([H])[C]([H])([Br])[C+]([H])[CH]=[CH]1",
+   "from": "meta-2",
+   "note": "Attack at the meta carbon (C3). Positive charge on ring carbon C4.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "H",
+     "x": 206.7,
+     "y": 225.4,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 7,
+     "sym": "Br",
+     "x": 235.0,
+     "y": 274.3,
+     "charge": 0,
+     "map": 31
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 1,
+     "map": 4
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 7
+   }
+  },
+  "product-meta": {
+   "smiles": "[c]1([O][CH3])[c]([H])[c]([Br])[c]([H])[cH][cH]1.[H+]",
+   "from": "meta-3",
+   "note": "H+ lost: meta-substituted product.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "O",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 0,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 11
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 4,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 6,
+     "sym": "Br",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 11,
+     "sym": "H",
+     "x": 433.3,
+     "y": 211.0,
+     "charge": 1,
+     "map": 23,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 3,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 5,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 7,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 10,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 11,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 6
+   }
+  }
+ },
+ "director-nitrobenzene": {
+  "reactants": {
+   "smiles": "[c]1([N+](=[O])[O-])[c]([H])[c]([H])[c]([H])[cH][cH]1.[Br+]",
+   "from": null,
+   "note": "",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "N",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 1,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 250.0,
+     "y": 101.0,
+     "charge": -1,
+     "map": 14
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 12,
+     "sym": "Br",
+     "x": 420.1,
+     "y": 211.0,
+     "charge": 1,
+     "map": 31
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 8,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 12
+   }
+  },
+  "meta-1": {
+   "smiles": "[C]1([N+](=[O])[O-])=[CH][CH]=[C]([H])[C]([H])([Br])[C+]1[H]",
+   "from": "reactants",
+   "note": "Attack at the meta carbon (C3). Positive charge on ring carbon C2.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "N",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 1,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 250.0,
+     "y": 101.0,
+     "charge": -1,
+     "map": 14
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 206.7,
+     "y": 225.4,
+     "charge": 0,
+     "map": 23,
+     "mv": true
+    },
+    {
+     "idx": 10,
+     "sym": "Br",
+     "x": 235.0,
+     "y": 274.3,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 12,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 11,
+    "5": 12,
+    "6": 8,
+    "7": 9,
+    "8": 6,
+    "9": 7,
+    "10": 5,
+    "11": 4,
+    "12": 10
+   }
+  },
+  "meta-2": {
+   "smiles": "[C]1([N+](=[O])[O-])=[C]([H])[C]([H])([Br])[C]([H])=[CH][CH+]1",
+   "from": "meta-1",
+   "note": "Attack at the meta carbon (C3). Positive charge on ring carbon C6.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "N",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 1,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 250.0,
+     "y": 101.0,
+     "charge": -1,
+     "map": 14
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 206.7,
+     "y": 225.4,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 8,
+     "sym": "Br",
+     "x": 235.0,
+     "y": 274.3,
+     "charge": 0,
+     "map": 31
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 10,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 12,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 1,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 11,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 12,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 8
+   }
+  },
+  "meta-3": {
+   "smiles": "[C]1([N+](=[O])[O-])=[C]([H])[C]([H])([Br])[C+]([H])[CH]=[CH]1",
+   "from": "meta-2",
+   "note": "Attack at the meta carbon (C3). Positive charge on ring carbon C4.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "N",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 1,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 250.0,
+     "y": 101.0,
+     "charge": -1,
+     "map": 14
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 206.7,
+     "y": 225.4,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 8,
+     "sym": "Br",
+     "x": 235.0,
+     "y": 274.3,
+     "charge": 0,
+     "map": 31
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 1,
+     "map": 4
+    },
+    {
+     "idx": 10,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 12,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 12,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 8
+   }
+  },
+  "product-meta": {
+   "smiles": "[c]1([N+](=[O])[O-])[c]([H])[c]([Br])[c]([H])[cH][cH]1.[H+]",
+   "from": "meta-3",
+   "note": "H+ lost: meta-substituted product.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "N",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 1,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 250.0,
+     "y": 101.0,
+     "charge": -1,
+     "map": 14
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "Br",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 10,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 12,
+     "sym": "H",
+     "x": 433.3,
+     "y": 211.0,
+     "charge": 1,
+     "map": 23,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 8,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 2,
+     "stereo": null,
+     "arom": true
+    },
+    {
+     "a": 11,
+     "b": 0,
+     "order": 1,
+     "stereo": null,
+     "arom": true
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 12,
+    "8": 8,
+    "9": 9,
+    "10": 10,
+    "11": 11,
+    "12": 7
+   }
+  },
+  "ortho-bad": {
+   "smiles": "[C+]1([N+](=[O])[O-])[C]([H])([Br])[C]([H])=[C]([H])[CH]=[CH]1",
+   "from": "reactants",
+   "note": "Attack at the ortho carbon: one resonance form puts + on C1, next to the +N of NO2. Bad.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 1,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "N",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 1,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 250.0,
+     "y": 101.0,
+     "charge": -1,
+     "map": 14
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 6,
+     "sym": "Br",
+     "x": 250.0,
+     "y": 145.0,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 8,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 9,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 10,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 12,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 9,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 12,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 7,
+    "7": 8,
+    "8": 9,
+    "9": 10,
+    "10": 11,
+    "11": 12,
+    "12": 6
+   }
+  },
+  "para-bad": {
+   "smiles": "[C+]1([N+](=[O])[O-])[C]([H])=[C]([H])[C]([H])([Br])[CH]=[CH]1",
+   "from": "reactants",
+   "note": "Attack at the para carbon: one resonance form puts + on C1, next to the +N of NO2. Bad.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 288.1,
+     "y": 167.0,
+     "charge": 1,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "N",
+     "x": 288.1,
+     "y": 123.0,
+     "charge": 1,
+     "map": 12
+    },
+    {
+     "idx": 2,
+     "sym": "O",
+     "x": 326.2,
+     "y": 101.0,
+     "charge": 0,
+     "map": 13
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 250.0,
+     "y": 101.0,
+     "charge": -1,
+     "map": 14
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 250.0,
+     "y": 189.0,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 211.9,
+     "y": 167.0,
+     "charge": 0,
+     "map": 22
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 250.0,
+     "y": 233.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 7,
+     "sym": "H",
+     "x": 211.9,
+     "y": 255.0,
+     "charge": 0,
+     "map": 23
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 288.1,
+     "y": 255.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 9,
+     "sym": "H",
+     "x": 288.1,
+     "y": 299.0,
+     "charge": 0,
+     "map": 24
+    },
+    {
+     "idx": 10,
+     "sym": "Br",
+     "x": 250.0,
+     "y": 277.0,
+     "charge": 0,
+     "map": 31,
+     "mv": true
+    },
+    {
+     "idx": 11,
+     "sym": "C",
+     "x": 326.2,
+     "y": 233.0,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 12,
+     "sym": "C",
+     "x": 326.2,
+     "y": 189.0,
+     "charge": 0,
+     "map": 6
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 0,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 11,
+     "b": 12,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 12,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 11,
+    "11": 12,
+    "12": 10
+   }
+  }
+ },
+ "diels-alder": {
+  "reactants": {
+   "smiles": "[CH2]=[CH][CH]=[CH2].[CH2]=[CH][CH]=[O]",
+   "from": "product",
+   "note": "s-cis diene (U shape) over the dienophile. The two new bonds C4-C5 and C1-C6 are not yet formed.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 219.1,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 254.0,
+     "y": 180.9,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 276.0,
+     "y": 142.8,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 320.0,
+     "y": 142.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 342.0,
+     "y": 180.9,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 320.0,
+     "y": 219.1,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 342.0,
+     "y": 257.2,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "O",
+     "x": 386.0,
+     "y": 257.2,
+     "charge": 0,
+     "map": 8
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 2,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+   }
+  },
+  "product": {
+   "smiles": "[CH2]1[CH]=[CH][CH2][CH2][CH]1[CH]=[O]",
+   "from": null,
+   "note": "cyclohex-3-ene-1-carbaldehyde (drawn flat).",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 276.0,
+     "y": 219.1,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 254.0,
+     "y": 180.9,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 276.0,
+     "y": 142.8,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 320.0,
+     "y": 142.8,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 342.0,
+     "y": 180.9,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 320.0,
+     "y": 219.1,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 342.0,
+     "y": 257.2,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 7,
+     "sym": "O",
+     "x": 386.0,
+     "y": 257.2,
+     "charge": 0,
+     "map": 8
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 5,
+     "b": 0,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7
+   }
+  }
+ }
+}
