@@ -83,7 +83,8 @@ const MINUS = '−';
 const atomName = (config, i) => config.atoms[i].label || config.atoms[i].el;
 export function describeSource(config, f) {
   if (f.lp != null) return `the lone pair on ${atomName(config, f.lp)}`;
-  return `the ${atomName(config, f.bond[0])}${MINUS}${atomName(config, f.bond[1])} bond electrons`;
+  const k = findBond(config.bonds, f.bond[0], f.bond[1]), ord = k >= 0 ? config.bonds[k].order || 1 : 1;   // a double bond reads C=C, so "C−C" never names a π pair
+  return `the ${atomName(config, f.bond[0])}${ord === 2 ? '=' : ord === 3 ? '≡' : MINUS}${atomName(config, f.bond[1])} bond electrons`;
 }
 export function describeDest(config, f, d) {
   if (d.atom != null) return (f.bond ? 'onto ' : 'to ') + atomName(config, d.atom);

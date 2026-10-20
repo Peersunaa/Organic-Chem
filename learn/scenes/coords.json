@@ -23,7 +23,9 @@
    "fc-acylation": 44.0,
    "director-anisole": 44.0,
    "director-nitrobenzene": 44.0,
-   "diels-alder": 44.0
+   "diels-alder": 44.0,
+   "hcl-ethylene": 44.0,
+   "arrow-grammar": 44.0
   }
  },
  "alkene-hx": {
@@ -12178,6 +12180,382 @@
     "5": 5,
     "6": 6,
     "7": 7
+   }
+  }
+ },
+ "hcl-ethylene": {
+  "reactants": {
+   "smiles": "[CH2]=[CH2].[H][Cl]",
+   "from": null,
+   "note": "Lesson 08 primer (scene 17): ethylene and HCl.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 298.0,
+     "y": 214.7,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 342.0,
+     "y": 214.7,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "H",
+     "x": 342.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "Cl",
+     "x": 298.0,
+     "y": 185.3,
+     "charge": 0,
+     "map": 4
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3
+   }
+  },
+  "carbocation": {
+   "smiles": "[H][CH2][CH2+].[Cl-]",
+   "from": "reactants",
+   "note": "H has moved to C1; Cl- is free.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "H",
+     "x": 358.1,
+     "y": 218.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 320.0,
+     "y": 196.3,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 281.9,
+     "y": 218.3,
+     "charge": 1,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "Cl",
+     "x": 320.0,
+     "y": 167.0,
+     "charge": -1,
+     "map": 4
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3
+   }
+  },
+  "product": {
+   "smiles": "[H][CH2][CH2][Cl]",
+   "from": "carbocation",
+   "note": "chloroethane.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "H",
+     "x": 378.1,
+     "y": 204.0,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 337.6,
+     "y": 186.8,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 302.4,
+     "y": 213.2,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "Cl",
+     "x": 261.9,
+     "y": 196.0,
+     "charge": 0,
+     "map": 4
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3
+   }
+  }
+ },
+ "arrow-grammar": {
+  "reactants": {
+   "smiles": "[CH2]=[CH][CH2][Cl]",
+   "from": null,
+   "note": "Lesson 08 primer (scene 18): allyl chloride.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 261.9,
+     "y": 204.0,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 302.4,
+     "y": 186.8,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 337.6,
+     "y": 213.2,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "Cl",
+     "x": 378.1,
+     "y": 196.0,
+     "charge": 0,
+     "map": 4
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3
+   }
+  },
+  "cation": {
+   "smiles": "[CH2+][CH]=[CH2].[Cl-]",
+   "from": "reactants",
+   "note": "allyl cation (second drawing) and Cl-.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 281.9,
+     "y": 218.3,
+     "charge": 1,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 320.0,
+     "y": 196.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 358.1,
+     "y": 218.3,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "Cl",
+     "x": 320.0,
+     "y": 167.0,
+     "charge": -1,
+     "map": 4
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 2,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3
+   }
+  },
+  "product": {
+   "smiles": "[Cl][CH2][CH]=[CH2]",
+   "from": "cation",
+   "note": "allyl chloride again, Cl on C1.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "Cl",
+     "x": 378.1,
+     "y": 196.0,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 337.6,
+     "y": 213.2,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 302.4,
+     "y": 186.8,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 261.9,
+     "y": 204.0,
+     "charge": 0,
+     "map": 3
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3
    }
   }
  }

@@ -13,9 +13,16 @@
 //   judge(drawn)     Lesson 11: replaces the grading against config.arrows (no expected arrows needed); returns {ok, diagnosis, wrong?: [arrow indices], message?}.
 //   regio.alt        Lesson 11: more {pi, H, ends} for the mirror-image C=C of a symmetric diene (the question is asked for either C=C).
 //   play()           (returned) animates the drawn arrows and sends two electron dots along each curve; resolves when finished
-//                    (immediately under prefers-reduced-motion).
+//                    (immediately under prefers-reduced-motion). The dots are removed when they arrive.
+//   after:true       Lesson 08: once the arrows are right they play, then the picture turns into the AFTER state (applyArrows of config.arrows: new bonds and
+//                    lone pairs fade in, charges recomputed) with `afterNote` under it, and a "Show before / Show after" toggle (44 px) lets the learner compare.
+//   dashLong:true    the mechanism player's mid-step pictures: a bond longer than 1.45 bond lengths is one an arrow has just made between atoms that have not
+//                    moved together yet, so it is drawn dashed ("forming") instead of as a real long bond.
+// Tap targets are sized in SCREEN pixels after layout (ResizeObserver): atoms and lone pairs get 44 px where the drawing has room (never more than half the way to a
+// neighbour), and every bond has a 44 px-wide hit band over its middle, drawn above the atoms, so both stay reachable on a 400 px phone.
+// Charge badges are placed where they clear every lone-pair dot, bond line and atom (pushed outward until they do).
 import { NAME } from '../chem.js';
-import { SCALE, radius, P, lpCount, lpPoints, keyOf, grade, badStart, curve, describeSource, describeDest, headAtom } from './arrow-core.js';
+import { SCALE, radius, P, lpCount, lpPoints, keyOf, grade, badStart, curve, describeSource, describeDest, headAtom, applyArrows } from './arrow-core.js';
 import { freeAngles } from './lewis-core.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -24,7 +31,8 @@ const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: r
 export default {
   id: 'arrow-draw',
   mount(host, config, ctx) {
-    const { atoms, bonds } = config;
+    let atoms = config.atoms, bonds = config.bonds;      // what is drawn: the config's structure, or the AFTER state once `after` has played
+    let view = 'before', afterState = null, destroyed = false, ro = null;
     const preset = !!config.preset;
     let drawn = preset ? config.arrows.map((a) => ({ from: a.from, to: a.to })) : [];       // {from, to}
     const geo = [];       // per drawn arrow: {start, c, end} in px (for the electron animation)
@@ -38,6 +46,7 @@ export default {
       <div class="lb ad">
         <svg class="lb-svg ad-svg" role="group" aria-label="Curved arrow workspace"></svg>
         <p class="lb-help ad-status" aria-live="polite">${preset ? (config.caption || '') : 'Tap the electrons the arrow starts from (a pair of dots or a bond), then tap where they go.'}</p>
+        <div class="ad-ba" hidden><button type="button" class="btn ghost small" data-act="ba" aria-pressed="false">Show before</button></div>
         <div class="lb-actions"${preset ? ' hidden' : ''}>
           <button type="button" class="btn ghost" data-act="undo">Undo arrow</button>
           <button type="button" class="btn ghost" data-act="reset">Clear</button>
@@ -60,13 +69,20 @@ export default {
     svg.setAttribute('viewBox', `${minX} ${minY} ${maxX - minX} ${maxY - minY}`);
     svg.style.aspectRatio = `${maxX - minX} / ${maxY - minY}`;
 
-    const lpPts = atoms.map((_, i) => lpPoints(atoms, bonds, i));
-    const nLp = atoms.map((_, i) => lpCount(atoms, bonds, i));
+    let lpPts, nLp;
+    const recalc = () => { lpPts = atoms.map((_, i) => lpPoints(atoms, bonds, i)); nLp = atoms.map((_, i) => lpCount(atoms, bonds, i)); };
+    recalc();
+    const vbW = maxX - minX;
     const say = (t) => { status.textContent = t; };
     const bondEnds = (b) => { const A = atoms[b.a], B = atoms[b.b]; return [P(A), P(B)]; };
 
     function srcPoint(from, toward) {
-      if (from.atom != null) { const [ax, ay] = P(atoms[from.atom]); return { x: ax, y: ay - radius(atoms[from.atom].el) * 0.9 }; }
+      if (from.atom != null) {
+        // a wrong arrow drawn from an atom (H+): start on the side that faces where it goes, so the tail never sits under the atom's charge badge
+        const [ax, ay] = P(atoms[from.atom]), r = radius(atoms[from.atom].el) + 2;
+        const dx = toward.x - ax, dy = toward.y - ay, L = Math.hypot(dx, dy) || 1;
+        return { x: ax + (dx / L) * r, y: ay + (dy / L) * r };
+      }
       if (from.bond) {
         const [p, q] = [P(atoms[from.bond[0]]), P(atoms[from.bond[1]])];
         return { x: (p[0] + q[0]) / 2, y: (p[1] + q[1]) / 2 };
@@ -79,6 +95,21 @@ export default {
       return { x: best.x, y: best.y };
     }
     function destPoint(to, from) {
+      if (to.atom != null && from && from.bond && from.bond.includes(to.atom)) {
+        // a bond pair moving onto one of its own atoms (H–Cl → Cl): the chord from the bond's middle to the atom is tiny, so land on the atom's upper side,
+        // half-way between the bond direction and straight up: the arrow becomes a visible hook instead of a 10 px stub
+        const B = atoms[to.atom], A = atoms[from.bond[0] === to.atom ? from.bond[1] : from.bond[0]];
+        const [bx, by] = P(B), [ax, ay] = P(A);
+        const ux = ax - bx, uy = ay - by, L = Math.hypot(ux, uy) || 1;
+        let nx = -uy / L, ny = ux / L;
+        if (ny > 0 || (Math.abs(ny) < 0.2 && nx < 0)) { nx = -nx; ny = -ny; }
+        const dx = nx + 0.7 * (ux / L), dy = ny + 0.7 * (uy / L), M = Math.hypot(dx, dy) || 1;
+        const rr = radius(B.el) + 4;
+        const ex = bx + (dx / M) * rr, ey = by + (dy / M) * rr;
+        // a tall loop: the control point sits well above the bond's middle, so the hook is big enough to see on a phone
+        const mx = (ax + bx) / 2, my = (ay + by) / 2;
+        return { x: ex, y: ey, r: 0, ctrl: { x: (mx + ex) / 2 + nx * 46, y: (my + ey) / 2 + ny * 46 } };
+      }
       if (to.atom != null) { const [x, y] = P(atoms[to.atom]); return { x, y, r: radius(atoms[to.atom].el) + 4 }; }
       const nb = from && headAtom(config, { from, to });
       if (nb) { const [x, y] = P(atoms[nb.atom]); return { x, y, r: radius(atoms[nb.atom].el) + 4 }; } // a bond that is about to form
@@ -86,10 +117,48 @@ export default {
       return { x: (p[0] + q[0]) / 2, y: (p[1] + q[1]) / 2, r: 4 };
     }
 
+    const segDist = (px, py, x1, y1, x2, y2) => { const dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy || 1; const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / L2)); return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy)); };
+    /** Where the charge badge of atom i goes: the spot nearest the open gap that clears every lone-pair dot, bond line and other atom; pushed outward until it does. */
+    function badgeSpot(i) {
+      const a = atoms[i], [x, y] = P(a), r = radius(a.el);
+      const bAngs = bonds.filter((b) => b.a === i || b.b === i).map((b) => { const j = b.a === i ? b.b : b.a; return Math.atan2(atoms[j].y - a.y, atoms[j].x - a.x); });
+      const [ct] = freeAngles(bAngs.concat(lpPts[i].map((p) => p.t)), 1);
+      // every lone-pair DOT (two per pair, 4.5 either side of the pair's centre), not just the pair's centre
+      const dots = lpPts.flat().flatMap((p) => { const ox = -Math.sin(p.t) * 4.5, oy = Math.cos(p.t) * 4.5; return [{ x: p.x + ox, y: p.y + oy }, { x: p.x - ox, y: p.y - oy }]; });
+      const clear = (cx, cy) => {
+        let c = 99;
+        for (const p of dots) c = Math.min(c, Math.hypot(cx - p.x, cy - p.y) - 3.4 - 9 - 2);
+        for (const b of bonds) { const [p1, p2] = bondEnds(b); c = Math.min(c, segDist(cx, cy, p1[0], p1[1], p2[0], p2[1]) - 2 - 9); }
+        atoms.forEach((o, j) => { if (j !== i) { const [ox, oy] = P(o); c = Math.min(c, Math.hypot(cx - ox, cy - oy) - radius(o.el) - 9); } });
+        return c;
+      };
+      const ang = (u, v) => { const d = Math.abs(u - v) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; };
+      for (const d of [r * 1.35, r * 1.6, r * 1.9, r * 2.3, r * 2.7]) {
+        let best = null;
+        for (let k = 0; k < 24; k++) {
+          const t = ct + (k * Math.PI) / 12, cx = x + Math.cos(t) * d, cy = y + Math.sin(t) * d;
+          if (clear(cx, cy) >= 2 && (!best || ang(t, ct) < best.a - 1e-9)) best = { cx, cy, a: ang(t, ct) };
+        }
+        if (best) return best;
+      }
+      return { cx: x + Math.cos(ct) * r * 2.7, cy: y + Math.sin(ct) * r * 2.7 };
+    }
+
+    /** A quadratic arrow with a given control point (the bond → own-atom hook), in the same shape curve() returns. */
+    function hook(p, c, q) {
+      const ex = q.x - c.x, ey = q.y - c.y, L = Math.hypot(ex, ey) || 1, t = { x: ex / L, y: ey / L };
+      const h = 11, w = 6, base = { x: q.x - t.x * h, y: q.y - t.y * h };
+      const head = [[q.x, q.y], [base.x - t.y * w, base.y + t.x * w], [base.x + t.y * w, base.y - t.x * w]];
+      const stem = { x: q.x - t.x * (h - 3), y: q.y - t.y * (h - 3) };
+      return { d: `M${p.x.toFixed(1)} ${p.y.toFixed(1)} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${stem.x.toFixed(1)} ${stem.y.toFixed(1)}`, head: head.map((v) => v.map((n) => n.toFixed(1)).join(',')).join(' '), ctrl: c, p0: p, stem };
+    }
+
     function draw() {
       svg.textContent = '';
+      const bondG = el('g'), hitG = el('g', { class: 'ad-hits' });
+      svg.appendChild(bondG);
       // bonds
-      bonds.forEach((b, bi) => {
+      bonds.forEach((b) => {
         const A = atoms[b.a], B = atoms[b.b];
         const [x1, y1] = P(A), [x2, y2] = P(B);
         const len = Math.hypot(x2 - x1, y2 - y1) || 1;
@@ -99,15 +168,19 @@ export default {
         const ord = b.order || 1;
         const offs = ord === 1 ? [0] : ord === 2 ? [-4.5, 4.5] : [-7, 0, 7];
         const isSrc = src && src.bond && keyOf(src) === keyOf({ bond: [b.a, b.b] });
-        const g = el('g', { class: 'lb-bond ad-bond' + (isSrc ? ' ad-src' : ''), 'data-bond': b.a + '-' + b.b });
+        const forming = config.dashLong && len > 1.45 * SCALE;
+        const g = el('g', { class: 'lb-bond ad-bond' + (isSrc ? ' ad-src' : '') + (forming ? ' ad-forming' : ''), 'data-bond': b.a + '-' + b.b });
         for (const o of offs) g.appendChild(el('line', { x1: sx - uy * o, y1: sy + ux * o, x2: ex - uy * o, y2: ey + ux * o, class: 'lb-line' }));
-        g.appendChild(el('line', { x1: sx, y1: sy, x2: ex, y2: ey, class: 'lb-hit' }));
         if (!finished) {
           g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
           g.setAttribute('aria-label', `Bond between ${A.label || A.el} and ${B.label || B.el}. ${src ? 'Press to send the electrons into this bond.' : 'Press to start an arrow from the bond electrons.'}`);
           wire(g, () => tap({ kind: 'bond', bond: [b.a, b.b] }));
+          // the hit band covers the middle of the bond and sits ABOVE the atoms, so a big atom target never swallows the bond
+          const hit = el('line', { x1: x1 + (x2 - x1) * 0.24, y1: y1 + (y2 - y1) * 0.24, x2: x1 + (x2 - x1) * 0.76, y2: y1 + (y2 - y1) * 0.76, class: 'lb-hit', 'data-hit': b.a + '-' + b.b });
+          hit.addEventListener('click', (e) => { e.stopPropagation(); tap({ kind: 'bond', bond: [b.a, b.b] }); });
+          hitG.appendChild(hit);
         }
-        svg.appendChild(g);
+        bondG.appendChild(g);
       });
       // atoms
       atoms.forEach((a, i) => {
@@ -124,6 +197,7 @@ export default {
         }
         svg.appendChild(g);
       });
+      svg.appendChild(hitG);
       // lone pairs (on top of the atom hit areas so they can be tapped on their own)
       atoms.forEach((a, i) => {
         lpPts[i].forEach((p, k) => {
@@ -142,17 +216,10 @@ export default {
           svg.appendChild(g);
         });
       });
-      // charges
+      // charges (one lb-atom group per charged atom, in atom order: the mechanism player relies on that order)
       atoms.forEach((a, i) => {
         if (!a.charge) return;
-        const [x, y] = P(a), r = radius(a.el);
-        const bAngs = bonds.filter((b) => b.a === i || b.b === i).map((b) => { const j = b.a === i ? b.b : b.a; return Math.atan2(atoms[j].y - a.y, atoms[j].x - a.x); });
-        const occ = bAngs.concat(lpPts[i].map((p) => p.t));
-        const [ct] = freeAngles(occ, 1);
-        // an atom with four groups (O+ with three bonds and a pair) leaves only a narrow gap: push the badge outward until it clears the bonds on both sides
-        const gap = occ.length ? Math.min(...occ.map((t) => { const d = Math.abs(ct - t) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; })) : Math.PI;
-        const dist = Math.min(Math.max(r * 1.35, 12 / Math.max(Math.sin(Math.min(gap, Math.PI / 2)), 0.2)), r * 2.6);
-        const cx = x + Math.cos(ct) * dist, cy = y + Math.sin(ct) * dist;
+        const { cx, cy } = badgeSpot(i);
         const g = el('g', { class: 'lb-atom' });
         g.appendChild(el('circle', { cx, cy, r: 9, class: 'lb-chg' }));
         g.appendChild(el('text', { x: cx, y: cy + 0.5, class: 'lb-chgt' }, a.charge > 0 ? '+' : '−'));
@@ -163,7 +230,7 @@ export default {
       drawn.forEach((ar, n) => {
         const dest = destPoint(ar.to, ar.from);
         const start = srcPoint(ar.from, dest);
-        const c = curve(start, dest, dest.r);
+        const c = dest.ctrl ? hook(start, dest.ctrl, dest) : curve(start, dest, dest.r);
         geo[n] = { start, c: c.ctrl, end: c.stem };
         const bad = badIdx.includes(n);
         const g = el('g', { class: 'ad-arrow' + (bad ? ' bad' : '') + (n === lastAdded && !reduceMotion() ? ' draw' : '') });
@@ -172,7 +239,31 @@ export default {
         g.appendChild(el('circle', { cx: start.x, cy: start.y, r: 3.2, class: 'ad-dot' }));
         svg.appendChild(g);
       });
+      sizeHits();
     }
+
+    /** Tap targets in screen pixels: 44 px (radius 22 px) where the drawing allows it. Called after every draw and whenever the drawing is resized. */
+    function sizeHits() {
+      if (finished || !svg.isConnected) return;
+      const w = svg.getBoundingClientRect().width;
+      if (!w) return;
+      const k = w / vbW, want = 22 / k;
+      const near = atoms.map((a, i) => Math.min(9e9, ...atoms.map((o, j) => (j === i ? 9e9 : Math.hypot(o.x - a.x, o.y - a.y) * SCALE))));
+      svg.querySelectorAll('.ad-atom').forEach((g) => {
+        const i = Number(g.dataset.atom), c = g.querySelector('.lb-hit-atom');
+        if (c) c.setAttribute('r', Math.max(radius(atoms[i].el) + 8, Math.min(want, near[i] * 0.48)).toFixed(1));
+      });
+      // pairs on the SAME atom may overlap (any of them starts the same arrow); pairs of different atoms never do
+      const pts = [...svg.querySelectorAll('.ad-hit-lp')];
+      const xy = pts.map((c) => [Number(c.getAttribute('cx')), Number(c.getAttribute('cy'))]);
+      const own = pts.map((c) => c.parentNode.dataset.lp.split('-')[0]);
+      pts.forEach((c, n) => {
+        const d = Math.min(9e9, ...xy.map((q, m) => (m === n || own[m] === own[n] ? 9e9 : Math.hypot(q[0] - xy[n][0], q[1] - xy[n][1]))));
+        c.setAttribute('r', Math.max(13, Math.min(want, d * 0.5, 27)).toFixed(1));
+      });
+      svg.querySelectorAll('.ad-hits .lb-hit').forEach((l) => { l.style.strokeWidth = Math.max(30, Math.min(2 * want, 46)).toFixed(1); });
+    }
+    if (typeof ResizeObserver !== 'undefined') { ro = new ResizeObserver(() => sizeHits()); ro.observe(svg); }
 
     function wire(g, fn) {
       g.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
@@ -194,7 +285,7 @@ export default {
           const from = { bond: [e.idx, other] }, to = { bond: [e.idx, rg.H] };
           closeChooser();
           drawn.push({ from, to }); lastAdded = drawn.length - 1; src = null;
-          say(`Arrow added: ${describeSource(config, from)} ${describeDest(config, from, to)}. Add another arrow or press Check.`);
+          say(`Arrow added: ${addedText(from, to)}. Add another arrow or press Check.`);
           draw();
         });
         row.appendChild(b);
@@ -233,8 +324,13 @@ export default {
       drawn.push({ from, to });
       lastAdded = drawn.length - 1;
       src = null;
-      say(`Arrow added: ${describeSource(config, from)} ${describeDest(config, from, to)}. Add another arrow or press Check.`);
+      say(`Arrow added: ${addedText(from, to)}. Add another arrow or press Check.`);
       draw();
+    }
+    /** "the C=C bond electrons make a new bond to H" for a bond pointed at an atom outside it (that is what the arrow means), else arrow-core's wording. */
+    function addedText(from, to) {
+      if (from.bond && to.atom != null && !from.bond.includes(to.atom)) return `${describeSource(config, from)} make a new bond to ${atoms[to.atom].label || atoms[to.atom].el}`;
+      return `${describeSource(config, from)} ${describeDest(config, from, to)}`;
     }
 
     host.querySelector('[data-act="undo"]').addEventListener('click', () => { if (finished) return; closeChooser(); drawn.pop(); badIdx = []; src = null; lastAdded = -1; say('Last arrow removed.'); draw(); });
@@ -247,7 +343,32 @@ export default {
       lastAdded = -1;
       draw();
       ctx.onResult(r);
+      if (r.ok && config.after) play().then(() => { if (!destroyed) showAfter(true); });
     });
+    // ---------------------------------------------------------------- before / after (config.after)
+    const baRow = host.querySelector('.ad-ba'), baBtn = host.querySelector('[data-act="ba"]');
+    const bondKeys = (bs) => new Set(bs.map((b) => keyOf({ bond: [b.a, b.b] }) + ':' + (b.order || 1)));
+    function showAfter(fade) {
+      if (!afterState) {
+        const st = applyArrows({ atoms: config.atoms, bonds: config.bonds, arrows: config.arrows });
+        afterState = { atoms: st.atoms.map((a, i) => ({ el: a.el, x: a.x, y: a.y, charge: a.charge, label: config.atoms[i].label })), bonds: st.bonds };
+      }
+      const lp0 = nLp.slice(), k0 = bondKeys(bonds);
+      view = 'after'; atoms = afterState.atoms; bonds = afterState.bonds; recalc();
+      const keep = drawn; drawn = []; draw(); drawn = keep;
+      if (fade && !reduceMotion()) {
+        bonds.forEach((b) => { if (!k0.has(keyOf({ bond: [b.a, b.b] }) + ':' + (b.order || 1))) svg.querySelector(`[data-bond="${b.a}-${b.b}"]`)?.classList.add('mp-new'); });
+        nLp.forEach((v, i) => { if (v > lp0[i]) svg.querySelectorAll(`[data-lp^="${i}-"]`).forEach((g) => g.classList.add('mp-new')); });
+      }
+      say(config.afterNote || 'After the arrow: the electrons are where the arrow pointed.');
+      baRow.hidden = false; baBtn.textContent = 'Show before'; baBtn.setAttribute('aria-pressed', 'false');
+    }
+    function showBefore() {
+      view = 'before'; atoms = config.atoms; bonds = config.bonds; recalc(); draw();
+      say(config.beforeNote || 'Before: the arrow starts at the electrons and points to where they go.');
+      baBtn.textContent = 'Show after'; baBtn.setAttribute('aria-pressed', 'true');
+    }
+    baBtn.addEventListener('click', () => { if (view === 'after') showBefore(); else showAfter(false); });
     function play() {
       const groups = [...svg.querySelectorAll('.ad-arrow')];
       if (!groups.length || reduceMotion()) return Promise.resolve();
@@ -274,6 +395,6 @@ export default {
       })));
     }
     draw();
-    return { destroy() {}, getDrawn: () => drawn, play };
+    return { destroy() { destroyed = true; if (ro) ro.disconnect(); }, getDrawn: () => drawn, play, showAfter: () => showAfter(false) };
   }
 };

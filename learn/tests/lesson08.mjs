@@ -2,6 +2,7 @@
 // arrow grading, the energy-diagram logic (answers recomputed independently), the nucleophile/electrophile site table, reaction kinds
 // (classification vs counts and formulas), the wrong mechanisms of the "spot the rule" step, the `mechanism-basics` generator, and the
 // lesson's own steps. Run on its own with `node learn/tests/lesson08.mjs`, or as part of run.mjs.
+import '../engine/steps.js';   // load order: steps.js before widgets/index.js, so the naming-levels generator's widget hook finds WIDGETS initialised (run on its own)
 import { ready, rdkit, canon, analyze, VALENCE, ENEG } from '../engine/chem.js';
 import fs from 'node:fs';
 import { LESSONS } from '../lessons/index.js';
@@ -16,7 +17,8 @@ import { generate, generatorForSkill, GENERATORS } from '../engine/generators.js
 import { randomLevels, MECH_TASKS, makeMechProblem, MECH_SKILLS } from '../engine/generators-mech.js';
 import { checkInput } from '../engine/steps.js';
 import { skillLabel, skillRule } from '../engine/skills.js';
-import { nameAlkeneBoth } from '../engine/naming.js';
+import * as R from '../engine/reactions.js';
+import { STEP_SCENE } from '../scenes/scene-index.js';
 
 function mulberry32(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function htmlStrings(o, out = []) {
@@ -296,19 +298,19 @@ export async function lesson08({ ok, eq }) {
     eq(M.classifyReaction(['C=C', 'Cl'], ['CCBr']), null, 'unbalanced equation is not classified');
     eq(M.classifyReaction(['CCO'], ['CC=O']), null, 'one reactant to one product with a different formula is not a rearrangement');
     eq(M.classifyReaction(['C=CCC'], ['C=CCC']), null, 'identical reactant and product is not a rearrangement');
-    // the four reactions the learner classifies in step 2 are one of each kind
-    const w = L.steps.find((s) => s.id === 's02');
-    eq(w.moves.map((m) => m.options.find((o) => o.correct).text.toLowerCase()).sort(), ['addition', 'elimination', 'rearrangement', 'substitution'], 'step 2: one reaction of each kind');
+    // the four reactions the learner sorts (the worked reaction-types step) are one of each kind
+    const w = L.steps.find((s) => s.type === 'worked' && s.skill === 'reaction-types');
+    eq(w.moves.map((m) => m.options.find((o) => o.correct).text.toLowerCase()).sort(), ['addition', 'elimination', 'rearrangement', 'substitution'], 'sort step: one reaction of each kind');
     w.moves.forEach((m, i) => {
       const r = M.REACTIONS.find((x) => JSON.stringify(x.reactants) === JSON.stringify(m.equation.reactants) && JSON.stringify(x.products) === JSON.stringify(m.equation.products));
-      ok(!!r, `step 2 move ${i} is a pool reaction`);
-      eq(m.options.find((o) => o.correct).text.toLowerCase(), M.kindOf(r), `step 2 move ${i} correct option = computed kind`);
-      ok(m.options.every((o) => o.why.length > 20), `step 2 move ${i} every option explains itself`);
+      ok(!!r, `sort step move ${i} is a pool reaction`);
+      eq(m.options.find((o) => o.correct).text.toLowerCase(), M.kindOf(r), `sort step move ${i} correct option = computed kind`);
+      ok(m.options.every((o) => o.why.length > 20), `sort step move ${i} every option explains itself`);
     });
     ok(M.REACTIONS.some((r) => r.id === 'hcl-ethylene') && M.kindOf(M.REACTION['hcl-ethylene']) === 'addition', 'HCl + ethylene is an addition');
   }
 
-  // ================================================================ 5. the wrong mechanisms of step 8
+  // ================================================================ 5. the wrong mechanisms of the broken-rule step (s10)
   {
     const A = M.RULE_CASES.fromProton;
     ok(arrow.validate({ atoms: A.atoms, bonds: A.bonds, arrows: A.arrows }).length > 0, 'case 1: arrow-core rejects an arrow that starts at an atom');
@@ -330,11 +332,11 @@ export async function lesson08({ ok, eq }) {
     const ta = tallyIndep(C.reactants), tb = tallyIndep(C.studentProducts);
     eq(ta.c, tb.c, 'case 3: the student’s products keep every atom'); ok(ta.q !== tb.q, `case 3: but the charge is not conserved (${ta.q} vs ${tb.q})`);
     eq(arrow.lpCount(C.atoms, C.bonds, 0), 3, 'case 3: hydroxide O has 3 lone pairs');
-    // each case has the right correct option in the lesson
-    const w = L.steps.find((s) => s.id === 's08');
-    eq(w.moves.length, 3, 'step 8 has three wrong mechanisms');
-    w.moves.forEach((m, i) => { ok(m.visual && htmlStrings(m.visual).length > 0, `step 8 move ${i} shows the wrong mechanism`); ok(m.options.filter((o) => o.correct).length === 1 && m.options.length === 4, `step 8 move ${i} has 4 options, one right`); });
-    ok(/H⁺/.test(w.moves[0].options.find((o) => o.correct).text) && /five bonds/.test(w.moves[1].options.find((o) => o.correct).text) && /Charge is not conserved/.test(w.moves[2].options.find((o) => o.correct).text), 'step 8: the three rules are arrow-from-H+, a five-bond carbon, charge not conserved');
+    // each case has the right correct option in the lesson (the broken-rule worked step, after the three grammar draws)
+    const w = L.steps.find((s) => s.id === 's10');
+    eq(w.moves.length, 3, 'step 10 has three wrong mechanisms');
+    w.moves.forEach((m, i) => { ok(m.visual && htmlStrings(m.visual).length > 0, `step 10 move ${i} shows the wrong mechanism`); ok(m.options.filter((o) => o.correct).length === 1 && m.options.length === 4, `step 10 move ${i} has 4 options, one right`); });
+    ok(/H⁺/.test(w.moves[0].options.find((o) => o.correct).text) && /five bonds/.test(w.moves[1].options.find((o) => o.correct).text) && /Charge is not conserved/.test(w.moves[2].options.find((o) => o.correct).text), 'step 10: the three rules are arrow-from-H+, a five-bond carbon, charge not conserved');
   }
 
   // ================================================================ 6. mechanism-basics generator
@@ -411,17 +413,18 @@ export async function lesson08({ ok, eq }) {
     ok(total === MECH_TASKS.length * 25, `generated ${total} problems`);
   }
 
-  // ================================================================ 7. the lesson
+  // ================================================================ 7. the lesson (rebuilt 2026-10-20 around one spine: docs/reviews/2026-10-20-lesson08-audit.md)
   {
     const t = 'L08';
+    const S = (id) => L.steps.find((s) => s.id === id);
+    const at = (id) => L.steps.findIndex((s) => s.id === id);
     ok(L && L.id === '08' && L.slug === 'mechanisms', `${t} registered`);
-    ok(L.steps.length >= 15 && L.steps.length <= 18, `${t} has 15-18 steps (${L.steps.length})`);
-    ok(L.minutes >= 25 && L.minutes <= 30, `${t} 25-30 minutes`);
+    ok(L.steps.length >= 24 && L.steps.length <= 30, `${t} has 24-30 steps (${L.steps.length})`);
+    eq(L.steps.map((s) => s.id), L.steps.map((_, i) => 's' + String(i + 1).padStart(2, '0')), `${t} step ids run s01 to s${String(L.steps.length).padStart(2, '0')}`);
+    ok(L.minutes >= 30 && L.minutes <= 40, `${t} about 35 minutes (${L.minutes})`);
     ok(L.drawing === 'skeletal' && L.chapter === 3, `${t} skeletal drawing, chapter 3`);
     eq(L.sections, ['3.5', '3.6', '3.7', '3.8', '3.9'], `${t} sections`);
     eq(L.mastery, { count: 3, generator: 'mechanism-basics' }, `${t} mastery`);
-    ok(L.steps[0].type === 'predict' && L.steps.findIndex((s) => s.type === 'explain') > 1, `${t} acts before it explains`);
-    ok(L.steps.filter((s) => s.type === 'explain').every((s, k, arr) => L.steps.indexOf(s) > 3), `${t} explain cards come after the learner has acted`);
     eq(L.useIt.book, ['3.11', '3.12', '3.13', '3.14', '3.15', '3.16', '3.17', '3.18', '3.19', '3.22', '3.23', '3.24', '3.25', '3.26', '3.27', '3.28', '3.46', '3.47', '3.48', '3.49', '3.50', '3.51', '3.55', '3.56', '3.57', '3.58', '3.59', '3.60'], `${t} book problems`);
     ok(L.useIt.endFrom === 20, `${t} end-of-chapter exercises start at 3.20`);
     try {
@@ -429,79 +432,171 @@ export async function lesson08({ ok, eq }) {
       const nums = new Set([...txt.matchAll(/^3\.(\d+) /gm)].map((m) => Number(m[1])));
       const inChap = [...txt.matchAll(/^Problem 3\.(\d+)$/gm)].map((m) => Number(m[1]));
       for (const b of L.useIt.book) { const n = Number(b.split('.')[1]); ok(n >= 20 ? nums.has(n) : inChap.includes(n), `${t} book problem ${b} exists in the chapter text`); }
-      ok(/Classify the following reactions as additions/.test(txt) && /^3\.51 Consider the energy diagram/m.test(txt) && /^3\.46 If a reaction has Eact/m.test(txt), `${t} spot check: 3.11 classify, 3.46/3.51 energy diagrams`);
     } catch (e) { /* the book text is not part of the repo; skip when it is absent */ }
-    // widgets used and reachable
-    const by = (w) => L.steps.filter((s) => s.widget === w);
-    eq(by('site-picker').length, 2, `${t} two site-picker rounds (nucleophiles, electrophiles)`);
-    eq(by('mechanism-player').map((s) => s.config.mode), ['draw', 'watch'], `${t} one drawn mechanism, one watched`);
-    eq(by('energy-diagram').map((s) => s.config.mode), ['tasks', 'tasks', 'catalyst'], `${t} energy-diagram: two task rounds and the catalyst mode`);
-    ok(L.steps.some((s) => s.visual && s.visual.widget === 'energy-diagram' && s.visual.config.mode === 'view'), `${t} a read-only diagram step`);
-    for (const w of ['mechanism-player', 'energy-diagram', 'site-picker', 'arrow-draw']) ok(WIDGETS[w] && typeof WIDGETS[w].mount === 'function', `widget ${w} registered`);
-    // site pickers
-    const sites = by('site-picker').flatMap((s) => s.config.items);
-    eq(sites.map((i) => i.id), ['water', 'ammonia', 'bromide', 'ethylene', 'hbr', 'ethylcation', 'bf3', 'acetone'], `${t} the eight molecules of the brief`);
-    eq(sites.map((i) => i.role), ['nuc', 'nuc', 'nuc', 'nuc', 'elec', 'elec', 'elec', 'elec'], `${t} roles`);
-    sites.forEach((i) => ok(M.SITES[i.id][i.role], `${t} site item ${i.id}/${i.role} has data`));
-    // (e) the HCl + ethylene mechanism: both steps drawn, arrows graded against the data
-    const s10 = L.steps.find((s) => s.id === 's10');
-    ok(s10.config.mech === M.MECH['hcl-ethylene'] && s10.config.mode === 'draw', `${t} s10 draws the HCl + ethylene mechanism`);
-    eq(MC.checkMechanism(s10.config.mech), [], `${t} s10 mechanism valid`);
-    ok(balIndep(s10.reaction.reactants, s10.reaction.products), `${t} s10 reaction balances`);
-    const s17 = L.steps.find((s) => s.id === 's17');
-    ok(s17.config.mech === M.MECH['hbr-butene'] && s17.config.mode === 'watch' && MC.checkMechanism(s17.config.mech).length === 0, `${t} s17 watches HBr + but-2-ene`);
-    // (f) energy diagram steps use the HCl levels and every task is gradeable with a right answer
-    const okAnswer = (lv, task) => {
-      const n = task.split(':')[0];
-      return n === 'ts' ? EC.tsIndexes(lv)[0] : n === 'intermediate' ? EC.intermediateIndexes(lv)[0] : n === 'rds' ? EC.rdsStep(lv).ts : n === 'eact' ? 'eact' + task.split(':')[1] : n === 'dh' ? 'dh' : n === 'dhsign' ? (EC.overallDH(lv) < 0 ? 'neg' : 'pos') : n === 'faster' ? EC.fastestStep(lv).n : EC.steps(lv).length;
-    };
-    for (const s of by('energy-diagram').filter((x) => x.config.mode === 'tasks')) {
-      eq(EC.validate(s.config.levels), [], `${t} ${s.id} levels valid`);
-      for (const task of s.config.tasks) ok(EC.gradeTask(s.config.levels, task, okAnswer(s.config.levels, task)).ok, `${t} ${s.id} task ${task} is solvable from the data`);
+
+    // ---- the spine, in order: rich/poor -> arrow grammar -> HCl + ethylene -> cation stability -> energy diagram -> reaction types -> names -> last step
+    ok(L.steps[0].type === 'predict' && L.steps[0].skill === 'nuc-elec' && L.steps[1].type === 'predict' && L.steps[2].type === 'explain', `${t} opens with two predicts, then the explain (rich gives a pair to poor)`);
+    ok(/electron-rich/.test(S('s03').html) && /electron-poor/.test(S('s03').html) && ['π bond', 'lone pair', 'negative charge', 'δ+ H', 'positive carbon', 'short of an octet'].every((w) => S('s03').html.includes(w)), `${t} s03 lists rich (π bond, lone pair, negative charge) and poor (δ+ H, positive carbon, short of an octet)`);
+    const firstUse = (re) => L.steps.findIndex((s) => htmlStrings({ ...s, caveman: undefined }).some((x) => re.test(x)) || htmlStrings(s.caveman || {}).some((x) => re.test(x)));
+    const namesAt = at('s28');
+    ok(S('s28').type === 'explain' && /<b>nucleophile<\/b>/.test(S('s28').html) && /<b>electrophile<\/b>/.test(S('s28').html), `${t} s28 names nucleophile and electrophile`);
+    eq(firstUse(/nucleophil|electrophil/i), namesAt, `${t} the words nucleophile / electrophile appear first in the naming step (named LAST, as labels for rich and poor)`);
+    const grammarAt = at('s06');
+    ok(/Lone pair → atom/.test(S('s06').html) && /Bond → atom/.test(S('s06').html) && /Bond → new bond/.test(S('s06').html), `${t} s06 states the three legal arrows`);
+    ok(L.steps.findIndex((s) => s.widget === 'arrow-draw' || s.widget === 'mechanism-player') > grammarAt, `${t} the arrow grammar comes before any arrow is drawn`);
+    eq(firstUse(/exothermic|endothermic|rate-determining/i), at('s25'), `${t} exothermic / endothermic / rate-determining arrive only after the picture (s25)`);
+    ok(at('s22') < at('s23') && at('s21') < at('s22') && S('s22').visual && S('s22').visual.widget === 'energy-diagram' && S('s22').visual.config.mode === 'view', `${t} energy diagram: predict, then axes/hills/valleys with the picture, then the tap tasks`);
+    ok(firstUse(/Markovnikov/) === -1, `${t} Markovnikov is previewed without the name (the name arrives in Lesson 09)`);
+    ok(S('s26').type === 'explain' && ['Addition', 'Elimination', 'Substitution', 'Rearrangement'].every((k) => S('s26').html.includes(`<b>${k}</b>`)) && (S('s26').html.match(/<mol /g) || []).length === 8, `${t} s26: the four reaction types on one screen, a skeletal example (two drawings) each`);
+
+    // ---- every predict is answerable from what came before, and says why
+    for (const s of L.steps.filter((x) => x.type === 'predict')) {
+      ok(typeof s.answerable === 'string' && s.answerable.length > 20, `${t} ${s.id} says what makes it answerable`);
+      const refs = [...(s.answerable || '').matchAll(/s(\d\d)/g)].map((m) => 's' + m[1]);
+      refs.forEach((r) => ok(at(r) >= 0 && at(r) < at(s.id), `${t} ${s.id} leans on ${r}, which comes first`));
+      ok(s.options.every((o) => o.why && o.why.length > 30), `${t} ${s.id} every option names its misconception`);
     }
-    eq([...by('energy-diagram')[0].config.tasks, ...by('energy-diagram')[1].config.tasks], ['ts', 'intermediate', 'eact:1', 'dh', 'dhsign', 'rds'], `${t} energy tasks: TS vs intermediate, Eact, dH sign, the rate-determining step`);
-    const lv = M.HCL_ETHYLENE_LEVELS, st = EC.steps(lv);
-    const s12 = L.steps.find((s) => s.id === 's12'), s13 = L.steps.find((s) => s.id === 's13'), s14 = L.steps.find((s) => s.id === 's14'), s15 = L.steps.find((s) => s.id === 's15');
-    ok(s12.worked.includes(String(st[0].eact)) && s12.worked.includes('−40') && s12.worked.includes(String(lv[1].E - lv[0].E)), `${t} s12 worked answer quotes the computed Eact and dH`);
-    ok(s13.prompt.includes(String(st[0].eact)) && s13.prompt.includes(String(st[1].eact)) && s13.worked.includes(String(st[0].eact)), `${t} s13 quotes Eact of both steps`);
-    ok(s14.prompt.includes(String(EC.steps(M.CATALYST_LEVELS)[0].eact)) && s14.prompt.includes('−40'), `${t} s14 quotes the catalyst diagram’s Eact and dH`);
-    // (g) catalyst: the worked answer is itself accepted by the grader
-    ok(EC.gradeCatalyst(s15.config.levels, { ts: 90, p: s15.config.levels[2].E }, s15.config.catalyst).ok, `${t} s15 worked answer (TS at 90, products fixed) is accepted`);
-    ok(!EC.gradeCatalyst(s15.config.levels, { ts: 90, p: 0 }, s15.config.catalyst).ok, `${t} s15 moving the products fails`);
-    ok(/70 to 40/.test(s15.worked), `${t} s15 worked states Eact 70 -> 40 for a TS at 90 (120 - 90 = 30)`);
-    // (h) worked HBr example: figures are the mechanism's own species
-    const w16 = L.steps.find((s) => s.id === 's16');
-    eq(w16.moves.length, 5, `${t} s16 has five predicted moves`);
-    const fig = (i) => canon(w16.moves[i].figure.smiles);
-    eq(fig(1), canon(M.MECH['hbr-ethylene'].steps[0].after[0]), `${t} s16 carbocation figure is step 1's cation`);
-    eq(fig(2), canon(M.MECH['hbr-ethylene'].products[0]), `${t} s16 product figure is bromoethane`);
-    eq(fig(3), canon(M.MECH['hbr-butene'].steps[0].after[0]), `${t} s16 but-2-ene carbocation figure`);
-    eq(fig(4), canon(M.MECH['hbr-butene'].products[0]), `${t} s16 but-2-ene product figure`);
-    eq(M.MECH['hbr-butene'].products[0], 'CCC(C)Br', `${t} 2-bromobutane`);
-    // names: both IUPAC styles through <name new old>, checked with the naming engine
-    const tags = htmlStrings(L.steps).flatMap((x) => [...x.matchAll(/<name new="([^"]*)" old="([^"]*)"/g)].map((m) => [m[1], m[2]]));
-    ok(tags.length >= 1, `${t} uses <name new old> for style-dependent names (${tags.length})`);
-    for (const [n, o] of tags) { const e = nameAlkeneBoth('CC=CC'); ok(e.new === n && e.old === o, `${t} name tag ${n} / ${o} equals the naming engine`); }
+    for (const s of L.steps.filter((x) => x.type === 'choice' || x.type === 'try')) ok(s.hints.length === 2 && s.worked.length > 20, `${t} ${s.id} hints and worked answer`);
+
+    // ---- part 1: the site-picker in plain words (no names yet)
+    {
+      const s = S('s04');
+      ok(s.widget === 'site-picker' && s.config.words === 'rich', `${t} s04 asks for electron-rich / electron-poor atoms, not names`);
+      eq(s.config.items.map((i) => `${i.id}/${i.role}`), ['water/nuc', 'hbr/elec', 'ethylene/nuc', 'bf3/elec'], `${t} s04 items`);
+      for (const item of s.config.items) {
+        const nAtoms = analyze(M.SITES[item.id].smiles, { keepHs: true }).atoms.length;
+        for (let i = 0; i < nAtoms; i++) { const r = SP.grade(item, i, 'rich'); if (!r.ok) ok(!/nucleophil|electrophil/i.test(r.diagnosis) && /electron-(rich|poor)/.test(r.diagnosis), `${t} s04 ${item.id} tap ${i}: the diagnosis uses rich / poor words`); }
+      }
+    }
+    // ---- part 2: one draw step per legal arrow, easiest first; each shows the AFTER picture
+    {
+      const draws = L.steps.filter((s) => s.widget === 'arrow-draw');
+      eq(draws.map((s) => s.id), ['s07', 's08', 's09'], `${t} three grammar draw steps`);
+      const kinds = [['lpToAtom', (a) => a.from.lp != null && a.to.atom != null], ['bondToAtom', (a) => a.from.bond && a.to.atom != null && a.from.bond.includes(a.to.atom)], ['bondToBond', (a) => a.from.bond && a.to.bond]];
+      draws.forEach((s, k) => {
+        const [key, isKind] = kinds[k], c = s.config, G = M.GRAMMAR[key];
+        const tt = `${t} ${s.id} (${key})`;
+        ok(c.after === true && typeof c.afterNote === 'string' && c.afterNote.length > 30, `${tt} shows the after picture with a note`);
+        ok(c.atoms === G.atoms && c.bonds === G.bonds && c.arrows.length === 1 && isKind(c.arrows[0]), `${tt} is one arrow of its kind`);
+        eq(arrow.validate(c), [], `${tt} arrow is legal for the scene`);
+        ok(c.atoms.every((a, i) => Number.isInteger(arrow.lpCount(c.atoms, c.bonds, i)) && arrow.lpCount(c.atoms, c.bonds, i) >= 0), `${tt} whole lone pairs`);
+        const res = arrow.applyArrows(c);
+        eq(canon(buildMolblock(res)), canon(c.products.join('.')), `${tt} the arrow gives ${c.products.join(' + ')}`);
+        eq(MC.octetViolations(res), [], `${tt} no octet exceeded after the arrow`);
+        eq(res.atoms.reduce((q, a) => q + a.charge, 0), c.atoms.reduce((q, a) => q + (a.charge || 0), 0), `${tt} charge conserved`);
+        ok(arrow.grade(c, c.arrows).ok && arrow.grade(c, []).code === 'empty', `${tt} solution accepted, empty rejected`);
+        const learner = c.arrows.map((a) => (a.to.bond ? { from: a.from, to: { atom: arrow.headAtom(c, a).atom } } : a));
+        ok(arrow.grade(c, learner).ok, `${tt} the learner's tap (pointing at the atom) is graded right`);
+        ok(new Set(c.atoms.map((a) => a.x.toFixed(2) + ',' + a.y.toFixed(2))).size === c.atoms.length, `${tt} atom positions distinct`);
+        const hPlus = c.atoms.findIndex((a) => a.el === 'H' && a.charge === 1);
+        if (hPlus >= 0) ok(/not at H⁺/.test(arrow.badStart(c, hPlus)), `${tt} tapping H⁺ first gets the "arrows start at electrons" diagnosis at once`);
+      });
+      // a wrong destination names the misconception (the arrow's note)
+      const c1 = S('s07').config, c2 = S('s08').config, c3 = S('s09').config;
+      ok(/H⁺, which has none/.test(arrow.grade(c1, [{ from: { lp: 0 }, to: { atom: 1 } }]).diagnosis), `${t} s07 lone pair to the O–H hydrogen: "that H already has its bond"`);
+      ok(/Cl keeps it/.test(arrow.grade(c2, [{ from: { bond: [0, 1] }, to: { atom: 0 } }]).diagnosis), `${t} s08 bond pair onto H: "Cl pulls harder, Cl keeps it"`);
+      ok(/electron-poor partner, H⁺/.test(arrow.grade(c3, [{ from: { bond: [0, 1] }, to: { atom: 2 } }]).diagnosis), `${t} s09 π pair to a C–H hydrogen: "goes to the electron-poor partner, H⁺"`);
+    }
+    // ---- part 3: HCl + ethylene in two steps, the carbocation as a real thing
+    {
+      const s13 = S('s13'), s17 = S('s17');
+      ok(s13.widget === 'mechanism-player' && s13.config.mech === M.HCL_STEP1 && s13.config.mode === 'draw' && s13.config.whatIf === false, `${t} s13 draws step 1 of HCl + ethylene`);
+      ok(M.HCL_STEP1.steps[0] === M.MECH['hcl-ethylene'].steps[0], `${t} s13 plays the very step object of the hcl-ethylene mechanism`);
+      eq(MC.checkMechanism(M.HCL_STEP1), [], `${t} s13 mechanism (step 1 alone) is valid`);
+      ok(s17.config.mech === M.MECH['hcl-ethylene'] && JSON.stringify(s17.config.modes) === '["watch","draw"]' && s17.config.whatIf === false, `${t} s17 replays step 1 and has the learner draw step 2`);
+      ok(balIndep(s17.reaction.reactants, s17.reaction.products), `${t} s17 reaction balances`);
+      ok(M.MECH['hcl-ethylene'].steps.every((st) => st.arrows.every((a) => a.why)), `${t} a why line on every arrow of HCl + ethylene`);
+      eq(analyze('C[CH2+]').atoms.find((a) => a.fc === 1).electrons, 6, `${t} s14: the + carbon of CH3CH2+ has 6 electrons (RDKit)`);
+      eq(S('s14').options.find((o) => o.correct).text, '6', `${t} s14 answer is the computed 6`);
+      ok(S('s15').visual && S('s15').visual.widget === 'model3d' && S('s15').visual.config.mol === 'tert-butyl-cation', `${t} s15 shows the solid 3D tert-butyl cation`);
+      ok(/empty p orbital/.test(S('s15').html) && /flat/.test(S('s15').html), `${t} s15: flat, empty p orbital`);
+      ok(/lone pair on Cl⁻ to the \+ carbon/.test(S('s16').options.find((o) => o.correct).text), `${t} s16: Cl⁻ lone pair → C⁺`);
+    }
+    // ---- part 4: why that carbon
+    {
+      const cls = (smi) => analyze(smi).atoms.find((a) => a.fc === 1).nbrs.filter((j) => analyze(smi).atoms[j].sym === 'C').length;
+      ok(cls('C[C+](C)C') === 3 && cls('C[CH2+]') === 1 && cls('[CH3+]') === 0, `${t} s18 cation classes recomputed (3, 1, 0 carbon neighbours)`);
+      ok(/^\(CH₃\)₃C⁺/.test(S('s18').options.find((o) => o.correct).text), `${t} s18: the most substituted cation is the answer`);
+      const pred = R.predict('CC=C', 'HCl');
+      ok(pred.outcome === 'markovnikov' && pred.products.length === 1 && canon(pred.products[0]) === canon('CC(C)Cl'), `${t} s20: propene + HCl gives 2-chloropropane (reaction engine)`);
+      ok(/2-chloropropane/.test(S('s20').options.find((o) => o.correct).text) && /2°/.test(S('s20').options.find((o) => o.correct).text), `${t} s20 correct option is the 2° route`);
+    }
+    // ---- part 5: energy diagrams (answers recomputed from the levels)
+    {
+      const okAnswer = (lv, task) => {
+        const n = String(typeof task === 'string' ? task : task.task).split(':');
+        return n[0] === 'ts' ? EC.tsIndexes(lv)[0] : n[0] === 'intermediate' ? EC.intermediateIndexes(lv)[0] : n[0] === 'rds' ? EC.rdsStep(lv).ts : n[0] === 'eact' ? 'eact' + n[1] : n[0] === 'dh' ? 'dh' : n[0] === 'dhsign' ? (EC.overallDH(lv) < 0 ? 'neg' : 'pos') : n[0] === 'faster' ? EC.fastestStep(lv).n : EC.steps(lv).length;
+      };
+      const eds = L.steps.filter((s) => s.widget === 'energy-diagram');
+      eq(eds.map((s) => s.id), ['s23', 's24'], `${t} two energy-diagram task steps`);
+      for (const s of eds) {
+        eq(EC.validate(s.config.levels), [], `${t} ${s.id} levels valid`);
+        for (const task of s.config.tasks) ok(EC.gradeTask(s.config.levels, typeof task === 'string' ? task : task.task, okAnswer(s.config.levels, task)).ok, `${t} ${s.id} task ${JSON.stringify(task)} is solvable from the data`);
+      }
+      eq(S('s23').config.tasks.map((x) => (typeof x === 'string' ? x : x.task)), ['ts', 'intermediate', 'rds'], `${t} s23: transition state, intermediate, the slower step`);
+      ok(!/rate-determining/.test(S('s23').config.tasks[2].ask), `${t} s23 asks for the higher hill without the word rate-determining`);
+      eq(S('s24').config.tasks, ['eact:1', 'dh', 'dhsign'], `${t} s24: Eact, ΔH and its sign`);
+      const lv = M.HCL_ETHYLENE_LEVELS, st = EC.steps(lv);
+      eq(EC.rdsStep(lv).n, 1, `${t} s21: step 1 is the high hill (computed)`);
+      ok(/^Step 1/.test(S('s21').options.find((o) => o.correct).text), `${t} s21 answer is step 1`);
+      ok(S('s24').worked.includes(String(st[0].eact)) && S('s24').worked.includes('−40') && S('s24').confirm.includes(String(lv[1].E - lv[0].E)), `${t} s24 worked answer quotes the computed Eact and ΔH`);
+      ok(/−40/.test(S('s25').html) && EC.overallDH(lv) === -40, `${t} s25 quotes the computed ΔH`);
+    }
+    // ---- part 6: reaction types: the sort step uses one reaction of each kind, answers computed
+    {
+      const w = S('s27');
+      ok(w.type === 'worked' && w.skill === 'reaction-types', `${t} s27 is the sort step`);
+      eq(w.moves.map((m) => m.options.find((o) => o.correct).text.toLowerCase()).sort(), ['addition', 'elimination', 'rearrangement', 'substitution'], `${t} s27: one reaction of each kind`);
+      w.moves.forEach((m, i) => {
+        const r = M.REACTIONS.find((x) => JSON.stringify(x.reactants) === JSON.stringify(m.equation.reactants) && JSON.stringify(x.products) === JSON.stringify(m.equation.products));
+        ok(!!r, `${t} s27 move ${i} is a pool reaction`);
+        eq(m.options.find((o) => o.correct).text.toLowerCase(), M.kindOf(r), `${t} s27 move ${i} correct option = computed kind`);
+        ok(m.options.every((o) => o.why.length > 20 && !/Here there/.test(o.why)), `${t} s27 move ${i} every option explains itself`);
+      });
+      const shown = (S('s26').html.match(/smiles="([^"]+)"/g) || []).map((x) => x.slice(8, -1));
+      const pairs = [[['C1=CCCCC1', 'Cl'], ['ClC1CCCCC1'], 'addition'], [['OC1CCCCC1'], ['C1=CCCCC1', 'O'], 'elimination'], [['CCBr', '[OH-]'], ['CCO', '[Br-]'], 'substitution'], [['C=CCC'], ['CC=CC'], 'rearrangement']];
+      pairs.forEach(([r, p, k]) => ok(M.classifyReaction(r, p) === k, `${t} s26 example of ${k} is classified as ${k}`));
+      eq(shown, ['C1=CCCCC1', 'ClC1CCCCC1', 'OC1CCCCC1', 'C1=CCCCC1', 'CCBr', 'CCO', 'C=CCC', 'CC=CC'], `${t} s26 draws the examples it classifies`);
+    }
+    // ---- part 7: names, then a site-picker on three molecules (tap the nucleophilic atom, tap the electrophilic atom)
+    {
+      const s = S('s29');
+      ok(s.widget === 'site-picker' && (s.config.words || 'names') === 'names' && at('s29') > namesAt, `${t} s29 uses the names, after they are given`);
+      eq(s.config.items.map((i) => `${i.id}/${i.role}`), ['acetone/nuc', 'acetone/elec', 'water/nuc', 'water/elec', 'ethylcation/elec'], `${t} s29: three molecules, nucleophilic and electrophilic atoms`);
+      eq(new Set(s.config.items.map((i) => i.id)).size, 3, `${t} s29 has three molecules`);
+      s.config.items.forEach((i) => ok(M.SITES[i.id][i.role], `${t} s29 ${i.id}/${i.role} has data`));
+    }
+    // ---- part 8: the last step lists five ideas with a link to each (real Lesson 08 steps that come earlier)
+    {
+      const s = S('s30');
+      ok(s === L.steps[L.steps.length - 1] && s.type === 'explain' && /Last step/.test(s.html), `${t} s30 is the "last step" card`);
+      eq((s.html.match(/<li>/g) || []).length, 5, `${t} s30 lists five things to carry into Lesson 09`);
+      const links = [...s.html.matchAll(/href="#lesson-08\/(s\d\d)"/g)].map((m) => m[1]);
+      eq(links.length, 5, `${t} s30 links every item`);
+      links.forEach((id) => ok(at(id) >= 0 && at(id) < at('s30'), `${t} s30 link ${id} is a real earlier step`));
+    }
+    // ---- scenes: "Watch the scene" on the grammar step and the HCl steps
+    eq(STEP_SCENE['08/s06'], '18-arrow-grammar', `${t} s06 gets scene 18 (arrow grammar)`);
+    ok(['s13', 's15', 's17'].every((id) => STEP_SCENE['08/' + id] === '17-hcl-ethylene'), `${t} s13, s15, s17 get scene 17 (HCl + ethylene)`);
+
+    // ---- widgets used and reachable
+    for (const w of ['mechanism-player', 'energy-diagram', 'site-picker', 'arrow-draw', 'model3d']) ok(WIDGETS[w] && typeof WIDGETS[w].mount === 'function', `widget ${w} registered`);
     // every smiles in text parses; inline SVG pictures are well-formed
     for (const str of htmlStrings(L.steps)) {
       for (const m of str.matchAll(/smiles="([^"]+)"/g)) ok(canon(m[1]) !== null, `${t} smiles ${m[1]} parses`);
       const open = (str.match(/<svg\b/g) || []).length, close = (str.match(/<\/svg>/g) || []).length;
       ok(open === close, `${t} inline SVG tags balance`);
     }
-    for (const s of L.steps) {
-      for (const f of [].concat(s.equation || [], s.moves ? s.moves.map((m) => m.equation).filter(Boolean) : [])) ok([...f.reactants, ...f.products].every((x) => canon(x)), `${t} ${s.id} equation smiles parse`);
-      for (const m of s.moves || []) if (m.figure) ok(canon(m.figure.smiles), `${t} ${s.id} figure parses`);
-    }
+    for (const s of L.steps) for (const f of [].concat(s.equation || [], s.moves ? s.moves.map((m) => m.equation).filter(Boolean) : [])) ok([...f.reactants, ...f.products].every((x) => canon(x)), `${t} ${s.id} equation smiles parse`);
     // skills in the step list
     const skills = new Set(L.steps.map((s) => s.skill));
-    for (const k of ['reaction-types', 'nuc-elec', 'energy-diagram', 'mechanism', 'curved-arrows']) ok(skills.has(k), `${t} trains ${k}`);
-    // chemistry words that must not drift: catalyst keeps dH, TS cannot be isolated, intermediate is a minimum
+    for (const k of ['reaction-types', 'nuc-elec', 'energy-diagram', 'mechanism', 'curved-arrows', 'carbocations']) ok(skills.has(k), `${t} trains ${k}`);
+    // chemistry words that must not drift
     const prose = htmlStrings(L.steps).join(' ').replace(/<[^>]+>/g, ' ');
-    ok(/catalyst/.test(prose) && /ΔH/.test(prose) && /cannot be isolated/.test(prose), `${t} covers catalysts, dH`);
-    ok(/rate-determining/.test(prose) && /homolytic/.test(prose) && /heterolytic/.test(prose) && /fishhook/.test(prose) && /nucleophile/.test(prose) && /electrophile/.test(prose), `${t} covers rds, homolytic/heterolytic, nucleophile/electrophile`);
+    ok(/catalyst/.test(prose) && /ΔH/.test(prose) && /transition state/.test(prose) && /intermediate/.test(prose), `${t} covers catalysts, ΔH, transition states, intermediates`);
+    ok(/rate-determining/i.test(prose) && /fishhook/.test(prose) && /nucleophile/.test(prose) && /electrophile/.test(prose) && /inductive effect/.test(prose), `${t} covers rds, the fishhook legend, nucleophile/electrophile, the inductive effect`);
   }
 }
-
 // run alone: node learn/tests/lesson08.mjs
 if (process.argv[1] && process.argv[1].endsWith('lesson08.mjs')) {
   let pass = 0, fail = 0; const failures = [];

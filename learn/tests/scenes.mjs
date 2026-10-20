@@ -1,4 +1,4 @@
-// Mechanism scene checks (learn/scenes/): the 16 storyboards in scenes/scenes/*.json, their compiled layouts in scenes/layouts/*.json, the renderer
+// Mechanism scene checks (learn/scenes/): the 18 storyboards (01-16 reagent scenes, 17-18 Lesson 08 primers) in scenes/scenes/*.json, their compiled layouts in scenes/layouts/*.json, the renderer
 // (scenes/scene-engine.js), the index (scenes/scene-index.js) and the wiring in app.js, hub-view.js, widgets/index.js and index.html.
 // Run on its own with `node tests/scenes.mjs` from learn/, or as part of run.mjs.
 //
@@ -10,7 +10,7 @@
 //                matches that stage's coordinates (within 1 px after a rigid fit: the scene is free to turn the molecule, not to change its shape)
 //   renderer     12 times along each scene, in motion and static, in each layer: well-formed SVG with a viewBox, no NaN, nothing outside the stage; static frames show their arrows
 //                with the pair at its end; the ORBITALS-only layer still moves the electrons; the end state of the last beat draws every atom of the last state
-//   placement    card -> scene covers the 16 scenes; lesson steps exist; routes, home and hub links, the widget registration and the CSS block are in place
+//   placement    card -> scene covers the 16 reagent scenes, every primer is reached from a Lesson 08 step; lesson steps exist; routes, home and hub links, the widget registration and the CSS block are in place
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -134,11 +134,11 @@ export async function scenes({ ok: okT, eq }) {
   ok(!!schema, 'schema', 'docs/scenes/SCENE-SCHEMA.md holds the JSON Schema (section 13)');
 
   // ---- the index
-  ok(SCENES.length === 16, 'index', `16 scenes, found ${SCENES.length}`);
+  ok(SCENES.length === 18, 'index', `18 scenes (16 reagent scenes + 2 Lesson 08 primers), found ${SCENES.length}`);
   eq(SCENES.map((s) => s.id), fs.readdirSync(sceneDir).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).sort(), 'scenes index lists exactly the files in scenes/scenes');
   eq(fs.readdirSync(layoutDir).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).sort(), SCENES.map((s) => s.id), 'scenes: a layout for every scene');
   ok(sceneId('alkene-hx') === '01-alkene-hx' && sceneId('01-alkene-hx') === '01-alkene-hx' && sceneId('nope') === null, 'index', 'sceneId() takes the short and the full id');
-  ok(neighbours('01-alkene-hx').prev === null && neighbours('01-alkene-hx').next === '02-alkene-hydration' && neighbours('16-diels-alder').next === null, 'index', 'neighbours() walk the list in order');
+  ok(neighbours('01-alkene-hx').prev === null && neighbours('01-alkene-hx').next === '02-alkene-hydration' && neighbours(SCENES[SCENES.length - 1].id).next === null, 'index', 'neighbours() walk the list in order');
 
   const stages = [];     // {id, scene, layout}
   for (const entry of SCENES) {
@@ -150,7 +150,10 @@ export async function scenes({ ok: okT, eq }) {
     // ---- schema
     if (schema) { const errs = validate(schema, scene); ok(errs.length === 0, id, `validates against the schema: ${errs.slice(0, 3).join(' | ')}`); }
     ok(scene.id === id && scene.title === entry.title, id, 'the index row names this scene and its title');
-    ok(entry.cards.includes(scene.reagentCard), id, `reagentCard ${scene.reagentCard} is among the index cards`);
+    if (entry.primer) {
+      // a Lesson 08 primer has no hub card of its own (its reagentCard names the card it prepares for, which keeps its own scene); it must be reached from the lesson
+      ok(!!HUB_BY_ID[scene.reagentCard] && entry.cards.length === 0 && entry.lesson.length > 0 && entry.lesson.every((l) => l.id === '08'), id, 'primer: no hub card of its own, reached from Lesson 08 steps');
+    } else ok(entry.cards.includes(scene.reagentCard), id, `reagentCard ${scene.reagentCard} is among the index cards`);
     entry.cards.forEach((c) => ok(!!HUB_BY_ID[c], id, `hub card ${c} exists`));
     (scene.alsoCards || []).forEach((c) => ok(!!HUB_BY_ID[c], id, `alsoCards ${c} exists`));
     scene.whatIf.forEach((w) => ok(!!SCENE_BY_ID[w] && w !== id, id, `what-if scene ${w} exists`));
@@ -317,7 +320,9 @@ export async function scenes({ ok: okT, eq }) {
   ok(bindReport.filter((s) => s.endsWith(' px')).length >= 12, 'coords', `at least 12 scenes end on a coords.json drawing (${bindReport.length} reported)`);
 
   // ---- placement: card -> scene, lesson step -> scene
-  eq(new Set(Object.values(CARD_SCENE)).size, 16, 'scenes: every one of the 16 scenes is reachable from a hub card');
+  eq(new Set(Object.values(CARD_SCENE)).size, SCENES.filter((s) => !s.primer).length, 'scenes: every one of the 16 reagent scenes is reachable from a hub card');
+  ok(SCENES.filter((s) => !s.primer).length === 16 && SCENES.filter((s) => s.primer).every((s) => s.lesson.length && !Object.values(CARD_SCENE).includes(s.id)), 'placement', 'the primers (17, 18) hang on Lesson 08 steps, not on hub cards');
+  ok(STEP_SCENE['08/s06'] === '18-arrow-grammar' && STEP_SCENE['08/s17'] === '17-hcl-ethylene' && CARD_SCENE['alkene-hx'] === '01-alkene-hx', 'placement', 'Lesson 08 steps get their primer scene; alkene-hx keeps scene 01');
   ok(CARD_SCENE['alkyne-hx-1'] === '08-alkyne-hx' && CARD_SCENE['alkyne-hx-2'] === '08-alkyne-hx', 'cards', '08 serves alkyne-hx-1 and alkyne-hx-2');
   ok(CARD_SCENE['alkene-kmno4-base'] === '06-alkene-kmno4-cold', 'cards', '06 serves alkene-kmno4-base');
   ok(CARD_SCENE['director-activating'] === '15-directors' && CARD_SCENE['director-meta'] === '15-directors', 'cards', '15 serves director-activating and director-meta');
@@ -343,7 +348,7 @@ export async function scenes({ ok: okT, eq }) {
   void shortId; void whyLines; void captionFor; void beatAt;
 }
 
-const SKILL_OK = new Set(['markovnikov', 'stereo-addition', 'alkene-oxidation', 'alkynes', 'acetylides', 'eas', 'directors', 'dienes', 'mechanism']);
+const SKILL_OK = new Set(['markovnikov', 'stereo-addition', 'alkene-oxidation', 'alkynes', 'acetylides', 'eas', 'directors', 'dienes', 'mechanism', 'curved-arrows']);
 
 // run alone: node tests/scenes.mjs
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {

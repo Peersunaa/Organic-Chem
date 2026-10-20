@@ -6,6 +6,7 @@
 //  (3) the fallback (no `why`: the step's label) and the player's promises, read from its source (Back / Next / Auto, slow 2.4 s / normal 1.4 s hold, reduced motion,
 //      onResult after the last arrow), and its CSS (focus rings, 44 px targets, tokens only).
 // Run on its own with `node learn/tests/player.mjs`, or as part of run.mjs.
+import '../engine/steps.js';   // load order: steps.js before widgets/index.js, so the naming-levels generator's widget hook finds WIDGETS initialised (run on its own)
 import { ready, canon } from '../engine/chem.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,8 +29,8 @@ const sentences = (t) => t.trim().split(/(?<=[.!?])\s+(?=[A-ZΠ(])/).filter(Bool
 /** Every mechanism the course can play, with where it comes from. */
 function collect() {
   const out = [];
-  const add = (src, f) => { try { const m = f(); if (m) out.push({ src, mech: m }); } catch (e) { /* an excluded substrate: not a mechanism the course plays */ } };
-  for (const L of LESSONS) for (const s of L.steps) if (s.widget === 'mechanism-player') add(`lesson ${L.id} ${s.id}`, () => s.config.mech);
+  const add = (src, f, cfg) => { try { const m = f(); if (m) out.push({ src, mech: m, cfg }); } catch (e) { /* an excluded substrate: not a mechanism the course plays */ } };
+  for (const L of LESSONS) for (const s of L.steps) if (s.widget === 'mechanism-player') add(`lesson ${L.id} ${s.id}`, () => s.config.mech, s.config);
   for (const [id, m] of Object.entries(M.MECH)) add(`MECH ${id}`, () => m);
   for (const a of M.HX_ALKENES) for (const X of ['Cl', 'Br']) add(`hxMechanism ${a.label} + H${X}`, () => M.hxMechanism(a.smiles, X));
   // the reaction lab: every alkene x HX / hydration, both orientations (the minor path too), the halogens, the dienes, the alkynes, benzene
@@ -121,9 +122,12 @@ export async function player({ ok, eq }) {
 
   // ---- (4) what-if branching: the alternatives the player offers on its final state (engine/whatif.js)
   {
-    const EXPECT = { 'lesson 08 s10': 'alkene-hx', 'lesson 08 s17': 'alkene-hx', 'lesson 09 s08': 'alkene-hx', 'lesson 09 s11': 'alkene-hydration', 'lesson 10 s04': 'alkene-x2', 'lesson 12 s07': 'alkyne-hx', 'lesson 13 s06': 'eas', 'lesson 13 s08': 'eas' };
+    const EXPECT = { 'lesson 09 s08': 'alkene-hx', 'lesson 09 s11': 'alkene-hydration', 'lesson 10 s04': 'alkene-x2', 'lesson 12 s07': 'alkyne-hx', 'lesson 13 s06': 'eas', 'lesson 13 s08': 'eas' };
     const kinds = new Set();
-    for (const { src, mech } of lessonMechs) {
+    // Lesson 08 is the course's first mechanism: its players carry whatIf:false, so no row jumps to Br2 or hydration (Lesson 10 / 09 words) there
+    eq(lessonMechs.filter((x) => x.src.startsWith('lesson 08')).map((x) => x.cfg && x.cfg.whatIf), [false, false], 'Lesson 08 players hide the what-if row (whatIf: false)');
+    for (const { src, mech, cfg } of lessonMechs) {
+      if (cfg && cfg.whatIf === false) continue;
       const w = WI.whatIfFor(mech), want = EXPECT[src] || null;
       const k = WI.kindOf(mech);
       eq(k ? k.kind : null, want, `${src}: what-if kind`);
@@ -169,7 +173,7 @@ export async function player({ ok, eq }) {
     const psrc = fs.readFileSync(path.join(HERE, '..', 'engine', 'widgets', 'mechanism-player.js'), 'utf8');
     const vsrc = fs.readFileSync(path.join(HERE, '..', 'engine', 'widgets', 'whatif-view.js'), 'utf8');
     ok(/whatIfFor\(lessonMech\)/.test(psrc) && /startAlt/.test(psrc) && /backToLesson/.test(psrc), 'the player offers what-if chips, replays an alternative and goes back');
-    ok(/n === N - 1\) \{ wiSlot = h\('div', 'mp-wi'\)/.test(psrc), 'the what-if row sits on the final state of the last step only');
+    ok(/n === N - 1 && config\.whatIf !== false\) \{ wiSlot = h\('div', 'mp-wi'\)/.test(psrc), 'the what-if row sits on the final state of the last step only, unless the step says whatIf: false');
     ok(/!reported && !alt/.test(psrc), 'an alternative never calls the lesson onResult');
     ok(/What if it were/.test(vsrc) && /Back to the lesson/.test(vsrc) && /comparePanel/.test(vsrc) && /factList/.test(vsrc), 'the what-if view has the chips, the back chip and the side-by-side with the card facts');
     ok(/modeOf = \(k\) => \(alt \? 'watch'/.test(psrc), 'an alternative plays in watch mode from its first step');

@@ -42,9 +42,9 @@ export const RECAP = {
     { n: '03', step: 's16', fact: 'A Lewis base donates an electron pair; a Lewis acid accepts one.' }
   ],
   '09': [
-    { n: '08', step: 's07', fact: 'A nucleophile is electron-rich and donates a pair of electrons; an electrophile is electron-poor and accepts a pair.' },
-    { n: '08', step: 's09', fact: 'In HX addition the C=C π bond is the nucleophile: the first arrow runs from the π bond to the H of HX.' },
-    { n: '08', step: 's12', fact: 'An energy diagram has transition states (peaks) and intermediates (valleys); the step with the bigger climb (Eact) is the slower one.' },
+    { n: '08', step: 's28', fact: 'A nucleophile is electron-rich and donates a pair of electrons; an electrophile is electron-poor and accepts a pair.' },
+    { n: '08', step: 's11', fact: 'In HX addition the C=C π bond is the nucleophile: the first arrow runs from the π bond to the H of HX.' },
+    { n: '08', step: 's22', fact: 'An energy diagram has transition states (peaks) and intermediates (valleys); the step with the bigger climb (Eact) is the slower one.' },
     { n: '05', step: 's09', fact: 'A carbon is primary, secondary, tertiary or quaternary by how many other carbons it is bonded to.' }
   ],
   '10': [
@@ -55,7 +55,7 @@ export const RECAP = {
   ],
   '11': [
     { n: '09', step: 's06', fact: 'A carbocation is stabilised by alkyl groups pushing electron density to the C⁺: tertiary is better than secondary, better than primary.' },
-    { n: '08', step: 's08', fact: 'A curved arrow moves a pair of electrons from a lone pair or a bond to an atom or bond that can receive it.' },
+    { n: '08', step: 's06', fact: 'A curved arrow moves a pair of electrons from a lone pair or a bond to an atom or bond that can receive it.' },
     { n: '02', step: 's05', fact: 'A π bond is made of two p orbitals overlapping sideways, which is why π electrons can be shared with a neighbouring empty p orbital.' },
     { n: '03', step: 's07', fact: 'Acetate, CH₃CO₂⁻, is the conjugate base of acetic acid; its negative charge sits on oxygen.' }
   ],
@@ -67,7 +67,7 @@ export const RECAP = {
   ],
   '13': [
     { n: '11', step: 's03', fact: 'Resonance forms are drawings of one species that differ only in where π electrons and lone pairs sit; the real species is a blend.' },
-    { n: '08', step: 's07', fact: 'An electrophile is electron-poor and accepts a pair; a nucleophile (here the ring’s π electrons) donates one.' },
+    { n: '08', step: 's28', fact: 'An electrophile is electron-poor and accepts a pair; a nucleophile (here the ring’s π electrons) donates one.' },
     { n: '09', step: 's04', fact: 'A reaction goes through the more stable carbocation, which is also the one that forms faster.' },
     { n: '03', step: 's16', fact: 'A Lewis acid (such as FeBr₃) accepts an electron pair; here it makes Br₂ a stronger electrophile.' }
   ],
@@ -89,7 +89,7 @@ export const RECAP = {
     { n: '15', step: 's09', fact: 'A polarimeter measures how far a solution turns plane-polarised light; enantiomers turn it equally in opposite directions.' }
   ],
   '17': [
-    { n: '08', step: 's07', fact: 'A nucleophile is electron-rich and donates a pair; an electrophile is electron-poor and accepts one. A curved arrow runs from the rich end to the poor end.' },
+    { n: '08', step: 's03', fact: 'A nucleophile is electron-rich and donates a pair; an electrophile is electron-poor and accepts one. A curved arrow runs from the rich end to the poor end.' },
     { n: '09', step: 's04', fact: 'Markovnikov: H goes to the C=C carbon with more H, so the + lands on the more substituted carbon (3° > 2° > 1°) and the other piece bonds there.' },
     { n: '10', step: 's03', fact: 'Br₂ adds anti through a bromonium ion; H₂ over Pd, a peroxyacid and cold KMnO₄ put both groups on one face (syn); a flat carbocation takes the group on either face.' },
     { n: '14', step: 's03', fact: 'A ring substitutes: the electrophile replaces one H. Activators and halogens send the next group ortho and para; every other deactivator sends it meta.' }

@@ -190,7 +190,7 @@ export async function text({ ok, eq }) {
   }
   { // teaching fixes: predictions that cannot be derived now carry the convention or a clue; terms are defined where they first matter
     const g = (id, sid) => stepOf(LESSONS.find((L) => L.id === id), sid);
-    ok(/full-headed arrow moves a <b>pair/.test(g('08', 's03').aside) && /one<\/b> electron/.test(g('08', 's03').aside), 'L8 s03: the arrow legend (full head = pair, half head = one electron) comes before the question');
+    ok(/full-headed arrow moves a <b>pair/.test(g('08', 's05').aside) && /one<\/b> electron/.test(g('08', 's05').aside), 'L8 s05: the arrow legend (full head = pair, half head = one electron) comes with the first arrow question');
     ok(/propene/.test(g('09', 's01').prompt) && /2-bromopropane/.test(g('09', 's01').prompt), 'L9 s01: the prompt gives the propene clue so a guess by analogy is possible');
     ok(!/trust your instincts/i.test(g('09', 's03').prompt) && /lend it/.test(g('09', 's03').prompt), 'L9 s03: no "trust your instincts", the electron-lending idea is given');
     ok(/<b>3°<\/b> if its C⁺ is bonded to three carbons/.test(g('09', 's04').html), 'L9 s04: defines a 3° / 2° / 1° cation');

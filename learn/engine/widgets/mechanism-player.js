@@ -1,13 +1,14 @@
 // Widget: mechanism-player. Plays a mechanism stored as DATA, one ARROW at a time (see mechanism-core.js for the data shape).
 //
-// config: { mech, mode?: 'draw' | 'watch', modes?: ['draw'|'watch', ...] (one per step, overrides mode), drawing?: 'auto' | 'full' | 'skeletal' }
+// config: { mech, mode?: 'draw' | 'watch', modes?: ['draw'|'watch', ...] (one per step, overrides mode), drawing?: 'auto' | 'full' | 'skeletal', whatIf?: false }
+// whatIf:false (Lesson 08) hides the what-if row, so the first mechanism of the course does not jump to Br2 or hydration (Lesson 10 / 09 words).
 //
 // watch step: press-to-advance. Each press of Next moves exactly ONE arrow: the curve is drawn, two electron dots travel along it, the bond or lone pair it breaks
 //             fades out and the one it makes fades in, then the picture HOLDS with a "why" line under it (the arrow's `why`, else the step's label). When every arrow of
 //             a step has played, the structure is the step's `after` state; the next press starts the next step. Back undoes one arrow at once (the earlier state is
 //             recomputed from the step's `before` and the first n-1 arrows, no animation). Auto plays arrow by arrow with the same hold (slow 2.4 s, normal 1.4 s).
 // draw step : the learner draws the arrows with arrow-draw (same grading and diagnoses as Lesson 03). When they are right, the same one-arrow-at-a-time playback
-//             reveals the step (Back / Next / Auto), then a "Next step" button moves on.
+//             reveals the step (Back / Next / Auto); at the end of the step the same Next button reads "Next step" and moves on (one control, never two).
 // After three wrong checks on a step a "Show me this step" button turns it into the same playback.
 // Under prefers-reduced-motion nothing travels: a press swaps the state at once; the why lines still show.
 // What-if (Piece 2): on the final state of a mechanism that engine/whatif.js knows (alkene + HX / Br2 / hydration, alkyne + HX, EAS) a "What if it were ..." row offers the other
@@ -79,7 +80,7 @@ export default {
     host.append(root);
 
     const len = () => mech.steps[n].arrows.length;
-    const canNext = () => phase === 'play' && (c < len() || (n < N - 1 && modeOf(n) !== 'draw'));
+    const canNext = () => phase === 'play' && (c < len() || n < N - 1);
     const canBack = () => phase === 'play' && (c > 0 || (n > 0 && modeOf(n) !== 'draw'));
 
     const paintStrip = () => {
@@ -106,7 +107,8 @@ export default {
       });
       return r;
     }
-    const mountScene = (box, atoms, bonds, arrows) => arrowDraw.mount(box, { atoms, bonds, arrows, preset: true }, { onResult() {} });
+    // mid-step pictures keep every atom in place, so a bond an arrow has just made can be long: dashLong draws it dashed (forming), never as a real long bond
+    const mountScene = (box, atoms, bonds, arrows, mid = false) => arrowDraw.mount(box, { atoms, bonds, arrows, preset: true, dashLong: mid }, { onResult() {} });
     /** Over-full atoms (the H of H-Br while it is bonding to carbon, a Br with two bonds and three lone pairs ...) are in the middle of the step: no charge badge for them. */
     function hideMidCharges(box, st) {
       if (!st.mid || !st.mid.length) return;
@@ -143,7 +145,7 @@ export default {
       const svg = box.querySelector('svg');
       const st = partialState(step, k - 1);
       const tmp = h('div');
-      mountScene(tmp, st.atoms, st.bonds, [step.arrows[k - 1]]);
+      mountScene(tmp, st.atoms, st.bonds, [step.arrows[k - 1]], true);
       const g = tmp.querySelector('.ad-arrow');
       if (!g || !svg) return;
       const gh = g.cloneNode(true);
@@ -169,17 +171,10 @@ export default {
         if (step.label !== whyOf(step, step.arrows.length - 1)) out.append(h('p', 'mp-label', step.label));   // no second copy of the same sentence
         out.append(figs(step));
         wiSlot = null;
-        if (n === N - 1) { wiSlot = h('div', 'mp-wi'); out.append(wiSlot); paintWhatIf(); }
-        if (modeOf(n) === 'draw' && n < N - 1) {
-          const r = h('div', 'mp-actions');
-          const nb = mkBtn('btn primary', 'Next step');
-          nb.addEventListener('click', () => { stopAuto(); n++; wrongHere = 0; lead = ''; renderStep(); });
-          r.append(nb);
-          out.append(r);
-        }
+        if (n === N - 1 && config.whatIf !== false) { wiSlot = h('div', 'mp-wi'); out.append(wiSlot); paintWhatIf(); }
       } else {
         const st = partialState(step, k);
-        mountScene(box, st.atoms, st.bonds, []);
+        mountScene(box, st.atoms, st.bonds, [], k > 0);
         hideMidCharges(box, st);
         if (k > 0) {
           addGhost(box, step, k);
@@ -254,7 +249,7 @@ export default {
       why.classList.toggle('mp-why-idle', k === 0);
       if (!busy) { if (k === 0) setWhy('Press Next to move the first electron pair.', false); else setWhy(whyText(step, k - 1)); }
       prompt.textContent = `Step ${n + 1} of ${N}: ${lead}` + (k === 0 ? (modeOf(n) === 'draw' ? 'Press Next to watch each electron pair move.' : 'Press Next to watch the electrons move, one arrow at a time.')
-        : k < L ? 'Press Next for the next arrow.' : n < N - 1 ? (modeOf(n) === 'draw' ? 'That is the whole step. Press Next step to go on.' : 'That is the whole step. Press Next to start the next one.') : 'That is the whole mechanism.');
+        : k < L ? 'Press Next for the next arrow.' : n < N - 1 ? (modeOf(n + 1) === 'draw' ? 'That is the whole step. Press Next step to draw the next one.' : 'That is the whole step. Press Next step to start the next one.') : 'That is the whole mechanism.');
       back.disabled = busy || !canBack();
       nextB.disabled = busy || !canNext();
       nextB.textContent = c >= L && canNext() ? 'Next step' : 'Next';
@@ -275,7 +270,7 @@ export default {
         stage.innerHTML = ''; out.innerHTML = '';
         const box = h('div', 'mp-scene');
         stage.append(box);
-        const a = mountScene(box, prev.atoms, prev.bonds, [step.arrows[j]]);
+        const a = mountScene(box, prev.atoms, prev.bonds, [step.arrows[j]], j > 0);
         hideMidCharges(box, prev);
         setWhy(whyText(step, j));
         chrome();

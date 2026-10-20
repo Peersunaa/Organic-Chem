@@ -10,10 +10,13 @@
 //         after the last task.
 // view  : the diagram only (levels labelled A, B, C ...; values shown when showValues).
 // catalyst: drag the transition state down (simulating a catalyst). A second handle moves the products on purpose: ΔH must stay fixed.
+//   ask: '' hides the widget's own instruction bar (when the step prompt already says it).
+// Feedback: a wrong answer's diagnosis goes to the step's feedback box only (ctx.onResult), never twice; a right answer's reason stays under the diagram until the
+//   next answer (it is not wiped after 0.65 s) and clears that box (ctx.onProgress). Tap targets (levels, brackets, handles) are at least 44 px on a 400 px phone.
 import { KIND_NAME, letter, steps, overallDH, brackets, gradeTask, gradeCatalyst, pathD, validate } from './energy-core.js';
 
 const NS = 'http://www.w3.org/2000/svg';
-const W = 400, H = 270, ML = 46, MR = 56, MT = 34, MB = 44;
+const W = 400, H = 290, ML = 46, MR = 56, MT = 46, MB = 52;   // room above the highest hill and below the lowest level for the kind labels (transition state, products)
 const svgEl = (tag, attrs = {}, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
 const html = (tag, cls, inner) => { const e = document.createElement(tag); if (cls) e.className = cls; if (inner != null) e.innerHTML = inner; return e; };
 const MINUS = '−';
@@ -48,7 +51,8 @@ export default {
     if (ov) { const e2 = validate(ov); if (e2.length || ov.length !== levels.length) throw new Error('energy-diagram overlay: ' + (e2.join('; ') || 'needs the same number of levels')); }
     const allE = levels.map((l) => l.E).concat(ov ? ov.map((l) => l.E) : []);
     const pad = mode === 'catalyst' ? 36 : 14;
-    const eMin = Math.min(...allE) - pad, eMax = Math.max(...allE) + (mode === 'catalyst' ? 26 : pad);
+    // below the lowest level sit its letter and its kind label ("products"): leave them room above the x axis
+    const eMin = Math.min(...allE) - (mode === 'catalyst' ? pad : 30), eMax = Math.max(...allE) + (mode === 'catalyst' ? 26 : pad);
     const X = (i) => ML + ((i + 0.5) / N) * (W - ML - MR);
     const Y = (E) => MT + ((eMax - E) / (eMax - eMin)) * (H - MT - MB);
     const toE = (y) => eMax - ((y - MT) / (H - MT - MB)) * (eMax - eMin);
@@ -84,7 +88,7 @@ export default {
       axes();
       const origPts = levels.map((l, i) => ({ x: X(i), y: Y(l.E) }));
       svg.append(svgEl('path', { d: pathD(origPts), class: 'ed-curve ghost' }));
-      svg.append(svgEl('text', { x: X(1) + 26, y: Y(levels[1].E) + 4, class: 'ed-ghost-txt' }, 'without catalyst'));
+      svg.append(svgEl('text', { x: X(1) + 30, y: Y(levels[1].E) - 12, class: 'ed-ghost-txt' }, 'without catalyst'));
       const curve = svgEl('path', { class: 'ed-curve' });
       const rLine = svgEl('line', { x1: X(0) - 22, x2: X(N - 1) + 26, y1: Y(R), y2: Y(R), class: 'ed-guide' });
       const pLine = svgEl('line', { x1: X(N - 1) - 24, x2: X(N - 1) + 40, y1: 0, y2: 0, class: 'ed-guide' });
@@ -93,14 +97,15 @@ export default {
       [0].forEach((i) => svg.append(svgEl('line', { x1: X(i) - 22, x2: X(i) + 22, y1: Y(levels[i].E), y2: Y(levels[i].E), class: 'ed-plat' })));
       const mk = (label, aria) => {
         const g = svgEl('g', { class: 'ed-handle', tabindex: '0', role: 'slider', 'aria-label': aria, 'aria-valuemin': String(Math.round(eMin)), 'aria-valuemax': String(Math.round(eMax)) });
-        g.append(svgEl('circle', { r: 17, class: 'ed-hhit' }), svgEl('circle', { r: 8, class: 'ed-hdot' }), svgEl('path', { d: 'M-4 -3 L0 -8 L4 -3 M-4 3 L0 8 L4 3', class: 'ed-harr' }));
+        g.append(svgEl('circle', { r: 27, class: 'ed-hhit' }), svgEl('circle', { r: 8, class: 'ed-hdot' }), svgEl('path', { d: 'M-4 -3 L0 -8 L4 -3 M-4 3 L0 8 L4 3', class: 'ed-harr' }));
         svg.append(g);
         return g;
       };
       const tsH = mk('ts', 'Transition state energy. Drag or use the up and down arrow keys.');
       const pH = mk('p', 'Products energy. Drag or use the up and down arrow keys.');
       const rTag = svgEl('text', { x: X(0), y: Y(R) + 19, class: 'ed-tag', 'text-anchor': 'middle' }, 'reactants');
-      svg.append(rTag);
+      const pTag = svgEl('text', { x: X(N - 1) - 30, y: 0, class: 'ed-tag', 'text-anchor': 'end' }, 'products');
+      svg.append(rTag, pTag);
       const read = html('p', 'ed-read');
       read.setAttribute('aria-live', 'polite');
       const row = html('div', 'lb-actions');
@@ -117,7 +122,7 @@ export default {
         tsH.setAttribute('aria-valuenow', String(cur.ts)); pH.setAttribute('aria-valuenow', String(cur.p));
         tsH.setAttribute('aria-valuetext', `${cur.ts - R} ${unit} above the reactants`);
         pH.setAttribute('aria-valuetext', `${fmt(cur.p - R)} ${unit} compared with the reactants`);
-        pLine.setAttribute('y1', Y(cur.p)); pLine.setAttribute('y2', Y(cur.p));
+        pLine.setAttribute('y1', Y(cur.p)); pLine.setAttribute('y2', Y(cur.p)); pTag.setAttribute('y', Y(cur.p) + 5);
         dhTxt.setAttribute('y', (Y(cur.p) + Y(R)) / 2 + 4);
         dhTxt.textContent = `ΔH ${fmt(cur.p - R)}`;
         read.innerHTML = `Eact = <b>${cur.ts - R}</b> ${unit} &nbsp;·&nbsp; ΔH = <b>${fmt(cur.p - R)}</b> ${unit}`;
@@ -152,11 +157,12 @@ export default {
       check.addEventListener('click', () => {
         if (locked) return;
         const r = gradeCatalyst(levels, cur, config.catalyst);
-        if (r.ok) { locked = true; check.disabled = true; reset.disabled = true; msg.className = 'ed-msg ok'; msg.textContent = r.why; }
+        if (r.ok) { locked = true; check.disabled = true; reset.disabled = true; msg.className = 'ed-msg ok'; msg.textContent = r.why; ctx.onProgress?.(); }
         else { msg.className = 'ed-msg'; msg.textContent = ''; }
         ctx.onResult(r);
       });
-      taskBar.innerHTML = config.ask || 'Add a catalyst: drag the <b>transition state</b> down to lower the barrier. The <b>products</b> handle is there too, so you can test what a catalyst can and cannot do. Then press Check.';
+      taskBar.innerHTML = config.ask != null ? config.ask : 'Add a catalyst: drag the <b>transition state</b> down to lower the barrier. The <b>products</b> handle is there too, so you can test what a catalyst can and cannot do. Then press Check.';
+      taskBar.hidden = config.ask === '';
       paint();
       return { destroy() {}, state: () => ({ ...cur }) };
     }
@@ -198,9 +204,9 @@ export default {
         g.append(svgEl('circle', { cx: X(i), cy: Y(l.E), r: 5.5, class: 'ed-dot' }));
         const tag = letter(i) + (config.showValues ? ` · ${l.E}` : '');
         g.append(svgEl('text', { x: X(i), y: tagPos(l, i, l.E), class: 'ed-tag', 'text-anchor': 'middle' }, tag));
-        if (revealed.has(i)) g.append(svgEl('text', { x: X(i), y: tagPos(l, i, l.E) + (l.kind === 'TS' ? -11 : 11), class: 'ed-kind', 'text-anchor': 'middle' }, KIND_NAME[l.kind]));
+        if (revealed.has(i)) g.append(svgEl('text', { x: X(i), y: tagPos(l, i, l.E) + (l.kind === 'TS' ? -14 : 14), class: 'ed-kind', 'text-anchor': 'middle' }, KIND_NAME[l.kind]));
         if (needTap && !done.has(ti)) {
-          g.append(svgEl('circle', { cx: X(i), cy: Y(l.E), r: 19, class: 'ed-hit' }));
+          g.append(svgEl('circle', { cx: X(i), cy: Y(l.E), r: 26, class: 'ed-hit' }));
           g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
           g.setAttribute('aria-label', `Level ${letter(i)}${l.label ? ', ' + l.label : ''}`);
           const go = () => answerTap(i);
@@ -222,7 +228,7 @@ export default {
           const my = (y1 + y2) / 2;
           g.append(svgEl('circle', { cx: bx + (b.side === 'right' ? 12 : -12), cy: my, r: 10, class: 'ed-brtag' }));
           g.append(svgEl('text', { x: bx + (b.side === 'right' ? 12 : -12), y: my + 0.5, class: 'ed-brnum', 'text-anchor': 'middle' }, String(k + 1)));
-          g.append(svgEl('rect', { x: bx - 18, y: Math.min(y1, y2), width: 36, height: Math.abs(y2 - y1), class: 'ed-hit' }));
+          { const hh = Math.max(Math.abs(y2 - y1), 56); g.append(svgEl('rect', { x: bx - 28, y: (y1 + y2) / 2 - hh / 2, width: 56, height: hh, class: 'ed-hit' })); }
           const go = () => answerBracket(b.id);
           g.addEventListener('click', go);
           g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
@@ -259,8 +265,8 @@ export default {
     }
     function result(r) {
       if (busy) return;
-      if (r.ok) { busy = true; setMsg('ok', r.why); setTimeout(advance, reducedMotion() ? 0 : 650); ctx.progress?.(ti + 1, tasks.length); }
-      else { setMsg('bad', r.diagnosis); ctx.onResult({ ok: false, diagnosis: r.diagnosis }); }
+      if (r.ok) { busy = true; setMsg('ok', r.why); ctx.onProgress?.(); setTimeout(advance, reducedMotion() ? 0 : 650); }
+      else { setMsg('', ''); ctx.onResult({ ok: false, diagnosis: r.diagnosis }); }   // the step's feedback box shows the diagnosis, once
     }
     const reducedMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
     function spec() { const s = tasks[ti]; return typeof s === 'string' ? s : s.task; }
@@ -273,7 +279,6 @@ export default {
       const name = s.split(':')[0];
       taskBar.innerHTML = `<span class="ed-count">Task ${ti + 1} of ${tasks.length}</span> ${askFor(tasks[ti])}`;
       answers.innerHTML = '';
-      setMsg('', '');
       const choice = (opts) => {
         const row = html('div', 'ed-choices');
         opts.forEach(([v, t]) => { const b = html('button', 'btn', t); b.type = 'button'; b.addEventListener('click', () => answerChoice(v)); row.append(b); });

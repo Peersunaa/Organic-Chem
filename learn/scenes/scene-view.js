@@ -347,7 +347,7 @@ export function scenePage(any) {
   ];
 }
 
-/** #scenes: 16 tiles, each with the engine's own first frame as its thumbnail. */
+/** #scenes: 18 tiles (16 reagents + the two Lesson 08 primers), each with the engine's own first frame as its thumbnail. */
 export function scenesList() {
   const grid = h('div', { class: 'ms-grid' });
   SCENES.forEach((s) => {
@@ -358,7 +358,7 @@ export function scenesList() {
   });
   return [
     h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'How each reagent works'),
-      h('p', { class: 'lede' }, 'Sixteen short animations, one per reagent. Scrub the timeline, switch the electron-pushing arrows and the orbitals on or off, and answer one question at the end.'),
+      h('p', { class: 'lede' }, 'Sixteen short animations, one per reagent, plus two Lesson 08 primers (17 and 18: the model reaction and the three legal arrows). Scrub the timeline, switch the electron-pushing arrows and the orbitals on or off, and answer one question at the end.'),
       h('div', { class: 'rx-btns' }, h('a', { class: 'btn ghost', href: '#reactions' }, 'Open the reaction cards'))),
     grid
   ];

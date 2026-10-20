@@ -1,12 +1,16 @@
 // Widget: site-picker. Tap the nucleophilic or electrophilic atom on a molecule; graded from the site table (engine/mechanisms.js SITES),
 // every item shows its reason after a correct tap, every wrong tap gets a specific diagnosis computed from the atom's own facts.
 //
-// config: { items: [{ id: 'water', role: 'nuc' | 'elec' }, ...] }   (ids are keys of SITES; a round of several molecules per step)
+// config: { items: [{ id: 'water', role: 'nuc' | 'elec' }, ...], words?: 'names' | 'rich' }   (ids are keys of SITES; a round of several molecules per step)
+//   words:'rich' (Lesson 08, before the names are taught) asks for the "electron-rich" / "electron-poor" atom and words every diagnosis that way.
+// A wrong tap's diagnosis goes to the step's feedback box only (ctx.onResult), never twice; a right tap shows its reason here and clears that box (ctx.onProgress).
+// Every tappable atom wears a faint dashed ring, so a learner can see the letters are buttons.
 import { svgPick, analyze, NAME, rdkit } from '../chem.js';
 import { SITES, siteRules } from '../mechanisms.js';
 import { lonePairGroup } from '../lp-draw.js';
 
-const ROLE_WORD = { nuc: 'nucleophilic', elec: 'electrophilic' };
+const WORDS = { names: { nuc: 'nucleophilic', elec: 'electrophilic' }, rich: { nuc: 'electron-rich', elec: 'electron-poor' } };
+const NEED = { nuc: 'electron-rich: a lone pair, a π bond or a negative charge', elec: 'electron-poor: positive, δ+, or short of an octet' };
 
 /** Atoms a perfect learner may tap for this item and role. */
 export function solution(item) { return SITES[item.id][item.role].atoms.slice(); }
@@ -18,8 +22,9 @@ function facts(smiles, idx) {
   return a;
 }
 
-/** Grade one tap. Returns {ok, why?, diagnosis?}. */
-export function grade(item, idx) {
+/** Grade one tap. Returns {ok, why?, diagnosis?}. `words` = 'names' (default) or 'rich'. */
+export function grade(item, idx, words = 'names') {
+  const ROLE_WORD = WORDS[words] || WORDS.names;
   const S = SITES[item.id];
   const want = S[item.role];
   if (want.atoms.includes(idx)) return { ok: true, why: want.why };
@@ -30,9 +35,11 @@ export function grade(item, idx) {
   const lpTxt = a.lp > 0 ? `${a.lp} lone pair${a.lp === 1 ? '' : 's'}` : 'no lone pair';
   if (rules[other].includes(idx) && !rules[item.role].includes(idx)) {
     const reason = S[other] ? S[other].why : item.role === 'nuc' ? 'it is electron-poor: δ+ or short of electrons' : 'it is electron-rich: it has a lone pair or a negative charge';
-    return { ok: false, diagnosis: `That ${a.sym} is the ${ROLE_WORD[other]} end, the opposite of what you are looking for. ${S[other] ? reason : reason[0].toUpperCase() + reason.slice(1) + '.'} A ${ROLE_WORD[item.role]} site is ${item.role === 'nuc' ? 'electron-rich: a lone pair, a π bond or a negative charge' : 'electron-poor: positive, δ+, or short of an octet'}.` };
+    const site = words === 'rich' ? `An ${ROLE_WORD[item.role]} atom has ${item.role === 'nuc' ? 'a lone pair, a π bond or a negative charge' : 'a + or δ+ charge, or fewer than eight electrons'}.` : `A ${ROLE_WORD[item.role]} site is ${NEED[item.role]}.`;
+    return { ok: false, diagnosis: `That ${a.sym} is the ${ROLE_WORD[other]} end, the opposite of what you are looking for. ${S[other] ? reason : reason[0].toUpperCase() + reason.slice(1) + '.'} ${site}` };
   }
-  return { ok: false, diagnosis: `This ${el.toLowerCase()} atom has ${lpTxt}${a.fc ? ' and a ' + (a.fc > 0 ? '+' : '−') + ' charge' : ''}, and nothing makes it ${item.role === 'nuc' ? 'electron-rich' : 'electron-poor'}. A ${ROLE_WORD[item.role]} site is ${item.role === 'nuc' ? 'electron-rich: a lone pair, a π bond or a negative charge' : 'electron-poor: positive, δ+, or short of an octet'}.` };
+  const site = words === 'rich' ? `An ${ROLE_WORD[item.role]} atom has ${item.role === 'nuc' ? 'a lone pair, a π bond or a negative charge' : 'a + or δ+ charge, or fewer than eight electrons'}.` : `A ${ROLE_WORD[item.role]} site is ${NEED[item.role]}.`;
+  return { ok: false, diagnosis: `This ${el.toLowerCase()} atom has ${lpTxt}${a.fc ? ' and a ' + (a.fc > 0 ? '+' : '−') + ' charge' : ''}, and nothing makes it ${item.role === 'nuc' ? 'electron-rich' : 'electron-poor'}. ${site}` };
 }
 
 export default {
@@ -53,7 +60,8 @@ export default {
       const info = analyze(S.smiles, { keepHs: keep });
       const ask = document.createElement('p');
       ask.className = 'sp-ask';
-      ask.innerHTML = `<span class="ed-count">${k + 1} of ${config.items.length}</span> Tap the <b>${ROLE_WORD[item.role]}</b> atom of <b>${S.label}</b>.`;
+      const RW = WORDS[config.words] || WORDS.names;
+      ask.innerHTML = `<span class="ed-count">${k + 1} of ${config.items.length}</span> Tap the <b>${RW[item.role]}</b> atom of <b>${S.label}</b>.`;
       const stage = document.createElement('div');
       stage.className = 'gf-stage sp-stage';
       stage.innerHTML = pick.svg;
@@ -76,8 +84,9 @@ export default {
         b.dataset.atom = String(i);
         b.addEventListener('click', () => {
           if (settled || locked) return;
-          const r = grade(item, i);
+          const r = grade(item, i, config.words);
           if (r.ok) {
+            ctx.onProgress?.();
             settled = true;
             stage.querySelectorAll('.gf-atom').forEach((x) => { x.disabled = true; });
             b.classList.add('lock'); b.setAttribute('aria-pressed', 'true');
@@ -89,8 +98,9 @@ export default {
             next.addEventListener('click', () => { if (last) { locked = true; next.disabled = true; ctx.onResult({ ok: true }); } else { k++; show(); } });
             row.append(next); next.focus({ preventScroll: true });
           } else {
+            stage.querySelectorAll('.gf-atom.bad').forEach((x) => x.classList.remove('bad'));
             b.classList.add('bad');
-            msg.className = 'sp-msg bad'; msg.textContent = r.diagnosis;
+            msg.className = 'sp-msg'; msg.textContent = '';      // the step's feedback box shows the diagnosis (once)
             ctx.onResult(r);
           }
         });

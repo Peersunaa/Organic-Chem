@@ -257,7 +257,7 @@ export const PASTPAPER = [
           'Both isomers burn to the same products, so the more stable isomer releases less energy: it has the smaller heat of combustion.',
           'Write that one line in your answer: more stable means less heat released when it burns.'
         ],
-        links: [lesson('08', 's12')],
+        links: [lesson('08', 's25')],
         trap: 'Thinking the more stable isomer gives off more heat when it burns. It gives off less.'
       }
     ]

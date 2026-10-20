@@ -60,6 +60,42 @@ export const HBR_BUTENE = {
   ]
 };
 export const MECH = { 'hcl-ethylene': HCL_ETHYLENE, 'hbr-ethylene': HBR_ETHYLENE, 'hbr-butene': HBR_BUTENE };
+/** Lesson 08 draws step 1 of HCl + ethylene on its own first (the carbocation is explained before Cl⁻ attacks): the same step object, ending at the cation and Cl⁻. */
+export const HCL_STEP1 = { reactants: HCL_ETHYLENE.reactants, products: HCL_ETHYLENE.steps[0].after, steps: [HCL_ETHYLENE.steps[0]] };
+
+// ---------------------------------------------------------------- arrow grammar (Lesson 08): one scene per legal arrow, easiest first
+// Coordinates are written out (bond length 1, y down) so the lesson needs no RDKit at import time. `arrows` is the one right arrow; `products` is what it gives
+// (the tests apply the arrow and compare canonical SMILES); `afterNote` is the sentence under the AFTER picture.
+export const GRAMMAR = {
+  // 1. lone pair -> atom: the pair becomes a new bond (HO- + H+ -> H2O)
+  lpToAtom: {
+    atoms: [{ el: 'O', x: 0, y: 0, charge: -1 }, { el: 'H', x: -0.95, y: 0.3 }, { el: 'H', x: 1.45, y: -0.25, charge: 1 }],
+    bonds: [{ a: 0, b: 1, order: 1 }],
+    arrows: [{ from: { lp: 0 }, to: { atom: 2 } }],
+    products: ['O'],
+    afterNote: 'After: the lone pair is now the new O–H bond. O has two bonds and two lone pairs, so its − charge is gone: water, H₂O.'
+  },
+  // 2. bond -> atom: the bond breaks and its pair becomes a lone pair on that atom (H-Cl -> H+ + Cl-)
+  bondToAtom: {
+    atoms: [{ el: 'H', x: 0, y: 0 }, { el: 'Cl', x: 1.1, y: 0 }],
+    bonds: [{ a: 0, b: 1, order: 1 }],
+    arrows: [{ from: { bond: [0, 1] }, to: { atom: 1 } }],
+    products: ['[H+]', '[Cl-]'],
+    afterNote: 'After: the H–Cl bond is gone. Its pair is a fourth lone pair on Cl, so Cl is Cl⁻; H is left with no electrons: H⁺.'
+  },
+  // 3. bond -> new bond: the pi pair becomes a bond to another atom (CH2=CH2 + H+ -> CH3CH2+); the learner points at H, the data says "new bond C0-H6"
+  bondToBond: {
+    atoms: [
+      { el: 'C', x: 0, y: 0 }, { el: 'C', x: 1, y: 0 },
+      { el: 'H', x: -0.5, y: -0.87 }, { el: 'H', x: -0.5, y: 0.87 }, { el: 'H', x: 1.5, y: -0.87 }, { el: 'H', x: 1.5, y: 0.87 },
+      { el: 'H', x: 0.5, y: -1.45, charge: 1 }
+    ],
+    bonds: [{ a: 0, b: 1, order: 2 }, { a: 0, b: 2, order: 1 }, { a: 0, b: 3, order: 1 }, { a: 1, b: 4, order: 1 }, { a: 1, b: 5, order: 1 }],
+    arrows: [{ from: { bond: [0, 1] }, to: { bond: [0, 6] } }],
+    products: ['C[CH2+]'],
+    afterNote: 'After: the π pair is now a new C–H bond. The other carbon lost its share of that pair: three bonds, six electrons, a + charge.'
+  }
+};
 
 // ---------------------------------------------------------------- HX addition built from a scene (used by the mastery generator)
 export const HX = { Cl: { smiles: 'Cl', label: 'HCl' }, Br: { smiles: 'Br', label: 'HBr' } };
@@ -154,7 +190,7 @@ export function kindWhy(r) {
   return `${nr} reactant → ${np} product (${r.eq}): the formula is unchanged, so the atoms were only reorganized into an isomer.`;
 }
 export const WRONG_KIND = {
-  addition: (r) => `An addition ends with ONE product that holds every atom of both reactants. Here there ${r.products.length === 1 ? 'is one product' : 'are ' + r.products.length + ' products'}.`,
+  addition: () => 'An addition ends with ONE product that holds every atom of both reactants.',
   elimination: () => 'An elimination starts from ONE reactant that splits into two products. Count the molecules on the left.',
   substitution: () => 'A substitution has two reactants and two products, because the reactants swap parts. Count the molecules on each side.',
   rearrangement: () => 'A rearrangement has ONE reactant and ONE product, isomers of each other. Count the molecules on each side.'
@@ -166,7 +202,7 @@ export const WRONG_KIND = {
  * The tests re-derive the sites from structure (charge, lone pairs, pi bond, electron count, electronegativity).
  */
 export const SITES = {
-  water: { smiles: '[H]O[H]', label: 'H₂O', nuc: { atoms: [1], why: 'Oxygen carries two lone pairs and is δ− (3.5 against 2.1 for H), so it can donate a pair.' } },
+  water: { smiles: '[H]O[H]', label: 'H₂O', nuc: { atoms: [1], why: 'Oxygen carries two lone pairs and is δ− (3.5 against 2.1 for H), so it can donate a pair.' }, elec: { atoms: [0, 2], why: 'Oxygen pulls the O–H pairs toward itself, so each H (either one) is δ+: a strong base can take it as H⁺.' } },
   ammonia: { smiles: '[H]N([H])[H]', label: 'NH₃', nuc: { atoms: [1], why: 'Nitrogen has a lone pair to donate, and it is δ− towards the hydrogens.' } },
   bromide: { smiles: '[Br-]', label: 'Br⁻', nuc: { atoms: [0], why: 'A negative ion with four lone pairs: it has electrons to give.' } },
   ethylene: { smiles: 'C=C', label: 'ethylene', nuc: { atoms: [0, 1], why: 'The C=C π electrons sit above and below the plane where reagents can reach them, so the double bond donates a pair. Either carbon of the bond counts.' } },
