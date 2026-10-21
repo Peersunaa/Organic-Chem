@@ -1196,7 +1196,31 @@ a.ms-type:hover { background: var(--surface-2); } a.ms-type:focus-visible { outl
   .rt-panel .bld-prods { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) { .rt-panel, .rt-cell.is-filled .rt-btn { animation: none; } .rt-btn, .rt-meter > span { transition: none; } }
-@media print { .rt-tools, .rt-qbar, .rt-panel, .rt-scrim { display: none !important; } .rt-scroll { max-height: none; overflow: visible; } }
+/* ---- morph animations (morph/morph.js, morph/morph-ui.js): the starting material turns into the product. Table cells, builder / table panel, hub cards. */
+.rt-mhint { display: flex; align-items: center; gap: var(--s-1); margin: 0; }
+.rt-mhint-i { color: var(--accent); font-size: .7rem; }
+.rt-cell { position: relative; }
+.rt-svg.is-morphing svg { overflow: visible; }
+.rt-replay { position: absolute; bottom: 3px; right: 3px; width: 24px; height: 24px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--accent); font: 600 .8125rem/1 inherit; cursor: pointer; opacity: .85; }
+.rt-replay:hover { opacity: 1; border-color: var(--accent-line); } .rt-replay:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: 1px; }
+.mo-group { margin: 0; display: grid; gap: var(--s-2); padding: var(--s-2) var(--s-3) var(--s-3); border-radius: var(--r-lg); background: var(--surface-2); border: 1px solid var(--line); min-width: 0; }
+.mo-cap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.mo-cap .hub-label { margin: 0; }
+.mo-btns { display: flex; gap: var(--s-1); flex-wrap: wrap; }
+.mo-speed[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
+.mo-grid { display: grid; gap: var(--s-2); grid-template-columns: minmax(0, 1fr); }
+.mo-grid.is-many { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.mo-cell { display: grid; gap: 2px; justify-items: center; min-width: 0; }
+.mo-host { width: 100%; max-width: 420px; aspect-ratio: 16 / 10; color: var(--ink); }
+.mo-host.is-still { aspect-ratio: auto; }
+.mo-host svg, .mo-pside svg { display: block; width: 100%; height: 100%; } .mo-host svg { overflow: visible; }
+.mo-lab { text-align: center; }
+.mo-pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--s-1); }
+.mo-pside { display: block; aspect-ratio: 16 / 10; }
+.mo-parrow { display: grid; justify-items: center; color: var(--muted); font-size: 1.1rem; } .mo-parrow small { font-size: .6875rem; max-width: 7em; text-align: center; }
+.mo-hub { display: grid; gap: var(--s-2); justify-items: start; }
+.mo-hub .mo-group { justify-self: stretch; background: var(--surface); }
+@media print { .rt-tools, .rt-qbar, .rt-panel, .rt-scrim, .rt-mhint, .rt-replay, .mo-hub { display: none !important; } .rt-scroll { max-height: none; overflow: visible; } }
 </style>
 
 <div id="app" aria-live="off"><p class="muted" style="padding:24px 16px">Loading Orgo Learn…</p></div>

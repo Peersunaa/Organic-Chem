@@ -9,6 +9,8 @@ import * as TB from './engine/tables.js';
 import { t, tAuto, cavemanOn, onVoiceChange } from './engine/voice.js';
 import { resultBlocks, nameNode, tileSvg } from './builder-view.js';
 import * as store from './engine/store.js';
+import { morphKey, loadMorphs } from './morph/morph.js';
+import { playInto } from './morph/morph-ui.js';
 
 const KEY = 'orgo.tables.v1';
 const BKEY = 'orgo.builder.v1';
@@ -41,10 +43,14 @@ export function tablesPage(chemReady) {
   const tools = h('div', { class: 'rt-tools' });
   const legend = h('div', { class: 'rt-legend', id: 'rt-legend', hidden: 'hidden' });
   const qbar = h('div', { class: 'rt-qbar', id: 'rt-qbar', hidden: 'hidden', 'aria-live': 'polite' });
+  // the morph hint: one line, worded for the device (hover plays on a desktop; on a phone the first tap plays, the second opens the details)
+  const canHover = (() => { try { return matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) { return true; } })();
+  const mhint = h('p', { class: 'small muted rt-mhint', id: 'rt-mhint' }, h('span', { class: 'rt-mhint-i', 'aria-hidden': 'true' }, '▶'),
+    canHover ? 'Hover a cell to watch the starting material turn into the product. Click it for the details.' : 'Tap a cell once to watch the starting material turn into the product, tap it again for the details.');
   const scroller = h('div', { class: 'rt-scroll', id: 'rt-scroll', tabindex: '0', role: 'region', 'aria-label': 'Reaction table, scrolls sideways' });
   const panel = h('aside', { class: 'rt-panel', id: 'rt-panel', role: 'dialog', 'aria-modal': 'false', 'aria-labelledby': 'rt-ph', hidden: 'hidden' });
   const scrim = h('div', { class: 'rt-scrim', hidden: 'hidden' });
-  root.append(tabs, tools, legend, qbar, scroller, scrim, panel);
+  root.append(tabs, tools, legend, qbar, mhint, scroller, scrim, panel);
   root.append(h('p', { class: 'muted rt-loading' }, 'Loading chemistry engine…'));
 
   // ---------------------------------------------------------------- tabs and tools
@@ -107,6 +113,7 @@ export function tablesPage(chemReady) {
   }
   function drawQbar() {
     qbar.hidden = !st.quiz;
+    mhint.hidden = st.quiz;
     qbar.innerHTML = '';
     if (!st.quiz) return;
     const d = TB.tableData(st.tab);
@@ -146,9 +153,39 @@ export function tablesPage(chemReady) {
         c.more ? h('span', { class: 'rt-more' }, `+${c.more}`) : null, c.minor ? h('span', { class: 'rt-minor' }, c.minor) : null));
       if (cavemanOn() && c.cave) btn.append(h('span', { class: 'rt-cave' }, c.cave));
     }
-    btn.addEventListener('click', () => openCell(row, col, c, btn));
+    // the morph: hover (mouse) plays it in the cell; on a touch screen the first tap plays it and the second opens the panel. Hidden quiz cells never play.
+    const canMorph = c.status === 'ok' && !hiddenCell;
+    if (canMorph) {
+      btn.addEventListener('pointerdown', (e) => { lastPT = e.pointerType; });
+      btn.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') playCell(td, row, col, c); });
+    }
+    btn.addEventListener('click', () => {
+      const touch = lastPT === 'touch' || lastPT === 'pen';
+      lastPT = null;
+      if (canMorph && touch && !td.dataset.played) {
+        td.dataset.played = '1';
+        playCell(td, row, col, c).then((any) => { if (!any) openCell(row, col, c, btn); });
+        return;
+      }
+      openCell(row, col, c, btn);
+    });
     td.append(btn);
     return td;
+  }
+  let lastPT = null;
+  /** Play the morph in every drawn product of the cell; after the first play a small replay button sits in the cell's corner. Resolves false when there is none. */
+  function playCell(td, row, col, c) {
+    const key = morphKey(row.smiles, col.id);
+    const spans = [...td.querySelectorAll('.rt-svg')];
+    return Promise.all(spans.map((sp, i) => playInto(sp, key, c.draw[i]))).then((r) => {
+      const any = r.some(Boolean);
+      if (any && !td.querySelector('.rt-replay')) {
+        const rb = h('button', { type: 'button', class: 'rt-replay', 'aria-label': `Replay the change: ${row.name[iupac()] || row.name.new} with ${col.head}`, title: 'Replay the change' }, '↻');
+        rb.addEventListener('click', (e) => { e.stopPropagation(); playCell(td, row, col, c); });
+        td.append(rb);
+      }
+      return any;
+    });
   }
   function drawTable() {
     const d = TB.tableData(st.tab);
@@ -268,6 +305,7 @@ export function tablesPage(chemReady) {
   Promise.resolve(chemReady).then(() => {
     const ld = root.querySelector('.rt-loading'); if (ld) ld.remove();
     drawAll();
+    setTimeout(() => { loadMorphs(); }, 1200);   // the morph data arrives in the background, so the first hover plays at once
     const off = onVoiceChange(() => { if (!root.isConnected) { off(); return; } drawTable(); if (!panel.hidden) drawPanel(); });
   }).catch(() => { root.innerHTML = '<p class="fb bad">The chemistry engine could not load. Reload the page to try again.</p>'; });
   return [lhead, root];

@@ -7,6 +7,7 @@ import { figureCard } from './figures/figure-card.js';
 import { GUESS_REAGENT_CARDS } from './engine/generators-reaction-modes.js';
 import { sceneForCard } from './scenes/scene-index.js';
 import { sceneToggle } from './scenes/scene-view.js';
+import { hubPlay } from './morph/morph-ui.js';
 
 /** The crafted chapter figure shown (collapsed) at the top of a hub group: alkenes -> ch4, aromatics -> ch5 (ch3 and ch6 have no group here). */
 export const GROUP_FIGURE = { alkene: 'ch4', arene: 'ch5' };
@@ -90,7 +91,8 @@ function exampleBlock(c, ex = c.example, second = false) {
   return h('div', { class: second ? 'hub-example hub-example2' : 'hub-example' },
     second ? h('p', { class: 'hub-rx small' }, h('b', {}, 'Second example')) : null, eq,
     h('p', { class: 'hub-rx small' }, h('span', { class: 'muted' }, 'Reagent: '), h('b', {}, ex.reagent || c.reagent)),
-    ex.note ? h('p', { class: 'muted small hub-note' }, (second ? tAuto(ex.note) : t(ex.note, c.caveman && c.caveman.note))) : null);
+    ex.note ? h('p', { class: 'muted small hub-note' }, (second ? tAuto(ex.note) : t(ex.note, c.caveman && c.caveman.note))) : null,
+    hubPlay('hub:' + c.id + (second ? ':2' : '')));
 }
 
 function factsBlock(c) {

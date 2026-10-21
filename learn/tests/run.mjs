@@ -58,6 +58,7 @@ import { figures } from './figures.mjs';
 import { scenes } from './scenes.mjs';
 import { builder } from './builder.mjs';
 import { tables } from './tables.mjs';
+import { morph } from './morph.mjs';
 import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
 const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'skeletal-convert', 'resonance-rank', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product', 'stereo-projections', 'naming-levels', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work', 'aromaticity']);
@@ -1239,6 +1240,9 @@ await builder({ ok, eq });
 
 // ---- Reaction tables: every row x column through react() and pairs(), tags against the builder's facts, four-option quizzes, the PDF export equals the page (tests/tables.mjs)
 await tables({ ok, eq });
+
+// ---- Morph animations: every table cell / builder pair / hub example has one, drawings read back as the engine's molecules, pinned atoms stay put, the map and changed bonds agree, frames are balanced SVG (tests/morph.mjs)
+await morph({ ok, eq });
 
 // ---- store: weak spots (memory fallback in Node)
 {

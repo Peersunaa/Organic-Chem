@@ -12,6 +12,8 @@ import { SCENE_BY_ID } from './scenes/scene-index.js';
 import mechanismPlayer from './engine/widgets/mechanism-player.js';
 import energyDiagram from './engine/widgets/energy-diagram.js';
 import * as store from './engine/store.js';
+import { morphKey } from './morph/morph.js';
+import { morphGroup } from './morph/morph-ui.js';
 
 const KEY = 'orgo.builder.v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch (e) { return {}; } };
@@ -122,6 +124,11 @@ export function noneCard(res) {
 export function resultBlocks(res, { onUse = null, widgets = [], opener = null } = {}) {
   if (res.status !== 'ok') return [noneCard(res)];
   const out = [];
+  // the change, animated: the starting material morphs into each major product (replay, slow / normal); nothing shows for a pair with no morph data
+  const labels = Object.fromEntries(res.products.filter((p) => p.label).map((p) => [p.smiles, tAuto(p.label)]));
+  const mg = morphGroup(morphKey(res.substrate, res.reagent.id), { labels });
+  widgets.push(mg);
+  out.push(mg);
   const grid = h('div', { class: 'bld-prods', id: 'bld-prods' });
   res.products.forEach((p, i) => grid.append(productCard(p, res, i, onUse)));
   out.push(grid);
