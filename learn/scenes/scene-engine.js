@@ -676,6 +676,7 @@ export function renderScene(scene, layout, t, opts = {}) {
   if (showArrows) {
     const partialsNow = beat.partials || [], partialsBefore = i > 0 ? scene.beats[i - 1].partials || [] : [];
     const f = fin;
+    const pills = [];   // badges already placed this frame: a second badge must not cover the first
     const labelOf = (atomId, text, tone, op, kind) => {
       const q = scr[atomId]; if (!q) return '';
       const dirs = nbrs(atomId).map((j) => scr[j]).filter(Boolean).map((r) => Math.atan2(r[1] - q[1], r[0] - q[0]));
@@ -697,11 +698,13 @@ export function renderScene(scene, layout, t, opts = {}) {
         const inR = (x, y, m) => Math.abs(x - px) < wpx / 2 + m && Math.abs(y - py) < hpx / 2 + m;
         for (const [j, sq] of Object.entries(scr)) { if (Number(j) === atomId || !sq || !A1.has(Number(j))) continue; if (inR(sq[0], sq[1], 12 * TA)) return true; }
         for (const [x, y] of lb.bonds) { const u = scr[x], v = scr[y]; if (!u || !v) continue; for (let k = 1; k < 8; k++) { const t = k / 8; if (inR(u[0] + (v[0] - u[0]) * t, u[1] + (v[1] - u[1]) * t, 2)) return true; } }
+        if (pills.some(([x, y, w, hh]) => Math.abs(x - px) < (w + wpx) / 2 + 4 && Math.abs(y - py) < (hh + hpx) / 2 + 2)) return true;
         return false;
       };
       let px, py;
       search: for (const extra of [0, 14, 28, 44]) for (let k = 0; k < 12; k++) { const a = ang + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (Math.PI / 6); [px, py] = place(a, extra); if (!blocked(px, py)) break search; }
       if (px == null) [px, py] = place(ang, 0);
+      pills.push([px, py, wpx, hpx]);
       return `<g opacity="${op}"><rect x="${f1(px - wpx / 2)}" y="${f1(py - hpx / 2)}" width="${f1(wpx)}" height="${f1(hpx)}" rx="${f1(hpx / 2)}" fill="var(--surface)" fill-opacity=".92" stroke="${col}" stroke-width="2"/><text x="${f1(px)}" y="${f1(py + 5 * TN)}" text-anchor="middle" font-size="${f1(14 * TN)}" font-weight="600" fill="${col}">${esc(text)}</text></g>`;
     };
     const items = [];

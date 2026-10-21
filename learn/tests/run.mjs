@@ -1231,7 +1231,7 @@ await text({ ok, eq });
 // ---- Crafted figures: files, wiring on the lessons and hub, charset, glossary hit area, why-line terms (tests/figures.mjs)
 await figures({ ok, eq });
 
-// ---- Mechanism scenes: the 16 storyboards validate against the schema, beats and captions obey the rules, layouts are up to date, every frame renders well-formed, the last frame matches coords.json, cards / lessons / routes are wired (tests/scenes.mjs)
+// ---- Mechanism scenes: the 20 storyboards validate against the schema, beats and captions obey the rules, layouts are up to date, every frame renders well-formed, the last frame matches coords.json, cards / lessons / routes are wired (tests/scenes.mjs)
 await scenes({ ok, eq });
 
 // ---- Reaction builder: tiles, every pair, the professor's rules as fixtures, the blocking-group chains, quiz options, Python RDKit read-back, wiring (tests/builder.mjs)

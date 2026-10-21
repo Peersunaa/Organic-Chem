@@ -1,6 +1,6 @@
 # Mechanism scenes
 
-Storyboards for 19 animated, scrubbable mechanism scenes (16 reagent scenes plus three Lesson 08 primers) in Orgo Learn (McMurry Fundamentals Ch 1–6, plus the extra midterm reactions on the hub). Each scene shows how a reagent acts on a reactant: which electrons move and why, where the new bond forms, and why the regiochemistry and stereochemistry come out as they do. There are two toggleable layers: ARROWS (curved arrows, electron pairs travelling) and ORBITALS (π clouds, empty p, σ*, bromonium, metal surface, faces).
+Storyboards for 20 animated, scrubbable mechanism scenes (17 reagent scenes plus three Lesson 08 primers) in Orgo Learn (McMurry Fundamentals Ch 1–6, plus the extra midterm reactions on the hub). Each scene shows how a reagent acts on a reactant: which electrons move and why, where the new bond forms, and why the regiochemistry and stereochemistry come out as they do. There are two toggleable layers: ARROWS (curved arrows, electron pairs travelling) and ORBITALS (π clouds, empty p, σ*, bromonium, metal surface, faces).
 
 - **[SCENE-SCHEMA.md](SCENE-SCHEMA.md)** is the contract: data model, atom identity, coordinates and camera, timing, colour, reduced motion, accessibility, a JSON Schema, and the tests to port.
 - **`NN-id.md`** holds one scene each: intent, stage, beats table, chemistry checks, stereo callout, what-if links, end quiz, notes, and the full scene object as JSON (the source of truth).
@@ -30,6 +30,7 @@ Every scene was generated from data and machine-checked with Python RDKit. The c
 | 17 | [hcl-ethylene](17-hcl-ethylene.md) | primer (Lesson 08 s13, s17) | ethylene + HCl → chloroethane, the model polar reaction | 8 | 33 |
 | 18 | [arrow-grammar](18-arrow-grammar.md) | primer (Lesson 08 s06) | one arrow per taught case: H–Cl → H⁺ + Cl⁻ (bond → atom), HO⁻ + H⁺ → H₂O (lone pair → atom), ethylene + H⁺ → CH₃CH₂⁺ (bond → new bond) | 7 | 30 |
 | 19 | [carbocation](19-carbocation.md) | primer (Lesson 08 s15) | the flat ethyl cation, its empty p orbital, Cl⁻ bonding into it (a short primer) | 3 | 14 |
+| 20 | [alkene-kmno4-hot](20-alkene-kmno4-hot.md) | `alkene-kmno4-acid` | 2-methylbut-2-ene + hot, acidic KMnO₄: syn attachment, diol (where cold stops), cleavage → acetone + acetic acid | 9 | 40 |
 
 ## Build order
 
@@ -63,7 +64,8 @@ Build the engine against scene 01, then add scenes so that each one brings at mo
 
 - **01**: the card's example is 1-methylcyclohexene; the scene uses 2-methylpropene, as the brief and Lesson 09 s08 do. The ring case is in scene 02.
 - **06**: the brief calls it `alkene-kmno4-cold`; the hub id is `alkene-kmno4-base`.
+- **20**: the brief's stereo line "so the diol is cis" does not fit 2-methylbut-2-ene: its diol has one stereocentre and forms as a racemate. The callout says so.
 - **08**: one scene covers two cards, `alkyne-hx-1` and `alkyne-hx-2`.
 - **11**: the card's example alkylates with CH₃CH₂Br (→ pent-2-yne); the scene uses CH₃Br as the brief says (→ but-2-yne, which then feeds scene 10).
 - **15**: the brief uses anisole; the card `director-activating` uses toluene (an alkyl activator with no lone pair). The nitrobenzene half matches `director-meta`.
-- **Deeper than the card, and marked as such in the notes:** the Hg²⁺ steps and acid-catalysed tautomerism (09), the HOO⁻ boron-to-oxygen shift (07), the NO₂⁺ formation arrows (13), and the Br lone pair stabilising the second cation (08).
+- **Deeper than the card, and marked as such in the notes:** the second MnO₄⁻ on the diol, the arrows of the cut and the aldehyde → acid step (20), the Hg²⁺ steps and acid-catalysed tautomerism (09), the HOO⁻ boron-to-oxygen shift (07), the NO₂⁺ formation arrows (13), and the Br lone pair stabilising the second cation (08).

@@ -1,4 +1,4 @@
-// The 19 mechanism scenes: which hub card, lesson step and weak-spot skill each one belongs to. 01-16 each animate one hub card's reagent; 17, 18 and 19 are Lesson 08
+// The 20 mechanism scenes: which hub card, lesson step and weak-spot skill each one belongs to. 01-16 and 20 each animate one hub card's reagent; 17, 18 and 19 are Lesson 08
 // PRIMERS (`primer: true`, no hub card of their own: HCl + ethylene as the model reaction, the three legal arrows, and the carbocation), reached from Lesson 08 steps and the #scenes list. Plain data, importable without fetching anything
 // (app.js, hub-view.js and the tests use it); tests/scenes.mjs checks every row against the scene JSON it names.
 //   id     = the storyboard's id and file name (scenes/scenes/<id>.json, scenes/layouts/<id>.json)
@@ -25,7 +25,8 @@ export const SCENES = [
   { id: '16-diels-alder', title: 'Diels–Alder: penta-1,3-diene + acrolein', reagent: 'acrolein, heat', cards: ['diels-alder'], lesson: [], skill: 'dienes' },
   { id: '17-hcl-ethylene', title: 'HCl adds to ethylene: the model polar reaction', reagent: 'HCl', cards: [], primer: true, lesson: [{ id: '08', step: 's17' }, { id: '08', step: 's13' }], skill: 'mechanism' },
   { id: '18-arrow-grammar', title: 'Arrow grammar: the three legal arrows, one simple case each', reagent: 'none (three cases, one arrow each)', cards: [], primer: true, lesson: [{ id: '08', step: 's06' }], skill: 'curved-arrows' },
-  { id: '19-carbocation', title: 'The carbocation: a flat + carbon and its empty p orbital', reagent: 'Cl⁻', cards: [], primer: true, lesson: [{ id: '08', step: 's15' }], skill: 'carbocations' }
+  { id: '19-carbocation', title: 'The carbocation: a flat + carbon and its empty p orbital', reagent: 'Cl⁻', cards: [], primer: true, lesson: [{ id: '08', step: 's15' }], skill: 'carbocations' },
+  { id: '20-alkene-kmno4-hot', title: 'Hot, acidic KMnO₄: how it attaches and how it cleaves', reagent: 'KMnO₄, H₃O⁺, heat', cards: ['alkene-kmno4-acid'], lesson: [{ id: '10', step: 's13' }], skill: 'alkene-oxidation' }
 ];
 
 export const SCENE_BY_ID = Object.fromEntries(SCENES.map((s) => [s.id, s]));

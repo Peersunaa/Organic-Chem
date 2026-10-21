@@ -18,7 +18,7 @@ export const SCENE_COORDS = {
   '06-alkene-kmno4-cold': ['alkene-kmno4-base'], '07-alkene-hydroboration': ['alkene-hydroboration'], '08-alkyne-hx': ['alkyne-hx'], '09-alkyne-hydration': ['alkyne-hydration'],
   '10-alkyne-lindlar': ['alkyne-lindlar'], '11-alkyne-acetylide': ['alkyne-acetylide'], '12-eas-bromination': ['eas-bromination'], '13-eas-nitration': ['eas-nitration'],
   '14-fc-acylation': ['fc-acylation'], '15-directors': ['director-anisole', 'director-nitrobenzene'], '16-diels-alder': ['diels-alder'],
-  '17-hcl-ethylene': ['hcl-ethylene'], '18-arrow-grammar': ['arrow-grammar'], '19-carbocation': ['carbocation-cl']
+  '17-hcl-ethylene': ['hcl-ethylene'], '18-arrow-grammar': ['arrow-grammar'], '19-carbocation': ['carbocation-cl'], '20-alkene-kmno4-hot': ['alkene-kmno4-acid']
 };
 /** The coords.json stages of a scene's reactions (the stage that holds the product comes first, so a product binds to it before an intermediate does). */
 export function coordStagesFor(coordsJson, sceneId) {

@@ -386,7 +386,7 @@
   "stereoMoment": "syn-diol",
   "text": "Both O come from one MnO₄⁻ on one face and the C–O bonds never break, so the OH groups are cis. On cyclohexene that is the meso cis-diol. Open chain: a cis alkene gives a meso diol, a trans alkene a racemic pair. For the TRANS diol use RCO₃H, then H₃O⁺ (anti opening of the epoxide)."
  },
- "whatIf": ["05-alkene-epoxide", "04-alkene-h2-pd", "03-alkene-x2"],
+ "whatIf": ["20-alkene-kmno4-hot", "05-alkene-epoxide", "04-alkene-h2-pd", "03-alkene-x2"],
  "quiz": {
   "q": "You need trans-cyclohexane-1,2-diol from cyclohexene. Is cold basic KMnO₄ the right reagent?",
   "options": [

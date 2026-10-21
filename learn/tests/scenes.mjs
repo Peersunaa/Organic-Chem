@@ -1,4 +1,4 @@
-// Mechanism scene checks (learn/scenes/): the 19 storyboards (01-16 reagent scenes, 17-19 Lesson 08 primers) in scenes/scenes/*.json, their compiled layouts in scenes/layouts/*.json, the renderer
+// Mechanism scene checks (learn/scenes/): the 20 storyboards (01-16 and 20 reagent scenes, 17-19 Lesson 08 primers) in scenes/scenes/*.json, their compiled layouts in scenes/layouts/*.json, the renderer
 // (scenes/scene-engine.js), the index (scenes/scene-index.js) and the wiring in app.js, hub-view.js, widgets/index.js and index.html.
 // Run on its own with `node tests/scenes.mjs` from learn/, or as part of run.mjs.
 //
@@ -10,11 +10,11 @@
 //                matches that stage's coordinates (within 1 px after a rigid fit: the scene is free to turn the molecule, not to change its shape)
 //   renderer     12 times along each scene, in motion and static, in each layer: well-formed SVG with a viewBox, no NaN, nothing outside the stage; static frames show their arrows
 //                with the pair at its end; the ORBITALS-only layer still moves the electrons; the end state of the last beat draws every atom of the last state
-//   placement    card -> scene covers the 16 reagent scenes, every primer is reached from a Lesson 08 step; lesson steps exist; routes, home and hub links, the widget registration and the CSS block are in place
+//   placement    card -> scene covers the 17 reagent scenes, every primer is reached from a Lesson 08 step; lesson steps exist; routes, home and hub links, the widget registration and the CSS block are in place
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ready } from '../engine/chem.js';
+import { ready, canon } from '../engine/chem.js';
 import { HUB_BY_ID } from '../engine/reaction-hub.js';
 import { LESSONS } from '../lessons/index.js';
 import { STEREO_MOMENTS } from '../engine/stereo-moments.js';
@@ -134,7 +134,7 @@ export async function scenes({ ok: okT, eq }) {
   ok(!!schema, 'schema', 'docs/scenes/SCENE-SCHEMA.md holds the JSON Schema (section 13)');
 
   // ---- the index
-  ok(SCENES.length === 19, 'index', `19 scenes (16 reagent scenes + 3 Lesson 08 primers), found ${SCENES.length}`);
+  ok(SCENES.length === 20, 'index', `20 scenes (17 reagent scenes + 3 Lesson 08 primers), found ${SCENES.length}`);
   eq(SCENES.map((s) => s.id), fs.readdirSync(sceneDir).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).sort(), 'scenes index lists exactly the files in scenes/scenes');
   eq(fs.readdirSync(layoutDir).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).sort(), SCENES.map((s) => s.id), 'scenes: a layout for every scene');
   ok(sceneId('alkene-hx') === '01-alkene-hx' && sceneId('01-alkene-hx') === '01-alkene-hx' && sceneId('nope') === null, 'index', 'sceneId() takes the short and the full id');
@@ -320,11 +320,17 @@ export async function scenes({ ok: okT, eq }) {
   ok(bindReport.filter((s) => s.endsWith(' px')).length >= 12, 'coords', `at least 12 scenes end on a coords.json drawing (${bindReport.length} reported)`);
 
   // ---- placement: card -> scene, lesson step -> scene
-  eq(new Set(Object.values(CARD_SCENE)).size, SCENES.filter((s) => !s.primer).length, 'scenes: every one of the 16 reagent scenes is reachable from a hub card');
-  ok(SCENES.filter((s) => !s.primer).length === 16 && SCENES.filter((s) => s.primer).every((s) => s.lesson.length && !Object.values(CARD_SCENE).includes(s.id)), 'placement', 'the primers (17, 18, 19) hang on Lesson 08 steps, not on hub cards');
+  eq(new Set(Object.values(CARD_SCENE)).size, SCENES.filter((s) => !s.primer).length, 'scenes: every one of the 17 reagent scenes is reachable from a hub card');
+  ok(SCENES.filter((s) => !s.primer).length === 17 && SCENES.filter((s) => s.primer).every((s) => s.lesson.length && !Object.values(CARD_SCENE).includes(s.id)), 'placement', 'the primers (17, 18, 19) hang on Lesson 08 steps, not on hub cards');
   ok(STEP_SCENE['08/s06'] === '18-arrow-grammar' && STEP_SCENE['08/s17'] === '17-hcl-ethylene' && STEP_SCENE['08/s15'] === '19-carbocation' && CARD_SCENE['alkene-hx'] === '01-alkene-hx', 'placement', 'Lesson 08 steps get their primer scene (s15: the carbocation scene); alkene-hx keeps scene 01');
   ok(CARD_SCENE['alkyne-hx-1'] === '08-alkyne-hx' && CARD_SCENE['alkyne-hx-2'] === '08-alkyne-hx', 'cards', '08 serves alkyne-hx-1 and alkyne-hx-2');
   ok(CARD_SCENE['alkene-kmno4-base'] === '06-alkene-kmno4-cold', 'cards', '06 serves alkene-kmno4-base');
+  ok(CARD_SCENE['alkene-kmno4-acid'] === '20-alkene-kmno4-hot' && STEP_SCENE['10/s13'] === '20-alkene-kmno4-hot', 'cards', '20 serves alkene-kmno4-acid and Lesson 10 s13 (KMnO₄ in acid)');
+  {   // the hot KMnO₄ card's worked example is the reaction scene 20 animates (same alkene, same two products)
+    const ex = HUB_BY_ID['alkene-kmno4-acid'].example, s20 = stages.find((x) => x.id === '20-alkene-kmno4-hot').scene;
+    const prods = s20.products.filter((p) => p.inFinal !== false).map((p) => canon(p.smiles)).sort();
+    ok(canon(ex.substrate) === canon(s20.reactant.smiles) && JSON.stringify(ex.product.split('.').map(canon).sort()) === JSON.stringify(prods), 'cards', `20 shows the alkene-kmno4-acid card's example (${ex.substrate} -> ${ex.product})`);
+  }
   ok(CARD_SCENE['director-activating'] === '15-directors' && CARD_SCENE['director-meta'] === '15-directors', 'cards', '15 serves director-activating and director-meta');
   ok(CARD_SCENE['alkyne-acetylide'] === '11-alkyne-acetylide', 'cards', '11 serves alkyne-acetylide');
   Object.keys(CARD_SCENE).forEach((c) => ok(!!HUB_BY_ID[c], 'cards', `${c} is a hub card`));
