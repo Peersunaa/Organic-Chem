@@ -30,6 +30,8 @@ const EDITED = { '17': new Set(['s01', 's04', 's07', 's12', 's13', 's14', 's15',
 // Lessons rebuilt from scratch on purpose (new step list and new ids): no step is compared with HEAD, every caveman rule above still applies.
 //   '08': Lesson 08 rebuild around one spine (docs/reviews/2026-10-20-lesson08-audit.md): 30 new steps, ids s01-s30.
 const REBUILT = new Set(['08']);
+// Steps added since HEAD (no HEAD step to compare with): Lesson 17 s65, hot KMnO₄ on an alkyne (the 39th hub card, 2026-10-21).
+const ADDED = { '17': new Set(['s65']) };
 const SIMPLE = ['prompt', 'problem', 'html', 'reveal', 'rule', 'worked', 'trap'];
 
 /** Length is measured on the TEXT a learner reads: drawings (inline <svg>, <mol>, <molpair>) and <name> chips are figures, and every other tag (<b>, <p>, <br>, <sub> ...) is markup, so none of them counts; entities count as one character. */
@@ -127,7 +129,7 @@ export async function cavemanLessons({ ok, eq }) {
       ok(s.caveman && typeof s.caveman === 'object' && (Object.keys(s.caveman).length > 0 || !!LEFT_PLAIN[`${L.id}:${s.id}`]), `${where}: has a caveman object with something in it`);
       steps++;
       out.forEach(([k, a, b]) => { fields++; const bad = checkPair(a, b); ok(!bad.length, `${where} ${k}: ${bad.join('; ')}`); });
-      if (head && !REBUILT.has(L.id)) {
+      if (head && !REBUILT.has(L.id) && !(ADDED[L.id] && ADDED[L.id].has(s.id))) {
         const h = head.steps.find((x) => x.id === s.id);   // by id: a step removed since HEAD (Lesson 17 s02, s05, s08) does not shift the others
         ok(!!h, `${where}: same step id as HEAD`);
         const edited = EDITED[L.id] && EDITED[L.id].has(s.id);

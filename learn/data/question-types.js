@@ -68,7 +68,7 @@ export const TYPES = [
     marks: [M(1, 'the C=C cut and both fragments drawn'), M(1, 'the right oxidation level of each end (ketone / acid / CO₂; aldehyde only with PCC)'), M(1, 'nothing invented: no H on the ketone carbon, no reaction for a tertiary alcohol')],
     sources: [{ gen: 'predict-product', skill: 'predict-product', settings: { cards: ['alkene-kmno4-acid', 'oxidation-pcc', 'oxidation-cr'] }, w: 3 }, { gen: 'alkene-additions-2', tasks: ['trap', 'cleave'], w: 1 }],
     seeds: [], book: ['4.9', '4.10', '4.36', '4.44', '4.58'],
-    lessons: [{ id: '10', step: 's12' }], cards: ['alkene-kmno4-acid', 'oxidation-pcc', 'oxidation-cr'], scenes: ['20-alkene-kmno4-hot']
+    lessons: [{ id: '10', step: 's12' }], cards: ['alkene-kmno4-acid', 'alkyne-kmno4-hot', 'oxidation-pcc', 'oxidation-cr'], scenes: ['20-alkene-kmno4-hot', '21-alkyne-kmno4-hot']
   },
   {
     id: 'predict-alkyne', group: 'reactions', stage: 1, title: 'Predict the product: alkyne reactions', short: 'Alkynes', chapter: 4, section: ['B3'], weight: 3,

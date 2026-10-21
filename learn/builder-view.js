@@ -62,14 +62,15 @@ export function factsBlock(res) {
   return h('ul', { class: 'hub-facts bld-facts', 'aria-label': 'Three facts' }, chip('What adds', t(f.adds, f.cave && f.cave.adds)), chip('Where it adds', t(f.where, f.cave && f.cave.where)), chip('How, in space', SPACE_TEXT[f.space] || f.space));
 }
 /** The mechanism block: scene, step player (mounted into `widgets` so the caller can destroy it), the card's scheme, the card link. */
-export function mechBlock(res, widgets = []) {
+export function mechBlock(res, widgets = [], { opener = null } = {}) {
   const M = res.mechanism || {};
   const box = h('div', { class: 'bld-mech' }, h('p', { class: 'hub-label' }, 'Mechanism'));
   const btns = h('div', { class: 'rx-btns' });
   const panels = h('div', { class: 'bld-mechpanels' });
   box.append(btns, panels);
   if (M.scene && SCENE_BY_ID[M.scene]) {
-    const tg = sceneToggle(M.scene, { label: 'Watch the scene', cls: 'btn small bld-watch' });
+    // opener: the scene notes how its steps play out on this starting material when it is not the scene's own (hot KMnO₄: end by end)
+    const tg = sceneToggle(M.scene, { label: 'Watch the scene', cls: 'btn small bld-watch', opener: opener || { smiles: res.substrate, name: B.describe(res.substrate) } });
     btns.append(tg.button); panels.append(tg.panel);
     box.append(h('p', { class: 'muted small' }, `Scene: ${SCENE_BY_ID[M.scene].title}. The arrows are the same for your molecule.`));
   }
@@ -118,7 +119,7 @@ export function noneCard(res) {
 }
 /** Everything under the equation for a result: the products (with `onUse` for chaining), the shares source, the professor's rule and why, the facts, the notes,
  *  the energy sketch and the mechanism. Widgets mounted on the way are pushed into `widgets`. */
-export function resultBlocks(res, { onUse = null, widgets = [] } = {}) {
+export function resultBlocks(res, { onUse = null, widgets = [], opener = null } = {}) {
   if (res.status !== 'ok') return [noneCard(res)];
   const out = [];
   const grid = h('div', { class: 'bld-prods', id: 'bld-prods' });
@@ -133,7 +134,7 @@ export function resultBlocks(res, { onUse = null, widgets = [] } = {}) {
   if (res.warnings && res.warnings.length) out.push(h('ul', { class: 'bld-warn', 'aria-label': 'Notes' }, res.warnings.map((w) => h('li', { 'data-w': w.id }, tAuto(w.text)))));
   const en = energyBlock(res, widgets);
   if (en) out.push(en);
-  out.push(mechBlock(res, widgets));
+  out.push(mechBlock(res, widgets, { opener }));
   return out;
 }
 
@@ -230,6 +231,7 @@ export function builderPage(chemReady) {
         const b = h('button', { type: 'button', class: `bld-tile bld-rtile is-${res.status}` + (on ? ' is-on' : ''), 'aria-pressed': String(on), 'data-rgt': r.id },
           g.num ? h('span', { class: 'bld-num', 'aria-hidden': 'true' }, g.num) : null,
           h('span', { class: 'bld-rlabel' }, r.label),
+          r.tags ? h('span', { class: 'bld-rtag', 'data-tags': r.tags.join(' ') }, r.tags.join(' · ')) : null,
           h('span', { class: 'bld-rstat small' }, res.status === 'ok' ? 'reacts' : res.status === 'none' ? 'no reaction' : 'not modelled'));
         b.addEventListener('click', () => { st.reagent = r.id; st.quizPick = null; persist(); drawRgts(); drawResult(); });
         row.append(b);
@@ -319,7 +321,7 @@ export function builderPage(chemReady) {
       const qb = quizBlock(res);
       if (qb) { colX.append(qb); return; }
     }
-    colX.append(...resultBlocks(res, { onUse: useNext(res), widgets: liveWidgets }));
+    colX.append(...resultBlocks(res, { onUse: useNext(res), widgets: liveWidgets, opener: { smiles: res.substrate, name: B.describe(res.substrate), from: 'builder' } }));
   }
 
   // ---------------------------------------------------------------- buttons

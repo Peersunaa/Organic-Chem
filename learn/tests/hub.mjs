@@ -5,7 +5,7 @@
 //      Each card has an EXPECTATION written by hand below: no stereo at all unless the card needs it.
 //  (3) where an engine models the reagent (HX, hydration, X2, H2, KMnO4, peracid, alkyne reactions, EAS, directors, side chains, acetylide, diene HX) the card's
 //      example product equals the engine's product for that substrate (canonical isomeric SMILES), and the card's `space` agrees with the engine's syn/anti.
-//  (3b) the ten workbook B3.1 cards (Diels-Alder, Clemmensen, Birch, two hydroborations, benzylic bromination, PCC, Cr(VI), amine in acid, desulfonation) have no
+//  (3b) the ten workbook B3.1 cards and hot KMnO₄ on an alkyne (Diels-Alder, Clemmensen, Birch, two hydroborations, benzylic bromination, PCC, Cr(VI), amine in acid, desulfonation) have no
 //      engine model, so their example products are checked by hand-written molecular formulas (HAND below), RDKit parse (JS and Python) and the stereo read-back;
 //      the cards with no lesson say "Not in a lesson" on the screen instead of a lesson link;
 //  (4) the router accepts #lesson-NN/sK and the view code keeps its promises (no progress faked), read from the source.
@@ -59,9 +59,11 @@ const HAND = {
   'oxidation-pcc': { formula: 'C10H10O2' },
   'oxidation-cr': { formula: 'C8H8O', formula2: 'C4H8O2' },
   'amine-in-acid': { formula: 'C9H12N2O2' },
-  'desulfonation': { formula: 'C7H8' }
+  'desulfonation': { formula: 'C7H8' },
+  // hot KMnO₄ on a C≡C (scene 21): no engine model; the two acids together keep all six carbons of hex-3-yne
+  'alkyne-kmno4-hot': { formula: ['C3H6O2', 'C3H6O2'] }
 };
-const NO_LESSON_IDS = ['diels-alder', 'clemmensen', 'birch', 'alkyne-hydroboration', 'alkene-hydroboration', 'oxidation-pcc', 'oxidation-cr'];
+const NO_LESSON_IDS = ['diels-alder', 'clemmensen', 'birch', 'alkyne-hydroboration', 'alkene-hydroboration', 'oxidation-pcc', 'oxidation-cr', 'alkyne-kmno4-hot'];
 const SUBGROUP = 'Side chains and alcohols (not in the book)';
 
 // The engine's answer for the card's example (products as canonical isomeric SMILES), and, where the engine knows it, how the new groups add.
@@ -127,7 +129,7 @@ export async function hub({ ok, eq }) {
   eq(addsIds, ['OH', 'X', 'H', 'other', 'O', 'ring'], 'adds filter ids');
   eq(HUB_GROUPS.map((g) => g.id), ['arene', 'alkene', 'alkyne', 'diene'], 'group order is unchanged');
   eq(Object.keys(HAND).sort(), HUB_CARDS.filter((c) => !ENGINE[c.id]).map((c) => c.id).sort(), 'HAND covers exactly the cards with no engine model');
-  eq(HUB_CARDS.filter((c) => c.lesson === null).map((c) => c.id).sort(), NO_LESSON_IDS.slice().sort(), 'the cards with no lesson are the seven the brief names');
+  eq(HUB_CARDS.filter((c) => c.lesson === null).map((c) => c.id).sort(), NO_LESSON_IDS.slice().sort(), 'the cards with no lesson are the seven the brief names, plus hot KMnO₄ on an alkyne (Lesson 12 has no KMnO₄ step)');
   eq(HUB_CARDS.filter((c) => c.subgroup).map((c) => c.id), ['oxidation-pcc', 'oxidation-cr'], 'only the two oxidation cards have a sub-header');
   for (const c of HUB_CARDS.filter((x) => x.subgroup)) ok(c.group === 'arene' && c.subgroup === SUBGROUP, `${c.id}: sits in the aromatics group under "${SUBGROUP}"`);
   // the sub-header cards are the last cards of their group, so they stay together under one header
@@ -257,7 +259,7 @@ export async function hub({ ok, eq }) {
       byHand.push(c.id);
       // (3b) formulas written by hand: the drawn product has the formula the chemistry gives
       const fp = c.example.product.split('.').map((x) => formulaOf(x));
-      eq(fp, [hand.formula], `${c.id}: formula of the example product`);
+      eq(fp, [].concat(hand.formula), `${c.id}: formula of the example product`);
       if (hand.sum) {
         const sub = c.example.substrate.split('.').map((x) => formulaOf(x));
         eq(sub, hand.sum, `${c.id}: the two reactants`);

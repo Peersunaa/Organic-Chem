@@ -227,7 +227,7 @@ export function tablesPage(chemReady) {
     const hiddenCell = st.quiz && c.status === 'ok' && !filledSet().has(key);
     if (hiddenCell) { panel.append(quizBox(row, col, c, key)); return; }
     if (c.status === 'ok') panel.append(h('p', { class: 'rt-ptag' }, h('span', { class: 'hub-label' }, 'Pattern'), h('b', { class: 'rt-tag' + (c.family ? ' fam-' + c.family : '') }, c.family ? h('span', { class: 'rt-glyph', 'aria-hidden': 'true' }, TB.FAMILY_BY_ID[c.family].glyph) : null, c.tag), c.note ? h('span', { class: 'muted small' }, ' ' + c.note) : null));
-    panel.append(...resultBlocks(res, { onUse: null, widgets }));
+    panel.append(...resultBlocks(res, { onUse: null, widgets, opener: { smiles: row.smiles, name: row.name[iupac()] || row.name.new, from: 'table' } }));
     const ob = h('button', { type: 'button', class: 'btn small rt-tobuilder', id: 'rt-tobuilder' }, 'Open this pair in the builder');
     ob.addEventListener('click', () => openInBuilder(row, col));
     panel.append(h('div', { class: 'rx-btns rt-pfoot' }, ob));

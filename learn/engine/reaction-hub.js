@@ -21,6 +21,7 @@
 // Ten cards from workbook B3.1 are on the hub although no lesson teaches them (Peera confirmed they come out on the midterm): Diels-Alder, Clemmensen,
 // Birch, alkyne and alkene hydroboration, benzylic bromination, PCC and Cr(VI) oxidation, amines in acid, desulfonation. They have no engine model:
 // the drill uses them as fixed-answer questions built from their examples (generators-predict.js, `fixed: true`).
+// alkyne-kmno4-hot (hot KMnO₄ cuts a C≡C to acids, scene 21) has no engine model either and no lesson (Lesson 12 has no KMnO₄ step): an eleventh fixed-answer card.
 
 export const HUB_GROUPS = [
   { id: 'arene', label: 'Aromatics', sub: 'Benzene rings: substitution, not addition (Lessons 13 and 14)' },
@@ -1022,6 +1023,35 @@ export const HUB_CARDS = [
         'H₂O, HgSO₄, H₂SO₄: OH inner carbon, methyl ketone.'
       ],
       note: 'Hex-1-yne: hexanal. Hg²⁺, H₂O: methyl ketone.'
+    },
+    lesson: null
+  },
+  {
+    id: 'alkyne-kmno4-hot', group: 'alkyne', reagent: 'KMnO₄, hot, H₃O⁺',
+    what: 'Cuts the C≡C right through. Each carbon of the old triple bond becomes a carboxylic acid, –CO₂H; a terminal ≡C–H end goes on to CO₂.',
+    example: { substrate: 'CCC#CCC', product: 'CCC(=O)O.CCC(=O)O', note: 'Hex-3-yne gives two molecules of propanoic acid, one from each end. A terminal alkyne loses its ≡C–H end as CO₂: prop-1-yne gives acetic acid and CO₂.' },
+    facts: { adds: 'O: each end of the old C≡C becomes –CO₂H (a terminal ≡C–H end becomes CO₂)', where: 'At the C≡C: count the H on each carbon. No H: –CO₂H. One H (≡C–H): CO₂', space: 'n.a.', addsKey: ['other'] },
+    apply: {
+      pattern: 'Hex-3-yne is treated with hot KMnO₄ in acid (H₃O⁺). Draw the products.',
+      steps: [
+        'Hot KMnO₄ in acid cuts the C≡C right through: the molecule falls into two pieces, one from each end of the triple bond.',
+        'On the way, MnO₄⁻ adds to one π bond (syn, a cyclic ester) and the alkyne is oxidised to a 1,2-diketone; then the C–C between the two C=O is cut.',
+        'Count the H on each C≡C carbon. No H (an internal end): that carbon becomes –CO₂H, a carboxylic acid.',
+        'One H (the ≡C–H of a terminal alkyne): that carbon leaves as CO₂. Prop-1-yne gives acetic acid and CO₂.',
+        'Every other carbon stays where it was. Hex-3-yne gives two CH₃CH₂CO₂H (propanoic acid).'
+      ]
+    },
+    caveman: {
+      what: 'Cut C≡C. Each carbon –CO₂H. Terminal ≡C–H end: CO₂.',
+      facts: { adds: 'O: each C≡C end –CO₂H (terminal ≡C–H: CO₂)', where: 'C≡C: H count. None: –CO₂H. One: CO₂', space: 'n.a.' },
+      steps: [
+        'Hot KMnO₄, acid: cut C≡C. Two pieces, one each end.',
+        'MnO₄⁻ on one π bond (syn, cyclic ester). 1,2-diketone. Cut C–C between C=O.',
+        'H count each C≡C carbon. None: –CO₂H.',
+        'One H (terminal ≡C–H): CO₂. Prop-1-yne: acetic acid, CO₂.',
+        'Other carbons stay. Hex-3-yne: two CH₃CH₂CO₂H.'
+      ],
+      note: 'Hex-3-yne: two propanoic acid. Terminal ≡C–H end: CO₂. Prop-1-yne: acetic acid, CO₂.'
     },
     lesson: null
   },

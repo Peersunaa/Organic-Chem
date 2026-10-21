@@ -5,7 +5,7 @@
 //  (2) every SMILES parses in RDKit, every <mol> tag is closed, names carry both IUPAC styles;
 //  (3) every correct answer equals the engine's (drill solveCard, predictSubst, an independent RDKit reaction for the oxidation and the parent Diels-Alder), no wrong
 //      answer equals the right one, and fixed-answer cards equal the hub card's example product;
-//  (4) every #reactions/<id> link is a hub card, every #lesson-NN/sK link is a real step, all 38 hub cards are reached in Part 2, each card step names its own card in its reveal;
+//  (4) every #reactions/<id> link is a hub card, every #lesson-NN/sK link is a real step, all 39 hub cards are reached in Part 2, each card step names its own card in its reveal;
 //  (5) reaction-lab steps use ids and reagent keys the lab knows, and every combination runs in the engines without an error;
 //  (6) recap entries, mastery generator, registry.
 // Run on its own with `node learn/tests/lesson17.mjs` (from learn/), or wire it into run.mjs.
@@ -110,7 +110,7 @@ export async function lesson17({ ok, eq }) {
   eq([byPart[1].length, byPart[3].length, byPart[4].length], [6, 7, 3], 'step counts: Part 1 = 6 (3 x worked, predict; the three explain steps that restated the rule boxes are gone), Part 3 = 7 exceptions, Part 4 = 3 exam items');
   ok(!L.steps.some((s) => ['s02', 's05', 's08'].includes(s.id)), 'the steps that only restated the rule boxes (s02, s05, s08) are removed; the other ids are not renumbered');
   ok(['s01', 's04', 's07'].every((id) => /\blesson-\d\d\/s\d\d/.test(L.steps.find((s) => s.id === id).rule) === (id !== 's04')), 'the merged facts moved into the rule boxes of the worked steps (links to Lessons 08, 09, 10)');
-  ok(byPart[2].length >= 38 + 4, `Part 2 has a step for every one of the 38 cards plus labs and kinds (${byPart[2].length})`);
+  ok(byPart[2].length >= 39 + 4, `Part 2 has a step for every one of the 39 cards plus labs and kinds (${byPart[2].length})`);
   eq(byPart[1].map((s) => s.type), ['worked', 'predict', 'worked', 'predict', 'worked', 'predict'], 'Part 1: worked, predict for each question');
   ok(byPart[3].every((s) => s.type === 'choice'), 'Part 3: one choice step each');
   ok(byPart[4].every((s) => s.type === 'predict' && /Write the structure of the major organic product/.test(strip(s.prompt))), 'Part 4: predict steps in workbook phrasing');
@@ -292,12 +292,12 @@ export async function lesson17({ ok, eq }) {
   const da = L.steps.find((s) => s.chk && s.chk.engine === 'diels-alder-parent');
   ok(da && /href="#reactions\/diels-alder"/.test(da.reveal) && /Q1/.test(da.reveal) && /Q3/.test(da.reveal), 'the parent Diels-Alder step links its card and names the questions');
   const ids38 = HUB_CARDS.map((c) => c.id);
-  eq(ids38.length, 38, 'the hub has 38 cards');
+  eq(ids38.length, 39, 'the hub has 39 cards (38, plus hot KMnO₄ on an alkyne)');
   const missing = ids38.filter((id) => !p2cards.has(id));
-  eq(missing, [], 'Part 2 reaches all 38 hub cards (missing: ' + missing.join(', ') + ')');
+  eq(missing, [], 'Part 2 reaches all 39 hub cards (missing: ' + missing.join(', ') + ')');
   const p2steps = L.steps.filter((s) => s.part === 2 && s.type === 'predict');
   const cardOfStep = p2steps.map((s) => (s.chk && s.chk.card) || (/#reactions\/([a-z0-9-]+)/.exec(s.reveal) || [])[1]);
-  eq(cardOfStep.length, 38, 'Part 2 has exactly 38 predict steps, one per card');
+  eq(cardOfStep.length, 39, 'Part 2 has exactly 39 predict steps, one per card');
   eq([...new Set(cardOfStep)].sort(), ids38.slice().sort(), 'each hub card has exactly one Part 2 predict step');
   // Part 3 and 4 cards are real too
   for (const id of reactionLinks) ok(!!HUB_BY_ID[id], `link target ${id}`);
@@ -357,7 +357,7 @@ export async function lesson17({ ok, eq }) {
     ok(rc.some((f) => f.n === '13' || f.n === '14'), 'recap L17 covers the ring lessons (13 or 14)');
   }
 
-  console.log(`  Lesson 17: ${L.steps.length} steps (Part 1: ${byPart[1].length}, Part 2: ${byPart[2].length}, Part 3: ${byPart[3].length}, Part 4: ${byPart[4].length}); ${nChk} engine-checked answers with ${nWrong} wrong drawings compared; ${nSmiles} SMILES parsed; ${nLinks} links resolved; ${combos} lab combinations run; ${p2cards.size}/38 cards reached in Part 2`);
+  console.log(`  Lesson 17: ${L.steps.length} steps (Part 1: ${byPart[1].length}, Part 2: ${byPart[2].length}, Part 3: ${byPart[3].length}, Part 4: ${byPart[4].length}); ${nChk} engine-checked answers with ${nWrong} wrong drawings compared; ${nSmiles} SMILES parsed; ${nLinks} links resolved; ${combos} lab combinations run; ${p2cards.size}/${HUB_CARDS.length} cards reached in Part 2`);
 }
 
 // run alone: node tests/lesson17.mjs (from learn/)

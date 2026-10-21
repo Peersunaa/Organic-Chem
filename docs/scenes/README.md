@@ -1,6 +1,6 @@
 # Mechanism scenes
 
-Storyboards for 20 animated, scrubbable mechanism scenes (17 reagent scenes plus three Lesson 08 primers) in Orgo Learn (McMurry Fundamentals Ch 1–6, plus the extra midterm reactions on the hub). Each scene shows how a reagent acts on a reactant: which electrons move and why, where the new bond forms, and why the regiochemistry and stereochemistry come out as they do. There are two toggleable layers: ARROWS (curved arrows, electron pairs travelling) and ORBITALS (π clouds, empty p, σ*, bromonium, metal surface, faces).
+Storyboards for 21 animated, scrubbable mechanism scenes (18 reagent scenes plus three Lesson 08 primers) in Orgo Learn (McMurry Fundamentals Ch 1–6, plus the extra midterm reactions on the hub). Each scene shows how a reagent acts on a reactant: which electrons move and why, where the new bond forms, and why the regiochemistry and stereochemistry come out as they do. There are two toggleable layers: ARROWS (curved arrows, electron pairs travelling) and ORBITALS (π clouds, empty p, σ*, bromonium, metal surface, faces).
 
 - **[SCENE-SCHEMA.md](SCENE-SCHEMA.md)** is the contract: data model, atom identity, coordinates and camera, timing, colour, reduced motion, accessibility, a JSON Schema, and the tests to port.
 - **`NN-id.md`** holds one scene each: intent, stage, beats table, chemistry checks, stereo callout, what-if links, end quiz, notes, and the full scene object as JSON (the source of truth).
@@ -30,7 +30,8 @@ Every scene was generated from data and machine-checked with Python RDKit. The c
 | 17 | [hcl-ethylene](17-hcl-ethylene.md) | primer (Lesson 08 s13, s17) | ethylene + HCl → chloroethane, the model polar reaction | 8 | 33 |
 | 18 | [arrow-grammar](18-arrow-grammar.md) | primer (Lesson 08 s06) | one arrow per taught case: H–Cl → H⁺ + Cl⁻ (bond → atom), HO⁻ + H⁺ → H₂O (lone pair → atom), ethylene + H⁺ → CH₃CH₂⁺ (bond → new bond) | 7 | 30 |
 | 19 | [carbocation](19-carbocation.md) | primer (Lesson 08 s15) | the flat ethyl cation, its empty p orbital, Cl⁻ bonding into it (a short primer) | 3 | 14 |
-| 20 | [alkene-kmno4-hot](20-alkene-kmno4-hot.md) | `alkene-kmno4-acid` | 2-methylbut-2-ene + hot, acidic KMnO₄: syn attachment, diol (where cold stops), cleavage → acetone + acetic acid | 9 | 40 |
+| 20 | [alkene-kmno4-hot](20-alkene-kmno4-hot.md) | `alkene-kmno4-acid` | 2-methylbut-2-ene + hot, acidic KMnO₄: syn attachment, diol (where cold stops), cleavage → acetone + acetic acid (0.75× by default) | 9 | 54 |
+| 21 | [alkyne-kmno4-hot](21-alkyne-kmno4-hot.md) | `alkyne-kmno4-hot` | hex-3-yne + hot KMnO₄: syn attachment to one π bond, the 1,2-diketone, the cut → two propanoic acids; a terminal ≡C–H end → CO₂ (0.75× by default) | 8 | 47.5 |
 
 ## Build order
 

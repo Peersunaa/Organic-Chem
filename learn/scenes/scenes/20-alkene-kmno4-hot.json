@@ -101,13 +101,14 @@
   "arrows",
   "orbitals"
  ],
- "duration": 40.0,
+ "duration": 54.0,
+ "defaultSpeed": 0.75,
  "beats": [
   {
    "id": "b1-meet",
    "t0": 0.0,
-   "t1": 3.0,
-   "hold": 1,
+   "t1": 4.0,
+   "hold": 1.5,
    "kind": "look",
    "caption": "2-Methylbut-2-ene meets hot, acidic KMnO₄. Permanganate is purple; its Mn(VII) badly wants electrons.",
    "arrows": [],
@@ -155,9 +156,9 @@
   },
   {
    "id": "b2-approach",
-   "t0": 4.0,
-   "t1": 7.0,
-   "hold": 1,
+   "t0": 5.5,
+   "t1": 9.5,
+   "hold": 1.5,
    "kind": "look",
    "caption": "Two O atoms of MnO₄⁻ line up over the top face of the C=C, one above each carbon.",
    "arrows": [],
@@ -199,33 +200,50 @@
    "moves": [
     {
      "species": "MnO4",
-     "pairs": [
-      [
-       7,
-       1
+     "frame": [
+      1,
+      2
+     ],
+     "place": {
+      "7": [
+       -0.2,
+       0,
+       1.7
       ],
-      [
-       8,
-       2
+      "8": [
+       1.2,
+       0,
+       1.7
+      ],
+      "9": [
+       0.5,
+       0,
+       2.35
+      ],
+      "10": [
+       -0.3,
+       0,
+       2.9
+      ],
+      "11": [
+       1.3,
+       0,
+       2.9
       ]
-     ],
-     "gap": [
-      0,
-      0,
-      1.3
-     ],
+     },
      "at": [
       0,
       0.7
      ]
     }
-   ]
+   ],
+   "notes": "MnO₄⁻ is stood upright over the C=C (place move in the frame C1→C2): O(a) above C1, O(b) above C2, Mn above the middle and its other two O further up, so the ring of b3 reads as a pentagon on the top face."
   },
   {
    "id": "b3-ring",
-   "t0": 8.0,
-   "t1": 12.0,
-   "hold": 1,
+   "t0": 11.0,
+   "t1": 16.5,
+   "hold": 1.5,
    "kind": "step",
    "caption": "In one step both C–O bonds form, both on the top face (syn): a cyclic manganate ester. Mn(VII) → Mn(V).",
    "arrows": [
@@ -350,20 +368,7 @@
    ],
    "charges": [],
    "partials": [],
-   "orbitals": [
-    {
-     "kind": "ring",
-     "atoms": [
-      1,
-      7,
-      9,
-      8,
-      2
-     ],
-     "side": "top",
-     "emphasis": "focus"
-    }
-   ],
+   "orbitals": [],
    "badges": [
     {
      "atom": 9,
@@ -389,13 +394,28 @@
     }
    },
    "state": "[O-:11][Mn:9]1(=[O:10])[O:7][C:1]([CH3:3])([CH3:4])[CH:2]([CH3:5])[O:8]1",
-   "ts": true
+   "ts": true,
+   "moves": [
+    {
+     "species": "MnO4",
+     "by": [
+      0,
+      0,
+      -0.4
+     ],
+     "at": [
+      0.05,
+      0.6
+     ]
+    }
+   ],
+   "notes": "No ring glyph: the five-membered ring is drawn with ordinary bonds only (readability pass 2026-10-21; a filled ring sat over the Mn and O labels on a phone)."
   },
   {
    "id": "b4-diol",
-   "t0": 13.0,
-   "t1": 17.0,
-   "hold": 1,
+   "t0": 18.0,
+   "t1": 23.0,
+   "hold": 1.5,
    "kind": "summary",
    "caption": "Water cuts the two O–Mn bonds, never the C–O bonds: the diol. Cold, dilute, basic KMnO₄ stops here.",
    "arrows": [],
@@ -522,9 +542,9 @@
   },
   {
    "id": "b5-attach",
-   "t0": 18.0,
-   "t1": 21.0,
-   "hold": 1,
+   "t0": 24.5,
+   "t1": 28.5,
+   "hold": 1.5,
    "kind": "summary",
    "caption": "Hot and acidic, it goes on: a fresh MnO₄⁻ bonds to one OH oxygen, and HO⁻ leaves. Mn(VII) wants a pair.",
    "arrows": [],
@@ -622,9 +642,9 @@
   },
   {
    "id": "b6-cleave",
-   "t0": 22.0,
-   "t1": 27.0,
-   "hold": 1,
+   "t0": 30.0,
+   "t1": 36.5,
+   "hold": 1.5,
    "kind": "step",
    "caption": "The bond that joined the two OH carbons is cut. Each end becomes C=O, and Mn takes the pair: Mn(V).",
    "arrows": [
@@ -851,9 +871,9 @@
   },
   {
    "id": "b7-sort",
-   "t0": 28.0,
-   "t1": 31.0,
-   "hold": 1,
+   "t0": 38.0,
+   "t1": 42.0,
+   "hold": 1.5,
    "kind": "look",
    "caption": "Sort the ends. The (CH₃)₂C end has no H: a ketone, acetone. The CH end still has an H: an aldehyde.",
    "arrows": [],
@@ -895,9 +915,9 @@
   },
   {
    "id": "b8-acid",
-   "t0": 32.0,
-   "t1": 36.0,
-   "hold": 1,
+   "t0": 43.5,
+   "t1": 48.5,
+   "hold": 1.5,
    "kind": "summary",
    "caption": "KMnO₄ oxidises that C–H too: the aldehyde becomes acetic acid. Purple MnO₄⁻ ends as brown MnO₂.",
    "arrows": [],
@@ -941,8 +961,8 @@
   },
   {
    "id": "b9-products",
-   "t0": 37.0,
-   "t1": 40.0,
+   "t0": 50.0,
+   "t1": 54.0,
    "hold": 0,
    "kind": "look",
    "caption": "Acetone and acetic acid, from one C=C. A =CH₂ end would be oxidised all the way to CO₂.",

@@ -349,6 +349,20 @@ export function compileScene(scene, { draw, orient = {}, coords = [] }) {
     const nearPoint = (near) => centroid((Array.isArray(near) ? near : [near]).map((id) => pos.get(id)));
 
     (beat.moves || []).forEach((m) => {
+      if (m.place) {
+        // place atoms at given spots in the frame of two stage atoms: origin = frame[0], x along frame[0] -> frame[1] (in the screen plane), y a quarter turn
+        // clockwise from x (down the screen when x points right), z toward the viewer. A non-rigid tween (each atom straight to its spot), so a species can be
+        // stood up in 3D (MnO4- upright over a C=C, its ring then drawn as a clean pentagon: scene 20 readability pass, 2026-10-21)
+        const [fa, fb] = m.frame;
+        const o = pos.get(fa), v = sub(pos.get(fb), o);
+        const ex = unit([v[0], v[1], 0]), ey = [-ex[1], ex[0], 0];
+        const ids = Object.keys(m.place).map(Number).filter((id) => pos.has(id));
+        const from = {}, to = {};
+        ids.forEach((id) => { const [dx, dy, dz] = m.place[id]; from[id] = pos.get(id).slice(); to[id] = [o[0] + ex[0] * dx + ey[0] * dy, o[1] + ex[1] * dx + ey[1] * dy, o[2] + dz]; });
+        segs.push({ at: m.at || [0, 0.4], ids, from, to, relayout: true });
+        ids.forEach((id) => pos.set(id, to[id].slice()));
+        return;
+      }
       if (m.rotate) {
         // group = the atoms attached to m.atoms[0] on its own side of the axis p-q
         const [p, q] = m.rotate.axis;

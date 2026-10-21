@@ -18,6 +18,10 @@ Units: the layout is done in RDKit units (bond = 1.5), then scaled to 44 px per 
 in 640 x 400), centred per reaction (one translation for all stages of a reaction) and flipped to SVG y-down.
 
 Run:  python tools/scene_coords.py            (writes the JSON and prints the check)
+      python tools/scene_coords.py --only ID    (builds only reaction ID from EXTRA_SPECS below and merges it into the JSON; the other reactions are kept)
+
+Reactions 17-20 (hcl-ethylene, arrow-grammar, carbocation-cl, alkene-kmno4-acid) were merged into coords.json the --only way and are not in
+build_spec(); a full run keeps every reaction already in the JSON that build_spec() does not define, so it never drops them.
 """
 import json
 import math
@@ -296,6 +300,24 @@ def build_spec():
         S('reactants', '[CH2:1]=[CH:2][CH:3]=[CH2:4].[CH2:5]=[CH:6][CH:7]=[O:8]', frm='product',
           note='s-cis diene (U shape) over the dienophile. The two new bonds C4-C5 and C1-C6 are not yet formed.'),
         S('product', '[CH2:1]1[CH:2]=[CH:3][CH2:4][CH2:5][CH:6]1[CH:7]=[O:8]', note='cyclohex-3-ene-1-carbaldehyde (drawn flat).'),
+    ])
+    return R
+
+
+def EXTRA_SPECS():
+    """Reactions merged with --only (scenes added after the first sixteen)."""
+    R = {}
+    # ---- scene 21, hot KMnO4 on an alkyne: hex-3-yne -> cyclic manganate ester -> hexane-3,4-dione -> two propanoic acids
+    R['alkyne-kmno4-hot'] = dict(orient=dict(a=3, b=4, angle=0), stages=[
+        S('reactants', '[CH3:1][CH2:2][C:3]#[C:4][CH2:5][CH3:6].[O-:11][Mn:9](=[O:7])(=[O:8])=[O:10]',
+          hints=[M([3, 4], {7: (-0.5, -1.15), 8: (0.5, -1.15), 9: (0.0, -2.1), 10: (-0.95, -2.65), 11: (0.95, -2.65)})],
+          note='Scene 21 (hot, acidic KMnO4 on an alkyne): hex-3-yne and MnO4- over one pi bond.'),
+        S('manganate-ester', '[CH3:1][CH2:2][C:3]1=[C:4]([CH2:5][CH3:6])[O:8][Mn:9](=[O:10])([O-:11])[O:7]1',
+          movers=[1, 2, 5, 6, 7, 8, 9, 10, 11], note='Both O atoms add to the same face of one pi bond: a cyclic manganate ester; one pi bond is left.'),
+        S('diketone', '[CH3:1][CH2:2][C:3](=[O:7])[C:4](=[O:8])[CH2:5][CH3:6]', movers=[1, 2, 5, 6, 7, 8],
+          note='Course level: the alkyne is oxidised to a 1,2-diketone, hexane-3,4-dione.'),
+        S('product', '[CH3:1][CH2:2][C:3](=[O:7])[O:12][H:14].[CH3:6][CH2:5][C:4](=[O:8])[O:13][H:15]', frm='diketone', movers=[4, 5, 6, 8, 12, 13, 14, 15],
+          hints=[H(4, 3, 2.6, 0)], note='Two propanoic acids: the C-C between the two C=O is cut and each end becomes CO2H.'),
     ])
     return R
 
@@ -823,11 +845,32 @@ def build():
 
 
 def main():
+    global build_spec
     try:
         sys.stdout.reconfigure(encoding='utf-8')
     except Exception:
         pass
+    cur = json.loads(OUT.read_text(encoding='utf-8')) if OUT.exists() else None
+    if '--only' in sys.argv:
+        rid = sys.argv[sys.argv.index('--only') + 1]
+        extra = EXTRA_SPECS()
+        if rid not in extra:
+            print('no such reaction in EXTRA_SPECS:', rid)
+            return 1
+        build_spec = lambda: {rid: extra[rid]}
     final, report = build()
+    if cur is not None:
+        # keep every reaction the JSON already has that this run did not build (17-20, merged with --only), and their scales
+        scales = dict(cur.get('_meta', {}).get('scales', {}))
+        scales.update(final['_meta']['scales'])
+        merged = {'_meta': dict(final['_meta'], scales=scales)}
+        for k, v in cur.items():
+            if k != '_meta':
+                merged[k] = final.get(k, v)
+        for k, v in final.items():
+            if k not in merged:
+                merged[k] = v
+        final = merged
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(final, ensure_ascii=False, indent=1), encoding='utf-8')
     print('wrote learn/scenes/coords.json')

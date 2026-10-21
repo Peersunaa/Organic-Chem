@@ -1008,6 +1008,40 @@ export default {
       id: 's29'
     },
     {
+      caveman: {"prompt":"<name new=\"hex-3-yne\" old=\"3-hexyne\"></name> + <b>KMnO₄, hot, H₃O⁺</b>: major product(s)?","reveal":"<b>Q1:</b> KMnO₄ cuts C≡C: each end gains O.<br><b>Q2:</b> H count: no H, CO₂H; ≡C–H, CO₂.<br><b>Q3:</b> C≡C gone.<br><b>Kind:</b> two <b>carboxylic acids</b>. <a href=\"#reactions/alkyne-kmno4-hot\">Open card</a>","options":[{"why":"1,2-diketone: halfway. Hot KMnO₄ cuts C–C between C=O."},{"why":"Ketone: Hg²⁺, H₂O. Hot KMnO₄ cuts C≡C."},{"why":"Aldehyde not end. Hot KMnO₄: each end to –CO₂H."},{"why":"Yes. Hot KMnO₄ cuts C≡C. No H each end: two –CO₂H."}]}, // CAVEMAN
+      type: 'predict',
+      skill: 'predict-product',
+      part: 2,
+      prompt: 'Substrate: <name new="hex-3-yne" old="3-hexyne"></name>. Reagent: <b>KMnO₄, hot, H₃O⁺</b>. What is the major product (or products)?',
+      equation: {
+        reactants: ['CCC#CCC'],
+        products: [],
+        cond: 'KMnO₄, hot, H₃O⁺'
+      },
+      options: [
+        {
+          text: '<mol smiles="CCC(=O)C(=O)CC"></mol>',
+          why: 'That is the 1,2-diketone, only the halfway point. Hot KMnO₄ goes on and cuts the C–C between the two C=O, so each end becomes a carboxylic acid.'
+        },
+        {
+          text: '<mol smiles="CCCC(=O)CC"></mol>',
+          why: 'That is the ketone from Hg²⁺ with H₂O (hydration). Hot KMnO₄ does not add water across the C≡C: it cuts it.'
+        },
+        {
+          text: '<mol smiles="CCC=O"></mol>',
+          why: 'An aldehyde is not where it stops. Hot KMnO₄ oxidises each end all the way to the carboxylic acid, –CO₂H.'
+        },
+        {
+          text: '<mol smiles="CCC(=O)O.CCC(=O)O"></mol>',
+          correct: true,
+          why: 'Yes. Hot KMnO₄ cuts the C≡C right through. Neither carbon of the triple bond has an H, so each end becomes –CO₂H: two propanoic acids.'
+        }
+      ],
+      reveal: '<b>Q1, what adds:</b> The C≡C is attacked by the oxidant and cut right through: each end gains O.<br><b>Q2, where:</b> Count H on each triple-bond carbon: no H gives –CO₂H, a ≡C–H end gives CO₂.<br><b>Q3, in space:</b> Nothing to show: the C≡C is gone.<br><b>Kind of product:</b> two <b>carboxylic acids</b> (propanoic acid, one from each end). <a href="#reactions/alkyne-kmno4-hot">Open the hot KMnO₄ alkyne card</a>.',
+      chk: { card: 'alkyne-kmno4-hot', sub: 'CCC#CCC', v: 'fixed' },
+      id: 's65'
+    },
+    {
       caveman: {"prompt":"Lab, alkynes. Predict BEFORE answer: equivalents, C=O, geometry. Three right, two alkynes.","worked":"HBr (1): 2-bromohex-1-ene; HBr (2): 2,2-dibromohexane; Br₂ (1): (E)-1,2-dibromohex-1-ene; H₂O, HgSO₄: hexan-2-one; H₂/Lindlar: hex-1-ene; H₂/Pd: hexane.","hints":["Equivalents: 1 stops at C=C, 2 use both π bonds. H₂: which catalyst. Water, HgSO₄: ketone.","Wrong geometry (Z where anti gives E), C=O on end, wrong halogen count: another reagent."]}, // CAVEMAN
       type: 'try',
       skill: 'predict-product',

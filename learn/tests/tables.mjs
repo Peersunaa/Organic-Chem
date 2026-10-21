@@ -53,7 +53,7 @@ const ezLabels = (s) => (ezInfo(s) || []).map((e) => e.label).filter(Boolean);
 export async function tables({ ok, eq }) {
   await ready();
   // ---- (1) sizes
-  const SIZES = { alkenes: [12, 11], alkynes: [7, 10], rings: [25, 6] };
+  const SIZES = { alkenes: [12, 11], alkynes: [7, 11], rings: [25, 6] };
   for (const T of TB.TABLES) {
     const d = TB.tableData(T.id);
     eq([d.rows.length, d.cols.length], SIZES[T.id], `table ${T.id}: ${SIZES[T.id].join(' x ')}`);

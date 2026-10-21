@@ -63,7 +63,7 @@ Y = 200 + 64·k·((y − fy)·cos θ − z·sin θ)
 
 ## 4 Timeline
 
-- Each beat has a motion window `[t0, t1]` (seconds from scene start), then a `hold`. `t0(next) = t1 + hold`. Motion beats are 2–5 s long (a test enforces this). The default hold is 1.0 s. The last beat has hold 0, and the player stays on its end state until the learner acts.
+- Each beat has a motion window `[t0, t1]` (seconds from scene start), then a `hold`. `t0(next) = t1 + hold`. Motion beats are 2–5 s long (a test enforces this). The default hold is 1.0 s. A scene that sets `defaultSpeed` (the player's starting speed, below 1 for a slow, dense mechanism: scenes 20 and 21 use 0.75) may use motion windows up to 7 s and holds of 1.5 s, and may run to 60 s. The last beat has hold 0, and the player stays on its end state until the learner acts.
 - Progress through a beat is `p = ease((t − t0) / (t1 − t0))`, with the house ease `cubic-bezier(.4, 0, .2, 1)`. During the hold, p = 1 and nothing moves.
 - Every `at: [a, b]` is a fraction of the motion window, before easing. Each sub-motion is eased on its own window.
 - Order inside a beat: `reset` cross-fade (0–0.1, 250 ms) → `drops` fade out (0–0.2) → `adds` fade in (0–0.25) → `moves` (their `at`, default [0, 0.4]) → `arrows` (their `at`) → bond fades (tied to arrows, section 7) → `charges` and `partials` cross-fade (0.85–1.0) → `relayout` (0.4–1.0).
@@ -147,6 +147,7 @@ Y = 200 + 64·k·((y − fy)·cos θ − z·sin θ)
 | `{species, pairs: [[a, p], [b, q]], gap: [dx, dy, dz]}` | dock: rotate in plane and translate so that a sits at p + gap and b at q + gap (least squares when not exact) |
 | `{atoms, backside: {of, leaving, attacker?, dist}}` | place the moved group `dist` units from `of`, on the line from `leaving` through `of`, on the far side (SN2, bromonium opening). With `attacker`, the attacker is fixed and the species moves so that `of` lands opposite `leaving` |
 | `{atoms: [a], with: "substituents", rotate: {axis: [p, q], deg}}` | rotate a and everything attached on its side about the p→q axis, in 3D (s-trans → s-cis) |
+| `{species \| atoms, frame: [p, q], place: {map: [dx, dy, dz]}}` | put each listed atom at a spot in the frame of two stage atoms: origin p, x along p→q in the screen plane, y a quarter turn clockwise from x, z toward the viewer. Not rigid: each atom tweens straight to its spot (scenes 20 and 21 stand MnO₄⁻ upright over the π bond this way) |
 | `orient: {atoms: [a, b], dir: [x, y, z]}` | extra key on any move: also turn the species so that a→b points along `dir` |
 | `trail: true` | extra key: leave a dotted motion trail that fades over 600 ms (surface H transfer) |
 
@@ -177,7 +178,9 @@ Y = 200 + 64·k·((y − fy)·cos θ − z·sin θ)
 
 Soft fills use `color-mix(in srgb, <token> N%, transparent)`, as in `figures/ch4-alkene.svg`. Light and dark themes come from the tokens. Text in the SVG is 16 px at the phone-scaled size (the house figure rule). Captions live in HTML under the SVG, not inside it, so they wrap and keep the app font.
 
-**Motion.** Calm and eased. No bounce, no overshoot, no spring, no shake. Electrons travel along the arrow, never jump. One idea per beat. Every beat ends on a clear, still state. Nothing moves during a hold. Total scene length is 25–50 s (a short Lesson 08 primer of 3–4 beats, such as scene 19: 12 s or more).
+**Motion.** Calm and eased. No bounce, no overshoot, no spring, no shake. Electrons travel along the arrow, never jump. One idea per beat. Every beat ends on a clear, still state. Nothing moves during a hold. Total scene length is 25–50 s (a short Lesson 08 primer of 3–4 beats, such as scene 19: 12 s or more; a scene with `defaultSpeed`: up to 60 s).
+
+**Clear space (readability pass, 2026-10-21).** No label may overlap another label, a bond or a glyph at 400 px. The renderer measures every atom label (symbol and H count; the H count goes right or left of the symbol when that side is clear of bonds), stops each bond at the edge of its label, puts charges, badges and δ labels in the nearest clear spot round their atom (off every label, bond line, lone pair and other pill), and knocks the label areas out of the bond, orbital, faces and arrow layers with a mask, so no line or lobe runs through a letter. A ring that forms on one face is drawn with ordinary bonds; scene 20 no longer uses the `ring` glyph.
 
 ## 11 Reduced motion
 
@@ -227,6 +230,7 @@ When `prefers-reduced-motion: reduce` is set (`reduceMotion()` as in app.js):
       "state": {"type": "string", "description": "mapped dot-SMILES of the start"}}},
     "layers": {"const": ["arrows", "orbitals"]},
     "duration": {"type": "number"},
+    "defaultSpeed": {"enum": [0.5, 0.75, 1, 1.5], "description": "the player's starting speed (scenes 20 and 21: 0.75)"},
     "beats": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/beat"}},
     "stereoCallout": {"type": "object", "required": ["title", "text"], "properties": {"title": {"type": "string"}, "text": {"type": "string"}, "stereoMoment": {"type": ["string", "null"], "description": "STEREO_MOMENTS id (engine/stereo-moments.js) for the See-it-in-3D button"}}},
     "whatIf": {"type": "array", "items": {"type": "string", "pattern": "^[0-9]{2}-[a-z0-9-]+$"}},
@@ -265,6 +269,7 @@ When `prefers-reduced-motion: reduce` is set (`reduceMotion()` as in app.js):
       "backside": {"type": "object", "required": ["of", "leaving", "dist"], "properties": {"of": {"$ref": "#/$defs/map"}, "leaving": {"$ref": "#/$defs/map"}, "attacker": {"$ref": "#/$defs/map"}, "dist": {"type": "number"}}},
       "with": {"const": "substituents"}, "rotate": {"type": "object", "required": ["axis", "deg"], "properties": {"axis": {"type": "array", "items": {"$ref": "#/$defs/map"}}, "deg": {"type": "number"}}},
       "orient": {"type": "object", "properties": {"atoms": {"type": "array"}, "dir": {"$ref": "#/$defs/vec3"}}},
+      "frame": {"type": "array", "items": {"$ref": "#/$defs/map"}, "minItems": 2, "maxItems": 2}, "place": {"type": "object", "patternProperties": {"^[0-9]+$": {"$ref": "#/$defs/vec3"}}},
       "at": {"$ref": "#/$defs/window"}, "trail": {"type": "boolean"}}},
     "beat": {"type": "object", "required": ["id", "t0", "t1", "hold", "kind", "caption", "arrows", "bonds", "charges", "partials", "orbitals", "badges", "ghosts", "camera", "faces", "state"], "properties": {
       "id": {"type": "string", "pattern": "^b[0-9]+-[a-z0-9-]+$"},

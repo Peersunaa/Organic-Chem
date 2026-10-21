@@ -979,6 +979,7 @@ a.ms-type:hover { background: var(--surface-2); } a.ms-type:focus-visible { outl
 .ms-dock { display: grid; gap: var(--s-2); padding: 0; background: var(--surface); }   /* timeline + Play right under the stage, never over it; the stage is capped so both fit one screen (novice re-test N3) */
 .ms-capbox { display: grid; gap: var(--s-1); min-width: 0; }
 .ms-count { margin: 0; font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--muted); }
+.ms-opener { margin: 0 0 10px; padding: 6px 10px; border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 7%, transparent); border-radius: 0 var(--r-sm, 6px) var(--r-sm, 6px) 0; font-size: .95rem; line-height: 1.4rem; color: var(--ink); }
 .ms-cap { margin: 0; min-height: 4.5rem; font-size: 1rem; line-height: 1.5rem; color: var(--ink); }
 .ms-cap.is-in { animation: ms-in 150ms var(--ease-out) both; }
 @media (min-width: 720px) { .ms-cap { min-height: 3rem; } .ms-why { min-height: 2.5rem; } }
@@ -1064,6 +1065,7 @@ a.ms-type:hover { background: var(--surface-2); } a.ms-type:focus-visible { outl
 .bld-rrow { align-items: stretch; }
 .bld-ghead { flex: none; align-self: center; display: inline-flex; align-items: center; gap: var(--s-1); margin: 0; padding: 0 var(--s-1); font: 600 var(--fs-label)/var(--lh-label) var(--mono); letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); max-height: 120px; }
 .bld-rtile { width: 150px; justify-items: start; text-align: left; position: relative; padding-top: var(--s-3); }
+.bld-rtag { justify-self: start; align-self: start; font-size: .75rem; line-height: 1.1rem; padding: 0 7px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); }
 .bld-rlabel { font-weight: 600; color: var(--ink); overflow-wrap: anywhere; padding-right: 22px; }
 .bld-rstat { color: var(--muted); }
 .bld-rtile.is-ok .bld-rstat { color: var(--ok); }

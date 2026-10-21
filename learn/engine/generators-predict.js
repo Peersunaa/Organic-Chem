@@ -424,6 +424,16 @@ const FIXED = {
       W('Cc1ccc(S(=O)(=O)O)cc1', 'unchanged', 'adds', 'That is the starting acid. Hot D₂SO₄ in D₂O runs sulfonation backwards, so the SO₃H is removed.'),
       W('Cc1ccccc1', 'plainH', 'adds', 'The SO₃H is gone, but the atom that replaces it is D, not H. D₂SO₄ in D₂O supplies D.'),
       W('Cc1cccc([2H])c1', 'moved', 'where', 'The D must go exactly where the SO₃H was (para to the CH₃). It does not end up on a different ring carbon.')
+    ] }] },
+  // hot KMnO₄ on a C≡C (scene 21): no engine model either (reactions-alkynes.js has no oxidative cleavage), so a fixed answer like the B3.1 cards
+  'alkyne-kmno4-hot': { fam: 'alkyne', items: [{
+    label: 'KMnO₄, hot, H₃O⁺',
+    right: 'Hot KMnO₄ cuts the C≡C right through. Neither carbon of the triple bond has an H, so each end becomes –CO₂H: two propanoic acids.',
+    wrong: [
+      W('CCC(=O)C(=O)CC', 'diketone', 'adds', 'That is the 1,2-diketone, only the halfway point. Hot KMnO₄ goes on and cuts the C–C between the two C=O, so each end becomes a carboxylic acid.'),
+      W('CCCC(=O)CC', 'ketone', 'adds', 'That is the ketone from Hg²⁺ with H₂O (hydration). Hot KMnO₄ does not add water across the C≡C: it cuts it.'),
+      W('CCC=O', 'aldehyde', 'adds', 'An aldehyde is not where it stops. Hot KMnO₄ oxidises each end all the way to the carboxylic acid, –CO₂H.'),
+      W('CC(=O)O', 'shorter', 'where', 'The cut is at the C≡C, between C3 and C4, so each piece keeps three carbons. Acetic acid (two carbons) would need a different bond to break.')
     ] }] }
 };
 /** A drill entry for a fixed-answer card: one substrate per hub example, the right answer read from the hub card, the wrong answers from FIXED. */
@@ -476,7 +486,7 @@ export const DRILL = {
 
   'diene-hx': { fam: 'diene', subs: ['C=CC=C', 'CC=CC=C', 'C=C(C)C=C', 'C1=CC=CCC1', 'C1=CC=CC1', 'CC=CC=CC', 'CC(C)=CC=C', 'C=C(C)C(C)=C'], variants: [V('HBr', 'HBr'), V('HCl', 'HCl')], ex: 0, solve: (s, v) => solveDiene(s, v) }
 };
-// the ten workbook B3.1 cards: fixed answers (see FIXED above)
+// the ten workbook B3.1 cards and hot KMnO₄ on an alkyne: fixed answers (see FIXED above)
 for (const id of Object.keys(FIXED)) DRILL[id] = fixedEntry(id);
 export const DRILL_IDS = HUB_CARDS.filter((c) => DRILL[c.id]).map((c) => c.id);
 /** Hub cards with no drill entry (none: the cards with an engine model use it, the ten B3.1 cards use fixed answers). */

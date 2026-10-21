@@ -21,14 +21,14 @@ export const FAMILY_OF = {
   'alkene-hx': 'hx', 'alkene-hydration': 'hx', 'diene-hx': 'hx',
   'alkene-x2': 'x2', 'alkene-epoxide-diol': 'x2',
   'alkene-h2-pd': 'syn', 'alkene-kmno4-base': 'syn', 'alkene-epoxide': 'syn',
-  'alkene-kmno4-acid': 'oxid', 'oxidation-pcc': 'oxid', 'oxidation-cr': 'oxid',
+  'alkene-kmno4-acid': 'oxid', 'alkyne-kmno4-hot': 'oxid', 'oxidation-pcc': 'oxid', 'oxidation-cr': 'oxid',
   'alkyne-hx-1': 'alkyne', 'alkyne-hx-2': 'alkyne', 'alkyne-x2-1': 'alkyne', 'alkyne-x2-2': 'alkyne', 'alkyne-hydration': 'alkyne', 'alkyne-lindlar': 'alkyne', 'alkyne-h2-pd': 'alkyne', 'alkyne-acetylide': 'alkyne',
   'eas-bromination': 'eas', 'eas-nitration': 'eas', 'eas-sulfonation': 'eas', 'fc-alkylation': 'eas', 'fc-acylation': 'eas',
   'director-activating': 'directors', 'director-halogen': 'directors', 'director-meta': 'directors',
   'side-chain-kmno4': 'sidechain', 'nitro-reduction': 'sidechain', 'side-chain-h2pd': 'sidechain',
   'diels-alder': 'hubonly', 'clemmensen': 'hubonly', 'birch': 'hubonly', 'alkene-hydroboration': 'hubonly', 'alkyne-hydroboration': 'hubonly', 'benzylic-bromination': 'hubonly', 'amine-in-acid': 'hubonly', 'desulfonation': 'hubonly'
 };
-/** Short names for the 38 cards (the chips of the settings card). */
+/** Short names for the 39 cards (the chips of the settings card). */
 export const CARD_LABEL = {
   'eas-bromination': 'Br₂, FeBr₃', 'eas-nitration': 'HNO₃, H₂SO₄', 'eas-sulfonation': 'SO₃, H₂SO₄', 'fc-alkylation': 'R–Cl, AlCl₃', 'fc-acylation': 'RCOCl, AlCl₃',
   'director-activating': 'Activator on ring', 'director-halogen': 'Halogen on ring', 'director-meta': 'Deactivator on ring',
@@ -38,7 +38,7 @@ export const CARD_LABEL = {
   'alkene-hx': 'HBr / HCl', 'alkene-hydration': 'H₂O, H₂SO₄', 'alkene-x2': 'Br₂ / Cl₂', 'alkene-h2-pd': 'H₂, Pd/C', 'alkene-kmno4-base': 'KMnO₄, OH⁻', 'alkene-kmno4-acid': 'KMnO₄, H₃O⁺',
   'alkene-epoxide': 'RCO₃H', 'alkene-epoxide-diol': 'RCO₃H, then H₃O⁺', 'alkene-hydroboration': 'BH₃, then H₂O₂',
   'alkyne-hx-1': 'HX (1 equiv.)', 'alkyne-hx-2': 'HX (2 equiv.)', 'alkyne-x2-1': 'X₂ (1 equiv.)', 'alkyne-x2-2': 'X₂ (2 equiv.)', 'alkyne-hydration': 'H₂O, HgSO₄', 'alkyne-lindlar': 'H₂, Lindlar',
-  'alkyne-h2-pd': 'H₂, Pd/C (2 equiv.)', 'alkyne-acetylide': 'NaNH₂, then R–Br', 'alkyne-hydroboration': 'BH₃, then H₂O₂',
+  'alkyne-h2-pd': 'H₂, Pd/C (2 equiv.)', 'alkyne-acetylide': 'NaNH₂, then R–Br', 'alkyne-hydroboration': 'BH₃, then H₂O₂', 'alkyne-kmno4-hot': 'KMnO₄, hot (C≡C)',
   'diene-hx': 'HX on a diene', 'diels-alder': 'Diels–Alder'
 };
 export const CARD_IDS = HUB_CARDS.map((c) => c.id);

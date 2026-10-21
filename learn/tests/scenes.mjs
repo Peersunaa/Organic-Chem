@@ -1,16 +1,18 @@
-// Mechanism scene checks (learn/scenes/): the 20 storyboards (01-16 and 20 reagent scenes, 17-19 Lesson 08 primers) in scenes/scenes/*.json, their compiled layouts in scenes/layouts/*.json, the renderer
+// Mechanism scene checks (learn/scenes/): the 21 storyboards (01-16, 20 and 21 reagent scenes, 17-19 Lesson 08 primers) in scenes/scenes/*.json, their compiled layouts in scenes/layouts/*.json, the renderer
 // (scenes/scene-engine.js), the index (scenes/scene-index.js) and the wiring in app.js, hub-view.js, widgets/index.js and index.html.
 // Run on its own with `node tests/scenes.mjs` from learn/, or as part of run.mjs.
 //
 //   storyboard   validates against the JSON Schema printed in docs/scenes/SCENE-SCHEMA.md (section 13); beats are contiguous and increasing; every motion window is
-//                2-5 s; every caption (and captionOrbitals) is at most 110 characters; the end quiz has exactly one right answer; every id it names exists (cards, lessons,
+//                2-5 s (2-7 s in a scene that sets a slower defaultSpeed); every caption (and captionOrbitals) is at most 110 characters; the end quiz has exactly one right answer; every id it names exists (cards, lessons,
 //                stereo moments, what-if scenes); the arrows reproduce the bond and charge changes between the states (the generator's RDKit checks 4 and 5, redone on the layout)
 //   layout       the committed layouts equal a fresh compile of the storyboards; every atom a beat mentions has a position; the motions end where pos1 says
 //   coords.json  every reaction a scene uses exists with its stages; where a scene's final molecule is the same molecule as a coords product stage, the last beat's drawing
 //                matches that stage's coordinates (within 1 px after a rigid fit: the scene is free to turn the molecule, not to change its shape)
 //   renderer     12 times along each scene, in motion and static, in each layer: well-formed SVG with a viewBox, no NaN, nothing outside the stage; static frames show their arrows
 //                with the pair at its end; the ORBITALS-only layer still moves the electrons; the end state of the last beat draws every atom of the last state
-//   placement    card -> scene covers the 17 reagent scenes, every primer is reached from a Lesson 08 step; lesson steps exist; routes, home and hub links, the widget registration and the CSS block are in place
+//   clear space  scenes 20 and 21 at the 400 px phone size, every beat, both layers: no label, charge, badge or note overlaps another, no bond line runs through a
+//                label that is not its own, everything inside the stage (renderScene opts.boxes); the 20 / 21 pacing (defaultSpeed 0.75) and the table/builder opener note
+//   placement    card -> scene covers the 18 reagent scenes, every primer is reached from a Lesson 08 step; lesson steps exist; routes, home and hub links, the widget registration and the CSS block are in place
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,6 +25,7 @@ import { parseSmiles } from '../scenes/scene-parse.js';
 import { compileScene, bindCoords } from '../scenes/scene-compile.js';
 import { makeDraw, coordStagesFor, ORIENT, SCENE_COORDS } from '../scenes/build-layouts.mjs';
 import { renderScene, sceneDuration, posAt, beatAt, whyLines, captionFor, screenPositions, cameraOf } from '../scenes/scene-engine.js';
+import { openerNote } from '../scenes/scene-opener.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const learn = path.resolve(here, '..');
@@ -134,7 +137,7 @@ export async function scenes({ ok: okT, eq }) {
   ok(!!schema, 'schema', 'docs/scenes/SCENE-SCHEMA.md holds the JSON Schema (section 13)');
 
   // ---- the index
-  ok(SCENES.length === 20, 'index', `20 scenes (17 reagent scenes + 3 Lesson 08 primers), found ${SCENES.length}`);
+  ok(SCENES.length === 21, 'index', `21 scenes (18 reagent scenes + 3 Lesson 08 primers), found ${SCENES.length}`);
   eq(SCENES.map((s) => s.id), fs.readdirSync(sceneDir).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).sort(), 'scenes index lists exactly the files in scenes/scenes');
   eq(fs.readdirSync(layoutDir).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', '')).sort(), SCENES.map((s) => s.id), 'scenes: a layout for every scene');
   ok(sceneId('alkene-hx') === '01-alkene-hx' && sceneId('01-alkene-hx') === '01-alkene-hx' && sceneId('nope') === null, 'index', 'sceneId() takes the short and the full id');
@@ -176,14 +179,15 @@ export async function scenes({ ok: okT, eq }) {
       ok(b.caption && b.caption.length <= 110, id, `${b.id}: caption is 1-110 characters (${(b.caption || '').length})`);
       if (b.captionOrbitals) ok(b.captionOrbitals.length <= 110, id, `${b.id}: captionOrbitals <= 110`);
       const win = b.t1 - b.t0;
-      ok(win >= 2 && win <= 5, id, `${b.id}: motion window ${win} s is 2-5 s`);
+      ok(win >= 2 && win <= (scene.defaultSpeed ? 7 : 5), id, `${b.id}: motion window ${win} s is 2-5 s (2-7 s in a slow-paced scene with a defaultSpeed)`);
       if (i < B.length - 1) ok(Math.abs(B[i + 1].t0 - (b.t1 + b.hold)) < 1e-9, id, `${b.id}: next beat starts at t1 + hold`);
       ok(i === 0 ? b.t0 === 0 : b.t0 > B[i - 1].t0, id, `${b.id}: times increase`);
       (b.arrows || []).forEach((a) => ok(a.at[0] >= 0 && a.at[1] <= 1 && a.at[0] < a.at[1] && a.why && a.why.length > 10, id, `${b.id}/${a.id}: window inside the beat, why line present`));
     });
     ok(B[B.length - 1].hold === 0, id, 'the last beat has no hold');
     const dur = sceneDuration(scene);
-    ok(dur >= (entry.primer && B.length <= 4 ? 12 : 25) && dur <= 50, id, `scene length ${dur} s is 25-50 s (a short Lesson 08 primer of 3-4 beats: 12-50 s)`);
+    ok(dur >= (entry.primer && B.length <= 4 ? 12 : 25) && dur <= (scene.defaultSpeed ? 60 : 50), id, `scene length ${dur} s is 25-50 s (a short Lesson 08 primer of 3-4 beats: 12-50 s; a slow-paced scene: up to 60 s)`);
+    if (scene.defaultSpeed !== undefined) ok([0.5, 0.75, 1, 1.5].includes(scene.defaultSpeed), id, `defaultSpeed ${scene.defaultSpeed} is one of the player's speeds`);
     ok(Math.abs(dur - scene.duration) < 1e-9, id, 'duration field equals the last beat end');
     ok(B.every((b, i) => b.id.startsWith('b' + (i + 1) + '-')), id, 'beat ids are numbered in order');
 
@@ -320,8 +324,8 @@ export async function scenes({ ok: okT, eq }) {
   ok(bindReport.filter((s) => s.endsWith(' px')).length >= 12, 'coords', `at least 12 scenes end on a coords.json drawing (${bindReport.length} reported)`);
 
   // ---- placement: card -> scene, lesson step -> scene
-  eq(new Set(Object.values(CARD_SCENE)).size, SCENES.filter((s) => !s.primer).length, 'scenes: every one of the 17 reagent scenes is reachable from a hub card');
-  ok(SCENES.filter((s) => !s.primer).length === 17 && SCENES.filter((s) => s.primer).every((s) => s.lesson.length && !Object.values(CARD_SCENE).includes(s.id)), 'placement', 'the primers (17, 18, 19) hang on Lesson 08 steps, not on hub cards');
+  eq(new Set(Object.values(CARD_SCENE)).size, SCENES.filter((s) => !s.primer).length, 'scenes: every one of the 18 reagent scenes is reachable from a hub card');
+  ok(SCENES.filter((s) => !s.primer).length === 18 && SCENES.filter((s) => s.primer).every((s) => s.lesson.length && !Object.values(CARD_SCENE).includes(s.id)), 'placement', 'the primers (17, 18, 19) hang on Lesson 08 steps, not on hub cards');
   ok(STEP_SCENE['08/s06'] === '18-arrow-grammar' && STEP_SCENE['08/s17'] === '17-hcl-ethylene' && STEP_SCENE['08/s15'] === '19-carbocation' && CARD_SCENE['alkene-hx'] === '01-alkene-hx', 'placement', 'Lesson 08 steps get their primer scene (s15: the carbocation scene); alkene-hx keeps scene 01');
   ok(CARD_SCENE['alkyne-hx-1'] === '08-alkyne-hx' && CARD_SCENE['alkyne-hx-2'] === '08-alkyne-hx', 'cards', '08 serves alkyne-hx-1 and alkyne-hx-2');
   ok(CARD_SCENE['alkene-kmno4-base'] === '06-alkene-kmno4-cold', 'cards', '06 serves alkene-kmno4-base');
@@ -330,6 +334,70 @@ export async function scenes({ ok: okT, eq }) {
     const ex = HUB_BY_ID['alkene-kmno4-acid'].example, s20 = stages.find((x) => x.id === '20-alkene-kmno4-hot').scene;
     const prods = s20.products.filter((p) => p.inFinal !== false).map((p) => canon(p.smiles)).sort();
     ok(canon(ex.substrate) === canon(s20.reactant.smiles) && JSON.stringify(ex.product.split('.').map(canon).sort()) === JSON.stringify(prods), 'cards', `20 shows the alkene-kmno4-acid card's example (${ex.substrate} -> ${ex.product})`);
+  }
+  {   // scene 21: hot KMnO₄ on an alkyne, from its card (no lesson step: Lesson 12 has no KMnO₄ step); the card's example is the scene's reaction
+    ok(CARD_SCENE['alkyne-kmno4-hot'] === '21-alkyne-kmno4-hot' && SCENE_BY_ID['21-alkyne-kmno4-hot'].lesson.length === 0, 'cards', '21 serves alkyne-kmno4-hot and hangs on no lesson step');
+    const ex = HUB_BY_ID['alkyne-kmno4-hot'].example, s21 = stages.find((x) => x.id === '21-alkyne-kmno4-hot').scene;
+    const lastState = s21.beats[s21.beats.length - 1].state.split('.').map((x) => canon(x.replace(/:\d+\]/g, ']'))).sort();
+    ok(canon(ex.substrate) === canon(s21.reactant.smiles) && JSON.stringify(ex.product.split('.').map(canon).sort()) === JSON.stringify(lastState), 'cards', `21 ends on the alkyne-kmno4-hot card's example (${ex.substrate} -> ${ex.product})`);
+  }
+  // ---- pacing: scenes 20 and 21 start at 0.75x, with 1.5 s holds; scene 20's beats are about 30 % longer than the first version (31 s of motion)
+  for (const sid of ['20-alkene-kmno4-hot', '21-alkyne-kmno4-hot']) {
+    const sc = stages.find((x) => x.id === sid).scene;
+    ok(sc.defaultSpeed === 0.75, sid, 'defaultSpeed 0.75');
+    ok(sc.beats.slice(0, -1).every((b) => b.hold >= 1.5), sid, 'every beat but the last ends on a 1.5 s hold');
+  }
+  {
+    const s20 = stages.find((x) => x.id === '20-alkene-kmno4-hot').scene;
+    const motion = s20.beats.reduce((t, b) => t + (b.t1 - b.t0), 0);
+    ok(motion >= 31 * 1.25 && motion <= 31 * 1.45, '20-alkene-kmno4-hot', `motion ${motion} s is about 30 % longer than 31 s`);
+    ok(s20.beats.every((b) => !(b.orbitals || []).some((o) => o.kind === 'ring')), '20-alkene-kmno4-hot', 'the cyclic ester is drawn with ordinary bonds only (no ring glyph)');
+  }
+  // ---- the opener note (a table cell or a builder result on another starting material)
+  {
+    const s20 = stages.find((x) => x.id === '20-alkene-kmno4-hot').scene, s21 = stages.find((x) => x.id === '21-alkyne-kmno4-hot').scene;
+    eq(openerNote(s20, { smiles: 'C=C', name: 'ethene' }), 'This scene uses 2-methylbut-2-ene. The same steps apply to ethene; here each end has 2 H, so both ends go to CO₂.', 'opener note: ethene + hot KMnO₄ (scene 20)');
+    eq(openerNote(s20, { smiles: 'CC=C', name: 'propene' }), 'This scene uses 2-methylbut-2-ene. The same steps apply to propene; here one end has 2 H, so it goes to CO₂, and the other has 1 H, so it becomes a carboxylic acid.', 'opener note: propene');
+    ok(/each end has 1 H, so both ends become carboxylic acids; the ring opens into one chain\.$/.test(openerNote(s20, { smiles: 'C1=CCCCC1', name: 'cyclohexene' })), 'opener', 'opener note: cyclohexene opens into one chain of two acids');
+    ok(/one end has 1 H, so it becomes a carboxylic acid, and the other has no H, so it becomes a ketone/.test(openerNote(s20, { smiles: 'CC1=CCCCC1', name: '1-methylcyclohexene' })), 'opener', 'opener note: 1-methylcyclohexene, acid + ketone');
+    eq(openerNote(s20, { smiles: 'CC(C)=CC', name: '2-methylbut-2-ene' }), null, 'opener note: none on the scene\'s own alkene');
+    eq(openerNote(s21, { smiles: 'CC#C', name: 'propyne' }), 'This scene uses hex-3-yne. The same steps apply to propyne; here one end has 1 H, so it goes to CO₂, and the other has no H, so it becomes a carboxylic acid.', 'opener note: propyne (scene 21)');
+    eq(openerNote(s21, { smiles: 'C#C', name: 'ethyne' }), 'This scene uses hex-3-yne. The same steps apply to ethyne; here each end has 1 H, so both ends go to CO₂.', 'opener note: ethyne');
+    eq(openerNote(stages.find((x) => x.id === '01-alkene-hx').scene, { smiles: 'C=C', name: 'ethene' }), null, 'opener note: only the hot KMnO₄ scenes carry one');
+    const view = read(path.join(learn, 'scenes', 'scene-view.js')), bv = read(path.join(learn, 'builder-view.js')), tv = read(path.join(learn, 'tables-view.js'));
+    ok(/openerNote\(scene, config\.opener\)/.test(view) && /opener = null/.test(view) && /ms-opener/.test(view), 'opener', 'scene-view mounts the note above the stage from the `opener` option');
+    ok(/opener: \{ smiles: res\.substrate/.test(bv) && /opener: \{ smiles: row\.smiles/.test(tv), 'opener', 'the builder and the reaction tables pass their starting material as the opener');
+    ok(/SPEEDS = \[0\.5, 0\.75, 1, 1\.5\]/.test(view) && /scene\.defaultSpeed/.test(view), 'view', 'the player offers 0.75x and starts a scene at its defaultSpeed');
+  }
+  // ---- clear space at 400 px (the phone): scenes 20 and 21, every beat (mid-motion and the held end), both layers
+  {
+    const stageW = 334;   // the drawn stage at a 400 px viewport (the player's container), as the player computes its text scale
+    const k = stageW / 640, textScale = { atom: Math.min(2.2, Math.max(1, 14 / (22 * k))), note: Math.min(2.4, Math.max(1, 12 / (14 * k))) };
+    const hit = (p, q) => p[0] < q[2] - 1 && q[0] < p[2] - 1 && p[1] < q[3] - 1 && q[1] < p[3] - 1;
+    const segBox = (sg, b) => { for (let i = 0; i <= 30; i++) { const t = i / 30, x = sg[0] + (sg[2] - sg[0]) * t, y = sg[1] + (sg[3] - sg[1]) * t; if (x > b[0] + 1 && x < b[2] - 1 && y > b[1] + 1 && y < b[3] - 1) return true; } return false; };
+    for (const sid of ['20-alkene-kmno4-hot', '21-alkyne-kmno4-hot']) {
+      const { scene: sc, layout: ly } = stages.find((x) => x.id === sid);
+      const bad = [];
+      sc.beats.forEach((b, bi) => {
+        for (const t of [b.t0 + 0.5 * (b.t1 - b.t0), b.t1 + Math.min(b.hold, 0.5) / 2]) {
+          const boxes = [];
+          renderScene(sc, ly, t, { layer: 'both', textScale, boxes });
+          const items = boxes.filter((x) => x.box && x.kind !== 'lp'), lps = boxes.filter((x) => x.kind === 'lp'), bonds = boxes.filter((x) => x.kind === 'bond');
+          for (let i = 0; i < items.length; i++) {
+            const A = items[i];
+            if (A.box[0] < 0 || A.box[1] < 0 || A.box[2] > 640 || A.box[3] > 400) bad.push(`b${bi + 1} t=${t}: ${A.kind} ${A.id} leaves the stage`);
+            for (let j = i + 1; j < items.length; j++) {
+              const B2 = items[j];
+              if (A.kind === 'label' && B2.kind === 'label' && A.id === B2.id) continue;   // a symbol and its own H count
+              if (hit(A.box, B2.box)) bad.push(`b${bi + 1} t=${t}: ${A.kind} ${A.id} on ${B2.kind} ${B2.id}`);
+            }
+            if (A.kind !== 'label') lps.forEach((L) => { if (hit(A.box, L.box)) bad.push(`b${bi + 1} t=${t}: ${A.kind} ${A.id} on a lone pair of ${L.id}`); });
+            bonds.forEach((sg) => { if (A.kind === 'label' && (A.id === sg.a || A.id === sg.b)) return; if (segBox(sg.seg, A.box)) bad.push(`b${bi + 1} t=${t}: bond ${sg.a}-${sg.b} through ${A.kind} ${A.id}`); });
+          }
+        }
+      });
+      ok(bad.length === 0, sid, `at 400 px no label, charge, badge or note overlaps another or a bond, in any beat: ${bad.slice(0, 4).join('; ')}`);
+    }
   }
   ok(CARD_SCENE['director-activating'] === '15-directors' && CARD_SCENE['director-meta'] === '15-directors', 'cards', '15 serves director-activating and director-meta');
   ok(CARD_SCENE['alkyne-acetylide'] === '11-alkyne-acetylide', 'cards', '11 serves alkyne-acetylide');

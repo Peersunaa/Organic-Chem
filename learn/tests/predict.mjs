@@ -91,7 +91,7 @@ export async function predict({ ok, eq }) {
       ok(e.subs.length >= 3 && e.subs.length <= 80, `${id}: 3 to 80 substrates (${e.subs.length}; the pools were widened for the reaction modes)`);
     }
   }
-  eq(DRILL_IDS.filter((id) => DRILL[id].fixed).sort(), ['alkene-hydroboration', 'alkyne-hydroboration', 'amine-in-acid', 'benzylic-bromination', 'birch', 'clemmensen', 'desulfonation', 'diels-alder', 'oxidation-cr', 'oxidation-pcc'], 'the ten B3.1 cards are the fixed-answer drill entries');
+  eq(DRILL_IDS.filter((id) => DRILL[id].fixed).sort(), ['alkene-hydroboration', 'alkyne-hydroboration', 'alkyne-kmno4-hot', 'amine-in-acid', 'benzylic-bromination', 'birch', 'clemmensen', 'desulfonation', 'diels-alder', 'oxidation-cr', 'oxidation-pcc'].sort(), 'the ten B3.1 cards and hot KMnO₄ on an alkyne are the fixed-answer drill entries');
   const app = fs.readFileSync(path.join(HERE, '..', 'app.js'), 'utf8');
   ok(/\^practise-\(\[a-z0-9-\]\+\)\$/.test(app), 'router serves #practise-<skill>');
   ok(/id: 'drill-predict'/.test(app) && (app.match(/#practise-predict-product/g) || []).length >= 3, 'the hub, the home Reactions panel and the weak-spot panel link to #practise-predict-product');

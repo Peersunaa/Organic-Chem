@@ -1,7 +1,9 @@
 // Mechanism scenes: the interactive player (widget `mech-scene`), the #scene/<id> page, the #scenes list, and the small toggles that open a scene
 // inline (reaction hub cards, lesson steps).
 //
-// Widget: registered in engine/widgets/index.js as 'mech-scene', config { scene: '<id or short id>', logSlips?: false }.
+// Widget: registered in engine/widgets/index.js as 'mech-scene', config { scene: '<id or short id>', logSlips?: false, opener?: { smiles, name } }.
+//   opener: the starting material of the table cell or builder result that opened the scene; when it is not the scene's own, a one-line note above the stage
+//   says how the same steps play out on it (scene-opener.js: hot KMnO₄ on a C=C or C≡C, end by end).
 //   A lesson step can use it as a `visual` (or as a `try` widget: ctx.onResult({ok}) fires on the quiz answer; pass logSlips:false there, because the step grader logs the slip).
 //   Standalone (hub, #scene page) a wrong quiz answer is logged as a slip under the scene's skill (scene-index.js) with the card id.
 // The scene (scenes/scenes/<id>.json) and its layout (scenes/layouts/<id>.json) are fetched relative to this file and kept in memory.
@@ -20,6 +22,7 @@ import { STEREO_MOMENTS } from '../engine/stereo-moments.js';
 import { stereoBlock } from '../stereo-view.js';
 import { renderScene, captionFor, whyLines, beatAt, sceneDuration } from './scene-engine.js';
 import { SCENES, SCENE_BY_ID, sceneId, shortId, neighbours, sceneNumber } from './scene-index.js';
+import { openerNote } from './scene-opener.js';
 
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 
@@ -39,12 +42,12 @@ export function loadScene(id) {
   return cache.get(id);
 }
 
-// remembered while the page is open
-let LAYER = 'both', SPEED = 1;
+// remembered while the page is open (a scene's own defaultSpeed wins until the learner picks a speed)
+let LAYER = 'both', SPEED = 1, SPEED_PICKED = false;
 let uid = 0;
 
 const LAYER_LABEL = { arrows: 'Arrows', orbitals: 'Orbitals', both: 'Both' };
-const SPEEDS = [0.5, 1, 1.5];
+const SPEEDS = [0.5, 0.75, 1, 1.5];
 
 // ------------------------------------------------------------------ the legend
 function legend() {
@@ -85,7 +88,7 @@ function mountScene(host, config = {}, ctx = {}) {
   function build(scene, layout) {
     root.innerHTML = '';
     const beats = scene.beats, N = beats.length, dur = sceneDuration(scene);
-    const S = { t: 0, beat: 0, playing: false, speed: SPEED, layer: LAYER, stopAt: null, last: 0, reduced: reduceMotion(), shown: -1, sig: '', why: null, reached: false };
+    const S = { t: 0, beat: 0, playing: false, speed: !SPEED_PICKED && SPEEDS.includes(scene.defaultSpeed) ? scene.defaultSpeed : SPEED, layer: LAYER, stopAt: null, last: 0, reduced: reduceMotion(), shown: -1, sig: '', why: null, reached: false };
 
     // ---- structure
     const stage = h('div', { class: 'ms-stage' });
@@ -111,6 +114,9 @@ function mountScene(host, config = {}, ctx = {}) {
     const layerRow = h('div', { class: 'ms-layers', role: 'group', 'aria-label': 'Layers' }, h('span', { class: 'ms-layers-k' }, 'Show'), layerBtns);
     // the timeline and the Play / Beat buttons sit directly under the stage, so a learner can watch and press at once (#14) without them covering the picture (N3)
     const dock = h('div', { class: 'ms-dock' }, line, row1);
+    let note = null;
+    try { note = openerNote(scene, config.opener); } catch (e) { note = null; }
+    if (note) root.append(h('p', { class: 'ms-opener', role: 'note' }, note));
     root.append(stageWrap, dock, capBox, layerRow, legend());
 
     // stereo callout
@@ -239,7 +245,7 @@ function mountScene(host, config = {}, ctx = {}) {
     stageWrap.addEventListener('click', toggle);   // a tap on the picture plays or pauses it (every tap on the stage acts)
     prevB.addEventListener('click', prevBeat);
     nextB.addEventListener('click', nextBeat);
-    speed.addEventListener('change', () => { S.speed = SPEED = Number(speed.value); if (S.reduced && S.playing) stepTimer(); });
+    speed.addEventListener('change', () => { S.speed = SPEED = Number(speed.value); SPEED_PICKED = true; if (S.reduced && S.playing) stepTimer(); });
     range.addEventListener('input', () => {
       stopTimers(); S.playing = false; S.stopAt = null;
       if (S.reduced) { S.beat = Math.round(Number(range.value)); } else S.t = Number(range.value);
@@ -315,7 +321,7 @@ function buildQuiz(scene, id, config, ctx) {
 
 // ------------------------------------------------------------------ inline toggles (hub cards, lesson steps)
 /** A button that opens the scene right under it (in `panel`, which the caller places) and closes it again. */
-export function sceneToggle(id, { label = 'Watch the scene', cls = 'btn small ghost ms-open' } = {}) {
+export function sceneToggle(id, { label = 'Watch the scene', cls = 'btn small ghost ms-open', opener = null } = {}) {
   const sid = sceneId(id);
   const panelId = 'ms-panel-' + sid + '-' + ++uid;
   const button = h('button', { type: 'button', class: cls, 'aria-expanded': 'false', 'aria-controls': panelId }, label);
@@ -324,7 +330,7 @@ export function sceneToggle(id, { label = 'Watch the scene', cls = 'btn small gh
   const close = () => { if (live) { live.destroy(); live = null; } panel.innerHTML = ''; panel.hidden = true; button.setAttribute('aria-expanded', 'false'); button.textContent = label; };
   const open = () => {
     panel.hidden = false;
-    live = mountScene(panel, { scene: sid }, {});
+    live = mountScene(panel, opener ? { scene: sid, opener } : { scene: sid }, {});
     button.setAttribute('aria-expanded', 'true'); button.textContent = 'Hide the scene';
   };
   button.addEventListener('click', () => (panel.hidden ? open() : close()));
@@ -356,7 +362,7 @@ export function scenePage(any) {
   ];
 }
 
-/** #scenes: 19 tiles (16 reagents + the three Lesson 08 primers), each with the engine's own first frame as its thumbnail. */
+/** #scenes: 21 tiles (18 reagent scenes + the three Lesson 08 primers), each with the engine's own first frame as its thumbnail. */
 export function scenesList() {
   const grid = h('div', { class: 'ms-grid' });
   SCENES.forEach((s) => {
@@ -367,7 +373,7 @@ export function scenesList() {
   });
   return [
     h('div', { class: 'lhead' }, h('a', { class: 'back-home', href: '#home' }, '← Home'), h('h1', { class: 'ltitle' }, 'How each reagent works'),
-      h('p', { class: 'lede' }, 'Sixteen short animations, one per reagent, plus three Lesson 08 primers (17 to 19: the model reaction, the three legal arrows and the carbocation). Scrub the timeline, switch the electron-pushing arrows and the orbitals on or off, and answer one question at the end.'),
+      h('p', { class: 'lede' }, 'Eighteen short animations, one per reagent (20 and 21: hot KMnO₄ on a C=C and on a C≡C), plus three Lesson 08 primers (17 to 19: the model reaction, the three legal arrows and the carbocation). Scrub the timeline, switch the electron-pushing arrows and the orbitals on or off, and answer one question at the end.'),
       h('div', { class: 'rx-btns' }, h('a', { class: 'btn ghost', href: '#reactions' }, 'Open the reaction cards'))),
     grid
   ];

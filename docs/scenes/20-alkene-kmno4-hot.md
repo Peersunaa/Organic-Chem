@@ -1,6 +1,6 @@
 # 20 · Hot, acidic KMnO₄: how it attaches and how it cleaves
 
-**Scene id** `20-alkene-kmno4-hot` · **Hub card** `alkene-kmno4-acid` · **Taught in** Lesson 10 s13 (KMnO₄ in acid; s14 uses the same alkene) · **Runtime** 40 s, 9 beats · **Layers** arrows, orbitals
+**Scene id** `20-alkene-kmno4-hot` · **Hub card** `alkene-kmno4-acid` · **Taught in** Lesson 10 s13 (KMnO₄ in acid; s14 uses the same alkene) · **Runtime** 54 s, 9 beats, played at 0.75× by default · **Layers** arrows, orbitals
 
 Implements [SCENE-SCHEMA.md](SCENE-SCHEMA.md). The JSON at the bottom is the source of truth; the tables are its readable view. Every state and product here was checked with RDKit (see Chemistry checks).
 
@@ -21,15 +21,15 @@ Atom names used in captions and tables: 1 = C1 (the (CH₃)₂C end), 2 = C2 (th
 
 | # | id | time (s) | caption | ARROWS layer | ORBITALS layer | camera / faces |
 |---|---|---|---|---|---|---|
-| 1 | `b1-meet` · look | 0–3 (+1 hold) | 2-Methylbut-2-ene meets hot, acidic KMnO₄. Permanganate is purple; its Mn(VII) badly wants electrons. | badges: Mn “Mn(VII)” | pi C1/C2 (both, focus)<br>*caption swaps to:* “The π cloud of the C=C sits above and below the flat molecule: a top face and a bottom face.” | zoom 1, tilt 35° |
-| 2 | `b2-approach` · look | 4–7 (+1 hold) | Two O atoms of MnO₄⁻ line up over the top face of the C=C, one above each carbon. | moves: MnO4 | pi C1/C2 (top, focus)<br>*caption swaps to:* “The top half of the π cloud reaches up toward the two O atoms waiting above it.” | zoom 1.2, tilt 65°, faces shown |
-| 3 | `b3-ring` · step | 8–12 (+1 hold) | In one step both C–O bonds form, both on the top face (syn): a cyclic manganate ester. Mn(VII) → Mn(V). | badges: Mn “Mn(V)”<br>**arrows:** (1) bond C1–C2 → bond C1–O(a) · (2) bond Mn–O(a) → Mn (pair onto it) · (3) bond Mn–O(b) → bond O(b)–C2<br>bonds: order C1–C2 (order 1), form C1–O(a), form C2–O(b), order O(a)–Mn (order 1), order O(b)–Mn (order 1) | ring C1/O(a)/Mn/O(b)/C2 (top, focus) | zoom 1.1, tilt 58°, faces shown |
-| 4 | `b4-diol` · summary | 13–17 (+1 hold) | Water cuts the two O–Mn bonds, never the C–O bonds: the diol. Cold, dilute, basic KMnO₄ stops here. | moves: atoms H; atoms H<br>bonds: break O(a)–Mn, break O(b)–Mn, break Mn–O, break Mn–O⁻, form O(a)–H, form O(b)–H | — | zoom 1.1, tilt 60°, faces shown |
-| 5 | `b5-attach` · summary | 18–21 (+1 hold) | Hot and acidic, it goes on: a fresh MnO₄⁻ bonds to one OH oxygen, and HO⁻ leaves. Mn(VII) wants a pair. | badges: Mn (fresh MnO₄⁻) “Mn(VII)”<br>moves: MnO4b; atoms O (HO⁻)<br>bonds: break O(b)–H, form O(b)–Mn (fresh MnO₄⁻), break Mn (fresh MnO₄⁻)–O (HO⁻) | — | zoom 1.2, tilt 60° |
-| 6 | `b6-cleave` · step | 22–27 (+1 hold) | The bond that joined the two OH carbons is cut. Each end becomes C=O, and Mn takes the pair: Mn(V). | badges: Mn (fresh MnO₄⁻) “Mn(V)”<br>moves: atoms C2,CH₃,O(b); atoms O (HO⁻); atoms Mn (fresh MnO₄⁻),O,O,O; atoms H<br>**arrows:** (1) bond C1–C2 → bond C2–O(b) · (2) bond O(b)–Mn (fresh MnO₄⁻) → Mn (fresh MnO₄⁻) (pair onto it) · (3) bond H–O(a) → bond O(a)–C1<br>bonds: break C1–C2, order C2–O(b) (order 2), break O(b)–Mn (fresh MnO₄⁻), break O(a)–H, order C1–O(a) (order 2)<br>charges: Mn (fresh MnO₄⁻) −, H + | — | zoom 1.2, tilt 55° |
-| 7 | `b7-sort` · look | 28–31 (+1 hold) | Sort the ends. The (CH₃)₂C end has no H: a ketone, acetone. The CH end still has an H: an aldehyde. | badges: C1 “no H”, C2 “one H” | — | zoom 1.2, tilt 40° |
-| 8 | `b8-acid` · summary | 32–36 (+1 hold) | KMnO₄ oxidises that C–H too: the aldehyde becomes acetic acid. Purple MnO₄⁻ ends as brown MnO₂. | bonds: form C2–O (HO⁻)<br>relayout to the final drawing | — | zoom 1, tilt 0° |
-| 9 | `b9-products` · look | 37–40 (+0 hold) | Acetone and acetic acid, from one C=C. A =CH₂ end would be oxidised all the way to CO₂. | hold the picture | — | zoom 1, tilt 0° |
+| 1 | `b1-meet` · look | 0–4 (+1.5 hold) | 2-Methylbut-2-ene meets hot, acidic KMnO₄. Permanganate is purple; its Mn(VII) badly wants electrons. | badges: Mn “Mn(VII)” | pi C1/C2 (both, focus)<br>*caption swaps to:* “The π cloud of the C=C sits above and below the flat molecule: a top face and a bottom face.” | zoom 1, tilt 35° |
+| 2 | `b2-approach` · look | 5.5–9.5 (+1.5 hold) | Two O atoms of MnO₄⁻ line up over the top face of the C=C, one above each carbon. | moves: MnO4 (stood upright over C1–C2) | pi C1/C2 (top, focus)<br>*caption swaps to:* “The top half of the π cloud reaches up toward the two O atoms waiting above it.” | zoom 1.2, tilt 65°, faces shown |
+| 3 | `b3-ring` · step | 11–16.5 (+1.5 hold) | In one step both C–O bonds form, both on the top face (syn): a cyclic manganate ester. Mn(VII) → Mn(V). | badges: Mn “Mn(V)”<br>moves: MnO4<br>**arrows:** (1) bond C1–C2 → bond C1–O(a) · (2) bond Mn–O(a) → Mn (pair onto it) · (3) bond Mn–O(b) → bond O(b)–C2<br>bonds: order C1–C2 (order 1), form C1–O(a), form C2–O(b), order O(a)–Mn (order 1), order O(b)–Mn (order 1) | — | zoom 1.1, tilt 58°, faces shown |
+| 4 | `b4-diol` · summary | 18–23 (+1.5 hold) | Water cuts the two O–Mn bonds, never the C–O bonds: the diol. Cold, dilute, basic KMnO₄ stops here. | moves: atoms H; atoms H<br>bonds: break O(a)–Mn, break O(b)–Mn, break Mn–O, break Mn–O⁻, form O(a)–H, form O(b)–H | — | zoom 1.1, tilt 60°, faces shown |
+| 5 | `b5-attach` · summary | 24.5–28.5 (+1.5 hold) | Hot and acidic, it goes on: a fresh MnO₄⁻ bonds to one OH oxygen, and HO⁻ leaves. Mn(VII) wants a pair. | badges: Mn (fresh MnO₄⁻) “Mn(VII)”<br>moves: MnO4b; atoms O (HO⁻)<br>bonds: break O(b)–H, form O(b)–Mn (fresh MnO₄⁻), break Mn (fresh MnO₄⁻)–O (HO⁻) | — | zoom 1.2, tilt 60° |
+| 6 | `b6-cleave` · step | 30–36.5 (+1.5 hold) | The bond that joined the two OH carbons is cut. Each end becomes C=O, and Mn takes the pair: Mn(V). | badges: Mn (fresh MnO₄⁻) “Mn(V)”<br>moves: atoms C2,CH₃,O(b); atoms O (HO⁻); atoms Mn (fresh MnO₄⁻),O,O,O; atoms H<br>**arrows:** (1) bond C1–C2 → bond C2–O(b) · (2) bond O(b)–Mn (fresh MnO₄⁻) → Mn (fresh MnO₄⁻) (pair onto it) · (3) bond H–O(a) → bond O(a)–C1<br>bonds: break C1–C2, order C2–O(b) (order 2), break O(b)–Mn (fresh MnO₄⁻), break O(a)–H, order C1–O(a) (order 2)<br>charges: Mn (fresh MnO₄⁻) −, H + | — | zoom 1.2, tilt 55° |
+| 7 | `b7-sort` · look | 38–42 (+1.5 hold) | Sort the ends. The (CH₃)₂C end has no H: a ketone, acetone. The CH end still has an H: an aldehyde. | badges: C1 “no H”, C2 “one H” | — | zoom 1.2, tilt 40° |
+| 8 | `b8-acid` · summary | 43.5–48.5 (+1.5 hold) | KMnO₄ oxidises that C–H too: the aldehyde becomes acetic acid. Purple MnO₄⁻ ends as brown MnO₂. | bonds: form C2–O (HO⁻)<br>relayout to the final drawing | — | zoom 1, tilt 0° |
+| 9 | `b9-products` · look | 50–54 (+0 hold) | Acetone and acetic acid, from one C=C. A =CH₂ end would be oxidised all the way to CO₂. | hold the picture | — | zoom 1, tilt 0° |
 
 Why lines (shown while each arrow's electrons travel):
 
@@ -81,6 +81,9 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
 - Stereo: 'so the diol is cis' does not apply to this alkene: 2-methylbutane-2,3-diol has one stereocentre (C2 of the diol carries two CH₃), so it forms as a racemate, not as a cis or meso compound. The callout says so.
 - Mn oxidation states are badges, not charges. The final MnO₂ is named in the caption only (not drawn).
 - Hub card `alkene-kmno4-acid` now opens this scene ("Watch how it works"); Lesson 10 s13 gets "Watch the scene" after it is answered. Lesson 17 keeps no scene buttons (a test forbids them there: its steps are unaided predict-the-product drills). The mastery type `predict-oxid` lists the scene too.
+- Readability pass (2026-10-21, from a student's phone screenshot of beat 3: a filled ring over the Mn and O labels, the Mn(V) pill on an O, C–O bonds hard to read). b2 now stands MnO₄⁻ upright over the C=C (a `place` move in the frame C1→C2), so b3's ring is a clean pentagon drawn with ordinary bonds (no `ring` glyph). The renderer puts every pill, charge and δ label in clear space and knocks the label areas out of the bond, orbital and arrow layers; tests/scenes.mjs checks every beat at 400 px.
+- Pacing: the motion windows are about 30 % longer (31 s → 42 s), every beat ends on a 1.5 s hold, and the player starts at 0.75× (`defaultSpeed`); Play and the Beat buttons are unchanged.
+- Opened from a reaction-table cell or a builder result on another alkene, the scene shows a one-line note above the stage (scenes/scene-opener.js), e.g. ethene: "This scene uses 2-methylbut-2-ene. The same steps apply to ethene; here each end has 2 H, so both ends go to CO₂."
 
 ## Scene data (JSON)
 
@@ -190,13 +193,14 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
   "arrows",
   "orbitals"
  ],
- "duration": 40.0,
+ "duration": 54.0,
+ "defaultSpeed": 0.75,
  "beats": [
   {
    "id": "b1-meet",
    "t0": 0.0,
-   "t1": 3.0,
-   "hold": 1,
+   "t1": 4.0,
+   "hold": 1.5,
    "kind": "look",
    "caption": "2-Methylbut-2-ene meets hot, acidic KMnO₄. Permanganate is purple; its Mn(VII) badly wants electrons.",
    "arrows": [],
@@ -244,9 +248,9 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
   },
   {
    "id": "b2-approach",
-   "t0": 4.0,
-   "t1": 7.0,
-   "hold": 1,
+   "t0": 5.5,
+   "t1": 9.5,
+   "hold": 1.5,
    "kind": "look",
    "caption": "Two O atoms of MnO₄⁻ line up over the top face of the C=C, one above each carbon.",
    "arrows": [],
@@ -288,33 +292,50 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
    "moves": [
     {
      "species": "MnO4",
-     "pairs": [
-      [
-       7,
-       1
+     "frame": [
+      1,
+      2
+     ],
+     "place": {
+      "7": [
+       -0.2,
+       0,
+       1.7
       ],
-      [
-       8,
-       2
+      "8": [
+       1.2,
+       0,
+       1.7
+      ],
+      "9": [
+       0.5,
+       0,
+       2.35
+      ],
+      "10": [
+       -0.3,
+       0,
+       2.9
+      ],
+      "11": [
+       1.3,
+       0,
+       2.9
       ]
-     ],
-     "gap": [
-      0,
-      0,
-      1.3
-     ],
+     },
      "at": [
       0,
       0.7
      ]
     }
-   ]
+   ],
+   "notes": "MnO₄⁻ is stood upright over the C=C (place move in the frame C1→C2): O(a) above C1, O(b) above C2, Mn above the middle and its other two O further up, so the ring of b3 reads as a pentagon on the top face."
   },
   {
    "id": "b3-ring",
-   "t0": 8.0,
-   "t1": 12.0,
-   "hold": 1,
+   "t0": 11.0,
+   "t1": 16.5,
+   "hold": 1.5,
    "kind": "step",
    "caption": "In one step both C–O bonds form, both on the top face (syn): a cyclic manganate ester. Mn(VII) → Mn(V).",
    "arrows": [
@@ -439,20 +460,7 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
    ],
    "charges": [],
    "partials": [],
-   "orbitals": [
-    {
-     "kind": "ring",
-     "atoms": [
-      1,
-      7,
-      9,
-      8,
-      2
-     ],
-     "side": "top",
-     "emphasis": "focus"
-    }
-   ],
+   "orbitals": [],
    "badges": [
     {
      "atom": 9,
@@ -478,13 +486,28 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
     }
    },
    "state": "[O-:11][Mn:9]1(=[O:10])[O:7][C:1]([CH3:3])([CH3:4])[CH:2]([CH3:5])[O:8]1",
-   "ts": true
+   "ts": true,
+   "moves": [
+    {
+     "species": "MnO4",
+     "by": [
+      0,
+      0,
+      -0.4
+     ],
+     "at": [
+      0.05,
+      0.6
+     ]
+    }
+   ],
+   "notes": "No ring glyph: the five-membered ring is drawn with ordinary bonds only (readability pass 2026-10-21; a filled ring sat over the Mn and O labels on a phone)."
   },
   {
    "id": "b4-diol",
-   "t0": 13.0,
-   "t1": 17.0,
-   "hold": 1,
+   "t0": 18.0,
+   "t1": 23.0,
+   "hold": 1.5,
    "kind": "summary",
    "caption": "Water cuts the two O–Mn bonds, never the C–O bonds: the diol. Cold, dilute, basic KMnO₄ stops here.",
    "arrows": [],
@@ -611,9 +634,9 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
   },
   {
    "id": "b5-attach",
-   "t0": 18.0,
-   "t1": 21.0,
-   "hold": 1,
+   "t0": 24.5,
+   "t1": 28.5,
+   "hold": 1.5,
    "kind": "summary",
    "caption": "Hot and acidic, it goes on: a fresh MnO₄⁻ bonds to one OH oxygen, and HO⁻ leaves. Mn(VII) wants a pair.",
    "arrows": [],
@@ -711,9 +734,9 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
   },
   {
    "id": "b6-cleave",
-   "t0": 22.0,
-   "t1": 27.0,
-   "hold": 1,
+   "t0": 30.0,
+   "t1": 36.5,
+   "hold": 1.5,
    "kind": "step",
    "caption": "The bond that joined the two OH carbons is cut. Each end becomes C=O, and Mn takes the pair: Mn(V).",
    "arrows": [
@@ -940,9 +963,9 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
   },
   {
    "id": "b7-sort",
-   "t0": 28.0,
-   "t1": 31.0,
-   "hold": 1,
+   "t0": 38.0,
+   "t1": 42.0,
+   "hold": 1.5,
    "kind": "look",
    "caption": "Sort the ends. The (CH₃)₂C end has no H: a ketone, acetone. The CH end still has an H: an aldehyde.",
    "arrows": [],
@@ -984,9 +1007,9 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
   },
   {
    "id": "b8-acid",
-   "t0": 32.0,
-   "t1": 36.0,
-   "hold": 1,
+   "t0": 43.5,
+   "t1": 48.5,
+   "hold": 1.5,
    "kind": "summary",
    "caption": "KMnO₄ oxidises that C–H too: the aldehyde becomes acetic acid. Purple MnO₄⁻ ends as brown MnO₂.",
    "arrows": [],
@@ -1030,8 +1053,8 @@ D. 6-Oxoheptanal, CH₃CO(CH₂)₄CHO
   },
   {
    "id": "b9-products",
-   "t0": 37.0,
-   "t1": 40.0,
+   "t0": 50.0,
+   "t1": 54.0,
    "hold": 0,
    "kind": "look",
    "caption": "Acetone and acetic acid, from one C=C. A =CH₂ end would be oxidised all the way to CO₂.",

@@ -91,7 +91,7 @@ export const REAGENTS = [
   RG('Br2', 'ae', 'Br₂, CH₂Cl₂', { type: 'alkene', key: 'Br2', card: 'alkene-x2' }), RG('Cl2', 'ae', 'Cl₂, CH₂Cl₂', { type: 'alkene', key: 'Cl2', card: 'alkene-x2' }),
   RG('H2-Pd', 'ae', 'H₂, Pd/C', { type: 'alkene', key: 'H2', card: 'alkene-h2-pd' }),
   RG('KMnO4-cold', 'ae', 'KMnO₄, cold, dilute, OH⁻', { type: 'alkene', key: 'KMnO4_OH', card: 'alkene-kmno4-base' }),
-  RG('KMnO4-hot', 'ae', 'KMnO₄, hot or acidic', { type: 'alkene', key: 'KMnO4_H', card: 'alkene-kmno4-acid' }),
+  RG('KMnO4-hot', 'ae', 'KMnO₄, hot or acidic', { type: 'alkene', key: 'KMnO4_H', card: 'alkene-kmno4-acid', tags: ['cleave'] }),
   RG('RCO3H', 'ae', 'RCO₃H (mCPBA)', { type: 'alkene', key: 'RCO3H', card: 'alkene-epoxide' }),
   RG('RCO3H-H3O', 'ae', 'RCO₃H, then H₃O⁺', { type: 'alkene', key: 'RCO3H_H3O', card: 'alkene-epoxide-diol' }),
   RG('BH3', 'ae', '1) BH₃·THF  2) H₂O₂, NaOH', { type: 'alkene', key: 'BH3', card: 'alkene-hydroboration' }),
@@ -105,11 +105,12 @@ export const REAGENTS = [
   RG('H2-Pd-2', 'ay', 'H₂ (2 equiv.), Pd/C', { type: 'alkyne', key: 'H2_Pd', card: 'alkyne-h2-pd' }),
   RG('NaNH2-MeBr', 'ay', 'NaNH₂, then CH₃Br', { type: 'alkyne', key: 'acetylide', halide: 'CBr', card: 'alkyne-acetylide' }),
   RG('NaNH2-EtBr', 'ay', 'NaNH₂, then CH₃CH₂Br', { type: 'alkyne', key: 'acetylide', halide: 'CCBr', card: 'alkyne-acetylide' }),
-  RG('BH3-alkyne', 'ay', '1) BH₃  2) H₂O₂, NaOH', { type: 'alkyne', key: 'BH3', card: 'alkyne-hydroboration' })
+  RG('BH3-alkyne', 'ay', '1) BH₃  2) H₂O₂, NaOH', { type: 'alkyne', key: 'BH3', card: 'alkyne-hydroboration' }),
+  RG('KMnO4-hot-alkyne', 'ay', 'KMnO₄, hot, H₃O⁺', { type: 'alkyne', key: 'KMnO4_H', card: 'alkyne-kmno4-hot', tags: ['cleave'] })
 ];
 export const REAGENT_BY_ID = Object.fromEntries(REAGENTS.map((r) => [r.id, r]));
 /** How many substrate x reagent pairs give a product (tests/builder.mjs recomputes it with pairs() and fails when it is stale). */
-export const PAIR_COUNT = 750;
+export const PAIR_COUNT = 757;
 
 // ---------------------------------------------------------------- names
 const PLAIN = Object.fromEntries(SUBSTRATES.filter((s) => s.name).map((s) => [s.smiles, s.name]));
@@ -306,9 +307,37 @@ function flipEZ(smiles) {
   j += i;
   return canon(s.slice(0, j) + (s[j] === '/' ? '\\' : '/') + s.slice(j + 1));
 }
-/** HX, X2, hydration, H2 (Lindlar, Pd, Na/NH3), acetylides, hydroboration on an alkyne. */
+/** Hot KMnO₄ on a C≡C (no course engine models it; hub card alkyne-kmno4-hot, scene 21): the triple bond is cut right through. An end whose carbon has no H
+ *  becomes –CO₂H; a ≡C–H end leaves as CO₂ (ethyne: both ends). Every other atom stays where it was. */
+function alkyneCleave(sub, k) {
+  const G = G_.readG(sub);
+  const t = G && G.bonds.find((b) => b.o === 3 && G.el[b.a] === 'C' && G.el[b.b] === 'C');
+  if (!t) return NOPE('na', 'There is no C≡C to cut.');
+  const H = G_.cloneG(G);
+  H.bonds = H.bonds.filter((b) => !((b.a === t.a && b.b === t.b) || (b.a === t.b && b.b === t.a)));
+  const piece = (start) => { const seen = new Set([start]), q = [start]; for (let i = 0; i < q.length; i++) G_.nbrsG(H, q[i]).forEach((n) => { if (!seen.has(n)) { seen.add(n); q.push(n); } }); return seen; };
+  const products = [];
+  [t.a, t.b].forEach((c, i) => {
+    if (H.h[c] >= 1) { products.push(prod(canon('O=C=O'), { label: 'the ≡C–H end: CO₂' })); return; }
+    const keep = piece(c);
+    const { G: P, map } = G_.dropG(H, new Set(H.el.map((_, j) => j).filter((j) => !keep.has(j))));
+    const at = map.get(c);
+    P.el.push('O', 'O'); P.h.push(0, 1); P.q.push(0, 0);
+    P.bonds.push({ a: at, b: P.el.length - 2, o: 2 }, { a: at, b: P.el.length - 1, o: 1 });
+    products.push(prod(W(P), { label: H.h[t.a] + H.h[t.b] === 0 ? (i === 0 ? 'one end (no H): –CO₂H' : 'the other end (no H): –CO₂H') : 'the end with no H: –CO₂H' }));
+  });
+  products.sort((x, y) => (x.smiles === canon('O=C=O') ? 1 : 0) - (y.smiles === canon('O=C=O') ? 1 : 0));   // the acid first, CO₂ last
+  const terminal = H.h[t.a] + H.h[t.b];
+  const why = terminal === 2 ? 'Hot KMnO₄ cuts the C≡C right through. Both ends are ≡C–H, so both carbons leave as CO₂.'
+    : terminal === 1 ? 'Hot KMnO₄ cuts the C≡C right through. The end with no H becomes a carboxylic acid, –CO₂H; the ≡C–H end goes on to CO₂.'
+      : 'Hot KMnO₄ cuts the C≡C right through. Neither carbon has an H, so each end becomes a carboxylic acid, –CO₂H.';
+  const warnings = k.ring ? [{ id: 'aryl-alkyne', text: 'Built for the C≡C next to the ring (the lessons leave alkynes on a benzene ring out). The ring itself does not react.' }] : [];
+  return { status: 'ok', products, rule: 'cleavage', ruleName: 'Oxidative cleavage: the C≡C is cut', why, warnings, hasMech: false };
+}
+/** HX, X2, hydration, H2 (Lindlar, Pd, Na/NH3), acetylides, hydroboration, hot KMnO₄ on an alkyne. */
 function alkyneReact(sub, r, k, full) {
   if (k.kind !== 'alkyne') return NOPE(k.kind === 'arene' ? 'none' : 'na', k.kind === 'arene' ? 'A benzene ring has no C≡C. These reagents add to a triple bond.' : 'This tile is for a C≡C. For a C=C pick the alkene reagents.', k.kind === 'arene' ? 'aromatic' : null);
+  if (r.key === 'KMnO4_H') return alkyneCleave(sub, k);
   if (k.ring) return ethynylArene(sub, r);
   try {
     if (r.key === 'Na_NH3') {
@@ -562,7 +591,7 @@ export function react(substrate, reagentId, opts = {}) {
   res.products.forEach((p) => { p.name = nameOf(p.smiles); });
   // the product to carry on with: the biggest share, else the first major, else the first
   if (res.status === 'ok') {
-    const main = res.products.filter((p) => !p.excess && !(p.label || '').startsWith('the =CH₂'));
+    const main = res.products.filter((p) => !p.excess && !(p.label || '').startsWith('the =CH₂') && !(p.label || '').startsWith('the ≡C–H'));
     const best = main.slice().sort((a, b) => (b.share ?? (b.minor ? -1 : 50)) - (a.share ?? (a.minor ? -1 : 50)))[0] || res.products[0];
     res.next = best.smiles;
   } else res.next = null;
@@ -641,7 +670,8 @@ export const HUB_EXAMPLE_REAGENT = {
   'director-meta': 'Br2-FeBr3', 'side-chain-kmno4': 'KMnO4-ring', 'nitro-reduction': 'Fe-H3O', clemmensen: 'Clemmensen', 'benzylic-bromination': 'NBS', 'amine-in-acid': 'HNO3', desulfonation: 'D2SO4',
   'side-chain-h2pd': 'H2-Pd', 'alkene-hx': 'HBr', 'alkene-hydration': 'H2O-H', 'alkene-x2': 'Br2', 'alkene-h2-pd': 'H2-Pd', 'alkene-kmno4-base': 'KMnO4-cold', 'alkene-kmno4-acid': 'KMnO4-hot',
   'alkene-epoxide': 'RCO3H', 'alkene-epoxide-diol': 'RCO3H-H3O', 'alkene-hydroboration': 'BH3', 'alkyne-hx-1': 'HBr-1', 'alkyne-hx-2': 'HBr-2', 'alkyne-x2-1': 'Br2-1', 'alkyne-x2-2': 'Br2-2',
-  'alkyne-hydration': 'H2O-Hg', 'alkyne-lindlar': 'Lindlar', 'alkyne-h2-pd': 'H2-Pd-2', 'alkyne-acetylide': 'NaNH2-EtBr', 'alkyne-hydroboration': 'BH3-alkyne'
+  'alkyne-hydration': 'H2O-Hg', 'alkyne-lindlar': 'Lindlar', 'alkyne-h2-pd': 'H2-Pd-2', 'alkyne-acetylide': 'NaNH2-EtBr', 'alkyne-hydroboration': 'BH3-alkyne',
+  'alkyne-kmno4-hot': 'KMnO4-hot-alkyne'
 };
 /** The hub examples this pair reproduces: [{card, product}] (for the tests). */
 export function hubExampleFor(reagentId, substrate) {

@@ -26,7 +26,8 @@
    "diels-alder": 44.0,
    "hcl-ethylene": 44.0,
    "arrow-grammar": 44.0,
-   "alkene-kmno4-acid": 44.0
+   "alkene-kmno4-acid": 44.0,
+   "alkyne-kmno4-hot": 44.0
   }
  },
  "alkene-hx": {
@@ -13312,6 +13313,671 @@
     "4": 4,
     "7": 3,
     "8": 6
+   }
+  }
+ },
+ "alkyne-kmno4-hot": {
+  "reactants": {
+   "smiles": "[CH3][CH2][C]#[C][CH2][CH3].[O-][Mn](=[O])(=[O])=[O]",
+   "from": null,
+   "note": "Scene 21 (hot, acidic KMnO4 on an alkyne): hex-3-yne and MnO4- over one pi bond.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 212.6,
+     "y": 258.5,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 234.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 278.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 322.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 366.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 5
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 388.6,
+     "y": 182.3,
+     "charge": 0,
+     "map": 6
+    },
+    {
+     "idx": 6,
+     "sym": "O",
+     "x": 342.4,
+     "y": 103.8,
+     "charge": -1,
+     "map": 11
+    },
+    {
+     "idx": 7,
+     "sym": "Mn",
+     "x": 300.6,
+     "y": 128.0,
+     "charge": 0,
+     "map": 9
+    },
+    {
+     "idx": 8,
+     "sym": "O",
+     "x": 278.6,
+     "y": 169.8,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 9,
+     "sym": "O",
+     "x": 322.6,
+     "y": 169.8,
+     "charge": 0,
+     "map": 8
+    },
+    {
+     "idx": 10,
+     "sym": "O",
+     "x": 258.8,
+     "y": 103.8,
+     "charge": 0,
+     "map": 10
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 3,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 10,
+     "order": 2,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
+    "10": 10
+   }
+  },
+  "manganate-ester": {
+   "smiles": "[CH3][CH2][C]1=[C]([CH2][CH3])[O][Mn](=[O])([O-])[O]1",
+   "from": "reactants",
+   "note": "Both O atoms add to the same face of one pi bond: a cyclic manganate ester; one pi bond is left.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 208.9,
+     "y": 251.4,
+     "charge": 0,
+     "map": 1,
+     "mv": true
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 252.7,
+     "y": 256.0,
+     "charge": 0,
+     "map": 2,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 278.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "C",
+     "x": 322.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 348.4,
+     "y": 256.0,
+     "charge": 0,
+     "map": 5,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "C",
+     "x": 330.5,
+     "y": 296.2,
+     "charge": 0,
+     "map": 6,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "O",
+     "x": 336.2,
+     "y": 178.6,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 7,
+     "sym": "Mn",
+     "x": 300.6,
+     "y": 152.7,
+     "charge": 0,
+     "map": 9,
+     "mv": true
+    },
+    {
+     "idx": 8,
+     "sym": "O",
+     "x": 330.0,
+     "y": 120.0,
+     "charge": 0,
+     "map": 10,
+     "mv": true
+    },
+    {
+     "idx": 9,
+     "sym": "O",
+     "x": 271.1,
+     "y": 120.0,
+     "charge": -1,
+     "map": 11,
+     "mv": true
+    },
+    {
+     "idx": 10,
+     "sym": "O",
+     "x": 265.0,
+     "y": 178.6,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 3,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 9,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 9,
+    "7": 7,
+    "8": 10,
+    "9": 6,
+    "10": 8
+   }
+  },
+  "diketone": {
+   "smiles": "[CH3][CH2][C](=[O])[C](=[O])[CH2][CH3]",
+   "from": "manganate-ester",
+   "note": "Course level: the alkyne is oxidised to a 1,2-diketone, hexane-3,4-dione.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 278.6,
+     "y": 144.2,
+     "charge": 0,
+     "map": 1,
+     "mv": true
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 256.6,
+     "y": 182.3,
+     "charge": 0,
+     "map": 2,
+     "mv": true
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 278.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 256.6,
+     "y": 258.5,
+     "charge": 0,
+     "map": 7,
+     "mv": true
+    },
+    {
+     "idx": 4,
+     "sym": "C",
+     "x": 322.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 4
+    },
+    {
+     "idx": 5,
+     "sym": "O",
+     "x": 344.6,
+     "y": 258.5,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 344.6,
+     "y": 182.3,
+     "charge": 0,
+     "map": 5,
+     "mv": true
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 388.6,
+     "y": 182.3,
+     "charge": 0,
+     "map": 6,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 4,
+    "4": 6,
+    "5": 7,
+    "8": 3,
+    "9": 5
+   }
+  },
+  "product": {
+   "smiles": "[CH3][CH2][C](=[O])[O][H].[CH3][CH2][C](=[O])[O][H]",
+   "from": "diketone",
+   "note": "Two propanoic acids: the C-C between the two C=O is cut and each end becomes CO2H.",
+   "atoms": [
+    {
+     "idx": 0,
+     "sym": "C",
+     "x": 278.6,
+     "y": 144.2,
+     "charge": 0,
+     "map": 1
+    },
+    {
+     "idx": 1,
+     "sym": "C",
+     "x": 256.6,
+     "y": 182.3,
+     "charge": 0,
+     "map": 2
+    },
+    {
+     "idx": 2,
+     "sym": "C",
+     "x": 278.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 3
+    },
+    {
+     "idx": 3,
+     "sym": "O",
+     "x": 256.6,
+     "y": 258.5,
+     "charge": 0,
+     "map": 7
+    },
+    {
+     "idx": 4,
+     "sym": "O",
+     "x": 322.6,
+     "y": 220.4,
+     "charge": 0,
+     "map": 12,
+     "mv": true
+    },
+    {
+     "idx": 5,
+     "sym": "H",
+     "x": 344.6,
+     "y": 258.5,
+     "charge": 0,
+     "map": 14,
+     "mv": true
+    },
+    {
+     "idx": 6,
+     "sym": "C",
+     "x": 431.1,
+     "y": 286.4,
+     "charge": 0,
+     "map": 6,
+     "mv": true
+    },
+    {
+     "idx": 7,
+     "sym": "C",
+     "x": 393.0,
+     "y": 264.4,
+     "charge": 0,
+     "map": 5,
+     "mv": true
+    },
+    {
+     "idx": 8,
+     "sym": "C",
+     "x": 393.0,
+     "y": 220.4,
+     "charge": 0,
+     "map": 4,
+     "mv": true
+    },
+    {
+     "idx": 9,
+     "sym": "O",
+     "x": 354.9,
+     "y": 198.4,
+     "charge": 0,
+     "map": 8,
+     "mv": true
+    },
+    {
+     "idx": 10,
+     "sym": "O",
+     "x": 431.1,
+     "y": 198.4,
+     "charge": 0,
+     "map": 13,
+     "mv": true
+    },
+    {
+     "idx": 11,
+     "sym": "H",
+     "x": 431.1,
+     "y": 154.4,
+     "charge": 0,
+     "map": 15,
+     "mv": true
+    }
+   ],
+   "bonds": [
+    {
+     "a": 0,
+     "b": 1,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 1,
+     "b": 2,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 3,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 2,
+     "b": 4,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 4,
+     "b": 5,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 6,
+     "b": 7,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 9,
+     "order": 2,
+     "stereo": null
+    },
+    {
+     "a": 8,
+     "b": 10,
+     "order": 1,
+     "stereo": null
+    },
+    {
+     "a": 10,
+     "b": 11,
+     "order": 1,
+     "stereo": null
+    }
+   ],
+   "map": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 8,
+    "4": 7,
+    "5": 6,
+    "8": 3,
+    "9": 9
    }
   }
  }

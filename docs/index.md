@@ -36,7 +36,7 @@ One line per page. A fresh session should read this first, then the page it need
 - Local preview: `python3 -m http.server 8765` from `learn/`; stale module caches happen, verify with a fresh `import('./x.js?v=1')`.
 
 ## Later additions (2026-10-20/21)
-- Lesson 17 Predict the product; `#practise-stereo-projections`; `#practise-naming-levels` with a settings card and systematic name forms; `#reactions-practice` (five modes + settings); `#mock` midterm from `learn/data/mock-blueprint.js`; `#scenes` animated mechanisms (19 incl. Lesson 8 primers); caveman voice everywhere; Lesson 8 rebuilt (5/5 on student test); `#build` reaction builder; `#table` reaction tables (+ PDFs); `study-guide/past-paper-study-guide.pdf` (untracked, rebuild with `python3 study-guide/build_guide.py`).
+- Lesson 17 Predict the product; `#practise-stereo-projections`; `#practise-naming-levels` with a settings card and systematic name forms; `#reactions-practice` (five modes + settings); `#mock` midterm from `learn/data/mock-blueprint.js`; `#scenes` animated mechanisms (21 incl. Lesson 8 primers; 20 and 21 are hot KMnO₄ on a C=C and a C≡C); caveman voice everywhere; Lesson 8 rebuilt (5/5 on student test); `#build` reaction builder; `#table` reaction tables (+ PDFs); `study-guide/past-paper-study-guide.pdf` (untracked, rebuild with `python3 study-guide/build_guide.py`).
 
 ## Backlog (post-midterm)
 - Standalone lesson tests 07–14 hit an import cycle (WIDGETS before init) unless steps.js is preloaded; the full runner is fine.
