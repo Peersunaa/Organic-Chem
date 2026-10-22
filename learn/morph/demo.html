@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Morph demo</title>
+<style>
+:root { --ink:#0c1d23; --accent:#0a727c; --bad:#b23a26; --electron:#cf7f00; --surface:#fff; --muted:#4f666d; }
+body { background:#f2f5f5; color:var(--ink); font:14px system-ui, sans-serif; margin:16px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); gap:12px; }
+figure { margin:0; background:var(--surface); border:1px solid #d9e3e5; border-radius:10px; padding:8px; }
+.row { display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; }
+.row span { display:block; aspect-ratio:1.6; }
+.row svg, .live svg { width:100%; height:100%; }
+.live { aspect-ratio:1.6; cursor:pointer; }
+figcaption { font-size:12px; color:var(--muted); word-break:break-all; }
+</style></head>
+<body>
+<p>Dev page for learn/morph/: each pair at t = 0, 0.5, 1 and a live copy (click to replay). Add <code>?k=key1,key2</code> to pick entries.</p>
+<div class="grid" id="g"></div>
+<script type="module">
+import { ready } from '../engine/chem.js';
+import { loadMorphs, viewOf, frameSvg, morph } from './morph.js';
+await ready();
+const D = await loadMorphs();
+const q = new URLSearchParams(location.search).get('k');
+const keys = q ? q.split(',') : ['C#CCCCC|HBr-1', 'Cc1ccccc1|HNO3', 'C1=CCCCC1|Br2', 'CC1=CCCCC1|BH3', 'CCC#CCC|Lindlar', 'C1=CCCCC1|KMnO4-hot', 'CC=C(C)C|KMnO4-hot', 'hub:diels-alder', 'CC(=O)c1ccccc1|Clemmensen', 'hub:desulfonation', 'C#CCCCC|Br2-1', 'CC#C|NaNH2-EtBr'];
+const g = document.getElementById('g');
+for (const k of keys) {
+  const e = D[k]; if (!e) { g.insertAdjacentHTML('beforeend', `<p>missing ${k}</p>`); continue; }
+  const v = viewOf(e);
+  const fig = document.createElement('figure');
+  fig.innerHTML = `<div class="row">${[0, 0.5, 1].map((t) => `<span>${frameSvg(v, t, { px: 105 })}</span>`).join('')}</div><div class="live"></div><figcaption>${k} → ${v.prod.smiles}</figcaption>`;
+  g.append(fig);
+  const live = fig.querySelector('.live');
+  const m = morph(live, v, { duration: 1600 });
+  live.addEventListener('click', () => m.play());
+}
+</script>
+</body></html>

@@ -1,0 +1,400 @@
+[
+ {
+  "id": "propyne-hbr1",
+  "alkyne": "CC#C",
+  "key": "HBr_1",
+  "outcome": "single",
+  "note": "propyne + 1 HBr: Markovnikov, H to the terminal carbon, Br to the internal carbon (vinylic halide)",
+  "products": [
+   {
+    "name": "2-bromopropene",
+    "smiles": "C=C(C)Br"
+   }
+  ]
+ },
+ {
+  "id": "propyne-hbr2",
+  "alkyne": "CC#C",
+  "key": "HBr_2",
+  "outcome": "single",
+  "note": "propyne + 2 HBr: geminal dibromide, both Br on C2",
+  "products": [
+   {
+    "name": "2,2-dibromopropane",
+    "smiles": "CC(C)(Br)Br"
+   }
+  ]
+ },
+ {
+  "id": "butyne-hydration",
+  "alkyne": "CCC#C",
+  "key": "H2O_Hg",
+  "outcome": "single",
+  "note": "but-1-yne + H2O/H2SO4/HgSO4: methyl ketone",
+  "products": [
+   {
+    "name": "butan-2-one",
+    "smiles": "CCC(C)=O"
+   }
+  ]
+ },
+ {
+  "id": "hex3yne-hydration",
+  "alkyne": "CCC#CCC",
+  "key": "H2O_Hg",
+  "outcome": "single",
+  "note": "hex-3-yne is symmetrical: a single ketone",
+  "products": [
+   {
+    "name": "hexan-3-one",
+    "smiles": "CCC(=O)CCC"
+   }
+  ]
+ },
+ {
+  "id": "butyne2-lindlar",
+  "alkyne": "CC#CC",
+  "key": "H2_Lindlar",
+  "outcome": "single",
+  "note": "but-2-yne + H2/Lindlar: syn addition, cis alkene, stops at the alkene",
+  "products": [
+   {
+    "name": "(Z)-but-2-ene",
+    "smiles": "C/C=C\\C"
+   }
+  ]
+ },
+ {
+  "id": "butyne2-pd",
+  "alkyne": "CC#CC",
+  "key": "H2_Pd",
+  "outcome": "single",
+  "note": "but-2-yne + 2 H2/Pd: the alkane",
+  "products": [
+   {
+    "name": "butane",
+    "smiles": "CCCC"
+   }
+  ]
+ },
+ {
+  "id": "propyne-acetylide-propylbromide",
+  "start": "CC#C",
+  "cards": [
+   "NaNH2",
+   "PrBr"
+  ],
+  "outcome": "single",
+  "note": "propyne, NaNH2, then 1-bromopropane: hex-2-yne",
+  "products": [
+   {
+    "name": "hex-2-yne",
+    "smiles": "CC#CCCC"
+   }
+  ]
+ },
+ {
+  "id": "acetylene-acetylide-methyl",
+  "start": "C#C",
+  "cards": [
+   "NaNH2",
+   "CH3Br"
+  ],
+  "outcome": "single",
+  "note": "acetylene, NaNH2, then bromomethane: propyne",
+  "products": [
+   {
+    "name": "propyne",
+    "smiles": "CC#C"
+   }
+  ]
+ },
+ {
+  "id": "hexyne-br2-1",
+  "alkyne": "CCCCC#C",
+  "key": "Br2_1",
+  "outcome": "single",
+  "note": "hex-1-yne + 1 Br2: anti addition, so the two Br are trans (E); the book shows (E)-1,2-dibromobut-1-ene for but-1-yne",
+  "products": [
+   {
+    "name": "(E)-1,2-dibromohex-1-ene",
+    "smiles": "Br/C=C(/Br)CCCC"
+   }
+  ]
+ },
+ {
+  "id": "hexyne-cl2-2",
+  "alkyne": "CCCCC#C",
+  "key": "Cl2_2",
+  "outcome": "single",
+  "note": "hex-1-yne + 2 Cl2: 1,1,2,2-tetrachloride",
+  "products": [
+   {
+    "name": "1,1,2,2-tetrachlorohexane",
+    "smiles": "CCCCC(Cl)(Cl)C(Cl)Cl"
+   }
+  ]
+ },
+ {
+  "id": "butyne1-br2-1",
+  "alkyne": "CCC#C",
+  "key": "Br2_1",
+  "outcome": "single",
+  "note": "the book's own example of anti addition of Br2 to but-1-yne",
+  "products": [
+   {
+    "name": "(E)-1,2-dibromobut-1-ene",
+    "smiles": "Br/C=C(/Br)CC"
+   }
+  ]
+ },
+ {
+  "id": "hexyne-hbr1",
+  "alkyne": "CCCCC#C",
+  "key": "HBr_1",
+  "outcome": "single",
+  "note": "book example: hex-1-yne + HBr (1 equiv.)",
+  "products": [
+   {
+    "name": "2-bromohex-1-ene",
+    "smiles": "C=C(Br)CCCC"
+   }
+  ]
+ },
+ {
+  "id": "hexyne-hbr2",
+  "alkyne": "CCCCC#C",
+  "key": "HBr_2",
+  "outcome": "single",
+  "note": "book example: hex-1-yne + excess HBr",
+  "products": [
+   {
+    "name": "2,2-dibromohexane",
+    "smiles": "CCCCC(C)(Br)Br"
+   }
+  ]
+ },
+ {
+  "id": "hexyne-hydration",
+  "alkyne": "CCCCC#C",
+  "key": "H2O_Hg",
+  "outcome": "single",
+  "note": "book example: hex-1-yne hydration gives hexan-2-one (78%)",
+  "products": [
+   {
+    "name": "hexan-2-one",
+    "smiles": "CCCCC(C)=O"
+   }
+  ]
+ },
+ {
+  "id": "oct4yne-lindlar",
+  "alkyne": "CCCC#CCCC",
+  "key": "H2_Lindlar",
+  "outcome": "single",
+  "note": "book example: oct-4-yne + H2/Lindlar gives cis-oct-4-ene",
+  "products": [
+   {
+    "name": "(Z)-oct-4-ene",
+    "smiles": "CCC/C=C\\CCC"
+   }
+  ]
+ },
+ {
+  "id": "oct4yne-pd",
+  "alkyne": "CCCC#CCCC",
+  "key": "H2_Pd",
+  "outcome": "single",
+  "note": "book example: oct-4-yne + H2/Pd gives octane",
+  "products": [
+   {
+    "name": "octane",
+    "smiles": "CCCCCCCC"
+   }
+  ]
+ },
+ {
+  "id": "oct4yne-hydration",
+  "alkyne": "CCCC#CCCC",
+  "key": "H2O_Hg",
+  "outcome": "single",
+  "note": "book problem 4.18: oct-4-yne is symmetrical, one ketone",
+  "products": [
+   {
+    "name": "octan-4-one",
+    "smiles": "CCCC(=O)CCCC"
+   }
+  ]
+ },
+ {
+  "id": "dec5yne-br2-2",
+  "alkyne": "CCCCC#CCCCC",
+  "key": "Br2_2",
+  "outcome": "single",
+  "note": "dec-5-yne + 2 Br2 (book problem 4.38b)",
+  "products": [
+   {
+    "name": "5,5,6,6-tetrabromodecane",
+    "smiles": "CCCCC(Br)(Br)C(Br)(Br)CCCC"
+   }
+  ]
+ },
+ {
+  "id": "hex2yne-hydration",
+  "alkyne": "CC#CCCC",
+  "key": "H2O_Hg",
+  "outcome": "mixture",
+  "note": "unsymmetrical internal alkyne: a mixture of both ketones (book)",
+  "products": [
+   {
+    "name": "hexan-2-one",
+    "smiles": "CCCCC(C)=O"
+   },
+   {
+    "name": "hexan-3-one",
+    "smiles": "CCC(=O)CCC"
+   }
+  ]
+ },
+ {
+  "id": "butyne2-br2-1",
+  "alkyne": "CC#CC",
+  "key": "Br2_1",
+  "outcome": "single",
+  "note": "but-2-yne + 1 Br2: anti addition, the two Br trans, E",
+  "products": [
+   {
+    "name": "(E)-2,3-dibromobut-2-ene",
+    "smiles": "C/C(Br)=C(/C)Br"
+   }
+  ]
+ },
+ {
+  "id": "propyne-hcl1",
+  "alkyne": "CC#C",
+  "key": "HCl_1",
+  "outcome": "single",
+  "note": "propyne + HCl (1 equiv.)",
+  "products": [
+   {
+    "name": "2-chloropropene",
+    "smiles": "C=C(C)Cl"
+   }
+  ]
+ },
+ {
+  "id": "acetylene-hcl2",
+  "alkyne": "C#C",
+  "key": "HCl_2",
+  "outcome": "single",
+  "note": "acetylene + 2 HCl: geminal dichloride",
+  "products": [
+   {
+    "name": "1,1-dichloroethane",
+    "smiles": "CC(Cl)Cl"
+   }
+  ]
+ },
+ {
+  "id": "acetylene-pentyne",
+  "start": "C#C",
+  "cards": [
+   "NaNH2",
+   "PrBr"
+  ],
+  "outcome": "single",
+  "note": "book worked example 4.7: acetylene, NaNH2, then 1-bromopropane",
+  "products": [
+   {
+    "name": "pent-1-yne",
+    "smiles": "CCCC#C"
+   }
+  ]
+ },
+ {
+  "id": "butyne1-lindlar",
+  "alkyne": "CCC#C",
+  "key": "H2_Lindlar",
+  "outcome": "single",
+  "note": "terminal alkyne + Lindlar: a terminal alkene, no cis/trans",
+  "products": [
+   {
+    "name": "but-1-ene",
+    "smiles": "C=CCC"
+   }
+  ]
+ },
+ {
+  "id": "cis-butene-from-propyne",
+  "start": "CC#C",
+  "cards": [
+   "NaNH2",
+   "CH3Br",
+   "H2_Lindlar"
+  ],
+  "outcome": "single",
+  "note": "book problem 4.46: cis-but-2-ene from propyne",
+  "products": [
+   {
+    "name": "(Z)-but-2-ene",
+    "smiles": "C/C=C\\C"
+   }
+  ]
+ },
+ {
+  "id": "acetylene-hexanone",
+  "start": "C#C",
+  "cards": [
+   "NaNH2",
+   "BuBr",
+   "H2O_Hg"
+  ],
+  "outcome": "single",
+  "note": "acetylene, NaNH2, 1-bromobutane, then hydration: hexan-2-one (hex-1-yne gives a single methyl ketone)",
+  "products": [
+   {
+    "name": "hexan-2-one",
+    "smiles": "CCCCC(C)=O"
+   }
+  ]
+ },
+ {
+  "id": "methylhexyne-hydration",
+  "alkyne": "CCC(C)CC#C",
+  "key": "H2O_Hg",
+  "outcome": "single",
+  "note": "book worked example 4.6 (branched alkyne)",
+  "products": [
+   {
+    "name": "4-methylhexan-2-one",
+    "smiles": "CCC(C)CC(C)=O"
+   }
+  ]
+ },
+ {
+  "id": "hexyne-pd",
+  "alkyne": "CCCCC#C",
+  "key": "H2_Pd",
+  "outcome": "single",
+  "note": "hex-1-yne + 2 H2/Pd: hexane",
+  "products": [
+   {
+    "name": "hexane",
+    "smiles": "CCCCCC"
+   }
+  ]
+ },
+ {
+  "id": "butyne1-hbr1",
+  "alkyne": "CCC#C",
+  "key": "HBr_1",
+  "outcome": "single",
+  "note": "but-1-yne + 1 HBr",
+  "products": [
+   {
+    "name": "2-bromobut-1-ene",
+    "smiles": "C=C(Br)CC"
+   }
+  ]
+ }
+]

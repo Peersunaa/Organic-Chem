@@ -1,0 +1,20 @@
+{
+  "_note": "Hand table written from the textbook rules (McMurry 4.10), independent of engine/resonance-rank.js. major = 0-based index into rankSystem(sys).forms, or 'equal'. Rules: octets (every atom full) > charges (fewer, no separation) > electronegativity (minus on the more electronegative atom).",
+  "acetaldehyde-enolate": { "major": 0, "rule": "electronegativity" },
+  "acetone-enolate": { "major": 0, "rule": "electronegativity" },
+  "acetamide": { "major": 0, "rule": "charges" },
+  "formamide": { "major": 0, "rule": "charges" },
+  "methyl-acetate": { "major": 0, "rule": "charges" },
+  "vinyl-chloride": { "major": 0, "rule": "charges" },
+  "phenoxide": { "major": 0, "rule": "electronegativity" },
+  "protonated-acetone": { "major": 0, "rule": "octets" },
+  "protonated-formaldehyde": { "major": 0, "rule": "octets" },
+  "methoxymethyl-cation": { "major": 1, "rule": "octets" },
+  "acrolein": { "major": 0, "rule": "octets" },
+  "vinylamine": { "major": 0, "rule": "charges" },
+  "iminium": { "major": 0, "rule": "octets" },
+  "acetate": { "major": "equal", "rule": null },
+  "allyl-cation": { "major": "equal", "rule": null },
+  "nitromethane": { "major": "equal", "rule": null },
+  "carbonate": { "major": "equal", "rule": null }
+}

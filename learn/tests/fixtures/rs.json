@@ -1,0 +1,38 @@
+{
+  "note": "Hand-checked: each configuration was worked out on paper from the SMILES neighbour order and the CIP ranking written in `order`, and each name was checked with OPSIN. The tests compare these with engine/cip.js, Python RDKit (new CIP labeler, FindMolChiralCenters) and OPSIN.",
+  "cases": [
+    { "smiles": "C[C@@H](O)CC", "label": "R", "order": "OH > CH₂CH₃ > CH₃ > H", "name": { "new": "(R)-butan-2-ol", "old": "(R)-2-butanol" } },
+    { "smiles": "C[C@H](O)CC", "label": "S", "order": "OH > CH₂CH₃ > CH₃ > H", "name": { "new": "(S)-butan-2-ol", "old": "(S)-2-butanol" } },
+    { "smiles": "CC[C@@H](C)Br", "label": "R", "order": "Br > CH₂CH₃ > CH₃ > H", "name": { "new": "(R)-2-bromobutane", "old": "(R)-2-bromobutane" } },
+    { "smiles": "CC[C@H](C)Cl", "label": "S", "order": "Cl > CH₂CH₃ > CH₃ > H", "name": { "new": "(S)-2-chlorobutane", "old": "(S)-2-chlorobutane" } },
+    { "smiles": "C[C@H](N)C(=O)O", "label": "S", "order": "NH₂ > CO₂H > CH₃ > H", "name": { "new": "(S)-2-aminopropanoic acid", "old": "(S)-2-aminopropanoic acid" }, "note": "(S)-alanine, L-alanine" },
+    { "smiles": "OC[C@@H](O)C=O", "label": "R", "order": "OH > CHO > CH₂OH > H", "name": { "new": "(R)-2,3-dihydroxypropanal", "old": "(R)-2,3-dihydroxypropanal" }, "note": "(R)-glyceraldehyde, D-glyceraldehyde: the CHO is (O,O,H) and beats CH2OH (O,H,H)" },
+    { "smiles": "C[C@@H](O)C(=O)O", "label": "R", "order": "OH > CO₂H > CH₃ > H", "name": { "new": "(R)-2-hydroxypropanoic acid", "old": "(R)-2-hydroxypropanoic acid" }, "note": "(R)-lactic acid" },
+    { "smiles": "C[C@H](O)C(=O)O", "label": "S", "order": "OH > CO₂H > CH₃ > H", "name": { "new": "(S)-2-hydroxypropanoic acid", "old": "(S)-2-hydroxypropanoic acid" }, "note": "(S)-lactic acid, the (+) form" },
+    { "smiles": "CCC[C@H](C)CC", "label": "R", "order": "CH₂CH₂CH₃ > CH₂CH₃ > CH₃ > H", "name": { "new": "(R)-3-methylhexane", "old": "(R)-3-methylhexane" } },
+    { "smiles": "F[C@H](Cl)Br", "label": "R", "order": "Br > Cl > F > H", "name": { "new": "(R)-bromochlorofluoromethane", "old": "(R)-bromochlorofluoromethane" } },
+    { "smiles": "F[C@@H](Cl)Br", "label": "S", "order": "Br > Cl > F > H", "name": { "new": "(S)-bromochlorofluoromethane", "old": "(S)-bromochlorofluoromethane" } },
+    { "smiles": "C[C@@H](O)CO", "label": "R", "order": "OH > CH₂OH > CH₃ > H", "name": { "new": "(R)-propane-1,2-diol", "old": "(R)-1,2-propanediol" } },
+    { "smiles": "C[C@H](O)CO", "label": "S", "order": "OH > CH₂OH > CH₃ > H", "name": { "new": "(S)-propane-1,2-diol", "old": "(S)-1,2-propanediol" } },
+    { "smiles": "CC[C@H](C)C(=O)O", "label": "S", "order": "CO₂H > CH₂CH₃ > CH₃ > H", "name": { "new": "(S)-2-methylbutanoic acid", "old": "(S)-2-methylbutanoic acid" } },
+    { "smiles": "N[C@@H](CO)C(=O)O", "label": "S", "order": "NH₂ > CO₂H > CH₂OH > H", "name": { "new": "(S)-2-amino-3-hydroxypropanoic acid", "old": "(S)-2-amino-3-hydroxypropanoic acid" }, "note": "(S)-serine, L-serine" },
+    { "smiles": "CC[C@](C)(Br)Cl", "label": "S", "order": "Br > Cl > CH₂CH₃ > CH₃", "name": { "new": "(S)-2-bromo-2-chlorobutane", "old": "(S)-2-bromo-2-chlorobutane" }, "note": "no H on the center: the lowest group is CH3" },
+    { "smiles": "C=C[C@H](C)CC", "label": "R", "order": "CH=CH₂ > CH₂CH₃ > CH₃ > H", "name": { "new": "(R)-3-methylpent-1-ene", "old": "(R)-3-methyl-1-pentene" } },
+    { "smiles": "CC(C)Cc1ccc(cc1)[C@H](C)C(=O)O", "label": "S", "name": { "new": "(S)-2-[4-(2-methylpropyl)phenyl]propanoic acid", "old": "(S)-2-[4-(2-methylpropyl)phenyl]propanoic acid" }, "note": "(S)-ibuprofen, the active enantiomer" },
+    { "smiles": "CC1=CC[C@H](CC1=O)C(C)=C", "label": "R", "name": { "new": "(R)-2-methyl-5-(prop-1-en-2-yl)cyclohex-2-en-1-one", "old": "(R)-2-methyl-5-(prop-1-en-2-yl)cyclohex-2-en-1-one" }, "note": "(R)-carvone, spearmint, levorotatory" },
+    { "smiles": "CC1=CC[C@@H](CC1=O)C(C)=C", "label": "S", "name": { "new": "(S)-2-methyl-5-(prop-1-en-2-yl)cyclohex-2-en-1-one", "old": "(S)-2-methyl-5-(prop-1-en-2-yl)cyclohex-2-en-1-one" }, "note": "(S)-carvone, caraway, dextrorotatory" },
+    { "smiles": "CC1=CC[C@@H](CC1)C(C)=C", "label": "R", "name": { "new": "(R)-1-methyl-4-(prop-1-en-2-yl)cyclohex-1-ene", "old": "(R)-1-methyl-4-(prop-1-en-2-yl)cyclohex-1-ene" }, "note": "(R)-limonene, orange peel, dextrorotatory" },
+    { "smiles": "CCC[C@@H](O)C", "label": "S", "order": "OH > CH₂CH₂CH₃ > CH₃ > H", "name": { "new": "(S)-pentan-2-ol", "old": "(S)-2-pentanol" }, "note": "neighbours Pr, H, O, CH3 with @@; moving to the order H, O, Pr, CH3 is an even permutation, so looking from H the sequence O, Pr, CH3 is clockwise; H away makes it counterclockwise: S" }
+  ],
+  "centers": [
+    { "smiles": "CCC(C)O", "centers": [2], "note": "butan-2-ol: one center" },
+    { "smiles": "CCC(C)Cl", "centers": [2], "note": "2-chlorobutane: one center, C2" },
+    { "smiles": "CC(C)O", "centers": [], "note": "propan-2-ol: two CH3 on C2" },
+    { "smiles": "CCC(O)CC", "centers": [], "note": "pentan-3-ol: two CH2CH3 on C3" },
+    { "smiles": "CC1CCCCC1", "centers": [], "note": "methylcyclohexane: the two ring directions are identical" },
+    { "smiles": "CC1(O)CCCCC1", "centers": [], "note": "1-methylcyclohexanol: the two ring directions are identical" },
+    { "smiles": "CC1CCCCC1=O", "centers": [1], "note": "2-methylcyclohexanone: C2 has CH3, H, C=O and CH2" },
+    { "smiles": "CC(C)Cc1ccc(cc1)C(C)C(=O)O", "centers": [10], "note": "ibuprofen: CH(CH3)CO2H" },
+    { "smiles": "CC1=CCC(CC1=O)C(C)=C", "centers": [4], "note": "carvone: C5" }
+  ]
+}
