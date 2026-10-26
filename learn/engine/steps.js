@@ -287,13 +287,14 @@ const RENDER = {
   predict(step, ctx, host) {
     host.append(h('p', { class: 'eyebrow' }, 'Predict first'));
     addPrompt(host, step);
-    const list = h('div', { class: 'opts', role: 'group' });
+    const list = h('div', { class: 'opts' + (step.options.some((o) => o.smiles) ? ' mols' : ''), role: 'group' });
     const out = h('div', { class: 'after' });
     const shown = orderedOptions(step, ctx.lessonId, ctx.attempt);
     const names = optionNames(shown);
     shown.forEach((o, oi) => {
-      const b = h('button', { type: 'button', class: 'opt' }, rich(o.text, 'span'));
-      nameOptionButton(b, names[oi]);
+      // a drawn option ({ smiles, label }) is a molecule figure, as in choice steps; otherwise the text
+      const b = h('button', { type: 'button', class: 'opt' }, o.smiles ? molFigure(o.smiles, o.label || '', { ...(o.raw ? { raw: true, showCharge: true } : {}), ...(o.lp ? { lp: true } : {}), ...(o.alt ? { alt: o.alt } : {}) }) : rich(o.text, 'span'));
+      nameOptionButton(b, o.alt || names[oi]);
       b.addEventListener('click', () => {
         [...list.children].forEach((x, i) => { x.disabled = true; if (shown[i].correct) x.classList.add('good'); });
         if (!o.correct) { b.classList.add('bad'); ctx.mistake(step.skill, step.id, o.why); }

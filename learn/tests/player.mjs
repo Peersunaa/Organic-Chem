@@ -55,7 +55,7 @@ export async function player({ ok, eq }) {
   const seen = new Set();
   const uniq = all.filter(({ mech }) => { const k = JSON.stringify(mech.steps.map((s) => [s.before, s.arrows, s.after])); if (seen.has(k)) return false; seen.add(k); return true; });
   const lessonMechs = all.filter((x) => x.src.startsWith('lesson'));
-  eq(lessonMechs.length, 11, 'eleven lesson steps play a mechanism (L08 x2, L09 x2, L10, L11 x2, L12 x2, L13 x2)');
+  eq(lessonMechs.length, 14, 'fourteen lesson steps play a mechanism (L08 x2, L09 x2, L10, L11 x2, L12 x2, L13 x2, L18 x3: SN2, SN1, E2)');
   ok(uniq.length >= 100, `the course builds ${uniq.length} distinct mechanisms to check (at least 100)`);
   let arrows = 0;
 

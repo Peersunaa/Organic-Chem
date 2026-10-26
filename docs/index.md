@@ -37,6 +37,7 @@ One line per page. A fresh session should read this first, then the page it need
 
 ## Later additions (2026-10-20/21)
 - Lesson 17 Predict the product; `#practise-stereo-projections`; `#practise-naming-levels` with a settings card and systematic name forms; `#reactions-practice` (five modes + settings); `#mock` midterm from `learn/data/mock-blueprint.js`; `#scenes` animated mechanisms (21 incl. Lesson 8 primers; 20 and 21 are hot KMnO₄ on a C=C and a C≡C); caveman voice everywhere; Lesson 8 rebuilt (5/5 on student test); `#build` reaction builder; `#table` reaction tables (+ PDFs); `study-guide/past-paper-study-guide.pdf` (untracked, rebuild with `python3 study-guide/build_guide.py`).
+- Chapter 7 piece 2 (2026-10-26, not committed): Lesson 18 Substitution and elimination (30 steps s01-s30, `mechanism-player` SN2 / SN1 / E2, `energy-diagram`, a chair-flip model for the E2 chair rule), generator `halides` (ten task families), recap, 7 glossary terms, the ten halide hub cards link to it; `tests/lesson18.mjs`. Scenes 22-25 (piece 3) hang on s06, s13, s19, s23.
 
 ## Backlog (post-midterm)
 - Standalone lesson tests 07–14 hit an import cycle (WIDGETS before init) unless steps.js is preloaded; the full runner is fine.

@@ -330,7 +330,7 @@ function practice(skill, cardId = null) {
   const rxPage = RX.PRACTICE_MODES.includes(skill) || skill === RX.MIX_ID;   // a reaction practice page: it has the settings card (except the one limited to a hub card)
   const rxLimited = rxPage && !!(cardId && HUB_BY_ID[cardId] && skill === 'guess-reagent');
   if (rxPage && !rxLimited) RX.beginReactionSession(); else RX.endReactionSession();
-  setDrawStyle((['skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships', 'predict-product'].includes(generatorForSkill(skill)) || generatorForSkill(skill) === 'huckel' || MODE_IDS.includes(generatorForSkill(skill)) || rxPage) ? 'skeletal' : 'full');
+  setDrawStyle((['halides', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'markovnikov', 'alkene-additions-2', 'resonance', 'directors', 'stereo-relationships', 'predict-product'].includes(generatorForSkill(skill)) || generatorForSkill(skill) === 'huckel' || MODE_IDS.includes(generatorForSkill(skill)) || rxPage) ? 'skeletal' : 'full');
   const host = h('div', { class: 'step' });
   const card = h('article', { class: 'card' }, host);
   const ctx = {

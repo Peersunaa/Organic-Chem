@@ -30,6 +30,8 @@ const EDITED = { '17': new Set(['s01', 's04', 's07', 's12', 's13', 's14', 's15',
 // Lessons rebuilt from scratch on purpose (new step list and new ids): no step is compared with HEAD, every caveman rule above still applies.
 //   '08': Lesson 08 rebuild around one spine (docs/reviews/2026-10-20-lesson08-audit.md): 30 new steps, ids s01-s30.
 const REBUILT = new Set(['08']);
+// Lessons written after the caveman pass and not in git HEAD yet (no HEAD file to compare with; every caveman rule above still applies): Lesson 18, Chapter 7.
+const NEW = new Set(['18']);
 // Steps added since HEAD (no HEAD step to compare with): Lesson 17 s65, hot KMnO₄ on an alkyne (the 39th hub card, 2026-10-21).
 const ADDED = { '17': new Set(['s65']) };
 const SIMPLE = ['prompt', 'problem', 'html', 'reveal', 'rule', 'worked', 'trap'];
@@ -120,7 +122,7 @@ export async function cavemanLessons({ ok, eq }) {
   for (let li = 0; li < LESSONS.length; li++) {
     const L = LESSONS[li], tag = `L${L.id}`;
     const head = await headLesson(files[li]);
-    ok(!!head, `${tag}: git HEAD has ${files[li]}`);
+    ok(!!head || NEW.has(L.id), `${tag}: git HEAD has ${files[li]}`);
     let fields = 0, steps = 0;
     L.steps.forEach((s, n) => {
       const where = `${tag} step ${s.id || n}`;
@@ -129,7 +131,7 @@ export async function cavemanLessons({ ok, eq }) {
       ok(s.caveman && typeof s.caveman === 'object' && (Object.keys(s.caveman).length > 0 || !!LEFT_PLAIN[`${L.id}:${s.id}`]), `${where}: has a caveman object with something in it`);
       steps++;
       out.forEach(([k, a, b]) => { fields++; const bad = checkPair(a, b); ok(!bad.length, `${where} ${k}: ${bad.join('; ')}`); });
-      if (head && !REBUILT.has(L.id) && !(ADDED[L.id] && ADDED[L.id].has(s.id))) {
+      if (head && !REBUILT.has(L.id) && !NEW.has(L.id) && !(ADDED[L.id] && ADDED[L.id].has(s.id))) {
         const h = head.steps.find((x) => x.id === s.id);   // by id: a step removed since HEAD (Lesson 17 s02, s05, s08) does not shift the others
         ok(!!h, `${where}: same step id as HEAD`);
         const edited = EDITED[L.id] && EDITED[L.id].has(s.id);

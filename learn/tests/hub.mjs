@@ -73,7 +73,7 @@ const HAND = {
   'alkyne-kmno4-hot': { formula: ['C3H6O2', 'C3H6O2'] }
 };
 const HALIDE_IDS = ['sn2-cn', 'sn2-i', 'sn2-oh', 'sn2-rs', 'sn1-solvolysis', 'e2-zaitsev', 'e2-chair', 'e1-heat', 'grignard-d2o', 'halide-from-alcohol'];
-const NO_LESSON_IDS = ['diels-alder', 'clemmensen', 'birch', 'alkyne-hydroboration', 'alkene-hydroboration', 'oxidation-pcc', 'oxidation-cr', 'alkyne-kmno4-hot', ...HALIDE_IDS];   // the alkyl-halide cards wait for Lesson 18 (piece 2)
+const NO_LESSON_IDS = ['diels-alder', 'clemmensen', 'birch', 'alkyne-hydroboration', 'alkene-hydroboration', 'oxidation-pcc', 'oxidation-cr', 'alkyne-kmno4-hot'];   // the ten alkyl-halide cards now link to Lesson 18
 const SUBGROUP = 'Side chains and alcohols (not in the book)';
 
 // The engine's answer for the card's example (products as canonical isomeric SMILES), and, where the engine knows it, how the new groups add.
@@ -151,7 +151,7 @@ export async function hub({ ok, eq }) {
   eq(HUB_GROUPS.map((g) => g.id), ['arene', 'alkene', 'alkyne', 'diene', 'halide'], 'group order: the alkyl halides come after the dienes');
   eq(HUB_CARDS.filter((c) => c.group === 'halide').map((c) => c.id), HALIDE_IDS, 'the ten alkyl-halide cards, in order');
   eq(Object.keys(HAND).sort(), HUB_CARDS.filter((c) => !ENGINE[c.id]).map((c) => c.id).sort(), 'HAND covers exactly the cards with no engine model');
-  eq(HUB_CARDS.filter((c) => c.lesson === null).map((c) => c.id).sort(), NO_LESSON_IDS.slice().sort(), 'the cards with no lesson are the seven the brief names, hot KMnO₄ on an alkyne (Lesson 12 has no KMnO₄ step) and the ten alkyl-halide cards (Lesson 18 is piece 2)');
+  eq(HUB_CARDS.filter((c) => c.lesson === null).map((c) => c.id).sort(), NO_LESSON_IDS.slice().sort(), 'the cards with no lesson are the seven the brief names plus hot KMnO₄ on an alkyne (Lesson 12 has no KMnO₄ step); the ten alkyl-halide cards link to Lesson 18');
   eq(HUB_CARDS.filter((c) => c.subgroup).map((c) => c.id), ['oxidation-pcc', 'oxidation-cr'], 'only the two oxidation cards have a sub-header');
   for (const c of HUB_CARDS.filter((x) => x.subgroup)) ok(c.group === 'arene' && c.subgroup === SUBGROUP, `${c.id}: sits in the aromatics group under "${SUBGROUP}"`);
   // the sub-header cards are the last cards of their group, so they stay together under one header

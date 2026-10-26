@@ -93,6 +93,12 @@ export const RECAP = {
     { n: '09', step: 's04', fact: 'Markovnikov: H goes to the C=C carbon with more H, so the + lands on the more substituted carbon (3° > 2° > 1°) and the other piece bonds there.' },
     { n: '10', step: 's03', fact: 'Br₂ adds anti through a bromonium ion; H₂ over Pd, a peroxyacid and cold KMnO₄ put both groups on one face (syn); a flat carbocation takes the group on either face.' },
     { n: '14', step: 's03', fact: 'A ring substitutes: the electrophile replaces one H. Activators and halogens send the next group ortho and para; every other deactivator sends it meta.' }
+  ],
+  '18': [
+    { n: '08', step: 's06', fact: 'A curved arrow starts at electrons (a lone pair or a bond) and points to where they go: a lone pair on the nucleophile goes to the δ+ carbon.' },
+    { n: '09', step: 's06', fact: 'A carbocation is flat and sp² with an empty p orbital; alkyl groups steady it, so 3° > 2° > 1° > methyl.' },
+    { n: '06', step: 's12', fact: 'In a chair, axial bonds point straight up or down and equatorial bonds point outward; a ring flip swaps them, and up stays up.' },
+    { n: '15', step: 's13', fact: 'R/S in three moves: rank the groups (CIP), put group 4 at the back, then read 1 → 2 → 3 as clockwise (R) or counterclockwise (S).' }
   ]
 };
 

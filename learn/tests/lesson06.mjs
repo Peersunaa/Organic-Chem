@@ -150,7 +150,7 @@ export async function lesson06(h) {
 
   // ------------------------------------------------------------ chair models (data/3d/chairs.js)
   const ids = Object.keys(CC.CHAIRS);
-  ok(ids.length === 8 && ['cyclohexane', 'methylcyclohexane', ...['12', '13', '14'].flatMap((p) => ['cis', 'trans'].map((r) => `dm-${r}-${p}`))].every((i) => ids.includes(i)), 'chair models: cyclohexane, methylcyclohexane and the six dimethylcyclohexanes');
+  ok(ids.length === 10 && ['cyclohexane', 'methylcyclohexane', ...['12', '13', '14'].flatMap((p) => ['cis', 'trans'].map((r) => `dm-${r}-${p}`)), 'bm-cis-12', 'bm-trans-12'].every((i) => ids.includes(i)), 'chair models: cyclohexane, methylcyclohexane, the six dimethylcyclohexanes and the two 1-bromo-2-methylcyclohexanes (Lesson 18, the E2 chair rule)');
   for (const id of ids) {
     const m = CC.load(id), e = m.entry;
     const t = `chair ${id}`;

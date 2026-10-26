@@ -83,7 +83,15 @@ export const GLOSSARY = [
   { id: 'kekule', label: 'Kekulé structure', forms: ['Kekulé', 'Kekule'], def: 'One of the two ways of drawing benzene with alternating double and single bonds; the real ring is a hybrid of both.' },
   { id: 'solvent', label: 'solvent', forms: ['solvent'], def: 'The liquid, such as water or ether, in which a reaction is run; it is present in huge excess, so it can act as a reagent too.' },
   { id: 'leavinggroup', label: 'leaving group', forms: ['leaving group', 'leaving groups'], def: 'An atom or group that departs with the bonding pair of electrons; a good one, such as Br⁻ or H₂O, is stable on its own.' },
-  { id: 'tautomer', label: 'tautomer', forms: ['tautomer', 'tautomers'], def: 'Isomers that differ in where an H and a double bond sit and that swap quickly, such as an enol and its ketone.' }
+  { id: 'tautomer', label: 'tautomer', forms: ['tautomer', 'tautomers'], def: 'Isomers that differ in where an H and a double bond sit and that swap quickly, such as an enol and its ketone.' },
+  // Chapter 7 (Lesson 18)
+  { id: 'zaitsev', label: 'Zaitsev’s rule', forms: ['Zaitsev', 'Zaitsev’s'], def: 'In an elimination, the alkene with more carbon groups on its C=C (the more substituted one) is the major product.' },
+  { id: 'antiperiplanar', label: 'anti-periplanar', forms: ['anti-periplanar', 'antiperiplanar'], def: 'Lying in one plane on opposite sides, 180° apart, like the β H and the halogen in E2 (trans-diaxial on a ring).' },
+  { id: 'solvolysis', label: 'solvolysis', forms: ['solvolysis'], def: 'A reaction in which the solvent (water or an alcohol) is also the nucleophile, as when a 3° halide is heated in ethanol.' },
+  { id: 'protic', label: 'protic solvent', forms: ['protic solvent', 'protic solvents', 'protic'], def: 'A solvent with an O–H or N–H, such as water or an alcohol; it hydrogen-bonds to ions and helps a halide leave in SN1.' },
+  { id: 'aprotic', label: 'aprotic solvent', forms: ['aprotic solvent', 'aprotic solvents', 'polar aprotic', 'aprotic'], def: 'A polar solvent with no O–H or N–H, such as DMSO or acetone; it leaves an anionic nucleophile free, so SN2 is fast.' },
+  { id: 'grignard', label: 'Grignard reagent', forms: ['Grignard reagent', 'Grignard reagents', 'Grignard'], def: 'R–Mg–X, made from R–X and magnesium in dry ether; its carbon is a strong base and a nucleophile.' },
+  { id: 'inversion', label: 'inversion', forms: ['inversion', 'inverts', 'inverted'], def: 'The flip of a stereocentre in SN2: the nucleophile enters from the back, so the three other groups turn over like an umbrella.' }
 ];
 export const GLOSSARY_BY_ID = Object.fromEntries(GLOSSARY.map((g) => [g.id, g]));
 

@@ -622,7 +622,7 @@ export function sn1Mechanism(RX, nuId) {
   const cat = chargedAtom(sc3, 0), N2 = sc3.maps[1].heavy[Nu.site];
   st3.arrows = [
     { from: { lp: N2 }, to: { atom: cat.hs[0] }, why: 'A solvent molecule uses a lone pair to take an H⁺ from the positively charged atom of the new product.' },
-    { from: { bond: [cat.idx, cat.hs[0]] }, to: { atom: cat.idx }, why: 'The bond pair stays on that atom, which becomes neutral: the alcohol or ether is formed.' }
+    { from: { bond: [cat.idx, cat.hs[0]] }, to: { atom: cat.idx }, why: `The ${sc3.atoms[cat.idx].el}–H bond pair stays on that ${sc3.atoms[cat.idx].el} atom, which becomes neutral: the ${sc3.atoms[cat.idx].el === 'O' ? 'alcohol or ether' : 'amine'} is formed.` }
   ];
   if (cat.hs.length > 1) st3.equiv = cat.hs.slice(1).map((h2) => ({ [cat.hs[0]]: h2, [h2]: cat.hs[0] }));
   st3.after = afterOf(st3);

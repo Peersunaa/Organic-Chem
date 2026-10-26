@@ -1,7 +1,7 @@
 // Teaching-wave T1 checks (tests/text.mjs):
 //  (1) no <mol> / <molpair> tag is left open in any lesson, generated problem, hub card or past-paper item (an open tag swallows the text after it);
 //  (2) option order: shuffled at render time (seeded, deterministic, objects kept), and the answer-position and answer-length cues are gone;
-//  (3) the glossary (40-60 terms, one sentence of at most 140 characters, found as whole words) and the prerequisite recap cards (every link is a real step);
+//  (3) the glossary (40-90 terms, one sentence of at most 140 characters, found as whole words) and the prerequisite recap cards (every link is a real step);
 //  (4) content fixes from the novice review (valence table in L1 s03, sigma/pi figures, Li electronegativity, Diels-Alder hub drawing and past-paper link);
 //  (5) review 3 (fix wave T3b): first-try scoring (engine/first-try.js, the reaction lab, the mastery player), worked-step moves shuffled like choice steps, accessible names for image options (engine/mol-name.js).
 // Run on its own with `node learn/tests/text.mjs`, or as part of run.mjs.
@@ -123,7 +123,7 @@ export async function text({ ok, eq }) {
   }
 
   // ---------------------------------------------------------------- (3) glossary and recap cards
-  ok(GLOSSARY.length >= 40 && GLOSSARY.length <= 80, `glossary has 40 to 80 terms (${GLOSSARY.length})`);
+  ok(GLOSSARY.length >= 40 && GLOSSARY.length <= 90, `glossary has 40 to 90 terms (${GLOSSARY.length})`);
   for (const t of ['catalyst', 'isomer', 'dienophile', 'oxonium', 'bromonium', 'inductive', 'equilibrium', 'ewg', 'kekule', 'solvent', 'leavinggroup']) ok(GLOSSARY.some((g) => g.id === t), `glossary has the term ${t} (the round-2 review's missing terms)`);
   ok(new Set(GLOSSARY.map((g) => g.id)).size === GLOSSARY.length, 'glossary ids are unique');
   for (const g of GLOSSARY) {

@@ -24,7 +24,7 @@
 // the drill uses them as fixed-answer questions built from their examples (generators-predict.js, `fixed: true`).
 // alkyne-kmno4-hot (hot KMnO₄ cuts a C≡C to acids, scene 21) has no engine model either and no lesson (Lesson 12 has no KMnO₄ step): an eleventh fixed-answer card.
 // The ten alkyl-halide cards (group `halide`, Chapter 7: sn2-cn, sn2-i, sn2-oh, sn2-rs, sn1-solvolysis, e2-zaitsev, e2-chair, e1-heat, grignard-d2o, halide-from-alcohol) are modelled by engine/reactions-halides.js
-// (tests/hub.mjs checks every example product against it). They have `lesson: null` until Lesson 18 (piece 2) exists.
+// (tests/hub.mjs checks every example product against it). Each links to its step in Lesson 18.
 
 export const HUB_GROUPS = [
   { id: 'arene', label: 'Aromatics', sub: 'Benzene rings: substitution, not addition (Lessons 13 and 14)' },
@@ -1130,7 +1130,7 @@ export const HUB_CARDS = [
     },
     lesson: null
   }  ,
-  // ------------------------------------------------------------------ alkyl halides (Chapter 7; Lesson 18 is piece 2, so lesson is null for now)
+  // ------------------------------------------------------------------ alkyl halides (Chapter 7; each card links to its step in Lesson 18)
   {
     id: 'sn2-cn', group: 'halide', reagent: 'NaCN (cyanide as the nucleophile)',
     what: 'A cyanide ion replaces the halogen of a methyl, 1° or 2° alkyl halide in one step (SN2). The chain gains one carbon and a nitrile, R–C≡N, forms.',
@@ -1157,7 +1157,7 @@ export const HUB_CARDS = [
         '3° halide: no SN2. Back side blocked.'
       ]
     },
-    lesson: null
+    lesson: { id: '18', step: 's11' }
   },
   {
     id: 'sn2-i', group: 'halide', reagent: 'NaI, acetone',
@@ -1183,7 +1183,7 @@ export const HUB_CARDS = [
         'Stereocentre: I from back. Flip.'
       ]
     },
-    lesson: null
+    lesson: { id: '18', step: 's06' }, mech: 's05'
   },
   {
     id: 'sn2-oh', group: 'halide', reagent: 'NaOH (hydroxide as the nucleophile)',
@@ -1212,7 +1212,7 @@ export const HUB_CARDS = [
       ],
       note: '(R) to (S). HO⁻ from back. 2° also some E2 alkene.'
     },
-    lesson: null
+    lesson: { id: '18', step: 's04' }, mech: 's05'
   },
   {
     id: 'sn2-rs', group: 'halide', reagent: 'NaSCH₃ (a thiolate)',
@@ -1238,7 +1238,7 @@ export const HUB_CARDS = [
         'Stereocentre: flip.'
       ]
     },
-    lesson: null
+    lesson: { id: '18', step: 's11' }
   },
   {
     id: 'sn1-solvolysis', group: 'halide', reagent: 'H₂O, heat (solvolysis of a 3° halide)',
@@ -1268,7 +1268,7 @@ export const HUB_CARDS = [
       ],
       note: 'Water bond cation, second water take H⁺. Alkene (E1) beside it.'
     },
-    lesson: null
+    lesson: { id: '18', step: 's12' }, mech: 's13'
   },
   {
     id: 'e2-zaitsev', group: 'halide', reagent: 'KOH, ethanol, heat (or NaOCH₂CH₃, NaOCH₃)',
@@ -1297,7 +1297,7 @@ export const HUB_CARDS = [
       ],
       note: '2-Methylbut-2-ene major (three groups); 2-methylbut-1-ene minor. Ignore E/Z.'
     },
-    lesson: null
+    lesson: { id: '18', step: 's18' }, mech: 's19'
   },
   {
     id: 'e2-chair', group: 'halide', reagent: 'KOH, ethanol, heat, on a cyclohexyl halide',
@@ -1327,7 +1327,7 @@ export const HUB_CARDS = [
       ],
       note: 'Only 3-methylcyclohexene: H on CH₃ carbon cis to Br, not anti.'
     },
-    lesson: null
+    lesson: { id: '18', step: 's21' }
   },
   {
     id: 'e1-heat', group: 'halide', reagent: 'CH₃CH₂OH, heat (no added base)',
@@ -1356,7 +1356,7 @@ export const HUB_CARDS = [
       ],
       note: 'Ether 2-ethoxy-2-methylpropane forms too (SN1). Heat: more alkene.'
     },
-    lesson: null
+    lesson: { id: '18', step: 's22' }
   },
   {
     id: 'grignard-d2o', group: 'halide', reagent: 'Mg in ether, then D₂O',
@@ -1383,7 +1383,7 @@ export const HUB_CARDS = [
       ],
       note: 'D replace Br: deuteriocyclohexane.'
     },
-    lesson: null
+    lesson: { id: '18', step: 's26' }
   },
   {
     id: 'halide-from-alcohol', group: 'halide', reagent: 'PBr₃ or SOCl₂ (1° and 2° alcohols); HBr or HCl (3° alcohols)',
@@ -1413,7 +1413,7 @@ export const HUB_CARDS = [
       ],
       note: '(S) alcohol to (R) bromide. OH and Br both top: letter flips.'
     },
-    lesson: null
+    lesson: { id: '18', step: 's28' }
   }
 ];
 

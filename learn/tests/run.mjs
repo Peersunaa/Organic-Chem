@@ -40,6 +40,7 @@ import { lesson14 } from './lesson14.mjs';
 import { lesson15 } from './lesson15.mjs';
 import { lesson16 } from './lesson16.mjs';
 import { lesson17 } from './lesson17.mjs';
+import { lesson18 } from './lesson18.mjs';
 import { halides } from './halides.mjs';
 import { hub } from './hub.mjs';
 import { predict } from './predict.mjs';
@@ -155,7 +156,7 @@ function htmlStrings(o, out = []) {
 const words = (html) => html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 
 ok(PLANNED.length === 0, 'no locked placeholders are left (Lesson 16 is unlocked)');
-ok(LESSONS.length === 17 && LESSONS[16].id === '17' && LESSONS[15].id === '16' && LESSONS[14].id === '15' && LESSONS[13].id === '14' && LESSONS[12].id === '13' && LESSONS[11].id === '12' && LESSONS[10].id === '11' && LESSONS[9].id === '10' && LESSONS[8].id === '09' && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-16 registered and unlocked');
+ok(LESSONS.length === 18 && LESSONS[17].id === '18' && LESSONS[16].id === '17' && LESSONS[15].id === '16' && LESSONS[14].id === '15' && LESSONS[13].id === '14' && LESSONS[12].id === '13' && LESSONS[11].id === '12' && LESSONS[10].id === '11' && LESSONS[9].id === '10' && LESSONS[8].id === '09' && LESSONS[7].id === '08' && LESSONS[6].id === '07' && LESSONS[1].id === '02' && LESSONS[2].id === '03' && LESSONS[3].id === '04' && LESSONS[4].id === '05' && LESSONS[5].id === '06', 'lessons 01-18 registered and unlocked');
 
 for (const L of LESSONS) {
   const tag = `L${L.id}`;
@@ -289,7 +290,7 @@ for (const L of LESSONS) {
     }
   }
   // generator registry
-  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'mechanism-mastery', 'markovnikov', 'alkene-additions-2', 'resonance', 'alkynes', 'eas-basics', 'directors', 'rs', 'stereo-relationships', 'predict-product'].includes(L.mastery.generator), `${tag} generator known`);
+  ok(['lewis-basic', 'shape-basic', 'acid-base', 'skeletal-fg', 'alkane-names', 'chairs', 'alkene-names', 'mechanism-basics', 'mechanism-mastery', 'markovnikov', 'alkene-additions-2', 'resonance', 'alkynes', 'eas-basics', 'directors', 'rs', 'stereo-relationships', 'predict-product', 'halides'].includes(L.mastery.generator), `${tag} generator known`);
 }
 
 // ---- Lesson 02 specifics
@@ -1193,6 +1194,9 @@ await lesson17({ ok, eq });
 
 // ---- Chapter 7: alkyl halides engine (engine/reactions-halides.js), independent Python recompute (tools/check_halides.py), hand-checked fixture with OPSIN names (tests/halides.mjs)
 await halides({ ok, eq });
+
+// ---- Lesson 18: substitution and elimination (every drawn answer recomputed from engine/reactions-halides.js, the three mechanisms proven, the chair model measured from its coordinates, energy diagrams validated, the `halides` generator, recap, glossary, hub links; tests/lesson18.mjs)
+await lesson18({ ok, eq });
 
 // ---- Reaction hub: every card has all its fields, every lesson/mechanism link resolves to a real step, every drawn molecule parses in RDKit (JS and Python), stereo read back in Python (stereocentres, meso/racemic, cis/trans on rings in 3D, E/Z), the card's product equals the engine's wherever an engine models the reagent, router and home-screen promises (tests/hub.mjs)
 await hub({ ok, eq });
