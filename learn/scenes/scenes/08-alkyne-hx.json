@@ -1,0 +1,617 @@
+{
+ "id": "08-alkyne-hx",
+ "title": "HBr adds to hex-1-yne, once and twice",
+ "reagentCard": "alkyne-hx-1",
+ "alsoCards": ["alkyne-hx-2"],
+ "lesson": {
+  "id": "12",
+  "step": "s07"
+ },
+ "intent": "After this scene the learner can say: \"A π pair of the triple bond takes H⁺, and H goes to the end carbon (it already has the H), so the + lands on C2: a vinylic cation. Br⁻ bonds there. One HBr stops at the vinylic bromide; a second HBr adds the same way, so both Br end on C2: a geminal dibromide.\"",
+ "reactant": {
+  "smiles": "C#CCCCC",
+  "name": "hex-1-yne"
+ },
+ "reagent": {
+  "smiles": "Br",
+  "label": "HBr (1 equiv., then a 2nd equiv.)"
+ },
+ "products": [
+  {
+   "smiles": "C=C(Br)CCCC",
+   "name": "2-bromohex-1-ene (after 1 equiv.)",
+   "stereo": "achiral",
+   "inFinal": false,
+   "note": "The 1-equivalent stopping point (card alkyne-hx-1)."
+  },
+  {
+   "smiles": "CCCCC(C)(Br)Br",
+   "name": "2,2-dibromohexane (after 2 equiv.)",
+   "stereo": "achiral",
+   "note": "Card alkyne-hx-2."
+  }
+ ],
+ "intermediates": [
+  {
+   "name": "vinylic cation",
+   "smiles": "C=[C+]CCCC"
+  },
+  {
+   "name": "bromo-substituted cation (2nd addition)",
+   "smiles": "C[C+](Br)CCCC"
+  }
+ ],
+ "atomNames": {
+  "1": "C1",
+  "2": "C2",
+  "3": "C3",
+  "6": "C6",
+  "7": "H(a)",
+  "8": "Br(a)",
+  "9": "H(b)",
+  "10": "Br(b)"
+ },
+ "stage": {
+  "species": [
+   {
+    "key": "alkyne",
+    "role": "reactant",
+    "smiles": "[CH:1]#[C:2][CH2:3][CH2:4][CH2:5][CH3:6]",
+    "label": "hex-1-yne",
+    "at": [0, 0],
+    "style": "skeletal",
+    "notes": "Keep H–C1≡C2–C3 on one straight line (sp carbons, 180°)."
+   },
+   {
+    "key": "HBr",
+    "role": "reagent",
+    "smiles": "[H:7][Br:8]",
+    "label": "HBr",
+    "at": [-2.2, -1.0],
+    "style": "full"
+   }
+  ],
+  "state": "[CH:1]#[C:2][CH2:3][CH2:4][CH2:5][CH3:6].[H:7][Br:8]"
+ },
+ "layers": ["arrows", "orbitals"],
+ "duration": 39.0,
+ "beats": [
+  {
+   "id": "b1-meet",
+   "t0": 0.0,
+   "t1": 3.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "Hex-1-yne meets HBr. A triple bond holds two π bonds, so it has π electrons to give.",
+   "captionOrbitals": "Two π clouds at right angles: one above and below the line, one in front and behind.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [{"atom": 7, "sign": "+"}, {"atom": 8, "sign": "-"}],
+   "orbitals": [
+    {
+     "kind": "pi",
+     "atoms": [1, 2],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 2,
+     "plane": "z"
+    },
+    {
+     "kind": "pi",
+     "atoms": [1, 2],
+     "side": "both",
+     "emphasis": "normal",
+     "electrons": 2,
+     "plane": "y"
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [1, 2, 7],
+    "tilt": 35
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[CH:1]#[C:2][CH2:3][CH2:4][CH2:5][CH3:6].[H:7][Br:8]"
+  },
+  {
+   "id": "b2-choose",
+   "t0": 4.0,
+   "t1": 7.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "H goes to C1, the end carbon that already has an H. Then the + lands on C2, the more substituted carbon.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "pi",
+     "atoms": [1, 2],
+     "side": "both",
+     "emphasis": "normal",
+     "electrons": 2,
+     "plane": "z"
+    }
+   ],
+   "badges": [{"atom": 2, "text": "+ here", "tone": "elec"}, {"atom": 1, "text": "H here", "tone": "muted"}],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [1, 2, 7],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[CH:1]#[C:2][CH2:3][CH2:4][CH2:5][CH3:6].[H:7][Br:8]"
+  },
+  {
+   "id": "b3-attack",
+   "t0": 8.0,
+   "t1": 12.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "One π pair of the triple bond takes the δ+ H onto C1. The H–Br pair leaves with Br as Br⁻.",
+   "moves": [
+    {
+     "species": "HBr",
+     "anchor": 7,
+     "near": 1,
+     "offset": [-0.6, -0.9, 0],
+     "at": [0, 0.35]
+    },
+    {
+     "atoms": [8],
+     "by": [-0.8, -0.6, 0],
+     "at": [0.75, 1]
+    }
+   ],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "bond": [1, 2]
+     },
+     "to": {
+      "bond": [1, 7]
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "elec"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.3, 0.75],
+     "why": "A π pair of the triple bond attacks the δ+ H of H–Br and forms a new C–H bond on C1, the carbon with more H."
+    },
+    {
+     "id": "a2",
+     "from": {
+      "bond": [7, 8]
+     },
+     "to": {
+      "atom": 8
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "none",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.45, 0.95],
+     "why": "The H–Br pair leaves with Br, so Br becomes Br⁻. C2 is left with the +."
+    }
+   ],
+   "bonds": [
+    {
+     "a": 1,
+     "b": 2,
+     "action": "order",
+     "order": 2
+    },
+    {
+     "a": 1,
+     "b": 7,
+     "action": "form",
+     "order": 1
+    },
+    {
+     "a": 7,
+     "b": 8,
+     "action": "break",
+     "order": 0
+    }
+   ],
+   "charges": [{"atom": 2, "charge": 1}, {"atom": 8, "charge": -1}],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "p-empty",
+     "atoms": [2],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 0,
+     "plane": "y"
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [1, 2, 7],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[H:7][CH:1]=[C+:2][CH2:3][CH2:4][CH2:5][CH3:6].[Br-:8]"
+  },
+  {
+   "id": "b4-vinyl",
+   "t0": 13.0,
+   "t1": 16.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "The + sits on C2, a carbon of the new C=C: a vinylic carbocation. It has an empty p orbital.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "p-empty",
+     "atoms": [2],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 0,
+     "plane": "y",
+     "label": "empty p"
+    },
+    {
+     "kind": "pi",
+     "atoms": [1, 2],
+     "side": "both",
+     "emphasis": "normal",
+     "electrons": 2,
+     "plane": "z"
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.3,
+    "focus": [2],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[H:7][CH:1]=[C+:2][CH2:3][CH2:4][CH2:5][CH3:6].[Br-:8]",
+   "notes": "C2 is sp: draw C1=C2–C3 straight. The empty p lies in the drawing plane (plane y), at 90° to the remaining π bond (plane z)."
+  },
+  {
+   "id": "b5-bromide",
+   "t0": 17.0,
+   "t1": 21.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "Br⁻ gives a lone pair to C2. With one HBr it stops here: 2-bromohex-1-ene, a vinylic halide.",
+   "moves": [{"atoms": [8], "anchor": 8, "near": 2, "offset": [0, -1.4, 0], "at": [0, 0.4]}],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "lp": 8
+     },
+     "to": {
+      "atom": 2
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "elec"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.35, 0.9],
+     "why": "A lone pair on Br⁻ attacks the + carbon and forms the new C–Br bond, giving the vinylic halide."
+    }
+   ],
+   "bonds": [{"a": 2, "b": 8, "action": "form", "order": 1}],
+   "charges": [{"atom": 2, "charge": 0}, {"atom": 8, "charge": 0}],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "p-empty",
+     "atoms": [2],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 0,
+     "plane": "y"
+    },
+    {
+     "kind": "lone-pair",
+     "atoms": [8],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 2,
+     "toward": 2
+    }
+   ],
+   "badges": [{"atom": 2, "text": "1 equiv. ends here", "tone": "muted"}],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [2],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[H:7][CH:1]=[C:2]([Br:8])[CH2:3][CH2:4][CH2:5][CH3:6]"
+  },
+  {
+   "id": "b6-second",
+   "t0": 22.0,
+   "t1": 26.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "A second HBr adds the same way. The π pair puts H on C1 again, and the + lands on C2 again.",
+   "adds": [
+    {
+     "key": "HBr2",
+     "role": "reagent",
+     "smiles": "[H:9][Br:10]",
+     "label": "HBr (2nd)",
+     "at": "auto",
+     "style": "full"
+    }
+   ],
+   "moves": [
+    {
+     "atoms": [9, 10],
+     "anchor": 9,
+     "near": 1,
+     "offset": [-0.6, 0.9, 0],
+     "at": [0, 0.35]
+    },
+    {
+     "atoms": [10],
+     "by": [-0.8, 0.6, 0],
+     "at": [0.75, 1]
+    }
+   ],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "bond": [1, 2]
+     },
+     "to": {
+      "bond": [1, 9]
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "elec"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.3, 0.75],
+     "why": "The C=C π pair attacks the H of the second HBr; H bonds to C1 again, the carbon with more H."
+    },
+    {
+     "id": "a2",
+     "from": {
+      "bond": [9, 10]
+     },
+     "to": {
+      "atom": 10
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "none",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.45, 0.95],
+     "why": "The H–Br pair leaves with Br as Br⁻. The + is on C2 once more."
+    }
+   ],
+   "bonds": [
+    {
+     "a": 1,
+     "b": 2,
+     "action": "order",
+     "order": 1
+    },
+    {
+     "a": 1,
+     "b": 9,
+     "action": "form",
+     "order": 1
+    },
+    {
+     "a": 9,
+     "b": 10,
+     "action": "break",
+     "order": 0
+    }
+   ],
+   "charges": [{"atom": 2, "charge": 1}, {"atom": 10, "charge": -1}],
+   "partials": [],
+   "orbitals": [{"kind": "p-empty", "atoms": [2], "side": "both", "emphasis": "focus", "electrons": 0}],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [2],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[H:7][CH:1]([H:9])[C+:2]([Br:8])[CH2:3][CH2:4][CH2:5][CH3:6].[Br-:10]"
+  },
+  {
+   "id": "b7-why",
+   "t0": 27.0,
+   "t1": 30.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "C2 is the more substituted carbon, and the Br already on it can share the + using a lone pair.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "p-empty",
+     "atoms": [2],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 0
+    },
+    {
+     "kind": "lone-pair",
+     "atoms": [8],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 2,
+     "toward": 2
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.3,
+    "focus": [2, 8],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[H:7][CH:1]([H:9])[C+:2]([Br:8])[CH2:3][CH2:4][CH2:5][CH3:6].[Br-:10]",
+   "notes": "The card states the result only (\"Br on the SAME carbon\"). The lone-pair reason is one step deeper than the course; keep it in this look beat only."
+  },
+  {
+   "id": "b8-bromide2",
+   "t0": 31.0,
+   "t1": 35.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "The second Br⁻ bonds to C2 as well. Both Br end up on one carbon: a geminal dibromide.",
+   "moves": [{"atoms": [10], "anchor": 10, "near": 2, "offset": [0.3, 1.3, 0], "at": [0, 0.4]}],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "lp": 10
+     },
+     "to": {
+      "atom": 2
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "elec"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.35, 0.9],
+     "why": "A lone pair on the second Br⁻ attacks the + carbon, C2, and forms a second C–Br bond on it."
+    }
+   ],
+   "bonds": [{"a": 2, "b": 10, "action": "form", "order": 1}],
+   "charges": [{"atom": 2, "charge": 0}, {"atom": 10, "charge": 0}],
+   "partials": [],
+   "orbitals": [],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [2, 8],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[H:7][CH:1]([H:9])[C:2]([Br:8])([Br:10])[CH2:3][CH2:4][CH2:5][CH3:6]"
+  },
+  {
+   "id": "b9-product",
+   "t0": 36.0,
+   "t1": 39.0,
+   "hold": 0,
+   "kind": "look",
+   "caption": "2,2-Dibromohexane. Markovnikov twice: both H went to C1, and both Br went to C2.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1,
+    "focus": [],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[H:7][CH:1]([H:9])[C:2]([Br:8])([Br:10])[CH2:3][CH2:4][CH2:5][CH3:6]",
+   "relayout": {
+    "anchor": [1, 2]
+   }
+  }
+ ],
+ "stereoCallout": {
+  "title": "No stereo to show",
+  "stereoMoment": null,
+  "text": "HX on an alkyne has nothing to mark here: the vinylic bromide C=C(Br) has two H on C1 (no E/Z), and C2 of the gem-dibromide holds two Br (no stereocentre). The point of the scene is regiochemistry: Markovnikov, twice, onto the same carbon."
+ },
+ "whatIf": ["01-alkene-hx", "09-alkyne-hydration", "10-alkyne-lindlar"],
+ "quiz": {
+  "q": "Hex-1-yne is treated with two equivalents of HBr. Which product forms?",
+  "options": [
+   {
+    "text": "2,2-Dibromohexane.",
+    "correct": true,
+    "why": "Yes. Both times H goes to C1 and the + forms on C2, so both Br land on C2."
+   },
+   {
+    "text": "1,2-Dibromohexane.",
+    "correct": false,
+    "why": "Each H goes to C1, so each + forms on C2. Both Br go to C2, not one to each carbon."
+   },
+   {
+    "text": "(E)-1,2-Dibromohex-1-ene.",
+    "correct": false,
+    "why": "That is what Br₂ gives (anti addition of two Br). HBr adds H and Br."
+   }
+  ]
+ },
+ "notes": ["Matches Lesson 12 s07 arrows (alkyneHXMechanism): two arrows in step 1, one in step 2. Lesson uses propyne; the scene uses the hub example hex-1-yne."]
+}

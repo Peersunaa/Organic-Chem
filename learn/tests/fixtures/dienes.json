@@ -1,0 +1,16 @@
+[
+  {"diene": "C=CC=C", "reagent": "HBr", "outcome": "two", "note": "buta-1,3-diene + HBr (1 equiv): 1,2-addition and 1,4-addition (McMurry 4.8)",
+   "products": [{"name": "3-bromobut-1-ene", "smiles": "C=CC(C)Br"}, {"name": "1-bromobut-2-ene", "smiles": "CC=CCBr"}]},
+  {"diene": "C1=CC=CCC1", "reagent": "HBr", "outcome": "single", "note": "cyclohexa-1,3-diene + HBr: 1,2- and 1,4-addition give the same compound",
+   "products": [{"name": "3-bromocyclohexene", "smiles": "BrC1C=CCCC1"}]},
+  {"diene": "C=C(C)C=C", "reagent": "HCl", "outcome": "two", "optional": true, "note": "isoprene + HCl: H+ on C1 gives the 3 degree allylic cation (+ on C2 and C4)",
+   "products": [{"name": "3-chloro-3-methylbut-1-ene", "smiles": "C=CC(C)(C)Cl"}, {"name": "1-chloro-3-methylbut-2-ene", "smiles": "CC(C)=CCCl"}]},
+  {"diene": "CC=CC=C", "reagent": "HCl", "outcome": "single", "note": "penta-1,3-diene + HCl: H+ on C1 gives a symmetrical allylic cation with two secondary ends (McMurry 4.13, 4.14)",
+   "products": [{"name": "4-chloropent-2-ene", "smiles": "CC=CC(C)Cl"}]},
+  {"diene": "C=C(C)C(C)=C", "reagent": "HBr", "outcome": "two", "note": "2,3-dimethylbuta-1,3-diene + HBr",
+   "products": [{"name": "3-bromo-2,3-dimethylbut-1-ene", "smiles": "C=C(C)C(C)(C)Br"}, {"name": "1-bromo-2,3-dimethylbut-2-ene", "smiles": "CC(C)=C(C)CBr"}]},
+  {"diene": "CC=CC=CC", "reagent": "HBr", "outcome": "two", "note": "hexa-2,4-diene + HBr: both ends of the allylic cation are secondary but different",
+   "products": [{"name": "4-bromohex-2-ene", "smiles": "CC=CC(Br)CC"}, {"name": "2-bromohex-3-ene", "smiles": "CCC=CC(C)Br"}]},
+  {"diene": "C1=CC=CC1", "reagent": "HI", "outcome": "single", "note": "cyclopenta-1,3-diene + HI",
+   "products": [{"name": "3-iodocyclopentene", "smiles": "IC1C=CCC1"}]}
+]

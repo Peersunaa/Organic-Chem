@@ -1,0 +1,534 @@
+[
+ {
+  "id": "sn2-bu-cn",
+  "substrate": "CCCCBr",
+  "substrateName": "1-bromobutane",
+  "reagent": "CN",
+  "mechanism": "SN2",
+  "products": [
+   "pentanenitrile"
+  ],
+  "note": "1° halide + NaCN: SN2; the chain grows by one carbon (the CN carbon bonds)"
+ },
+ {
+  "id": "sn2-bu-i",
+  "substrate": "CCCCBr",
+  "substrateName": "1-bromobutane",
+  "reagent": "I",
+  "mechanism": "SN2",
+  "products": [
+   "1-iodobutane"
+  ],
+  "note": "1° halide + NaI in acetone: halide exchange by SN2 (Br leaves, I enters)"
+ },
+ {
+  "id": "sn2-cl-i",
+  "substrate": "CCCCCl",
+  "substrateName": "1-chlorobutane",
+  "reagent": "I",
+  "mechanism": "SN2",
+  "products": [
+   "1-iodobutane"
+  ],
+  "note": "Cl⁻ is a worse leaving group than Br⁻ but NaI in acetone still exchanges it"
+ },
+ {
+  "id": "sn2-R2bb-oh",
+  "substrate": "CC[C@@H](C)Br",
+  "substrateName": "(2R)-2-bromobutane",
+  "reagent": "HO",
+  "mechanism": "SN2",
+  "products": [
+   "(2S)-butan-2-ol"
+  ],
+  "note": "inversion: the (R) bromide gives the (S) alcohol (Br and OH both rank above ethyl, so the letter flips)"
+ },
+ {
+  "id": "sn2-S2bb-i",
+  "substrate": "CC[C@H](C)Br",
+  "substrateName": "(2S)-2-bromobutane",
+  "reagent": "I",
+  "mechanism": "SN2",
+  "products": [
+   "(2R)-2-iodobutane"
+  ],
+  "note": "inversion with iodide: (S) gives (R)"
+ },
+ {
+  "id": "sn2-R2bh-cn",
+  "substrate": "CCCC[C@@H](C)Br",
+  "substrateName": "(2R)-2-bromohexane",
+  "reagent": "CN",
+  "mechanism": "SN2",
+  "products": [
+   "(2S)-2-methylhexanenitrile"
+  ],
+  "note": "inversion at the 2° stereocentre; C≡N outranks butyl, so the letter flips R to S"
+ },
+ {
+  "id": "sn2-pr-sme",
+  "substrate": "CCCBr",
+  "substrateName": "1-bromopropane",
+  "reagent": "MeS",
+  "mechanism": "SN2",
+  "products": [
+   "1-(methylsulfanyl)propane"
+  ],
+  "note": "1° + NaSCH₃: SN2, a sulfide"
+ },
+ {
+  "id": "sn2-et-n3",
+  "substrate": "CCBr",
+  "substrateName": "bromoethane",
+  "reagent": "N3",
+  "mechanism": "SN2",
+  "products": [
+   "azidoethane"
+  ],
+  "note": "azide attacks through N; an alkyl azide"
+ },
+ {
+  "id": "sn2-ipr-cn",
+  "substrate": "CC(C)Br",
+  "substrateName": "2-bromopropane",
+  "reagent": "CN",
+  "mechanism": "SN2",
+  "products": [
+   "2-methylpropanenitrile"
+  ],
+  "note": "2° + a non-basic strong nucleophile: SN2"
+ },
+ {
+  "id": "sn2-bn-cn",
+  "substrate": "BrCc1ccccc1",
+  "substrateName": "(bromomethyl)benzene",
+  "reagent": "CN",
+  "mechanism": "SN2",
+  "products": [
+   "2-phenylacetonitrile"
+  ],
+  "note": "benzylic bromide is fast in SN2"
+ },
+ {
+  "id": "sn2-me-oh",
+  "substrate": "CBr",
+  "substrateName": "bromomethane",
+  "reagent": "HO",
+  "mechanism": "SN2",
+  "products": [
+   "methanol"
+  ],
+  "note": "methyl halide + HO⁻: SN2 only (no beta H)"
+ },
+ {
+  "id": "sn2-trans-cn",
+  "substrate": "C[C@H]1CCCC[C@@H]1Br",
+  "substrateName": "(1S,2S)-1-bromo-2-methylcyclohexane",
+  "reagent": "CN",
+  "mechanism": "SN2",
+  "products": [
+   "(1R,2S)-2-methylcyclohexane-1-carbonitrile"
+  ],
+  "note": "trans bromide + CN⁻: inversion at C1 only, so the product is cis (7.47 pattern)"
+ },
+ {
+  "id": "sn2-bu-nh3",
+  "substrate": "CCCCBr",
+  "substrateName": "1-bromobutane",
+  "reagent": "NH3",
+  "mechanism": "SN2",
+  "products": [
+   "butan-1-amine"
+  ],
+  "note": "NH₃ attacks; after proton loss the primary amine"
+ },
+ {
+  "id": "sn2-bu-aco",
+  "substrate": "CCCCBr",
+  "substrateName": "1-bromobutane",
+  "reagent": "AcO",
+  "mechanism": "SN2",
+  "products": [
+   "butyl acetate"
+  ],
+  "note": "acetate attacks through O: an ester"
+ },
+ {
+  "id": "sn1-tbu-h2o",
+  "substrate": "CC(C)(C)Br",
+  "substrateName": "2-bromo-2-methylpropane",
+  "reagent": "H2O",
+  "mechanism": "SN1",
+  "products": [
+   "2-methylpropan-2-ol"
+  ],
+  "note": "3° + water: SN1 (hub card sn1-solvolysis)"
+ },
+ {
+  "id": "sn1-R3bmh-h2o",
+  "substrate": "CCC[C@](C)(Br)CC",
+  "substrateName": "(3R)-3-bromo-3-methylhexane",
+  "reagent": "H2O",
+  "mechanism": "SN1",
+  "products": [
+   "(3R)-3-methylhexan-3-ol",
+   "(3S)-3-methylhexan-3-ol"
+  ],
+  "note": "flat cation: both enantiomers form, a racemic alcohol (7.14 pattern)"
+ },
+ {
+  "id": "sn1-tpent-meoh",
+  "substrate": "CCC(C)(C)Br",
+  "substrateName": "2-bromo-2-methylbutane",
+  "reagent": "MeOH",
+  "mechanism": "SN1",
+  "products": [
+   "2-methoxy-2-methylbutane"
+  ],
+  "note": "3° + methanol: an ether by SN1 (methanol loses H⁺ at the end)"
+ },
+ {
+  "id": "sn1-tbu-etoh",
+  "substrate": "CC(C)(C)Br",
+  "substrateName": "2-bromo-2-methylpropane",
+  "reagent": "EtOH",
+  "mechanism": "SN1",
+  "products": [
+   "2-ethoxy-2-methylpropane"
+  ],
+  "note": "3° + ethanol: the ether, the SN1 co-product of the E1 card"
+ },
+ {
+  "id": "sn1-mch-h2o",
+  "substrate": "CC1(Br)CCCCC1",
+  "substrateName": "1-bromo-1-methylcyclohexane",
+  "reagent": "H2O",
+  "mechanism": "SN1",
+  "products": [
+   "1-methylcyclohexan-1-ol"
+  ],
+  "note": "3° ring halide + water"
+ },
+ {
+  "id": "sn1-bn-h2o",
+  "substrate": "BrCc1ccccc1",
+  "substrateName": "(bromomethyl)benzene",
+  "reagent": "H2O",
+  "mechanism": "SN1",
+  "products": [
+   "phenylmethanol"
+  ],
+  "note": "the benzylic cation is resonance-stabilised: SN1 with water"
+ },
+ {
+  "id": "sn1-phet-h2o",
+  "substrate": "CC(Br)c1ccccc1",
+  "substrateName": "(1-bromoethyl)benzene",
+  "reagent": "H2O",
+  "mechanism": "SN1",
+  "products": [
+   "(1R)-1-phenylethan-1-ol",
+   "(1S)-1-phenylethan-1-ol"
+  ],
+  "note": "2° benzylic: a stabilised cation, so SN1; a racemic alcohol"
+ },
+ {
+  "id": "e2-tpent-koh",
+  "substrate": "CCC(C)(C)Br",
+  "substrateName": "2-bromo-2-methylbutane",
+  "reagent": "KOH",
+  "mechanism": "E2",
+  "products": [
+   "2-methylbut-2-ene"
+  ],
+  "note": "Zaitsev: the trisubstituted alkene is major",
+  "minor": [
+   "2-methylbut-1-ene"
+  ],
+  "mode": "flat"
+ },
+ {
+  "id": "e2-2bb-etona",
+  "substrate": "CCC(C)Br",
+  "substrateName": "2-bromobutane",
+  "reagent": "NaOEt",
+  "mechanism": "E2",
+  "products": [
+   "but-2-ene"
+  ],
+  "note": "Zaitsev (E/Z ignored, as the book problems say)",
+  "minor": [
+   "but-1-ene"
+  ],
+  "mode": "flat"
+ },
+ {
+  "id": "e2-2bp-koh",
+  "substrate": "CCCC(C)Br",
+  "substrateName": "2-bromopentane",
+  "reagent": "KOH",
+  "mechanism": "E2",
+  "products": [
+   "pent-2-ene"
+  ],
+  "note": "Zaitsev: pent-2-ene over pent-1-ene",
+  "minor": [
+   "pent-1-ene"
+  ],
+  "mode": "flat"
+ },
+ {
+  "id": "e2-3bp-nome",
+  "substrate": "CCC(Br)CC",
+  "substrateName": "3-bromopentane",
+  "reagent": "NaOMe",
+  "mechanism": "E2",
+  "products": [
+   "pent-2-ene"
+  ],
+  "note": "both beta carbons are alike: one alkene",
+  "mode": "flat"
+ },
+ {
+  "id": "e2-tbu-nome",
+  "substrate": "CC(C)(C)Br",
+  "substrateName": "2-bromo-2-methylpropane",
+  "reagent": "NaOMe",
+  "mechanism": "E2",
+  "products": [
+   "2-methylprop-1-ene"
+  ],
+  "note": "3° + strong base: E2, not SN2",
+  "mode": "flat"
+ },
+ {
+  "id": "e2-pr-koh",
+  "substrate": "CCCBr",
+  "substrateName": "1-bromopropane",
+  "reagent": "KOH",
+  "mechanism": "E2",
+  "products": [
+   "prop-1-ene"
+  ],
+  "note": "the E2 product of a 1° halide (SN2 competes, so the mixture also holds the substitution product)",
+  "mode": "flat"
+ },
+ {
+  "id": "e2-ibu-koh",
+  "substrate": "CC(C)CBr",
+  "substrateName": "1-bromo-2-methylpropane",
+  "reagent": "KOH",
+  "mechanism": "E2",
+  "products": [
+   "2-methylprop-1-ene"
+  ],
+  "note": "one beta carbon, one alkene",
+  "mode": "flat"
+ },
+ {
+  "id": "e2-cyc-koh",
+  "substrate": "BrC1CCCCC1",
+  "substrateName": "bromocyclohexane",
+  "reagent": "KOH",
+  "mechanism": "E2",
+  "products": [
+   "cyclohexene"
+  ],
+  "note": "all beta carbons alike"
+ },
+ {
+  "id": "e2-mch-koh",
+  "substrate": "CC1(Br)CCCCC1",
+  "substrateName": "1-bromo-1-methylcyclohexane",
+  "reagent": "KOH",
+  "mechanism": "E2",
+  "products": [
+   "1-methylcyclohexene"
+  ],
+  "note": "Zaitsev: the ring alkene is major",
+  "minor": [
+   "methylidenecyclohexane"
+  ]
+ },
+ {
+  "id": "e2-trans-koh",
+  "substrate": "C[C@H]1CCCC[C@@H]1Br",
+  "substrateName": "(1S,2S)-1-bromo-2-methylcyclohexane",
+  "reagent": "KOH",
+  "mechanism": "E2",
+  "products": [
+   "(3S)-3-methylcyclohex-1-ene"
+  ],
+  "note": "chair rule: the H on C2 is cis to Br, so only the C6-H is anti to Br: ONLY the non-Zaitsev alkene (7.55 pattern)"
+ },
+ {
+  "id": "e2-cis-koh",
+  "substrate": "C[C@H]1CCCC[C@H]1Br",
+  "substrateName": "(1R,2S)-1-bromo-2-methylcyclohexane",
+  "reagent": "KOH",
+  "mechanism": "E2",
+  "products": [
+   "1-methylcyclohexene"
+  ],
+  "note": "cis isomer: the H on C2 is trans to Br, so Zaitsev works",
+  "minor": [
+   "(3S)-3-methylcyclohex-1-ene"
+  ]
+ },
+ {
+  "id": "e1-tbu",
+  "substrate": "CC(C)(C)Br",
+  "substrateName": "2-bromo-2-methylpropane",
+  "reagent": "heat",
+  "mechanism": "E1",
+  "products": [
+   "2-methylprop-1-ene"
+  ],
+  "note": "E1 beside SN1 in ethanol, heat (hub card e1-heat)",
+  "mode": "flat"
+ },
+ {
+  "id": "e1-tpent",
+  "substrate": "CCC(C)(C)Br",
+  "substrateName": "2-bromo-2-methylbutane",
+  "reagent": "heat",
+  "mechanism": "E1",
+  "products": [
+   "2-methylbut-2-ene"
+  ],
+  "note": "E1: the Zaitsev alkene is major",
+  "minor": [
+   "2-methylbut-1-ene"
+  ],
+  "mode": "flat"
+ },
+ {
+  "id": "e1-mch",
+  "substrate": "CC1(Br)CCCCC1",
+  "substrateName": "1-bromo-1-methylcyclohexane",
+  "reagent": "heat",
+  "mechanism": "E1",
+  "products": [
+   "1-methylcyclohexene"
+  ],
+  "note": "E1 on the ring: no anti rule, Zaitsev",
+  "minor": [
+   "methylidenecyclohexane"
+  ]
+ },
+ {
+  "id": "gr-chx",
+  "substrate": "BrC1CCCCC1",
+  "substrateName": "bromocyclohexane",
+  "reagent": "grignard-D2O",
+  "mechanism": "Grignard",
+  "products": [
+   "deuteriocyclohexane"
+  ],
+  "note": "Mg inserts into C–Br; D₂O gives the deuterio alkane (7.3 pattern)"
+ },
+ {
+  "id": "gr-ph",
+  "substrate": "Brc1ccccc1",
+  "substrateName": "bromobenzene",
+  "reagent": "grignard-D2O",
+  "mechanism": "Grignard",
+  "products": [
+   "deuteriobenzene"
+  ],
+  "note": "aryl halides make Grignard reagents too"
+ },
+ {
+  "id": "gr-bu",
+  "substrate": "CCCCBr",
+  "substrateName": "1-bromobutane",
+  "reagent": "grignard-D2O",
+  "mechanism": "Grignard",
+  "products": [
+   "1-deuteriobutane"
+  ],
+  "note": "butylmagnesium bromide, then D₂O"
+ },
+ {
+  "id": "gr-ipr",
+  "substrate": "CC(C)Br",
+  "substrateName": "2-bromopropane",
+  "reagent": "grignard-D2O",
+  "mechanism": "Grignard",
+  "products": [
+   "2-deuteriopropane"
+  ],
+  "note": "isopropylmagnesium bromide, then D₂O"
+ },
+ {
+  "id": "al-S2pol-pbr3",
+  "substrate": "CCC[C@H](C)O",
+  "substrateName": "(2S)-pentan-2-ol",
+  "reagent": "alcohol:PBr3",
+  "mechanism": "alcohol",
+  "products": [
+   "(2R)-2-bromopentane"
+  ],
+  "note": "PBr₃ inverts: the (S) alcohol gives the (R) bromide (7.24 pattern)"
+ },
+ {
+  "id": "al-R2bol-pbr3",
+  "substrate": "CC[C@@H](C)O",
+  "substrateName": "(2R)-butan-2-ol",
+  "reagent": "alcohol:PBr3",
+  "mechanism": "alcohol",
+  "products": [
+   "(2S)-2-bromobutane"
+  ],
+  "note": "inversion again"
+ },
+ {
+  "id": "al-bu-socl2",
+  "substrate": "CCCCO",
+  "substrateName": "butan-1-ol",
+  "reagent": "alcohol:SOCl2",
+  "mechanism": "alcohol",
+  "products": [
+   "1-chlorobutane"
+  ],
+  "note": "SOCl₂ on a 1° alcohol"
+ },
+ {
+  "id": "al-tbuoh-hbr",
+  "substrate": "CC(C)(C)O",
+  "substrateName": "2-methylpropan-2-ol",
+  "reagent": "alcohol:HBr",
+  "mechanism": "alcohol",
+  "products": [
+   "2-bromo-2-methylpropane"
+  ],
+  "note": "HBr on a 3° alcohol: SN1"
+ },
+ {
+  "id": "al-chxol-hbr",
+  "substrate": "OC1CCCCC1",
+  "substrateName": "cyclohexanol",
+  "reagent": "alcohol:HBr",
+  "mechanism": "alcohol",
+  "products": [
+   "bromocyclohexane"
+  ],
+  "note": "HBr on a 2° ring alcohol"
+ },
+ {
+  "id": "mono-2mp",
+  "substrate": "CCCC(C)C",
+  "substrateName": "2-methylpentane",
+  "reagent": "mono:Cl",
+  "mechanism": "mono",
+  "products": [
+   "1-chloro-2-methylpentane",
+   "2-chloro-2-methylpentane",
+   "3-chloro-2-methylpentane",
+   "2-chloro-4-methylpentane",
+   "1-chloro-4-methylpentane"
+  ],
+  "note": "radical chlorination: five different monochlorides (7.27 pattern); no major one is claimed",
+  "mode": "flat"
+ }
+]

@@ -1,0 +1,464 @@
+[
+ {
+  "id": "cp-br2",
+  "alkene": "C1=CCCC1",
+  "reagent": "Br2",
+  "products": [
+   "Br[C@H]1[C@@H](CCC1)Br"
+  ],
+  "names": [
+   {
+    "name": "trans-1,2-dibromocyclopentane",
+    "smiles": "Br[C@H]1[C@@H](CCC1)Br",
+    "mode": "key"
+   }
+  ],
+  "note": "McMurry 4.4: only trans is formed (anti addition via bromonium)"
+ },
+ {
+  "id": "chx-cl2",
+  "alkene": "C1=CCCCC1",
+  "reagent": "Cl2",
+  "products": [
+   "Cl[C@H]1[C@@H](CCCC1)Cl"
+  ],
+  "names": [
+   {
+    "name": "trans-1,2-dichlorocyclohexane",
+    "smiles": "Cl[C@H]1[C@@H](CCCC1)Cl",
+    "mode": "key"
+   }
+  ],
+  "note": ""
+ },
+ {
+  "id": "dmchx-h2",
+  "alkene": "CC1=C(C)CCCC1",
+  "reagent": "H2",
+  "products": [
+   "C[C@H]1[C@H](CCCC1)C"
+  ],
+  "names": [
+   {
+    "name": "cis-1,2-dimethylcyclohexane",
+    "smiles": "C[C@H]1[C@H](CCCC1)C",
+    "mode": "key"
+   }
+  ],
+  "note": "McMurry 4.5: syn addition of H2"
+ },
+ {
+  "id": "chx-rco3h",
+  "alkene": "C1=CCCCC1",
+  "reagent": "RCO3H",
+  "products": [
+   "[C@H]12CCCC[C@@H]2O1"
+  ],
+  "names": [
+   {
+    "name": "7-oxabicyclo[4.1.0]heptane",
+    "smiles": "C12CCCCC2O1",
+    "mode": "flat"
+   },
+   {
+    "name": "(1R,6S)-7-oxabicyclo[4.1.0]heptane",
+    "smiles": "[C@H]12CCCC[C@@H]2O1",
+    "mode": "key"
+   }
+  ],
+  "note": "cyclohexene oxide (cis-fused, meso)"
+ },
+ {
+  "id": "chx-diol-trans",
+  "alkene": "C1=CCCCC1",
+  "reagent": "RCO3H_H3O",
+  "products": [
+   "[C@@H]1([C@@H](CCCC1)O)O"
+  ],
+  "names": [
+   {
+    "name": "trans-cyclohexane-1,2-diol",
+    "smiles": "[C@@H]1([C@@H](CCCC1)O)O",
+    "mode": "key"
+   }
+  ],
+  "note": "epoxide then H3O+: anti"
+ },
+ {
+  "id": "chx-diol-cis",
+  "alkene": "C1=CCCCC1",
+  "reagent": "KMnO4_OH",
+  "products": [
+   "[C@@H]1([C@H](CCCC1)O)O"
+  ],
+  "names": [
+   {
+    "name": "cis-cyclohexane-1,2-diol",
+    "smiles": "[C@@H]1([C@H](CCCC1)O)O",
+    "mode": "key"
+   }
+  ],
+  "note": "KMnO4 in base: syn"
+ },
+ {
+  "id": "mbu2-kmno4",
+  "alkene": "CC=C(C)C",
+  "reagent": "KMnO4_H",
+  "products": [
+   "CC(C)=O",
+   "C(C)(=O)O"
+  ],
+  "names": [
+   {
+    "name": "propan-2-one",
+    "smiles": "CC(C)=O",
+    "mode": "key"
+   },
+   {
+    "name": "acetone",
+    "smiles": "CC(=O)C",
+    "mode": "key"
+   },
+   {
+    "name": "ethanoic acid",
+    "smiles": "C(C)(=O)O",
+    "mode": "key"
+   },
+   {
+    "name": "acetic acid",
+    "smiles": "C(C)(=O)O",
+    "mode": "key"
+   }
+  ],
+  "note": "ketone + carboxylic acid"
+ },
+ {
+  "id": "mpropene-kmno4",
+  "alkene": "CC(C)=C",
+  "reagent": "KMnO4_H",
+  "products": [
+   "CC(C)=O",
+   "C(=O)=O"
+  ],
+  "names": [
+   {
+    "name": "propan-2-one",
+    "smiles": "CC(C)=O",
+    "mode": "key"
+   },
+   {
+    "name": "carbon dioxide",
+    "smiles": "C(=O)=O",
+    "mode": "key"
+   }
+  ],
+  "note": "=CH2 gives CO2"
+ },
+ {
+  "id": "hex1-kmno4",
+  "alkene": "CCCCC=C",
+  "reagent": "KMnO4_H",
+  "products": [
+   "C(CCCC)(=O)O",
+   "C(=O)=O"
+  ],
+  "names": [
+   {
+    "name": "pentanoic acid",
+    "smiles": "C(CCCC)(=O)O",
+    "mode": "key"
+   },
+   {
+    "name": "carbon dioxide",
+    "smiles": "C(=O)=O",
+    "mode": "key"
+   }
+  ],
+  "note": ""
+ },
+ {
+  "id": "e-but2-rco3h",
+  "alkene": "C/C=C/C",
+  "reagent": "RCO3H",
+  "products": [
+   "C[C@@H]1O[C@H]1C"
+  ],
+  "names": [
+   {
+    "name": "trans-2,3-dimethyloxirane",
+    "smiles": "C[C@@H]1O[C@H]1C",
+    "mode": "key"
+   },
+   {
+    "name": "(2R,3R)-2,3-dimethyloxirane",
+    "smiles": "C[C@H]1O[C@@H]1C",
+    "mode": "key"
+   }
+  ],
+  "note": "geometry kept: trans alkene gives trans epoxide (racemate)"
+ },
+ {
+  "id": "z-but2-rco3h",
+  "alkene": "C/C=C\\C",
+  "reagent": "RCO3H",
+  "products": [
+   "C[C@@H]1O[C@@H]1C"
+  ],
+  "names": [
+   {
+    "name": "cis-2,3-dimethyloxirane",
+    "smiles": "C[C@@H]1O[C@@H]1C",
+    "mode": "key"
+   },
+   {
+    "name": "(2R,3S)-2,3-dimethyloxirane",
+    "smiles": "C[C@H]1O[C@H]1C",
+    "mode": "key"
+   }
+  ],
+  "note": "cis alkene gives cis (meso) epoxide"
+ },
+ {
+  "id": "propene-br2",
+  "alkene": "CC=C",
+  "reagent": "Br2",
+  "products": [
+   "BrCC(C)Br"
+  ],
+  "names": [
+   {
+    "name": "1,2-dibromopropane",
+    "smiles": "BrCC(C)Br",
+    "mode": "flat"
+   }
+  ],
+  "note": "one stereocentre: racemate, drawn flat"
+ },
+ {
+  "id": "e-but2-br2",
+  "alkene": "C/C=C/C",
+  "reagent": "Br2",
+  "products": [
+   "Br[C@H](C)[C@H](C)Br"
+  ],
+  "names": [
+   {
+    "name": "(2R,3S)-2,3-dibromobutane",
+    "smiles": "Br[C@H](C)[C@H](C)Br",
+    "mode": "key"
+   }
+  ],
+  "note": "anti addition to the trans alkene: meso"
+ },
+ {
+  "id": "z-but2-br2",
+  "alkene": "C/C=C\\C",
+  "reagent": "Br2",
+  "products": [
+   "Br[C@H](C)[C@@H](C)Br"
+  ],
+  "names": [
+   {
+    "name": "(2R,3R)-2,3-dibromobutane",
+    "smiles": "Br[C@H](C)[C@@H](C)Br",
+    "mode": "key"
+   }
+  ],
+  "note": "anti addition to the cis alkene: racemic (R,R)/(S,S)"
+ },
+ {
+  "id": "chx-kmno4-h",
+  "alkene": "C1=CCCCC1",
+  "reagent": "KMnO4_H",
+  "products": [
+   "C(CCCCC(=O)O)(=O)O"
+  ],
+  "names": [
+   {
+    "name": "hexanedioic acid",
+    "smiles": "C(CCCCC(=O)O)(=O)O",
+    "mode": "key"
+   }
+  ],
+  "note": ""
+ },
+ {
+  "id": "dmchx-br2",
+  "alkene": "CC1=C(C)CCCC1",
+  "reagent": "Br2",
+  "products": [
+   "Br[C@]1([C@](CCCC1)(C)Br)C"
+  ],
+  "names": [
+   {
+    "name": "trans-1,2-dibromo-1,2-dimethylcyclohexane",
+    "smiles": "Br[C@]1([C@](CCCC1)(C)Br)C",
+    "mode": "key"
+   }
+  ],
+  "note": "Problem 4.6 type: trans, racemic"
+ },
+ {
+  "id": "z-but2-kmno4-oh",
+  "alkene": "C/C=C\\C",
+  "reagent": "KMnO4_OH",
+  "products": [
+   "C[C@H]([C@H](C)O)O"
+  ],
+  "names": [
+   {
+    "name": "(2R,3S)-butane-2,3-diol",
+    "smiles": "C[C@H]([C@H](C)O)O",
+    "mode": "key"
+   }
+  ],
+  "note": "Problem 4.65: syn addition to the cis alkene: meso"
+ },
+ {
+  "id": "e-but2-kmno4-oh",
+  "alkene": "C/C=C/C",
+  "reagent": "KMnO4_OH",
+  "products": [
+   "C[C@H]([C@@H](C)O)O"
+  ],
+  "names": [
+   {
+    "name": "(2R,3R)-butane-2,3-diol",
+    "smiles": "C[C@H]([C@@H](C)O)O",
+    "mode": "key"
+   }
+  ],
+  "note": "syn addition to the trans alkene: racemic"
+ },
+ {
+  "id": "cp-h2",
+  "alkene": "C1=CCCC1",
+  "reagent": "H2",
+  "products": [
+   "C1CCCC1"
+  ],
+  "names": [
+   {
+    "name": "cyclopentane",
+    "smiles": "C1CCCC1",
+    "mode": "key"
+   }
+  ],
+  "note": ""
+ },
+ {
+  "id": "ethylene-cl2",
+  "alkene": "C=C",
+  "reagent": "Cl2",
+  "products": [
+   "ClCCCl"
+  ],
+  "names": [
+   {
+    "name": "1,2-dichloroethane",
+    "smiles": "ClCCCl",
+    "mode": "key"
+   }
+  ],
+  "note": "McMurry 4.4 example"
+ },
+ {
+  "id": "ipchx-kmno4",
+  "alkene": "CC(C)=C1CCCCC1",
+  "reagent": "KMnO4_H",
+  "products": [
+   "CC(C)=O",
+   "C1(CCCCC1)=O"
+  ],
+  "names": [
+   {
+    "name": "propan-2-one",
+    "smiles": "CC(C)=O",
+    "mode": "key"
+   },
+   {
+    "name": "cyclohexanone",
+    "smiles": "C1(CCCCC1)=O",
+    "mode": "key"
+   }
+  ],
+  "note": "McMurry 4.6 example: two ketones"
+ },
+ {
+  "id": "mpent1-kmno4",
+  "alkene": "CCC(C)C=C",
+  "reagent": "KMnO4_H",
+  "products": [
+   "CC(C(=O)O)CC",
+   "C(=O)=O"
+  ],
+  "names": [
+   {
+    "name": "2-methylbutanoic acid",
+    "smiles": "CC(C(=O)O)CC",
+    "mode": "key"
+   },
+   {
+    "name": "carbon dioxide",
+    "smiles": "C(=O)=O",
+    "mode": "key"
+   }
+  ],
+  "note": "McMurry 4.6 example (an alkene with a stereocentre: cleavage is fine)"
+ },
+ {
+  "id": "mpent2-kmno4",
+  "alkene": "CCC=C(C)C",
+  "reagent": "KMnO4_H",
+  "products": [
+   "CC(C)=O",
+   "C(CC)(=O)O"
+  ],
+  "names": [
+   {
+    "name": "propan-2-one",
+    "smiles": "CC(C)=O",
+    "mode": "key"
+   },
+   {
+    "name": "propanoic acid",
+    "smiles": "C(CC)(=O)O",
+    "mode": "key"
+   }
+  ],
+  "note": "Worked Example 4.3"
+ },
+ {
+  "id": "mchx-rco3h-h3o",
+  "alkene": "CC1=CCCCC1",
+  "reagent": "RCO3H_H3O",
+  "products": [
+   "CC1(C(CCCC1)O)O"
+  ],
+  "names": [
+   {
+    "name": "1-methylcyclohexane-1,2-diol",
+    "smiles": "CC1(C(CCCC1)O)O",
+    "mode": "flat"
+   }
+  ],
+  "note": "flat: only the constitution is checked by name; stereo is checked in Python",
+  "compare": "flat"
+ },
+ {
+  "id": "pent-h2",
+  "alkene": "CCCC=C",
+  "reagent": "H2",
+  "products": [
+   "CCCCC"
+  ],
+  "names": [
+   {
+    "name": "pentane",
+    "smiles": "CCCCC",
+    "mode": "key"
+   }
+  ],
+  "note": ""
+ }
+]

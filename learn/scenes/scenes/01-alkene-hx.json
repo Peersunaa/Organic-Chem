@@ -1,0 +1,456 @@
+{
+ "id": "01-alkene-hx",
+ "title": "HBr adds to 2-methylpropene",
+ "reagentCard": "alkene-hx",
+ "alsoCards": [],
+ "lesson": {
+  "id": "09",
+  "step": "s08"
+ },
+ "intent": "After this scene the learner can say: \"The π pair grabs the H of HBr. H goes to the carbon that already has more H, because that leaves the + on the carbon with more carbon neighbours (3°, the stable cation). The cation is flat, so Br⁻ can land on either face; here both faces give the same product.\"",
+ "reactant": {
+  "smiles": "CC(C)=C",
+  "name": "2-methylpropene"
+ },
+ "reagent": {
+  "smiles": "Br",
+  "label": "HBr"
+ },
+ "products": [
+  {
+   "smiles": "CC(C)(C)Br",
+   "name": "2-bromo-2-methylpropane (tert-butyl bromide)",
+   "stereo": "achiral",
+   "note": "C2 holds two identical CH₃ groups, so it is not a stereocentre: one product, whichever face Br⁻ uses."
+  }
+ ],
+ "intermediates": [
+  {
+   "name": "tert-butyl cation (3°)",
+   "smiles": "C[C+](C)C"
+  },
+  {
+   "name": "isobutyl cation (1°, NOT formed)",
+   "smiles": "CC(C)[CH2+]"
+  }
+ ],
+ "atomNames": {
+  "1": "C1",
+  "2": "C2",
+  "3": "CH₃(a)",
+  "4": "CH₃(b)",
+  "5": "H",
+  "6": "Br"
+ },
+ "stage": {
+  "species": [
+   {
+    "key": "alkene",
+    "role": "reactant",
+    "smiles": "[CH2:1]=[C:2]([CH3:3])[CH3:4]",
+    "label": "2-methylpropene",
+    "at": [0, 0],
+    "style": "full"
+   },
+   {
+    "key": "HBr",
+    "role": "reagent",
+    "smiles": "[H:5][Br:6]",
+    "label": "HBr",
+    "at": [3.4, -0.6],
+    "style": "full"
+   }
+  ],
+  "state": "[CH2:1]=[C:2]([CH3:3])[CH3:4].[H:5][Br:6]"
+ },
+ "layers": ["arrows", "orbitals"],
+ "duration": 34.0,
+ "beats": [
+  {
+   "id": "b1-meet",
+   "t0": 0.0,
+   "t1": 3.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "2-Methylpropene meets HBr. The C=C holds a π pair that sits above and below the flat molecule.",
+   "captionOrbitals": "The π cloud: two electrons above and below the C=C. They are easy for a reagent to reach.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [{"atom": 5, "sign": "+"}, {"atom": 6, "sign": "-"}],
+   "orbitals": [{"kind": "pi", "atoms": [1, 2], "side": "both", "emphasis": "focus", "electrons": 2}],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1,
+    "focus": [1, 2, 5],
+    "tilt": 35
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[CH2:1]=[C:2]([CH3:3])[CH3:4].[H:5][Br:6]"
+  },
+  {
+   "id": "b2-choose",
+   "t0": 4.0,
+   "t1": 8.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "H on C1 leaves the + on C2 (3°). H on C2 would leave it on C1 (1°). The 3° cation is far more stable.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [{"atom": 5, "sign": "+"}, {"atom": 6, "sign": "-"}],
+   "orbitals": [{"kind": "pi", "atoms": [1, 2], "side": "both", "emphasis": "normal", "electrons": 2}],
+   "badges": [{"atom": 2, "text": "3° if +", "tone": "elec"}, {"atom": 1, "text": "1° if +", "tone": "muted"}],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1,
+    "focus": [1, 2],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[CH2:1]=[C:2]([CH3:3])[CH3:4].[H:5][Br:6]"
+  },
+  {
+   "id": "b3-attack",
+   "t0": 9.0,
+   "t1": 13.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "The π pair reaches for the δ+ H and makes a new C–H bond on C1. The H–Br pair leaves with Br as Br⁻.",
+   "moves": [
+    {
+     "species": "HBr",
+     "anchor": 5,
+     "near": 1,
+     "offset": [0.3, -1.0, 0],
+     "at": [0, 0.35]
+    },
+    {
+     "atoms": [6],
+     "by": [1.0, -0.4, 0],
+     "at": [0.75, 1]
+    }
+   ],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "bond": [1, 2]
+     },
+     "to": {
+      "bond": [1, 5]
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "elec"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.3, 0.75],
+     "why": "The π pair attacks the δ+ H of HBr and forms a new C–H bond on C1, the carbon with more H."
+    },
+    {
+     "id": "a2",
+     "from": {
+      "bond": [5, 6]
+     },
+     "to": {
+      "atom": 6
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "none",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.45, 0.95],
+     "why": "The H–Br pair leaves with Br, the more electronegative atom, so Br becomes Br⁻."
+    }
+   ],
+   "bonds": [
+    {
+     "a": 1,
+     "b": 2,
+     "action": "order",
+     "order": 1
+    },
+    {
+     "a": 1,
+     "b": 5,
+     "action": "form",
+     "order": 1
+    },
+    {
+     "a": 5,
+     "b": 6,
+     "action": "break",
+     "order": 0
+    }
+   ],
+   "charges": [{"atom": 2, "charge": 1}, {"atom": 6, "charge": -1}],
+   "partials": [],
+   "orbitals": [{"kind": "p-empty", "atoms": [2], "side": "both", "emphasis": "focus", "electrons": 0}],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1,
+    "focus": [1, 2],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[H:5][CH2:1][C+:2]([CH3:3])[CH3:4].[Br-:6]"
+  },
+  {
+   "id": "b4-cation",
+   "t0": 14.0,
+   "t1": 17.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "C2 now has three bonds and only six electrons. It is flat, with an empty p orbital on each face.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "p-empty",
+     "atoms": [2],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 0,
+     "label": "empty p"
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.3,
+    "focus": [2],
+    "tilt": 65
+   },
+   "faces": {
+    "show": true,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[H:5][CH2:1][C+:2]([CH3:3])[CH3:4].[Br-:6]"
+  },
+  {
+   "id": "b5-stable",
+   "t0": 18.0,
+   "t1": 21.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "Three carbon neighbours lend it electron density (the inductive effect). That steadies this 3° cation.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [{"kind": "p-empty", "atoms": [2], "side": "both", "emphasis": "normal", "electrons": 0}],
+   "badges": [
+    {
+     "atom": 2,
+     "text": "3°",
+     "tone": "elec"
+    },
+    {
+     "atom": 1,
+     "text": "C",
+     "tone": "nuc"
+    },
+    {
+     "atom": 3,
+     "text": "C",
+     "tone": "nuc"
+    },
+    {
+     "atom": 4,
+     "text": "C",
+     "tone": "nuc"
+    }
+   ],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [2],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[H:5][CH2:1][C+:2]([CH3:3])[CH3:4].[Br-:6]",
+   "notes": "Draw three short teal \"push\" chevrons along C1→C2, C3→C2, C4→C2 (inductive donation). No hyperconjugation: the course does not teach it."
+  },
+  {
+   "id": "b6-bromide",
+   "t0": 22.0,
+   "t1": 26.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "Br⁻ gives a lone pair to the empty p orbital (opposite charges attract). The new C–Br bond forms.",
+   "moves": [{"atoms": [6], "anchor": 6, "near": 2, "offset": [0, 0, 1.6], "at": [0, 0.4]}],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "lp": 6
+     },
+     "to": {
+      "atom": 2
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "elec"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.35, 0.9],
+     "why": "A lone pair on Br⁻ attacks the positive carbon, because opposite charges attract, and becomes the new C–Br bond."
+    }
+   ],
+   "bonds": [{"a": 2, "b": 6, "action": "form", "order": 1}],
+   "charges": [{"atom": 2, "charge": 0}, {"atom": 6, "charge": 0}],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "p-empty",
+     "atoms": [2],
+     "side": "top",
+     "emphasis": "focus",
+     "electrons": 0
+    },
+    {
+     "kind": "lone-pair",
+     "atoms": [6],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 2,
+     "toward": 2
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [2, 6],
+    "tilt": 55
+   },
+   "faces": {
+    "show": true,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[H:5][CH2:1][C:2]([CH3:3])([CH3:4])[Br:6]"
+  },
+  {
+   "id": "b7-either",
+   "t0": 27.0,
+   "t1": 30.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "Br⁻ could just as well come from the bottom face. Here both faces give the very same product.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [{"kind": "p-empty", "atoms": [2], "side": "bottom", "emphasis": "ghost", "electrons": 0}],
+   "badges": [],
+   "ghosts": [{"atoms": [6], "offset": [0, 0, -2.0], "label": "or from below"}],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [2, 6],
+    "tilt": 55
+   },
+   "faces": {
+    "show": true,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[H:5][CH2:1][C:2]([CH3:3])([CH3:4])[Br:6]"
+  },
+  {
+   "id": "b8-product",
+   "t0": 31.0,
+   "t1": 34.0,
+   "hold": 0,
+   "kind": "look",
+   "caption": "2-Bromo-2-methylpropane. H went to the carbon with more H; Br went to the carbon with more alkyl groups.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1,
+    "focus": [],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false,
+    "labels": {
+     "top": "top face",
+     "bottom": "bottom face"
+    }
+   },
+   "state": "[H:5][CH2:1][C:2]([CH3:3])([CH3:4])[Br:6]",
+   "relayout": {
+    "anchor": [1, 2]
+   }
+  }
+ ],
+ "stereoCallout": {
+  "title": "Flat cation, two faces",
+  "stereoMoment": "planar-carbocation",
+  "text": "The cation is flat, so Br⁻ arrives from the top or the bottom face equally often. Here C2 carries two identical CH₃ groups, so both routes give one compound. If the new C–Br carbon were a stereocentre (HBr + but-1-ene → 2-bromobutane), the two faces would give the two mirror images: a racemate."
+ },
+ "whatIf": ["02-alkene-hydration", "03-alkene-x2", "04-alkene-h2-pd", "07-alkene-hydroboration", "08-alkyne-hx"],
+ "quiz": {
+  "q": "HBr adds to 2-methylpropene. Why does the H bond to the CH₂ carbon (C1)?",
+  "options": [
+   {
+    "text": "That leaves the + on C2, which has three carbon neighbours: the more stable 3° cation.",
+    "correct": true,
+    "why": "Yes. The route through the more stable cation has the lower barrier, so it is the fast one."
+   },
+   {
+    "text": "Br is too big to fit on the CH₂ carbon.",
+    "correct": false,
+    "why": "Size is not the reason. Where H goes is decided in step 1, by which cation forms, before Br⁻ arrives."
+   },
+   {
+    "text": "C1 is more electron-poor, so it attracts the H.",
+    "correct": false,
+    "why": "H⁺ wants electrons, so it does not go to a poor carbon. The choice is set by the cation left behind on the OTHER carbon."
+   }
+  ]
+ },
+ "notes": ["Course level: cation stability is explained by the inductive effect only (Lesson 09 s06). Do not show hyperconjugation.", "Hub card example is 1-methylcyclohexene; this scene uses 2-methylpropene as the brief and Lesson 09 s08 do (3° against 1° is the starkest contrast). The ring substrate is in scene 02."]
+}

@@ -1,0 +1,587 @@
+{
+ "id": "13-eas-nitration",
+ "title": "Nitration of benzene: HNO₃ with H₂SO₄",
+ "reagentCard": "eas-nitration",
+ "alsoCards": ["nitro-reduction"],
+ "lesson": {
+  "id": "13",
+  "step": "s10"
+ },
+ "intent": "After this scene the learner can say: \"H₂SO₄ protonates HNO₃ and water leaves, giving the nitronium ion NO₂⁺. From there it is the same arc as bromination: the ring's π pair bonds to N, the + is shared over three ring carbons, and HSO₄⁻ takes the H⁺ back so the ring is aromatic again. H₂SO₄ is a catalyst.\"",
+ "reactant": {
+  "smiles": "c1ccccc1",
+  "name": "benzene"
+ },
+ "reagent": {
+  "smiles": "O[N+](=O)[O-]",
+  "label": "HNO₃, H₂SO₄"
+ },
+ "products": [
+  {
+   "smiles": "O=[N+]([O-])c1ccccc1",
+   "name": "nitrobenzene",
+   "stereo": "achiral"
+  },
+  {
+   "smiles": "OS(=O)(=O)O",
+   "name": "H₂SO₄ (returned)",
+   "stereo": "achiral"
+  },
+  {
+   "smiles": "O",
+   "name": "H₂O",
+   "stereo": "achiral",
+   "inFinal": false
+  }
+ ],
+ "intermediates": [
+  {
+   "name": "protonated nitric acid",
+   "smiles": "[OH2+][N+](=O)[O-]"
+  },
+  {
+   "name": "nitronium ion",
+   "smiles": "O=[N+]=O"
+  },
+  {
+   "name": "sigma complex",
+   "smiles": "O=[N+]([O-])C1C=CC=C[CH+]1"
+  }
+ ],
+ "atomNames": {
+  "1": "C1",
+  "2": "C2",
+  "3": "C3",
+  "4": "C4",
+  "5": "C5",
+  "6": "C6",
+  "7": "H",
+  "8": "N",
+  "9": "O(H)",
+  "10": "H′",
+  "11": "O(a)",
+  "12": "O(b)",
+  "13": "O(S)",
+  "14": "H(S)",
+  "15": "S"
+ },
+ "stage": {
+  "species": [
+   {
+    "key": "benzene",
+    "role": "reactant",
+    "smiles": "[C:1]1([H:7])=[CH:2][CH:3]=[CH:4][CH:5]=[CH:6]1",
+    "label": "benzene",
+    "at": [0, 0.6],
+    "style": "skeletal"
+   },
+   {
+    "key": "HNO3",
+    "role": "reagent",
+    "smiles": "[H:10][O:9][N+:8](=[O:11])[O-:12]",
+    "label": "HNO₃",
+    "at": [3.2, -1.6],
+    "style": "full"
+   },
+   {
+    "key": "H2SO4",
+    "role": "catalyst",
+    "smiles": "[H:14][O:13][S:15](=O)(=O)O",
+    "label": "H₂SO₄",
+    "at": [6.0, -1.6],
+    "style": "full"
+   }
+  ],
+  "state": "[C:1]1([H:7])=[CH:2][CH:3]=[CH:4][CH:5]=[CH:6]1.[H:10][O:9][N+:8](=[O:11])[O-:12].[H:14][O:13][S:15](=O)(=O)O"
+ },
+ "layers": ["arrows", "orbitals"],
+ "duration": 35.0,
+ "beats": [
+  {
+   "id": "b1-meet",
+   "t0": 0.0,
+   "t1": 3.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "Benzene in a mix of HNO₃ and H₂SO₄. Neither acid is a strong enough electrophile. First, make one.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "aromatic",
+     "atoms": [1, 2, 3, 4, 5, 6],
+     "side": "both",
+     "emphasis": "normal",
+     "electrons": 6
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 0.9,
+    "focus": [],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[C:1]1([H:7])=[CH:2][CH:3]=[CH:4][CH:5]=[CH:6]1.[H:10][O:9][N+:8](=[O:11])[O-:12].[H:14][O:13][S:15](=O)(=O)O"
+  },
+  {
+   "id": "b2-protonate",
+   "t0": 4.0,
+   "t1": 8.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "H₂SO₄ is the stronger acid. It hands H⁺ to the OH oxygen of HNO₃.",
+   "moves": [
+    {
+     "species": "H2SO4",
+     "anchor": 14,
+     "near": 9,
+     "offset": [1.1, 0, 0],
+     "at": [0, 0.3]
+    },
+    {
+     "atoms": [13, 15],
+     "by": [0.8, 0, 0],
+     "at": [0.8, 1]
+    }
+   ],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "lp": 9
+     },
+     "to": {
+      "atom": 14
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.25, 0.7],
+     "why": "A lone pair on the OH oxygen of HNO₃ takes the H⁺ of H₂SO₄."
+    },
+    {
+     "id": "a2",
+     "from": {
+      "bond": [13, 14]
+     },
+     "to": {
+      "atom": 13
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "none",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.4, 0.95],
+     "why": "The O–H pair stays on the sulfuric acid O: HSO₄⁻ forms."
+    }
+   ],
+   "bonds": [
+    {
+     "a": 9,
+     "b": 14,
+     "action": "form",
+     "order": 1
+    },
+    {
+     "a": 13,
+     "b": 14,
+     "action": "break",
+     "order": 0
+    }
+   ],
+   "charges": [{"atom": 9, "charge": 1}, {"atom": 13, "charge": -1}],
+   "partials": [],
+   "orbitals": [],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [8, 9, 13],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[C:1]1([H:7])=[CH:2][CH:3]=[CH:4][CH:5]=[CH:6]1.[H:10][O+:9]([H:14])[N+:8](=[O:11])[O-:12].[O-:13][S:15](=O)(=O)O"
+  },
+  {
+   "id": "b3-water-leaves",
+   "t0": 9.0,
+   "t1": 13.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "The N–O bond breaks and water leaves. An O lone pair makes a second N=O: the nitronium ion, NO₂⁺.",
+   "moves": [{"atoms": [9, 10, 14], "by": [0.2, -1.2, 0], "at": [0.6, 1]}],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "bond": [8, 9]
+     },
+     "to": {
+      "atom": 9
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "none",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.1, 0.75],
+     "why": "The N–O bond pair leaves with the O⁺, which goes off as a neutral water molecule."
+    },
+    {
+     "id": "a2",
+     "from": {
+      "lp": 12
+     },
+     "to": {
+      "bond": [12, 8]
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.3, 0.95],
+     "why": "A lone pair on O⁻ moves in to make N=O, so N keeps an octet."
+    }
+   ],
+   "bonds": [{"a": 8, "b": 9, "action": "break", "order": 0}, {"a": 8, "b": 12, "action": "order", "order": 2}],
+   "charges": [{"atom": 9, "charge": 0}, {"atom": 12, "charge": 0}],
+   "partials": [],
+   "orbitals": [],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [8, 9, 13],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[C:1]1([H:7])=[CH:2][CH:3]=[CH:4][CH:5]=[CH:6]1.[H:10][O:9][H:14].[O:11]=[N+:8]=[O:12].[O-:13][S:15](=O)(=O)O"
+  },
+  {
+   "id": "b4-no2",
+   "t0": 14.0,
+   "t1": 17.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "NO₂⁺ is straight: O=N⁺=O. Its N carries the + and is where the ring will attack.",
+   "drops": [9],
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [],
+   "badges": [{"atom": 8, "text": "E⁺", "tone": "elec"}],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.3,
+    "focus": [8],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[C:1]1([H:7])=[CH:2][CH:3]=[CH:4][CH:5]=[CH:6]1.[O:11]=[N+:8]=[O:12].[O-:13][S:15](=O)(=O)O",
+   "notes": "Draw O=N=O exactly linear (sp nitrogen)."
+  },
+  {
+   "id": "b5-attack",
+   "t0": 18.0,
+   "t1": 22.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "Two π electrons of the ring bond C1 to N. One N=O π pair moves onto O, so N keeps an octet.",
+   "moves": [{"atoms": [8, 11, 12], "anchor": 8, "near": 1, "offset": [0, 0, 1.5], "at": [0, 0.3]}],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "bond": [1, 2]
+     },
+     "to": {
+      "bond": [1, 8]
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "elec"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.25, 0.75],
+     "why": "A π pair of the ring attacks the N of NO₂⁺ and forms a new C–N bond. The ring now carries a + charge."
+    },
+    {
+     "id": "a2",
+     "from": {
+      "bond": [8, 11]
+     },
+     "to": {
+      "atom": 11
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "none",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.4, 0.95],
+     "why": "One N=O π pair moves onto O, so N keeps only four bonds (an octet) and that oxygen becomes O⁻."
+    }
+   ],
+   "bonds": [
+    {
+     "a": 1,
+     "b": 2,
+     "action": "order",
+     "order": 1
+    },
+    {
+     "a": 1,
+     "b": 8,
+     "action": "form",
+     "order": 1
+    },
+    {
+     "a": 8,
+     "b": 11,
+     "action": "order",
+     "order": 1
+    }
+   ],
+   "charges": [{"atom": 2, "charge": 1}, {"atom": 11, "charge": -1}],
+   "partials": [],
+   "orbitals": [{"kind": "p-empty", "atoms": [2], "side": "both", "emphasis": "focus", "electrons": 0}],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [1, 2, 3, 4, 5, 6],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[C:1]1([H:7])([N+:8](=[O:12])[O-:11])[CH+:2][CH:3]=[CH:4][CH:5]=[CH:6]1.[O-:13][S:15](=O)(=O)O",
+   "pose": {
+    "8": 1,
+    "7": -1
+   }
+  },
+  {
+   "id": "b6-forms",
+   "t0": 23.0,
+   "t1": 26.0,
+   "hold": 1.0,
+   "kind": "look",
+   "caption": "The same sigma complex as with Br: three forms put the + on C2, C4 and C6 in turn.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "pi",
+     "atoms": [2, 3, 4, 5, 6],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 4,
+     "label": "4 π electrons over 5 carbons"
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "forms": ["[C:1]1([H:7])([N+:8](=[O:12])[O-:11])[CH+:2][CH:3]=[CH:4][CH:5]=[CH:6]1", "[C:1]1([H:7])([N+:8](=[O:12])[O-:11])[CH:2]=[CH:3][CH+:4][CH:5]=[CH:6]1", "[C:1]1([H:7])([N+:8](=[O:12])[O-:11])[CH:2]=[CH:3][CH:4]=[CH:5][CH+:6]1"],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [1, 2, 3, 4, 5, 6],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[C:1]1([H:7])([N+:8](=[O:12])[O-:11])[CH+:2][CH:3]=[CH:4][CH:5]=[CH:6]1.[O-:13][S:15](=O)(=O)O"
+  },
+  {
+   "id": "b7-deprot",
+   "t0": 27.0,
+   "t1": 31.0,
+   "hold": 1.0,
+   "kind": "step",
+   "caption": "HSO₄⁻ takes the H⁺ from C1. The C–H pair goes back into the ring, and the ring is aromatic again.",
+   "moves": [{"atoms": [13, 15], "anchor": 13, "near": 7, "offset": [0.3, 1.1, -0.6], "at": [0, 0.3]}],
+   "arrows": [
+    {
+     "id": "a1",
+     "from": {
+      "lp": 13
+     },
+     "to": {
+      "atom": 7
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "nuc",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.25, 0.75],
+     "why": "A lone pair on the negative oxygen of HSO₄⁻ takes the H⁺ from the sp³ carbon and forms a new O–H bond."
+    },
+    {
+     "id": "a2",
+     "from": {
+      "bond": [1, 7]
+     },
+     "to": {
+      "bond": [1, 2]
+     },
+     "electrons": "pair",
+     "tone": {
+      "src": "none",
+      "dst": "none"
+     },
+     "path": {
+      "bend": "auto",
+      "amount": 0.35
+     },
+     "at": [0.4, 0.95],
+     "why": "The C–H bond pair slides into the ring and makes a new C=C π bond. The ring is aromatic again and the + is gone."
+    }
+   ],
+   "bonds": [
+    {
+     "a": 1,
+     "b": 2,
+     "action": "order",
+     "order": 2
+    },
+    {
+     "a": 1,
+     "b": 7,
+     "action": "break",
+     "order": 0
+    },
+    {
+     "a": 7,
+     "b": 13,
+     "action": "form",
+     "order": 1
+    }
+   ],
+   "charges": [{"atom": 2, "charge": 0}, {"atom": 13, "charge": 0}],
+   "partials": [],
+   "orbitals": [
+    {
+     "kind": "aromatic",
+     "atoms": [1, 2, 3, 4, 5, 6],
+     "side": "both",
+     "emphasis": "focus",
+     "electrons": 6
+    }
+   ],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1.1,
+    "focus": [1, 2, 3, 4, 5, 6],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[O-:11][N+:8](=[O:12])[C:1]1=[CH:2][CH:3]=[CH:4][CH:5]=[CH:6]1.[H:7][O:13][S:15](=O)(=O)O"
+  },
+  {
+   "id": "b8-product",
+   "t0": 32.0,
+   "t1": 35.0,
+   "hold": 0,
+   "kind": "look",
+   "caption": "Nitrobenzene. H₂SO₄ is made again, so it was a catalyst. NO₂ took the place of one ring H.",
+   "arrows": [],
+   "bonds": [],
+   "charges": [],
+   "partials": [],
+   "orbitals": [],
+   "badges": [],
+   "ghosts": [],
+   "camera": {
+    "zoom": 1,
+    "focus": [],
+    "tilt": 0
+   },
+   "faces": {
+    "show": false
+   },
+   "state": "[O-:11][N+:8](=[O:12])[C:1]1=[CH:2][CH:3]=[CH:4][CH:5]=[CH:6]1.[H:7][O:13][S:15](=O)(=O)O",
+   "relayout": {
+    "anchor": [1, 4]
+   }
+  }
+ ],
+ "stereoCallout": {
+  "title": "Flat all the way",
+  "stereoMoment": null,
+  "text": "No stereochemistry. Two shapes worth seeing: NO₂⁺ is linear (sp N), and the NO₂ group in nitrobenzene is flat and in the ring plane. Next step in a synthesis: Fe/H₃O⁺ reduces NO₂ to NH₂ (aniline); NO₂ itself is a meta director (scene 15)."
+ },
+ "whatIf": ["12-eas-bromination", "14-fc-acylation", "15-directors"],
+ "quiz": {
+  "q": "What is the electrophile that the ring attacks in nitration?",
+  "options": [
+   {
+    "text": "NO₂⁺, made when H₂SO₄ protonates HNO₃ and water leaves.",
+    "correct": true,
+    "why": "Yes. The fully positive, linear nitronium ion is reactive enough for the stable ring."
+   },
+   {
+    "text": "HNO₃ itself.",
+    "correct": false,
+    "why": "HNO₃ is far too weak an electrophile for an aromatic ring. It must first lose water as NO₂⁺."
+   },
+   {
+    "text": "H⁺ from H₂SO₄.",
+    "correct": false,
+    "why": "H⁺ goes onto HNO₃, not onto the ring. The ring attacks the N of NO₂⁺."
+   }
+  ]
+ },
+ "notes": ["Course data has drawnActivation: false for HNO₃ (the lesson states NO₂⁺ without arrows). Beats 2–3 add the two-arrow McMurry formation of NO₂⁺; the attack and deprotonation arrows match the course data."]
+}
