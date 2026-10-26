@@ -4,6 +4,7 @@
 // (Diels-Alder, Clemmensen, Birch, hydroborations, benzylic bromination, PCC, Cr(VI), amine in acid, desulfonation) have no engine model. Their entries are
 // `fixed: true`: the right answer is the hub card's own example (read from the hub), and only the wrong answers are typed. The wrong options are the engines' own
 // distractors (anti-Markovnikov, wrong orientation, syn for anti, unreacted, over-reacted, wrong reagent) plus a few small hand edits (nitro reduction, side chains, acetylides).
+// The ten alkyl-halide cards (Chapter 7: SN2, SN1, E2, E1, Grignard, halides from alcohols) use engine/reactions-halides.js: the right answer is the engine product, the wrong answers are halideChoices().
 // Every wrong option is tagged with the hub's three facts: what adds ("adds"), where it adds ("where"), how it adds in space ("space"), and its `why` starts with the slip.
 // tests/predict.mjs checks 200 generated problems (RDKit parse, one right answer, the engine product, the card's stereo) and every substrate x reagent pair of every card.
 import { canon } from './chem.js';
@@ -13,6 +14,7 @@ import { predictAdd, productChoices2 } from './reactions-additions.js';
 import { predictAlkyne, alkyneChoices, ALKYNE_RXN, acetylideOf, alkylateAcetylide } from './reactions-alkynes.js';
 import { predictDiene, dieneChoices, dieneName } from './reactions-dienes.js';
 import { predictEAS, predictSubst, easChoices, substChoices, easRightWhy, substRightWhy, oxidizeSideChain, hydrogenate, reduceNitro, EAS, halideText, BENZENE } from './reactions-aromatic.js';
+import { predictSN2, predictSN1, predictE2, predictE1, grignard, fromAlcohol, halideChoices, halideName, NUCLEOPHILES, BASES, HALIDE_BY_ID, E2_RING_POOL, ALCOHOLS } from './reactions-halides.js';
 import { mirror } from './stereo-graph.js';
 import { nameAlkeneBoth } from './naming.js';
 import { nameBothAny } from './naming-chain.js';
@@ -33,7 +35,8 @@ const FACT_OF = {
   alkyne: { anti: 'where', splitX: 'where', aldehyde: 'where', onlyOne: 'where', onlyOther: 'where', syn: 'space', trans: 'space' },
   diene: { only12: 'where', only14: 'where', nonallylic: 'where', unchanged: 'adds', wrongHalogen: 'adds' },
   subst: { opposite: 'where', partial: 'where', otherPlace: 'where', twice: 'adds', otherReagent: 'adds', addition: 'adds' },
-  chain: { endOxidised: 'where', ringOnly: 'where', moved: 'where', tooFar: 'where', where: 'where' }
+  chain: { endOxidised: 'where', ringOnly: 'where', moved: 'where', tooFar: 'where', where: 'where' },
+  halide: { retention: 'space', racemic: 'space', oneEnantiomer: 'space', hofmann: 'where', notAnti: 'where', elim: 'where', subst: 'where', subst2: 'where', wrongNu: 'adds', wrongHalogen: 'adds', unchanged: 'adds', noD: 'adds', alcohol: 'adds', reagent: 'adds' }
 };
 const factOf = (family, kind, over) => (over && over[kind]) || (FACT_OF[family] && FACT_OF[family][kind]) || 'adds';
 const SLIP = {
@@ -45,6 +48,7 @@ const SPACE_LINE = {
   syn: 'syn: both new groups arrive on the same face',
   anti: 'anti: the two new groups arrive on opposite faces',
   either: 'either face: the cation is flat, so the new group can arrive on either face',
+  inversion: 'inversion: the new group comes in from the back, so a stereocentre flips',
   'n.a.': 'there is no stereochemistry to show here'
 };
 
@@ -53,6 +57,28 @@ const SPACE_LINE = {
 // Br₂ adds anti", "this adds HBr twice; one equivalent adds once"). The engine's longer explanation stays behind it as `more` (the drill shows it under "Why?").
 // The generic "Slip on WHERE it adds ..." sentence is only the fallback for a kind that has no line here (tests/predict.mjs asserts there is none).
 const first = (t) => String(t || '').split(/(?<=[.!?])\s+/)[0];
+/** The specific first lines of the wrong answers on the alkyl-halide cards (family `halide`): each names the real atom, group or carbon of the problem. */
+function halideLeads(S, label) {
+  const P = S.pred || {};
+  const hal = P.X || 'halogen';
+  const Nu = P.nu ? NUCLEOPHILES[P.nu] : null;
+  return {
+    retention: () => `This keeps the configuration (retention). ${P.alcohol ? 'The reagent' : 'SN2'} attacks from the back, so the carbon inverts.`,
+    racemic: () => 'This racemic pair would come from a flat carbocation (SN1). Here the carbon is attacked from the back in one step, so only one enantiomer forms.',
+    elim: () => (P.alcohol ? 'This is an alkene: water was lost. The reagent replaces the OH by a halogen on the same carbon.' : P.mech === 'SN1' ? 'This is the alkene (E1). With a weak base the main path is substitution: the solvent bonds to the carbon.' : 'This is an alkene (a C=C): a β H was lost instead of the nucleophile attacking the carbon. The question asks for the substitution product.'),
+    unchanged: () => (P.alcohol ? 'This is still the starting alcohol: the OH is still on the carbon. The reagent replaces it with a halogen.' : P.mech === 'E2' || P.mech === 'E1' ? `This is still the starting halide: the ${hal} is still on the carbon. The elimination removes it together with a β H.` : P.mech === 'Grignard' ? `This is still the starting halide: the ${hal} is still on the carbon. Mg inserts there, then D₂O gives D.` : `This is still the starting halide: the ${hal} is still on the carbon. The nucleophile replaces it.`),
+    wrongNu: () => (P.mech === 'E2' ? `This is a halide exchange (a different halogen replaces the ${hal}), not an elimination: there is no C=C.` : `The group on the carbon is not the one in the reagent. ${label} puts ${Nu ? Nu.group : 'its own group'} on the carbon.`),
+    oneEnantiomer: () => 'Only one enantiomer is drawn. The carbocation is flat, so the nucleophile reaches the carbon from either face and both enantiomers form.',
+    hofmann: () => 'This is the less substituted alkene (fewer carbon groups on the C=C). Zaitsev: the more substituted C=C is the major product.',
+    subst: () => (P.mech === 'E1' ? 'This is the SN1 product: the solvent bonded to the carbon. It forms beside the alkene, but the question asks for the E1 elimination product.' : 'This is the substitution product: OH or OR replaced the halogen on the carbon. A strong base takes a β H instead, so the product is an alkene.'),
+    subst2: () => 'This is an ether: an OR group replaced the halogen on the carbon. The question asks for the elimination product, an alkene (C=C).',
+    notAnti: () => 'This alkene needs the H on the CH₃ carbon, but that H is cis to the halogen. E2 needs an H trans to the halogen, so this alkene cannot form.',
+    noD: () => 'This has an ordinary H where the D should be. D₂O gives D to the carbon; H₂O would give an H.',
+    alcohol: () => 'This is an alcohol (an OH on the carbon). The Grignard reagent takes the D from D₂O; the OH of the water does not bond to the carbon.',
+    reagent: () => 'This is the Grignard reagent itself, with Mg on the carbon. The D₂O then replaces the C–Mg bond with C–D.',
+    wrongHalogen: () => `This carries the other halogen. The reagent is ${label}, so ${hal} is the atom that replaces the OH.`
+  };
+}
 const GROUP_TEXT = { Br: 'Br', Cl: 'Cl', I: 'I', '[N+](=O)[O-]': 'NO₂', 'S(=O)(=O)O': 'SO₃H' };
 const haloOf = (v) => (/Br/.test(v.id) ? 'Br' : /Cl/.test(v.id) ? 'Cl' : /(^|_)I/.test(v.id) ? 'I' : 'X');
 function leadFor(card, entry, sub, v, S, o) {
@@ -118,6 +144,7 @@ function leadFor(card, entry, sub, v, S, o) {
       where: () => 'The new carbon group is on the carbon next to the triple bond. NaNH₂ removes only the ≡C–H, so R attaches to the triple-bond carbon.',
       wrongR: () => `This has the wrong R group. The R that adds is the one in ${halideLabel(v.halide)}.`
     },
+    halide: halideLeads(S, label),
     diene: {
       nonallylic: () => 'H went to an inner carbon, so the + is not next to the other C=C: no resonance, and that cation does not form. H goes to a terminal carbon.',
       only12: () => `Only the 1,2 product (${X} on C2) is drawn. The allylic cation puts + on C2 and C4, so ${X}⁻ can also attack C4 and the 1,4 product forms too.`,
@@ -147,6 +174,7 @@ function leadFor(card, entry, sub, v, S, o) {
 const PLAIN = { 'C=Cc1ccccc1': 'styrene', 'C#Cc1ccccc1': 'phenylacetylene', 'CC=Cc1ccccc1': 'prop-1-enylbenzene', 'C=CCc1ccccc1': 'allylbenzene' };
 function nameTag(smiles, fam) {
   if (PLAIN[smiles]) return PLAIN[smiles];
+  if (fam === 'halide') { const hn = halideName(smiles); return hn ? `<name new="${hn.new}" old="${hn.old}"></name>` : null; }
   let n = null;
   try {
     if (fam === 'alkene') n = nameAlkeneBoth(smiles);
@@ -182,6 +210,22 @@ function solveAlkyne(sub, v) {
 function solveDiene(sub, v) {
   const pred = predictDiene(sub, v.id);
   return { label: v.label + ' (1 equiv.)', family: 'diene', racemic: false, choices: dieneChoices(pred, { n: 12 }), products: pred.products };
+}
+
+/** An alkyl-halide card (Chapter 7): the engine answers, halideChoices() gives the wrong answers. v.mech says which engine call. */
+function solveHalide(sub, v) {
+  let pred;
+  switch (v.mech) {
+    case 'SN2': pred = predictSN2(sub, v.id); break;
+    case 'SN1': pred = predictSN1(sub, v.id); break;
+    case 'E2': pred = predictE2(sub, v.id); break;
+    case 'E1': pred = predictE1(sub); break;
+    case 'Grignard': pred = grignard(sub); break;
+    default: pred = fromAlcohol(sub, v.id);
+  }
+  const products = pred.mech === 'E2' || pred.mech === 'E1' ? pred.major : pred.mech === 'Grignard' ? [pred.protonolysis.D2O] : pred.products;
+  if (products.length > 1 && !pred.racemic) throw new Error('excluded: a mixture');
+  return { label: v.label, family: 'halide', racemic: !!pred.racemic, stereoDefined: !pred.racemic && products.some((x) => /@/.test(x)), choices: halideChoices(pred, { n: 12 }), products, pred };
 }
 
 /** Aromatic substitution: benzene (one product, no position question) or a substituted ring (positions matter). `halide` for Friedel-Crafts. */
@@ -315,6 +359,15 @@ const DI_META = ['Brc1ccc([N+](=O)[O-])cc1', 'Clc1ccc(C(=O)O)cc1', 'Clc1ccc(C(C)
 const AMINES_FREE = ['Nc1ccccc1', 'CNc1ccccc1', 'CN(C)c1ccccc1'];   // nitration and sulfonation protonate these (amine in acid): the engine refuses them
 const FC_RINGS = ['c1ccccc1', 'Cc1ccccc1', 'Clc1ccccc1', 'CCc1ccccc1', 'COc1ccccc1',
   'Brc1ccccc1', 'Fc1ccccc1', 'Ic1ccccc1', 'CC(C)c1ccccc1', 'c1ccc(cc1)-c1ccccc1', 'CCOc1ccccc1', 'Cc1ccc(C)cc1', 'Cc1ccc(Cl)cc1', 'COc1ccc(C)cc1', 'Clc1ccc(Cl)cc1', 'Cc1ccc(F)cc1'];
+// alkyl halides: the pools are the engine's own (reactions-halides.js); every pair is checked by tests/predict.mjs and tests/halides.mjs
+const hs = (...ids) => ids.map((i) => HALIDE_BY_ID[i].smiles);
+const SN2_SUBS = hs('1-bromobutane', 'bromomethane', 'bromoethane', '1-bromopropane', '2-bromopropane', '2-bromobutane', '(R)-2-bromobutane', '(S)-2-bromobutane', '1-bromo-2-methylpropane', '1-chlorobutane', '1-iodopropane', '3-bromopentane', '2-bromopentane', '(R)-2-bromohexane', '(S)-2-bromohexane', 'bromocyclohexane', 'bromocyclopentane', 'benzyl bromide');
+const SN1_SUBS = hs('2-bromo-2-methylpropane', '2-bromo-2-methylbutane', '2-chloro-2-methylpropane', '(R)-3-bromo-3-methylhexane', '1-bromo-1-methylcyclohexane', 'bromocyclohexane', '3-bromopentane', '2-bromopropane', 'benzyl bromide', 'allyl bromide', '1-bromo-1-phenylethane');
+const E2_SUBS = hs('2-bromo-2-methylbutane', '2-bromobutane', '2-bromopentane', '1-bromo-1-methylcyclohexane', '3-bromopentane', '2-bromo-2-methylpropane', 'bromocyclohexane', '1-bromo-2-methylpropane', '2-chloro-2-methylpropane', '1-bromo-1-phenylethane', '2-bromopropane', 'bromocyclopentane');
+const E1_SUBS = hs('2-bromo-2-methylpropane', '2-bromo-2-methylbutane', '2-chloro-2-methylpropane', '1-bromo-1-methylcyclohexane', '2-bromo-2-methylpentane', 'bromocyclohexane', '3-bromopentane', '2-bromopropane', '1-bromo-1-phenylethane');
+const GRIGNARD_SUBS = hs('bromocyclohexane', 'bromoethane', '1-bromopropane', '2-bromopropane', '1-bromobutane', '1-chlorobutane', 'bromocyclopentane', 'bromobenzene', '2-bromo-2-methylpropane', '1-bromopropene', 'benzyl bromide');
+const ALCOHOL_SUBS = ALCOHOLS.map((a) => a.smiles);
+const TERTIARY_OH = ['CC(C)(C)O', 'CC1(O)CCCCC1', 'CCC(C)(C)O'], SECONDARY_OH = ['CCC(C)O', 'CCC[C@H](C)O', 'CCC[C@@H](C)O', 'OC1CCCCC1'];
 const ALKYNE_T = ['CC#C', 'CCC#C', 'CCCC#C', 'CCCCC#C'];
 const ALKYNE_TERM = uniq(ALKYNE_T, ['CCCCCC#C', 'CC(C)C#C', 'CC(C)CC#C', 'CC(C)(C)C#C', 'CCCCCCC#C', 'CC(C)CCC#C']);
 const ALKYNE_SYM = ['CC#CC', 'CCC#CCC', 'CCCC#CCCC', 'CCCCC#CCCCC', 'CC(C)C#CC(C)C'];
@@ -484,6 +537,18 @@ export const DRILL = {
   'alkyne-h2-pd': { fam: 'alkyne', subs: uniq(['CC#CC', 'CCCC#C', 'CCC#CCC', 'CCCC#CCCC'], ALKYNE_SYM, ALKYNE_UNSYM, ALKYNE_TERM), variants: [V('H2_Pd', ALKYNE_RXN.H2_Pd.label)], ex: 0, solve: (s, v) => solveAlkyne(s, v) },
   'alkyne-acetylide': { fam: 'alkyne', subs: ALKYNE_TERM,variants: [V('acetylide', '', { halide: 'CCBr' }), V('acetylide', '', { halide: 'CBr' }), V('acetylide', '', { halide: 'CCCBr' })], ex: 0, solve: (s, v) => solveAcetylide(s, v) },
 
+  // ---- alkyl halides (Chapter 7)
+  'sn2-cn': { fam: 'halide', subs: SN2_SUBS, variants: [V('CN', 'NaCN', { mech: 'SN2' })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+  'sn2-i': { fam: 'halide', subs: SN2_SUBS.filter((x) => x !== 'CCCI'), variants: [V('I', 'NaI, acetone', { mech: 'SN2' })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+  'sn2-oh': { fam: 'halide', subs: SN2_SUBS, variants: [V('HO', 'NaOH (aqueous)', { mech: 'SN2' })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+  'sn2-rs': { fam: 'halide', subs: SN2_SUBS, variants: [V('MeS', 'NaSCH₃', { mech: 'SN2' })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+  'sn1-solvolysis': { fam: 'halide', subs: SN1_SUBS, variants: [V('H2O', 'H₂O, heat', { mech: 'SN1' }), V('MeOH', 'CH₃OH, heat', { mech: 'SN1' }), V('EtOH', 'CH₃CH₂OH, heat', { mech: 'SN1' })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+  'e2-zaitsev': { fam: 'halide', subs: E2_SUBS, variants: [V('KOH', BASES.KOH.label, { mech: 'E2' }), V('NaOEt', BASES.NaOEt.label, { mech: 'E2' }), V('NaOMe', BASES.NaOMe.label, { mech: 'E2' })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+  'e2-chair': { fam: 'halide', subs: E2_RING_POOL.map((r) => r.smiles), variants: [V('KOH', BASES.KOH.label, { mech: 'E2' })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+  'e1-heat': { fam: 'halide', subs: E1_SUBS, variants: [V('EtOH', 'CH₃CH₂OH, heat (E1 elimination only)', { mech: 'E1' }), V('H2O', 'H₂O, heat (E1 elimination only)', { mech: 'E1' })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+  'grignard-d2o': { fam: 'halide', subs: GRIGNARD_SUBS, variants: [V('grignard', 'Mg, ether; then D₂O', { mech: 'Grignard' })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+  'halide-from-alcohol': { fam: 'halide', subs: ALCOHOL_SUBS, variants: [V('PBr3', 'PBr₃', { mech: 'alcohol', skip: TERTIARY_OH }), V('SOCl2', 'SOCl₂ (pyridine)', { mech: 'alcohol', skip: TERTIARY_OH }), V('HBr', 'HBr', { mech: 'alcohol', skip: SECONDARY_OH }), V('HCl', 'HCl', { mech: 'alcohol', skip: SECONDARY_OH })], ex: 0, solve: (s, v) => solveHalide(s, v) },
+
   'diene-hx': { fam: 'diene', subs: ['C=CC=C', 'CC=CC=C', 'C=C(C)C=C', 'C1=CC=CCC1', 'C1=CC=CC1', 'CC=CC=CC', 'CC(C)=CC=C', 'C=C(C)C(C)=C'], variants: [V('HBr', 'HBr'), V('HCl', 'HCl')], ex: 0, solve: (s, v) => solveDiene(s, v) }
 };
 // the ten workbook B3.1 cards and hot KMnO₄ on an alkyne: fixed answers (see FIXED above)
@@ -537,7 +602,7 @@ function finalize(card, entry, sub, v, S, rng) {
     promptHtml: `${nm || S.subText || 'The molecule drawn below'} + <b>${S.label}</b>. Which is the major product${flat(right.smiles).length > 1 ? ' (or products)' : ''}?${hasSpace ? ' Look at how the groups sit in space.' : ''}`,
     prompt: `${S.label}: which is the major product?`,
     options: opts, answer: opts.find((o) => o.correct).text,
-    card: card.id, group: card.group, substrate: sub, reagent: v.id, halide: v.halide || null, products: S.products, racemic: S.racemic, family: S.family,
+    card: card.id, group: card.group, substrate: sub, reagent: v.id, halide: v.halide || null, products: S.products, racemic: S.racemic, family: S.family, stereoDefined: !!S.stereoDefined,
     worked: `1. What adds: ${f.adds}. 2. Where: ${f.where}. 3. In space: ${spaceText}. ${rightWhy}`,
     derive: `1. What adds: ${f.adds}. 2. Where: ${f.where}. 3. In space: ${spaceText}. ${rightWhy}`,
     hints: [

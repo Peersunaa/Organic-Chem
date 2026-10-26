@@ -62,7 +62,7 @@ export async function morph({ ok, eq }) {
   const raw = fs.readFileSync(file, 'utf8');
   const D = JSON.parse(raw);
   const keys = Object.keys(D).filter((k) => k !== '_meta');
-  ok(raw.length < 1.6e6, `morph: morphs.json stays small (${raw.length} bytes)`);
+  ok(raw.length < 2.0e6, `morph: morphs.json stays small (${raw.length} bytes; the Chapter 7 pairs took it past 1.6 MB)`);
 
   // ---- (1) coverage
   const J = jobs();

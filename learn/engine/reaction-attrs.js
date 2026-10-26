@@ -11,12 +11,12 @@ export const PRACTICE_LABEL = { 'predict-product': 'Predict the product', 'guess
 export const PRACTICE_BLURB = { 'predict-product': 'You see the starting material and the reagent. Pick the major product.' };
 
 // ---- substrate classes (what the starting material is)
-export const SUBSTRATE_IDS = ['alkenes', 'cycloalkenes', 'alkynes', 'dienes', 'arenes', 'alcohols'];
-export const SUBSTRATE_LABEL = { alkenes: 'Alkenes', cycloalkenes: 'Cycloalkenes', alkynes: 'Alkynes', dienes: 'Dienes', arenes: 'Benzene / arenes', alcohols: 'Alcohols (oxidation cards)' };
+export const SUBSTRATE_IDS = ['alkenes', 'cycloalkenes', 'alkynes', 'dienes', 'arenes', 'alcohols', 'halides'];
+export const SUBSTRATE_LABEL = { alkenes: 'Alkenes', cycloalkenes: 'Cycloalkenes', alkynes: 'Alkynes', dienes: 'Dienes', arenes: 'Benzene / arenes', alcohols: 'Alcohols (oxidation cards)', halides: 'Alkyl halides' };
 
-// ---- reagent families (which kind of reagent) and the family of each of the 38 cards
-export const FAMILY_IDS = ['hx', 'x2', 'syn', 'oxid', 'alkyne', 'eas', 'directors', 'sidechain', 'hubonly'];
-export const FAMILY_LABEL = { hx: 'HX / water (Markovnikov)', x2: 'X₂ (anti)', syn: 'Syn group (H₂, cold KMnO₄, epoxide)', oxid: 'Oxidations / cleavage', alkyne: 'Alkyne-specific', eas: 'EAS', directors: 'Directors', sidechain: 'Side chain', hubonly: 'Hub-only facts' };
+// ---- reagent families (which kind of reagent) and the family of each of the cards
+export const FAMILY_IDS = ['hx', 'x2', 'syn', 'oxid', 'alkyne', 'eas', 'directors', 'sidechain', 'hubonly', 'sn2', 'sn1', 'e2', 'e1', 'grignard'];
+export const FAMILY_LABEL = { hx: 'HX / water (Markovnikov)', x2: 'X₂ (anti)', syn: 'Syn group (H₂, cold KMnO₄, epoxide)', oxid: 'Oxidations / cleavage', alkyne: 'Alkyne-specific', eas: 'EAS', directors: 'Directors', sidechain: 'Side chain', hubonly: 'Hub-only facts', sn2: 'SN2 (substitution with inversion)', sn1: 'SN1 (carbocation, either face)', e2: 'E2 (strong base, anti H and halogen)', e1: 'E1 (carbocation, loses H⁺)', grignard: 'Grignard (Mg then D₂O)' };
 export const FAMILY_OF = {
   'alkene-hx': 'hx', 'alkene-hydration': 'hx', 'diene-hx': 'hx',
   'alkene-x2': 'x2', 'alkene-epoxide-diol': 'x2',
@@ -26,9 +26,10 @@ export const FAMILY_OF = {
   'eas-bromination': 'eas', 'eas-nitration': 'eas', 'eas-sulfonation': 'eas', 'fc-alkylation': 'eas', 'fc-acylation': 'eas',
   'director-activating': 'directors', 'director-halogen': 'directors', 'director-meta': 'directors',
   'side-chain-kmno4': 'sidechain', 'nitro-reduction': 'sidechain', 'side-chain-h2pd': 'sidechain',
+  'sn2-cn': 'sn2', 'sn2-i': 'sn2', 'sn2-oh': 'sn2', 'sn2-rs': 'sn2', 'halide-from-alcohol': 'sn2', 'sn1-solvolysis': 'sn1', 'e2-zaitsev': 'e2', 'e2-chair': 'e2', 'e1-heat': 'e1', 'grignard-d2o': 'grignard',
   'diels-alder': 'hubonly', 'clemmensen': 'hubonly', 'birch': 'hubonly', 'alkene-hydroboration': 'hubonly', 'alkyne-hydroboration': 'hubonly', 'benzylic-bromination': 'hubonly', 'amine-in-acid': 'hubonly', 'desulfonation': 'hubonly'
 };
-/** Short names for the 39 cards (the chips of the settings card). */
+/** Short names for the cards (the chips of the settings card). */
 export const CARD_LABEL = {
   'eas-bromination': 'Br₂, FeBr₃', 'eas-nitration': 'HNO₃, H₂SO₄', 'eas-sulfonation': 'SO₃, H₂SO₄', 'fc-alkylation': 'R–Cl, AlCl₃', 'fc-acylation': 'RCOCl, AlCl₃',
   'director-activating': 'Activator on ring', 'director-halogen': 'Halogen on ring', 'director-meta': 'Deactivator on ring',
@@ -39,7 +40,8 @@ export const CARD_LABEL = {
   'alkene-epoxide': 'RCO₃H', 'alkene-epoxide-diol': 'RCO₃H, then H₃O⁺', 'alkene-hydroboration': 'BH₃, then H₂O₂',
   'alkyne-hx-1': 'HX (1 equiv.)', 'alkyne-hx-2': 'HX (2 equiv.)', 'alkyne-x2-1': 'X₂ (1 equiv.)', 'alkyne-x2-2': 'X₂ (2 equiv.)', 'alkyne-hydration': 'H₂O, HgSO₄', 'alkyne-lindlar': 'H₂, Lindlar',
   'alkyne-h2-pd': 'H₂, Pd/C (2 equiv.)', 'alkyne-acetylide': 'NaNH₂, then R–Br', 'alkyne-hydroboration': 'BH₃, then H₂O₂', 'alkyne-kmno4-hot': 'KMnO₄, hot (C≡C)',
-  'diene-hx': 'HX on a diene', 'diels-alder': 'Diels–Alder'
+  'diene-hx': 'HX on a diene', 'diels-alder': 'Diels–Alder',
+  'sn2-cn': 'NaCN (SN2)', 'sn2-i': 'NaI, acetone (SN2)', 'sn2-oh': 'NaOH (SN2)', 'sn2-rs': 'NaSCH₃ (SN2)', 'sn1-solvolysis': 'H₂O, heat (SN1)', 'e2-zaitsev': 'KOH, heat (E2)', 'e2-chair': 'E2 on a ring (chair)', 'e1-heat': 'Heat, ethanol (E1)', 'grignard-d2o': 'Mg, then D₂O', 'halide-from-alcohol': 'PBr₃, SOCl₂, HX'
 };
 export const CARD_IDS = HUB_CARDS.map((c) => c.id);
 /** The cards by hub group, in hub order: [{ id, label, cards: [ids] }] (for the grouped card chooser). */
@@ -93,10 +95,11 @@ function hasAlcohol(g) {
     return ca.sym === 'C' && !ca.arom && !g.nbrs[c].some((k) => g.atoms[k].sym !== 'C' && orderOf(g, c, k) === 2);
   })());
 }
-/** The substrate class of a starting material (the first that applies: alcohol, arene, alkyne, diene, cycloalkene, alkene). */
+/** The substrate class of a starting material (the first that applies: alcohol, alkyl halide, arene, alkyne, diene, cycloalkene, alkene). An alkyl halide has a halogen on a NON-aromatic carbon (bromobenzene stays an arene). */
 export function substrateClass(smi) {
   const g = parseSmiles(String(smi));
   if (hasAlcohol(g)) return 'alcohols';
+  if (g.atoms.some((a, i) => ['F', 'Cl', 'Br', 'I'].includes(a.sym) && g.nbrs[i].some((k) => g.atoms[k].sym === 'C' && !g.atoms[k].arom))) return 'halides';
   if (g.atoms.some((a) => a.arom)) return 'arenes';
   const cc = (o) => g.bonds.filter((b) => b.o === o && g.atoms[b.a].sym === 'C' && g.atoms[b.b].sym === 'C');
   if (cc(3).length) return 'alkynes';

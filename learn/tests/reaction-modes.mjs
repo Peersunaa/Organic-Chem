@@ -67,6 +67,13 @@ function engineProducts(id, sub, rg, hal) {
       return [r.final.smiles];
     }
     case 'diene-hx': return R.predictDiene(sub, rg).products;
+    // Chapter 7 (alkyl halides): the variant's id is the nucleophile / base / alcohol reagent
+    case 'sn2-cn': case 'sn2-i': case 'sn2-oh': case 'sn2-rs': return R.predictSN2(sub, rg).products;
+    case 'sn1-solvolysis': return R.predictSN1(sub, rg).products;
+    case 'e2-zaitsev': case 'e2-chair': return R.predictE2(sub, rg).major;
+    case 'e1-heat': return R.predictE1(sub).major;
+    case 'grignard-d2o': return [R.grignard(sub).protonolysis.D2O];
+    case 'halide-from-alcohol': return [R.fromAlcohol(sub, rg).product];
     default: {
       if (DRILL[id] && DRILL[id].fixed) {         // fixed-answer card: the answer IS the hub card's example for that substrate
         const c = HUB_BY_ID[id], ex = [c.example, c.example2].filter(Boolean).find((x) => x.substrate === sub);
@@ -107,10 +114,10 @@ export async function reactionModes({ ok, eq }) {
   ok(/MODE_IDS\.includes\(generatorForSkill\(skill\)\)/.test(app), 'the practice view draws the modes skeletal');
   ok(/'#practise-guess-reagent\/' \+ c\.id/.test(hubView) && /practise-guess-reagent\\\/\(\[a-z0-9-\]\+\)/.test(app), 'each engine card on the hub opens "which reagent?" limited to that card');
   ok(/\/\* reaction modes \*\//.test(indexHtml) && /\.rm-mode\b/.test(indexHtml), 'the CSS block /* reaction modes */');
-  eq(M.ENGINE_CARDS.length, 28, '28 engine cards (the ten fixed-answer cards have no engine)');
+  eq(M.ENGINE_CARDS.length, 38, '38 engine cards (the eleven fixed-answer cards have no engine; the ten alkyl-halide cards of Chapter 7 have one)');
   for (const id of ['clemmensen', 'birch', 'diels-alder']) ok(!M.ENGINE_CARDS.includes(id), `${id}: a fixed-answer card is not an engine card`);
   ok(Object.values(M.REP).flat().every((id) => M.ENGINE_CARDS.includes(id)), 'the wrong-reagent pools use engine cards only');
-  eq(M.GUESS_REAGENT_CARDS.length, 26, '26 cards can be practised as "which reagent?" (hub button)');
+  eq(M.GUESS_REAGENT_CARDS.length, 35, '35 cards can be practised as "which reagent?" (hub button)');
   for (const id of M.ENGINE_CARDS) {
     const n = M.allCombos([id]).filter((c) => M.buildGuessReagent(c, () => 0.5)).length;
     ok(M.GUESS_REAGENT_CARDS.includes(id) ? n > 0 : n === 0, `${id}: ${n} "which reagent?" problems, and it is ${M.GUESS_REAGENT_CARDS.includes(id) ? '' : 'not '}offered on the hub`);
@@ -475,7 +482,7 @@ export async function reactionModes({ ok, eq }) {
   const counts = { 'guess-reagent': nReagent, 'guess-reactant': nReactant, 'stereo-outcome': nStereo, 'two-step': nChains, 'wont-work': wontProblems };
   for (const m of M.MODE_IDS) eq(M.MODE_COUNTS[m], counts[m], `MODE_COUNTS['${m}'] is the number of problems the mode can make`);
   const triples = single.size + chainTriples.size;
-  // 28 engine cards x their substrate pools x reagent variants give `single` distinct (substrate, reagent, product) triples; the two-step chains add `chainTriples`.
+  // 38 engine cards x their substrate pools x reagent variants give `single` distinct (substrate, reagent, product) triples; the two-step chains add `chainTriples`.
   ok(single.size >= 1000, `at least 1000 distinct single-step (substrate, reagent, product) triples (${single.size})`);
   ok(chainTriples.size >= 500, `at least 500 distinct two-step (substrate, reagent pair, product) triples (${chainTriples.size})`);
   ok(triples >= 1500, `at least 1500 distinct (substrate, reagent, product) triples in all (${triples})`);
@@ -503,14 +510,14 @@ async function reactionSettings({ ok, eq }, built) {
 
   // ---- (1) wiring
   eq(C.PRACTICE_MODES, MODES6, 'six practice modes (the predict drill and the five reaction modes)');
-  eq(A.CARD_IDS.length, 39, '39 hub cards');
-  eq(A.FAMILY_IDS.length, 9, 'nine reagent families');
-  eq(A.SUBSTRATE_IDS, ['alkenes', 'cycloalkenes', 'alkynes', 'dienes', 'arenes', 'alcohols'], 'six substrate classes');
+  eq(A.CARD_IDS.length, 49, '49 hub cards');
+  eq(A.FAMILY_IDS.length, 14, 'fourteen reagent families (the five alkyl-halide families sn2, sn1, e2, e1 and grignard were added)');
+  eq(A.SUBSTRATE_IDS, ['alkenes', 'cycloalkenes', 'alkynes', 'dienes', 'arenes', 'alcohols', 'halides'], 'seven substrate classes');
   ok(A.CARD_IDS.every((id) => FAM[id] && A.FAMILY_IDS.includes(FAM[id]) && A.CARD_LABEL[id] && A.CARD_LABEL[id].length <= 24), 'every card has a family and a short label');
   ok(A.FAMILY_IDS.every((f) => A.CARD_IDS.some((id) => FAM[id] === f)), 'every family has at least one card');
-  eq(Object.keys(FAM).length, 39, 'the family table has exactly the 39 cards');
+  eq(Object.keys(FAM).length, 49, 'the family table has exactly the 49 cards');
   eq(A.CARD_GROUPS.flatMap((g) => g.cards).sort(), A.CARD_IDS.slice().sort(), 'the card groups hold every card once');
-  eq(A.CARD_GROUPS.map((g) => g.cards.length), [18, 9, 10, 2], 'groups: aromatics 18, alkenes 9, alkynes 10, dienes 2');
+  eq(A.CARD_GROUPS.map((g) => g.cards.length), [18, 9, 10, 2, 10], 'groups: aromatics 18, alkenes 9, alkynes 10, dienes 2, alkyl halides 10');
   const FAM_SPOT = { 'alkene-hx': 'hx', 'alkene-hydration': 'hx', 'diene-hx': 'hx', 'alkene-x2': 'x2', 'alkene-epoxide-diol': 'x2', 'alkene-h2-pd': 'syn', 'alkene-kmno4-base': 'syn', 'alkene-epoxide': 'syn',
     'alkene-kmno4-acid': 'oxid', 'oxidation-pcc': 'oxid', 'oxidation-cr': 'oxid', 'alkyne-lindlar': 'alkyne', 'alkyne-acetylide': 'alkyne', 'eas-nitration': 'eas', 'fc-acylation': 'eas', 'director-meta': 'directors',
     'side-chain-kmno4': 'sidechain', 'nitro-reduction': 'sidechain', 'clemmensen': 'hubonly', 'diels-alder': 'hubonly', 'alkyne-hydroboration': 'hubonly' };
@@ -528,7 +535,7 @@ async function reactionSettings({ ok, eq }, built) {
   ok(/export function reactionSettingsCard/.test(view) && /C\.settingsCardHtml/.test(view) && /dataset\.gall/.test(view), 'the settings view paints the pure card markup');
   ok(C.isUnfiltered(C.defaultSettings()) && C.defaultSettings().count === 10 && C.defaultSettings().timer === 0 && C.defaultSettings().modes.length === 0 && C.defaultSettings().weak === false, 'defaults: no filter, 10 problems, no timer, no mixed modes, no weighting');
   const ns = C.normalizeSettings({ substrates: ['bogus'], families: [], cards: ['nope', 'alkene-hx'], stereo: 'x', difficulty: 'z', modes: ['wont-work', 'bad', 'guess-reagent'], count: 7, timer: 5, weak: 'yes' });
-  eq([ns.substrates.length, ns.families.length, ns.cards, ns.stereo, ns.difficulty, ns.modes, ns.count, ns.timer, ns.weak], [6, 9, ['alkene-hx'], 'any', '', ['guess-reagent', 'wont-work'], 10, 0, false], 'normalizeSettings repairs every field (and keeps the modes in order)');
+  eq([ns.substrates.length, ns.families.length, ns.cards, ns.stereo, ns.difficulty, ns.modes, ns.count, ns.timer, ns.weak], [7, 14, ['alkene-hx'], 'any', '', ['guess-reagent', 'wont-work'], 10, 0, false], 'normalizeSettings repairs every field (and keeps the modes in order)');
   eq(C.normalizeSettings({ count: 0 }).count, 0, 'count 0 means endless');
   eq(C.normalizeSettings(null).count, 10, 'normalizeSettings(null) gives the defaults');
   // storage under ui.reactions
@@ -587,6 +594,7 @@ async function reactionSettings({ ok, eq }, built) {
   const nMatch = (smi, sma) => { const m = rdkit().get_mol(smi), q = rdkit().get_qmol(sma); try { return JSON.parse(m.get_substruct_matches(q)).length; } finally { m.delete(); q.delete(); } };
   const rdClass = (smi) => {
     if (nMatch(smi, '[CX4;!$(C=O)][OX2H]')) return 'alcohols';
+    if (nMatch(smi, '[F,Cl,Br,I][C;!a]')) return 'halides';      // a halogen on a carbon that is not aromatic (bromobenzene stays an arene)
     if (nMatch(smi, 'a')) return 'arenes';
     if (nMatch(smi, 'C#C')) return 'alkynes';
     const n = nMatch(smi, 'C=C');
@@ -595,7 +603,7 @@ async function reactionSettings({ ok, eq }, built) {
   const allSubs = [...new Set(A.CARD_IDS.flatMap((id) => DRILL[id].subs))];
   const badClass = allSubs.filter((s) => A.substrateClass(s) !== rdClass(s));
   eq(badClass, [], `substrateClass agrees with RDKit on all ${allSubs.length} substrates`);
-  eq(new Set(allSubs.map(A.substrateClass)).size, 6, 'all six substrate classes occur in the pools');
+  eq(new Set(allSubs.map(A.substrateClass)).size, 7, 'all seven substrate classes occur in the pools');
   const tiers = { easy: 0, medium: 0, hard: 0 };
   allSubs.forEach((s) => { tiers[A.difficultyOf(s)]++; });
   ok(tiers.easy > 20 && tiers.medium > 5 && tiers.hard >= 2, `difficulty tiers all occur (${JSON.stringify(tiers)})`);
@@ -643,7 +651,7 @@ async function reactionSettings({ ok, eq }, built) {
     eq(ps.length, 3, `${t}: three problems`);
     ps.forEach((p, j) => { stat.problems++; stat.byMode[p.skill] = (stat.byMode[p.skill] || 0) + 1; problemOk(p, F, res, `${t} #${j}`); });
   }
-  function isUnfilteredF(F) { return F.substrates.length === 6 && F.families.length === 9 && F.cards.length === 39 && F.stereo === 'any' && F.difficulty === ''; }
+  function isUnfilteredF(F) { return F.substrates.length === 7 && F.families.length === 14 && F.cards.length === 49 && F.stereo === 'any' && F.difficulty === ''; }
   ok(stat.relaxed >= 8 && stat.asked - stat.relaxed >= 40, `the 120 combinations include ${stat.relaxed} relaxed and ${stat.asked - stat.relaxed} met as asked`);
   ok(stat.skipped >= 5, `${stat.skipped} combinations left a mode out`);
   ok(stat.filtered >= 80, `${stat.filtered} combinations really filtered`);
@@ -788,8 +796,8 @@ async function reactionSettings({ ok, eq }, built) {
   const S0 = C.defaultSettings();
   const html = C.settingsCardHtml(S0, { open: true, where: 'practice' });
   const chips = (g) => (html.match(new RegExp(`data-g="${g}"`, 'g')) || []).length;
-  eq([chips('substrates'), chips('families'), chips('cards'), chips('stereo'), chips('difficulty'), chips('modes'), chips('count'), chips('timer'), chips('weak')], [6, 9, 39, 3, 4, 6, 4, 3, 1], 'the card has a chip for every choice (38 cards)');
-  eq([(html.match(/data-gall=/g) || []).length, (html.match(/data-gnone=/g) || []).length], [4, 4], 'each card group has All and None');
+  eq([chips('substrates'), chips('families'), chips('cards'), chips('stereo'), chips('difficulty'), chips('modes'), chips('count'), chips('timer'), chips('weak')], [7, 14, 49, 3, 4, 6, 4, 3, 1], 'the card has a chip for every choice (49 cards)');
+  eq([(html.match(/data-gall=/g) || []).length, (html.match(/data-gnone=/g) || []).length], [5, 5], 'each card group has All and None');
   ok(['Alkenes only', 'Aromatics only', 'Stereo outcomes', 'Everything mixed'].every((n) => html.includes(`data-preset="${n}"`)), 'the four built-in presets are chips');
   ok(html.includes('aria-expanded="true"') && !/id="rs-body" hidden/.test(html) && /id="rs-cards" hidden/.test(html), 'open card, cards list closed until asked');
   ok(/id="rs-body" hidden/.test(C.settingsCardHtml(S0, { open: false })) && /aria-expanded="false"/.test(C.settingsCardHtml(S0, { open: false })), 'a closed card hides its body');
@@ -802,7 +810,7 @@ async function reactionSettings({ ok, eq }, built) {
   const html2 = C.settingsCardHtml(sel, { open: true, where: 'practice', report: C.resolveReactions(sel, 'guess-reagent'), dirty: true, error: 'Oops <b>', hasWeakData: false });
   const pressed = (g, v) => new RegExp(`data-g="${g}" data-v="${v}" aria-pressed="true"`).test(html2);
   ok(pressed('substrates', 'arenes') && !pressed('substrates', 'alkenes') && pressed('stereo', 'has') && pressed('difficulty', 'hard') && pressed('count', '0') && pressed('timer', '60') && pressed('weak', '1') && pressed('cards', 'eas-nitration') && !pressed('cards', 'eas-bromination'), 'chips show what is chosen (aria-pressed)');
-  ok(/Individual cards <span class="nl-hint">2 of 39/.test(html2) && /Changed: press Start/.test(html2) && /class="nl-err"[^>]*>Oops &lt;b&gt;/.test(html2) && /No slips logged against a card yet/.test(html2), 'the cards count, the dirty note, the escaped error and the weak-spot note');
+  ok(/Individual cards <span class="nl-hint">2 of 49/.test(html2) && /Changed: press Start/.test(html2) && /class="nl-err"[^>]*>Oops &lt;b&gt;/.test(html2) && /No slips logged against a card yet/.test(html2), 'the cards count, the dirty note, the escaped error and the weak-spot note');
   ok(/class="nl-note rs-note"/.test(html2) && /These settings cannot all be met/.test(html2), 'a relaxation notice is shown above the settings');
   ok(/Aromatics only|Custom/.test(C.summaryOf(sel)) && /endless/.test(C.summaryOf(sel)) && /60 s each/.test(C.summaryOf(sel)) && /weak spots/.test(C.summaryOf(sel)), 'the collapsed card summarises the settings');
   const named = C.settingsCardHtml(C.loadPreset('Aromatics only'), { open: true });

@@ -19,7 +19,7 @@ const KEY = 'orgo.builder.v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch (e) { return {}; } };
 const save = (o) => { try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { /* storage blocked: nothing to keep */ } };
 const iupac = () => { try { return store.getIupac() === 'old' ? 'old' : 'new'; } catch (e) { return 'new'; } };
-const TOP_OF_KIND = { alkene: 'alkene', alkyne: 'alkyne', arene: 'ring' };
+const TOP_OF_KIND = { alkene: 'alkene', alkyne: 'alkyne', arene: 'ring', halide: 'halide' };
 /** Keep the chosen tile in view inside its horizontally scrolling row (phones), without moving the page. */
 const showOn = (row) => requestAnimationFrame(() => { const on = row.querySelector('.is-on'); if (on && row.scrollWidth > row.clientWidth + 4) row.scrollLeft = Math.max(0, row.scrollLeft + on.getBoundingClientRect().left - row.getBoundingClientRect().left - 8); });
 const TAB_OF = (s) => (s.group === 'ring2' ? 'ring2' : s.group);
@@ -194,7 +194,7 @@ export function builderPage(chemReady) {
         st.custom = inp.value;
         const r = B.resolveSubstrate(inp.value);
         if (!r.ok) { msg.className = 'small bld-custom-msg fb bad'; msg.textContent = r.why; return; }
-        msg.className = 'small bld-custom-msg muted'; msg.textContent = `Read as ${r.kind === 'arene' ? 'a benzene ring' : 'an ' + r.kind}.`;
+        msg.className = 'small bld-custom-msg muted'; msg.textContent = `Read as ${r.kind === 'arene' ? 'a benzene ring' : r.kind === 'halide' ? 'an alkyl halide' : 'an ' + r.kind}.`;
         pickSub(r.smiles, false);
       };
       go.addEventListener('click', use);

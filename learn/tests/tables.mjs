@@ -24,6 +24,8 @@ const ROOT = path.join(HERE, '..');
 const REPO = path.join(ROOT, '..');
 function mulberry32(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const key = (list) => list.map((s) => stereoKey(s)).sort().join('|');
+// the halide table's quiz options may be enantiomers of each other (inversion against retention), so its options are compared exactly
+const exact = (list) => list.map((s) => canon(s)).sort().join('|');
 const els = (s) => analyze(s).atoms;
 const count = (s, sym) => els(s).filter((a) => a.sym === sym).length;
 const carbons = (s) => count(s, 'C');
@@ -53,7 +55,7 @@ const ezLabels = (s) => (ezInfo(s) || []).map((e) => e.label).filter(Boolean);
 export async function tables({ ok, eq }) {
   await ready();
   // ---- (1) sizes
-  const SIZES = { alkenes: [12, 11], alkynes: [7, 11], rings: [25, 6] };
+  const SIZES = { alkenes: [12, 11], alkynes: [7, 11], rings: [25, 6], halides: [17, 9] };
   for (const T of TB.TABLES) {
     const d = TB.tableData(T.id);
     eq([d.rows.length, d.cols.length], SIZES[T.id], `table ${T.id}: ${SIZES[T.id].join(' x ')}`);
@@ -114,6 +116,15 @@ export async function tables({ ok, eq }) {
           case 'meta': ok(res.leaders.length && res.leaders.every((g) => g.dir === 'm'), `${where}: meta only with meta-directing leaders`); break;
           case 'o/p': ok(res.leaders.some((g) => g.dir === 'op') && res.products.filter((p) => !p.minor && !p.excess).every((p) => /\b(ortho|para)\b/.test(p.label)), `${where}: o/p leaders, major products ortho or para`); break;
           case 'one isomer': ok(res.products.filter((p) => !p.excess).length === 1, `${where}: one isomer = one product`); break;
+          // Chapter 7: the tag is the mechanism(s) decide() names, read from res.rule; substitution products carry no new C=C, elimination products no halogen and the substrate's carbons
+          case 'SN2': ok(res.rule === 'sn2' && D.every((s) => canon(s) !== canon(row.smiles)), `${where}: SN2 from the rule`); break;
+          case 'SN1': ok(res.rule === 'sn1' && D.every((s) => halogens(s) === 0), `${where}: SN1 from the rule, the halogen is gone`); break;
+          case 'SN1+E1': ok(res.rule === 'sn1+e1' && D.every((s) => halogens(s) === 0) && res.products.some((p) => p.minor), `${where}: SN1 and E1 together: the substitution product is drawn, an alkene is minor`); break;
+          case 'E2': ok(res.rule === 'e2' && D.every((s) => halogens(s) === 0 && carbons(s) === carbons(row.smiles) && /=/.test(s)), `${where}: E2: an alkene with the substrate's carbons`); break;
+          case 'SN2+E2': ok(res.rule === 'sn2+e2' && D.every((s) => halogens(s) === 0 && canon(s) !== canon(row.smiles)) && res.products.some((p) => p.minor), `${where}: SN2 product drawn (the alcohol), the E2 alkene is minor`); break;
+          case 'E2+SN2': ok(res.rule === 'e2+sn2' && D.every((s) => halogens(s) === 0 && /=/.test(s)) && res.products.some((p) => p.minor), `${where}: E2 drawn, the SN2 product is minor`); break;
+          case 'E1': ok(res.rule === 'e1' && D.every((s) => halogens(s) === 0 && /=/.test(s)), `${where}: E1`); break;
+          case 'Grignard': ok(res.rule === 'grignard' && D.every((s) => /\[2H\]/.test(s) && halogens(s) === 0), `${where}: Grignard then D₂O: D replaces the halogen`); break;
           default: ok(false, `${where}: unchecked tag ${c.tag}`);
         }
         ok(c.family === null || !!TB.FAMILY_BY_ID[c.family], `${where}: family is known`);
@@ -125,7 +136,9 @@ export async function tables({ ok, eq }) {
     }
   }
   console.log(`  tables: ${cells} cells; tags ${JSON.stringify(tagCount)}`);
-  ok(TB.TABLES.every((T) => TB.TAGS[T.id].filter((x) => x !== 'no rxn').every((tg) => tagCount[T.id + ':' + tg])), 'tables: every allowed tag is used at least once');
+  // (E1 alone is an allowed tag of the halide table but no column makes it: heat in a protic solvent gives SN1 and E1 together)
+  const NEVER_ALONE = { halides: ['E1'] };
+  ok(TB.TABLES.every((T) => TB.TAGS[T.id].filter((x) => x !== 'no rxn' && !(NEVER_ALONE[T.id] || []).includes(x)).every((tg) => tagCount[T.id + ':' + tg])), 'tables: every allowed tag is used at least once (E1 alone excepted in the halide table)');
 
   // ---- (5) quiz
   const rng = mulberry32(2026);
@@ -141,11 +154,12 @@ export async function tables({ ok, eq }) {
         quizzes++;
         eq(q.options.length, 4, `${where}: four options`);
         eq(q.options.filter((o) => o.correct).length, 1, `${where}: exactly one right`);
-        eq(new Set(q.options.map((o) => key(o.smiles))).size, q.options.length, `${where}: options all different`);
+        const kx = T.id === 'halides' ? exact : key;
+        eq(new Set(q.options.map((o) => kx(o.smiles))).size, q.options.length, `${where}: options all different`);
         ok(q.options.every((o) => o.why && o.smiles.length && o.smiles.every((s) => canon(s) !== null)), `${where}: every option parses and has a why`);
         const res = B.react(row.smiles, c.reagent);
         const m = res.products.filter((p) => !p.minor && !p.excess).map((p) => p.smiles);
-        eq(key(q.options.find((o) => o.correct).smiles), key(m.length ? m : res.products.map((p) => p.smiles)), `${where}: the right option is the builder's main product set`);
+        eq(kx(q.options.find((o) => o.correct).smiles), kx(m.length ? m : res.products.map((p) => p.smiles)), `${where}: the right option is the builder's main product set`);
       });
     }
   }

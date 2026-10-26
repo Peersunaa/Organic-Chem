@@ -60,6 +60,13 @@ function engineProducts(p) {
       return r.ok ? [r.final.smiles] : null;
     }
     case 'diene-hx': return R.predictDiene(sub, rg).products;
+    // Chapter 7 (alkyl halides): the reagent id of the variant is the nucleophile / base / alcohol reagent
+    case 'sn2-cn': case 'sn2-i': case 'sn2-oh': case 'sn2-rs': return R.predictSN2(sub, rg).products;
+    case 'sn1-solvolysis': return R.predictSN1(sub, rg).products;
+    case 'e2-zaitsev': case 'e2-chair': return R.predictE2(sub, rg).major;
+    case 'e1-heat': return R.predictE1(sub).major;
+    case 'grignard-d2o': return [R.grignard(sub).protonolysis.D2O];
+    case 'halide-from-alcohol': return [R.fromAlcohol(sub, rg).product];
     default: {
       // fixed-answer card (no engine): the answer IS the hub card's example for that substrate
       if (DRILL[id] && DRILL[id].fixed) {
@@ -121,7 +128,7 @@ export async function predict({ ok, eq }) {
   // consecutive problems use different cards, and the mix covers the groups
   for (let i = 1; i < probs.length; i++) if (probs[i].card === probs[i - 1].card) ok(false, `problem ${i}: same card twice in a row (${probs[i].card})`);
   ok(true, 'checked consecutive cards');
-  eq([...new Set(first.map((p) => p.group))].sort(), HUB_GROUPS.map((g) => g.id).sort(), 'the 200 problems cover all four groups');
+  eq([...new Set(first.map((p) => p.group))].sort(), HUB_GROUPS.map((g) => g.id).sort(), 'the 200 problems cover every group');
   const seenCards = new Set(first.map((p) => p.card));
   ok(seenCards.size >= HUB_CARDS.length - 2, `the 200 problems cover almost every card (${seenCards.size} of ${HUB_CARDS.length})`);
   let groupRuns = 0; for (let i = 1; i < first.length; i++) if (first[i].group === first[i - 1].group) groupRuns++;
@@ -190,7 +197,7 @@ export async function predict({ ok, eq }) {
   eq(py.size, uniq.length, 'Python read every drawn molecule');
   ok([...py.values()].every((m) => m.ok), 'every option molecule parses in Python RDKit');
   const rd = (list) => list.split('.').map((s) => py.get(s));
-  const flatKey = (list) => rd(list).map((m) => m.flat).sort().join('.');
+  const flatKey = (list) => [...new Set(rd(list).map((m) => m.flat))].sort().join('.');   // (a racemic pair and one of its enantiomers have the same flat structure)
 
   let hydroChecked = 0, ringChecked = 0, mesoChecked = 0, ezChecked = 0, chiralChecked = 0, spaceChecked = 0;
   for (const [i, p] of all.entries()) {
@@ -199,7 +206,8 @@ export async function predict({ ok, eq }) {
     const right = p.options.find((o) => o.correct);
     const ms = rd(right.smiles);
     // a chiral product with specified centres is flagged racemic (the lessons teach: achiral reagents make racemates)
-    for (const m of ms) if (m.centres.length && !m.achiral) { chiralChecked++; ok(p.racemic, `${t}: a chiral product (${m.smiles}) is flagged racemic`); }
+    // (an alkyl-halide problem whose substrate has a written centre keeps or inverts it: its product is one enantiomer, flagged `stereoDefined`, not racemic)
+    for (const m of ms) if (m.centres.length && !m.achiral) { chiralChecked++; ok(p.racemic || p.stereoDefined, `${t}: a chiral product (${m.smiles}) is flagged racemic (or stereoDefined: its configuration follows from the substrate's)`); }
     if (p.racemic) ok(ms.some((m) => (m.centres.length && !m.achiral) || m.unassigned > 0), `${t}: racemic flag only on a chiral product`);
     // the card's syn / anti, read back
     if (['alkene-x2', 'alkene-h2-pd', 'alkene-kmno4-base', 'alkene-epoxide', 'alkene-epoxide-diol'].includes(p.card)) {

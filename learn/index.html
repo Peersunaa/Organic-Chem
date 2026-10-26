@@ -23,7 +23,7 @@
   --c-O: #d1432b; --c-N: #2d5bd0; --c-F: #1b8f8f; --c-Cl: #1e8e4e; --c-P: #9a3bc4; --hl: rgba(242, 179, 61, .5);
   --model-bg: #c9d7db;
   /* reaction-table pattern families (hue + glyph; colour-blind safe pairs: blue/orange, green/purple) */
-  --fam-mk: #0b5c9e; --fam-amk: #9a4a00; --fam-syn: #0b6b50; --fam-anti: #8c3a7e; --fam-op: #0b5c9e; --fam-meta: #9a4a00;
+  --fam-mk: #0b5c9e; --fam-amk: #9a4a00; --fam-syn: #0b6b50; --fam-anti: #8c3a7e; --fam-op: #0b5c9e; --fam-meta: #9a4a00; --fam-sub: #0b5c9e; --fam-elim: #9a4a00;
   /* elevation: two levels */
   --elev-1: 0 1px 2px rgba(12, 29, 35, .06);
   --elev-2: 0 1px 2px rgba(12, 29, 35, .05), 0 12px 32px -10px rgba(12, 29, 35, .16);
@@ -66,7 +66,7 @@
     --electron: #f2b33d;
     --c-O: #ff8a70; --c-N: #8fb0ff; --c-F: #5fd6d6; --c-Cl: #6fd79a; --c-P: #d79bf0; --hl: rgba(242, 179, 61, .4);
     --model-bg: #2a4048;
-    --fam-mk: #7cb9ff; --fam-amk: #f3a95e; --fam-syn: #5fd7ae; --fam-anti: #e3a6d8; --fam-op: #7cb9ff; --fam-meta: #f3a95e;
+    --fam-mk: #7cb9ff; --fam-amk: #f3a95e; --fam-syn: #5fd7ae; --fam-anti: #e3a6d8; --fam-op: #7cb9ff; --fam-meta: #f3a95e; --fam-sub: #7cb9ff; --fam-elim: #f3a95e;
     --elev-1: 0 1px 2px rgba(0, 0, 0, .45);
     --elev-2: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 40px -12px rgba(0, 0, 0, .6);
     color-scheme: dark;
@@ -84,7 +84,7 @@
   --electron: #f2b33d;
   --c-O: #ff8a70; --c-N: #8fb0ff; --c-F: #5fd6d6; --c-Cl: #6fd79a; --c-P: #d79bf0; --hl: rgba(242, 179, 61, .4);
   --model-bg: #2a4048;
-  --fam-mk: #7cb9ff; --fam-amk: #f3a95e; --fam-syn: #5fd7ae; --fam-anti: #e3a6d8; --fam-op: #7cb9ff; --fam-meta: #f3a95e;
+  --fam-mk: #7cb9ff; --fam-amk: #f3a95e; --fam-syn: #5fd7ae; --fam-anti: #e3a6d8; --fam-op: #7cb9ff; --fam-meta: #f3a95e; --fam-sub: #7cb9ff; --fam-elim: #f3a95e;
   --elev-1: 0 1px 2px rgba(0, 0, 0, .45);
   --elev-2: 0 1px 2px rgba(0, 0, 0, .4), 0 16px 40px -12px rgba(0, 0, 0, .6);
   color-scheme: dark;
@@ -1174,7 +1174,7 @@ a.ms-type:hover { background: var(--surface-2); } a.ms-type:focus-visible { outl
 .rt-q { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 1px dashed var(--line-hover); color: var(--muted); font: 700 1rem/1 var(--mono); }
 .rt-cell.is-filled .rt-btn { animation: rt-fill var(--dur-slow) var(--ease-out); }
 @keyframes rt-fill { from { background: var(--ok-soft); } to { background: transparent; } }
-.fam-mk { --fam: var(--fam-mk); } .fam-amk { --fam: var(--fam-amk); } .fam-syn { --fam: var(--fam-syn); } .fam-anti { --fam: var(--fam-anti); } .fam-op { --fam: var(--fam-op); } .fam-meta { --fam: var(--fam-meta); }
+.fam-mk { --fam: var(--fam-mk); } .fam-amk { --fam: var(--fam-amk); } .fam-syn { --fam: var(--fam-syn); } .fam-anti { --fam: var(--fam-anti); } .fam-op { --fam: var(--fam-op); } .fam-meta { --fam: var(--fam-meta); } .fam-sub { --fam: var(--fam-sub); } .fam-elim { --fam: var(--fam-elim); }
 .rt-cell[class*="fam-"] { background: color-mix(in srgb, var(--fam) 11%, var(--surface)); box-shadow: inset 3px 0 0 var(--fam); }
 .rt-cell[class*="fam-"] .rt-tag, .rt-tag[class*="fam-"] { color: var(--fam); border-color: color-mix(in srgb, var(--fam) 50%, transparent); background: var(--surface); }
 .rt-scrim { position: fixed; inset: 0; z-index: 60; background: rgba(6, 14, 18, .45); }

@@ -6,7 +6,7 @@
 //   pairs()                 every substrate x reagent with its status; PAIR_COUNT = how many give a product (tests recompute it)
 //   classifySubstrate / resolveSubstrate   custom input (SMILES or a course name), validated by RDKit
 //   quizFor(substrate, reagentId, rng)     four drawn options: the drill's own question (generators-predict.js) when it matches, else products of three other reagents
-// Products come from the course engines (reactions.js and friends: alkenes, alkynes, Lessons 13-14 EAS) and from engine/eas-rules.js (the professor's ring rules,
+// Products come from the course engines (reactions.js and friends: alkenes, alkynes, Lessons 13-14 EAS, Chapter 7 alkyl halides) and from engine/eas-rules.js (the professor's ring rules,
 // ipso, deuteration, Friedel-Crafts limits). Nothing here types a product SMILES: every one is built by a graph edit or an engine call.
 import { canon, analyze } from './chem.js';
 import * as R from './reactions.js';
@@ -19,11 +19,12 @@ import { nameBothAny } from './naming-chain.js';
 import { nameBothArene, findRing } from './naming-arene.js';
 import { describeMol } from './mol-name.js';
 import { DRILL, problemFor } from './generators-predict.js';
+import * as H from './reactions-halides.js';
 
 // ---------------------------------------------------------------- substrates
 const S = (id, smiles, group, name = null, extra = {}) => ({ id, smiles, group, name, ...extra });
 export const SUBSTRATE_GROUPS = [
-  { id: 'alkene', label: 'Alkenes' }, { id: 'alkyne', label: 'Alkynes' }, { id: 'ring', label: 'Rings' }, { id: 'ring2', label: 'Two groups (page 9)' }
+  { id: 'alkene', label: 'Alkenes' }, { id: 'alkyne', label: 'Alkynes' }, { id: 'ring', label: 'Rings' }, { id: 'ring2', label: 'Two groups (page 9)' }, { id: 'halide', label: 'Alkyl halides' }
 ];
 export const SUBSTRATES = [
   S('ethylene', 'C=C', 'alkene', { new: 'ethene', old: 'ethylene' }), S('propene', 'CC=C', 'alkene'), S('2-methylpropene', 'CC(C)=C', 'alkene'), S('but-1-ene', 'CCC=C', 'alkene'),
@@ -43,7 +44,11 @@ export const SUBSTRATES = [
   S('o-fluoroanisole', 'COc1ccccc1F', 'ring2', { new: '1-fluoro-2-methoxybenzene', old: 'o-fluoroanisole' }), S('3-bromobenzoic-acid', 'OC(=O)c1cccc(Br)c1', 'ring2'),
   S('o-chlorotoluene', 'Cc1ccccc1Cl', 'ring2'), S('m-chlorotoluene', 'Cc1cccc(Cl)c1', 'ring2'), S('m-dichlorobenzene', 'Clc1cccc(Cl)c1', 'ring2'),
   S('phthalic-acid', 'OC(=O)c1ccccc1C(=O)O', 'ring2', { new: 'benzene-1,2-dicarboxylic acid', old: 'phthalic acid' }),
-  S('2-methoxyacetanilide', 'COc1ccccc1NC(C)=O', 'ring2', { new: 'N-(2-methoxyphenyl)acetamide', old: '2-methoxyacetanilide' }), S('m-chloronitrobenzene', 'O=[N+]([O-])c1cccc(Cl)c1', 'ring2')
+  S('2-methoxyacetanilide', 'COc1ccccc1NC(C)=O', 'ring2', { new: 'N-(2-methoxyphenyl)acetamide', old: '2-methoxyacetanilide' }), S('m-chloronitrobenzene', 'O=[N+]([O-])c1cccc(Cl)c1', 'ring2'),
+  // Chapter 7: alkyl halides (the pool of engine/reactions-halides.js; both naming styles come from halideName, verified with OPSIN in tests/halides.mjs)
+  ...['bromomethane', '1-bromobutane', '1-bromo-2-methylpropane', '1-chlorobutane', '2-bromopropane', '(R)-2-bromobutane', '(S)-2-bromobutane', 'bromocyclohexane', '2-bromo-2-methylpropane', '2-bromo-2-methylbutane',
+    '2-chloro-2-methylpropane', '1-bromo-1-methylcyclohexane', 'cis-1-bromo-2-methylcyclohexane', 'trans-1-bromo-2-methylcyclohexane', 'benzyl bromide', 'allyl bromide', '(R)-3-bromo-3-methylhexane']
+    .map((id) => { const e = H.HALIDE_BY_ID[id]; return S(id, e.smiles, 'halide', { new: e.iupac || e.id, old: e.old || e.iupac || e.id }); })
 ];
 export const SUBSTRATE_BY_ID = Object.fromEntries(SUBSTRATES.map((s) => [s.id, s]));
 
@@ -52,9 +57,10 @@ export const REAGENT_GROUPS = [
   { id: 'r1', top: 'ring', num: '1', label: 'Halogenation' }, { id: 'r2', top: 'ring', num: '2', label: 'Protonation, deuteration' }, { id: 'r3', top: 'ring', num: '3', label: 'Nitration' },
   { id: 'r4', top: 'ring', num: '4', label: 'Friedel–Crafts acylation' }, { id: 'r5', top: 'ring', num: '5', label: 'Friedel–Crafts alkylation' }, { id: 'r6', top: 'ring', num: '6', label: 'Sulfonation' },
   { id: 'rR', top: 'ring', num: 'R', label: 'Reductions' }, { id: 'rS', top: 'ring', num: 'S', label: 'Side chain' },
-  { id: 'ae', top: 'alkene', num: '', label: 'Alkene reagents' }, { id: 'ay', top: 'alkyne', num: '', label: 'Alkyne reagents' }
+  { id: 'ae', top: 'alkene', num: '', label: 'Alkene reagents' }, { id: 'ay', top: 'alkyne', num: '', label: 'Alkyne reagents' },
+  { id: 'hn', top: 'halide', num: '', label: 'Nucleophiles (SN2 / SN1)' }, { id: 'hb', top: 'halide', num: '', label: 'Bases (E2)' }, { id: 'hs', top: 'halide', num: '', label: 'Solvolysis (SN1 / E1)' }, { id: 'hg', top: 'halide', num: '', label: 'Grignard' }
 ];
-export const TOPS = [{ id: 'ring', label: 'Ring' }, { id: 'alkene', label: 'Alkene' }, { id: 'alkyne', label: 'Alkyne' }];
+export const TOPS = [{ id: 'ring', label: 'Ring' }, { id: 'alkene', label: 'Alkene' }, { id: 'alkyne', label: 'Alkyne' }, { id: 'halide', label: 'Alkyl halide' }];
 const RG = (id, g, label, spec) => ({ id, group: g, top: REAGENT_GROUPS.find((x) => x.id === g).top, label, ...spec });
 export const REAGENTS = [
   RG('Br2-FeBr3', 'r1', 'Br₂, FeBr₃', { type: 'eas', E: 'Br', card: 'eas-bromination', scene: '12-eas-bromination', easId: 'Br2' }),
@@ -106,11 +112,19 @@ export const REAGENTS = [
   RG('NaNH2-MeBr', 'ay', 'NaNH₂, then CH₃Br', { type: 'alkyne', key: 'acetylide', halide: 'CBr', card: 'alkyne-acetylide' }),
   RG('NaNH2-EtBr', 'ay', 'NaNH₂, then CH₃CH₂Br', { type: 'alkyne', key: 'acetylide', halide: 'CCBr', card: 'alkyne-acetylide' }),
   RG('BH3-alkyne', 'ay', '1) BH₃  2) H₂O₂, NaOH', { type: 'alkyne', key: 'BH3', card: 'alkyne-hydroboration' }),
-  RG('KMnO4-hot-alkyne', 'ay', 'KMnO₄, hot, H₃O⁺', { type: 'alkyne', key: 'KMnO4_H', card: 'alkyne-kmno4-hot', tags: ['cleave'] })
+  RG('KMnO4-hot-alkyne', 'ay', 'KMnO₄, hot, H₃O⁺', { type: 'alkyne', key: 'KMnO4_H', card: 'alkyne-kmno4-hot', tags: ['cleave'] }),
+  // Chapter 7: alkyl halides. hid = the id in reactions-halides.js (a NUCLEOPHILES id or a BASES id); decide() chooses the mechanism
+  ...[['I', 'sn2-i'], ['Br', 'sn2-i'], ['Cl', 'sn2-i'], ['CN', 'sn2-cn'], ['N3', 'sn2-cn'], ['MeS', 'sn2-rs'], ['HS', 'sn2-rs'], ['NH3', 'sn2-cn'], ['AcO', 'sn2-cn'], ['HO', 'sn2-oh']]
+    .map(([n, card]) => RG('h-' + n, 'hn', H.NUCLEOPHILES[n].label, { type: 'halide', hid: n, card })),
+  ...[['KOH', 'e2-zaitsev'], ['NaOEt', 'e2-zaitsev'], ['NaOMe', 'e2-zaitsev']].map(([b, card]) => RG('h-' + b, 'hb', H.BASES[b].label, { type: 'halide', hid: b, card })),
+  RG('h-H2O', 'hs', H.NUCLEOPHILES.H2O.label, { type: 'halide', hid: 'H2O', card: 'sn1-solvolysis' }),
+  RG('h-MeOH', 'hs', H.NUCLEOPHILES.MeOH.label, { type: 'halide', hid: 'MeOH', card: 'sn1-solvolysis' }),
+  RG('h-EtOH', 'hs', H.NUCLEOPHILES.EtOH.label, { type: 'halide', hid: 'EtOH', card: 'e1-heat' }),
+  RG('h-Mg-D2O', 'hg', 'Mg, ether; then D₂O', { type: 'grignard', card: 'grignard-d2o' })
 ];
 export const REAGENT_BY_ID = Object.fromEntries(REAGENTS.map((r) => [r.id, r]));
 /** How many substrate x reagent pairs give a product (tests/builder.mjs recomputes it with pairs() and fails when it is stale). */
-export const PAIR_COUNT = 757;
+export const PAIR_COUNT = 1034;
 
 // ---------------------------------------------------------------- names
 const PLAIN = Object.fromEntries(SUBSTRATES.filter((s) => s.name).map((s) => [s.smiles, s.name]));
@@ -129,7 +143,7 @@ export function nameOf(smiles) {
 export const describe = (smiles) => { const n = nameOf(smiles); return n ? n.new : describeMol(smiles); };
 
 // ---------------------------------------------------------------- what kind of substrate
-/** 'alkene' | 'alkyne' | 'arene' | 'none', with flags: ring (has a benzene ring), cc (C=C outside a ring of benzene), ccc (C≡C). */
+/** 'halide' | 'alkene' | 'alkyne' | 'arene' | 'none', with flags: ring (has a benzene ring), cc (C=C outside a ring of benzene), ccc (C≡C). */
 export function classifySubstrate(smiles) {
   const c = canon(smiles);
   if (!c) return { kind: 'invalid', why: 'RDKit cannot read that structure.' };
@@ -144,8 +158,10 @@ export function classifySubstrate(smiles) {
     else if ((b.bo ?? 1) === 2 && !(ringSet.has(x) && ringSet.has(y))) cc++;
   });
   if (c.includes('.')) return { kind: 'none', smiles: c, why: 'One molecule at a time, please.' };
-  const kind = ccc ? 'alkyne' : cc ? 'alkene' : ring ? 'arene' : 'none';
-  return { kind, smiles: c, ring: !!ring, cc, ccc, why: kind === 'none' ? 'This molecule has no C=C, no C≡C and no benzene ring, so none of these reagents is taught on it.' : '' };
+  // an alkyl halide: a halogen on a carbon that is not part of the benzene ring (bromobenzene stays an arene; benzyl bromide and allyl bromide are halides)
+  const halide = info.atoms.some((a) => ['F', 'Cl', 'Br', 'I'].includes(a.sym) && a.nbrs.length === 1 && info.atoms[a.nbrs[0]].sym === 'C' && !ringSet.has(a.nbrs[0]));
+  const kind = halide ? 'halide' : ccc ? 'alkyne' : cc ? 'alkene' : ring ? 'arene' : 'none';
+  return { kind, smiles: c, ring: !!ring, cc, ccc, why: kind === 'none' ? 'This molecule has no C=C, no C≡C, no benzene ring and no C–X bond, so none of these reagents is taught on it.' : '' };
 }
 let NAME_INDEX = null;
 function nameIndex() {
@@ -552,6 +568,54 @@ function carbonylToCH2(sub, r) {
   return { status: 'ok', products: [prod(out)], rule: r.type === 'clem' ? 'clemmensen' : 'wolff-kishner', ruleName: r.type === 'clem' ? 'Clemmensen: C=O → CH₂ in acid' : 'Wolff–Kishner: C=O → CH₂ in base', why: `${r.type === 'clem' ? 'Zn(Hg) with HCl and heat' : 'Hydrazine with KOH and heat'} reduces the ketone or aldehyde C=O all the way to CH₂ and leaves the ring alone. The professor: Friedel–Crafts acylation, then this reduction, is the way to put a STRAIGHT chain on a ring (alkylation would rearrange).`, warnings, hasMech: false };
 }
 
+// ---------------------------------------------------------------- alkyl halides (Chapter 7): substitution, elimination, Grignard
+const MECH_NAME = { SN2: 'SN2: back-side attack, inversion', SN1: 'SN1: carbocation, either face', E2: 'E2: strong base, anti H and halogen (Zaitsev)', E1: 'E1: carbocation, loses H⁺ (Zaitsev)' };
+const RULE_NAME = { sn2: MECH_NAME.SN2, sn1: MECH_NAME.SN1, e2: MECH_NAME.E2, e1: MECH_NAME.E1, 'sn1+e1': 'SN1 and E1 compete (one carbocation)', 'e2+sn2': 'E2 with SN2 beside it (a mixture)', 'sn2+e2': 'SN2 with E2 beside it (a mixture)', grignard: 'Grignard reagent, then D₂O' };
+/** The label of one product of decide(): says what the product is, and the stereochemistry in words. */
+function halideLabel(p, pair) {
+  if (p.mech === 'SN2') return /@/.test(p.smiles) ? 'SN2 product: the nucleophile replaces the halogen, with INVERSION at the carbon' : 'SN2 product: the nucleophile replaces the halogen';
+  if (p.mech === 'SN1') return pair ? 'SN1 product, one of two enantiomers: the flat carbocation is attacked from either face (racemic)' : 'SN1 product: the solvent bonds to the carbocation';
+  if (p.mech === 'E2') return p.role === 'major' ? 'E2 product, the more substituted alkene (Zaitsev)' : 'E2 product, the less substituted alkene';
+  return p.role === 'major' ? 'E1 product, the more substituted alkene (Zaitsev)' : 'E1 product, the less substituted alkene';
+}
+/** The mechanism a halide result walks through in the mechanism player: the major mechanism, ending at its first major product. */
+function halideMech(sub, P, d) {
+  const prod = d.products.find((p) => p.mech === d.major && p.role === 'major') || d.products.find((p) => p.mech === d.major);
+  if (d.major === 'SN2') return H.sn2Mechanism(sub, P.nuId);
+  if (d.major === 'SN1') return H.sn1Mechanism(sub, P.nuId);
+  if (d.major === 'E2') { const pr = H.predictE2(sub, P.baseId || P.nuId); const a = pr.alkenes.find((x) => x.smiles === prod.smiles); return H.e2Mechanism(sub, P.baseId || P.nuId, { beta: a.betas[0] }); }
+  return H.e1Mechanism(sub, { alkene: prod.smiles, solvent: P.nuId === 'MeOH' ? 'MeOH' : P.nuId === 'EtOH' ? 'EtOH' : 'H2O' });
+}
+function halideReact(sub, r, k, full) {
+  if (r.type === 'grignard') {
+    let g;
+    try { g = H.grignard(sub); } catch (e) { const why = String(e.message || e).replace(/^excluded:\s*/, ''); return /acidic hydrogen|react with the Grignard/.test(why) ? NOPE('none', `No reaction: ${why}.`, 'grignard-acidic') : NOPE('na', 'Not modelled: ' + why); }
+    return { status: 'ok', products: [prod(g.protonolysis.D2O, { label: 'R–D: D takes the place of the halogen' })], rule: 'grignard', ruleName: RULE_NAME.grignard, why: g.why, warnings: [{ id: 'dry-ether', text: 'The Grignard reagent forms in dry ether and is destroyed by any acidic H (O–H, N–H, S–H, CO₂H), which is why the halide must not carry one.' }], hasMech: false };
+  }
+  const d = H.decide(sub, r.hid);
+  if (!d.ok) return /no halogen/.test(d.reason) ? NOPE('na', 'This reagent works on an alkyl halide (a C–X bond). This molecule has none.') : NOPE('na', 'Not modelled: ' + d.reason);
+  if (d.noReaction) return NOPE('none', `No reaction: ${d.reason}`, /sp²/.test(d.reason) ? 'sp2-halide' : 'no-sn-e');
+  const P = H.reagentProfile(r.hid);
+  const seen = new Set();
+  const list = d.products.filter((p) => !seen.has(p.smiles) && seen.add(p.smiles));
+  const nSN1 = list.filter((x) => x.mech === 'SN1').length;
+  const products = list.map((p) => prod(p.smiles, { label: halideLabel(p, p.mech === 'SN1' && nSN1 === 2), minor: p.role === 'minor', major: p.role === 'major' }));
+  const rule = d.mechs.map((m) => m.toLowerCase()).join('+');
+  const warnings = [];
+  if (d.mechs.length > 1) warnings.push({ id: 'mixture', text: d.mechs.includes('SN1') ? 'One carbocation gives both products: the solvent either bonds to it (SN1) or takes a β H (E1). Substitution is the bigger share in the cold; heat makes elimination grow.' : 'A strong base that is also a nucleophile does both: it takes a β H (E2) and attacks the carbon (SN2). The book’s table says E2 here; heat favours elimination.' });
+  let ringRule = false;
+  if (d.mechs.includes('E2')) {
+    try {
+      const e = H.predictE2(sub, P.baseId || P.nuId);
+      if (e.ring) { ringRule = true; warnings.push({ id: 'chair', text: e.ringBlocked.length ? 'Six-membered ring: E2 needs the β H trans to the halogen (trans-diaxial in the chair). The H on the more substituted carbon is cis to the halogen here, so that alkene cannot form.' : 'Six-membered ring: E2 needs a β H trans to the halogen; every β carbon here has one, so the more substituted alkene (Zaitsev) can form.' }); }
+    } catch (e) { /* no ring note */ }
+  }
+  if (d.mechs.includes('SN2') && /@/.test(sub)) warnings.push({ id: 'inversion', text: 'The carbon is a stereocentre: the nucleophile comes in from the back, so its configuration inverts.' });
+  let mech = null;
+  if (full) { try { mech = halideMech(sub, P, d); } catch (e) { mech = null; } }
+  return { status: 'ok', products, rule, ruleName: RULE_NAME[rule] || rule, why: d.reason, caveWhy: d.caveman, warnings, mech, hasMech: true, ringRule };
+}
+
 // ---------------------------------------------------------------- energy sketch (the professor's pages 7 and 8: sigma complexes of o/p against meta attack)
 const LV = (ts) => [{ label: 'ring + E⁺', kind: 'R', E: 0 }, { label: 'TS', kind: 'TS', E: ts }, { label: 'σ-complex', kind: 'I', E: ts - 16 }, { label: 'TS', kind: 'TS', E: ts - 8 }, { label: 'product + H⁺', kind: 'P', E: -20 }];
 export function energyFor(kind) {
@@ -578,7 +642,7 @@ export function react(substrate, reagentId, opts = {}) {
   else {
     const sub = k.smiles;
     try {
-      res = r.top === 'alkene' ? alkeneReact(sub, r, k, full) : r.top === 'alkyne' ? alkyneReact(sub, r, k, full) : ringReact(sub, r, k);
+      res = r.top === 'alkene' ? alkeneReact(sub, r, k, full) : r.top === 'alkyne' ? alkyneReact(sub, r, k, full) : r.top === 'halide' ? halideReact(sub, r, k, full) : ringReact(sub, r, k);
     } catch (e) {
       res = NOPE('na', 'Not modelled: ' + String(e.message || e).replace(/^excluded:\s*/, ''));
     }
@@ -596,7 +660,7 @@ export function react(substrate, reagentId, opts = {}) {
     res.next = best.smiles;
   } else res.next = null;
   // facts (what adds / where / in space; for rings: which position and why)
-  const cf = cardFacts(r.card);
+  const cf = cardFacts(res.ringRule ? 'e2-chair' : r.card);
   if (res.status === 'ok') {
     if (k.kind === 'arene' && ['eas', 'acyl', 'alkyl', 'deut'].includes(r.type) && res.orient) {
       const L = res.leaders || [];
@@ -605,12 +669,12 @@ export function react(substrate, reagentId, opts = {}) {
   } else res.facts = null;
   // mechanism: scene when one exists, else the engine's step-by-step mechanism, else the hub card's scheme
   const scene = sceneOf(r);
-  const mechanism = { scene, card: r.card, alsoScene: k.kind === 'arene' && res.status === 'ok' && ['eas', 'acyl', 'alkyl'].includes(r.type) && res.orient && res.orient.groups.length ? '15-directors' : null };
+  const mechanism = { scene, card: res.ringRule ? 'e2-chair' : r.card, alsoScene: k.kind === 'arene' && res.status === 'ok' && ['eas', 'acyl', 'alkyl'].includes(r.type) && res.orient && res.orient.groups.length ? '15-directors' : null };
   if (res.status === 'ok') {
     if (res.mech) mechanism.mech = res.mech;
     else if (full && k.kind === 'arene' && r.easId && ['eas', 'acyl', 'alkyl'].includes(r.type) && !(r.source && r.source.smiles === 'CCCCl')) { try { mechanism.mech = R.easMechanism(r.easId, r.halide || null); mechanism.mechOnBenzene = true; } catch (e) { /* no mechanism */ } }
     mechanism.hasMech = !!(res.hasMech || (k.kind === 'arene' && r.easId && ['eas', 'acyl', 'alkyl'].includes(r.type)));
-    mechanism.scheme = HUB_BY_ID[r.card] ? { card: r.card, example: HUB_BY_ID[r.card].example } : null;
+    mechanism.scheme = HUB_BY_ID[mechanism.card] ? { card: mechanism.card, example: HUB_BY_ID[mechanism.card].example } : null;
   }
   delete res.mech;
   res.mechanism = mechanism;
@@ -619,7 +683,7 @@ export function react(substrate, reagentId, opts = {}) {
     const scan = ER.ringScan(res.substrate);
     res.energy = energyFor(ER.ringKind(scan, !!res.amineAcid));
   }
-  delete res.orient; delete res.hasMech;
+  delete res.orient; delete res.hasMech; delete res.ringRule;
   if (!full) cache.set(key, res);
   return res;
 }
@@ -661,6 +725,12 @@ export function drillLink(reagentId, substrate) {
     if (['HBr', 'HCl', 'H2O'].includes(r.key)) return pickV(r.card, (v) => v.id === r.key);
     return pickV(r.card, (v) => v.id === r.key);
   }
+  if (r.top === 'halide') {
+    const MAP = { 'h-CN': ['sn2-cn', 'CN'], 'h-I': ['sn2-i', 'I'], 'h-HO': ['sn2-oh', 'HO'], 'h-MeS': ['sn2-rs', 'MeS'], 'h-H2O': ['sn1-solvolysis', 'H2O'], 'h-MeOH': ['sn1-solvolysis', 'MeOH'], 'h-EtOH': ['sn1-solvolysis', 'EtOH'],
+      'h-KOH': ['e2-zaitsev', 'KOH'], 'h-NaOEt': ['e2-zaitsev', 'NaOEt'], 'h-NaOMe': ['e2-zaitsev', 'NaOMe'], 'h-Mg-D2O': ['grignard-d2o', 'grignard'] };
+    const m = MAP[r.id];
+    return m ? pickV(m[0], (v) => v.id === m[1]) : null;
+  }
   if (r.key === 'acetylide') return pickV('alkyne-acetylide', (v) => v.halide === r.halide);
   return pickV(r.card, (v) => v.id === r.key);
 }
@@ -671,7 +741,8 @@ export const HUB_EXAMPLE_REAGENT = {
   'side-chain-h2pd': 'H2-Pd', 'alkene-hx': 'HBr', 'alkene-hydration': 'H2O-H', 'alkene-x2': 'Br2', 'alkene-h2-pd': 'H2-Pd', 'alkene-kmno4-base': 'KMnO4-cold', 'alkene-kmno4-acid': 'KMnO4-hot',
   'alkene-epoxide': 'RCO3H', 'alkene-epoxide-diol': 'RCO3H-H3O', 'alkene-hydroboration': 'BH3', 'alkyne-hx-1': 'HBr-1', 'alkyne-hx-2': 'HBr-2', 'alkyne-x2-1': 'Br2-1', 'alkyne-x2-2': 'Br2-2',
   'alkyne-hydration': 'H2O-Hg', 'alkyne-lindlar': 'Lindlar', 'alkyne-h2-pd': 'H2-Pd-2', 'alkyne-acetylide': 'NaNH2-EtBr', 'alkyne-hydroboration': 'BH3-alkyne',
-  'alkyne-kmno4-hot': 'KMnO4-hot-alkyne'
+  'alkyne-kmno4-hot': 'KMnO4-hot-alkyne',
+  'sn2-cn': 'h-CN', 'sn2-i': 'h-I', 'sn2-oh': 'h-HO', 'sn2-rs': 'h-MeS', 'sn1-solvolysis': 'h-H2O', 'e2-zaitsev': 'h-KOH', 'e2-chair': 'h-KOH', 'e1-heat': 'h-EtOH', 'grignard-d2o': 'h-Mg-D2O'
 };
 /** The hub examples this pair reproduces: [{card, product}] (for the tests). */
 export function hubExampleFor(reagentId, substrate) {

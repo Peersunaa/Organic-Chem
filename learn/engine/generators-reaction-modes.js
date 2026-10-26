@@ -30,7 +30,7 @@ export const MODE_INFO = {
   'wont-work': { label: 'Which one will not work?', blurb: 'Three routes work and one fails for a reason from the course. Spot it.' }
 };
 /** How many different problems each mode can make (distinct substrate / reagent / product combinations). tests/reaction-modes.mjs recomputes every number and fails when one is stale. */
-export const MODE_COUNTS = { 'guess-reagent': 1491, 'guess-reactant': 1523, 'stereo-outcome': 429, 'two-step': 507, 'wont-work': 791 };
+export const MODE_COUNTS = { 'guess-reagent': 1664, 'guess-reactant': 1718, 'stereo-outcome': 429, 'two-step': 507, 'wont-work': 791 };
 
 const LETTERS = 'ABCD';
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
@@ -85,17 +85,19 @@ export function variantLabel(cardId, v) {
 }
 const variantsFor = (cardId, substrate) => DRILL[cardId].variants.filter((v) => !(v.skip || []).includes(substrate));
 const ENGINE_CARDS = DRILL_IDS.filter((id) => !DRILL[id].fixed);
-/** The cards that can be practised in "which reagent?": the two with fewer than three other reagents that change their substrates (H₂/Pd on a side chain, HX on a diene) cannot make a four-option question. */
-export const GUESS_REAGENT_CARDS = ENGINE_CARDS.filter((id) => !['side-chain-h2pd', 'diene-hx'].includes(id));
+/** The cards that can be practised in "which reagent?": the three with fewer than three other reagents that change their substrates (H₂/Pd on a side chain, HX on a diene, PBr₃/SOCl₂/HX on an alcohol: the other reagents give the same halide) cannot make a four-option question. */
+export const GUESS_REAGENT_CARDS = ENGINE_CARDS.filter((id) => !['side-chain-h2pd', 'diene-hx', 'halide-from-alcohol'].includes(id));
 const groupOf = (cardId) => HUB_BY_ID[cardId].group;
 /** The cards whose reagents are offered as wrong answers for a substrate of each group (each reagent once: the director cards repeat the substitution reagents). */
 export const REP = {
   alkene: ['alkene-hx', 'alkene-hydration', 'alkene-x2', 'alkene-h2-pd', 'alkene-kmno4-base', 'alkene-kmno4-acid', 'alkene-epoxide', 'alkene-epoxide-diol'],
   alkyne: ['alkyne-hx-1', 'alkyne-hx-2', 'alkyne-x2-1', 'alkyne-x2-2', 'alkyne-hydration', 'alkyne-lindlar', 'alkyne-h2-pd', 'alkyne-acetylide'],
   arene: ['eas-bromination', 'eas-nitration', 'eas-sulfonation', 'fc-alkylation', 'fc-acylation', 'side-chain-kmno4', 'nitro-reduction', 'side-chain-h2pd'],
-  diene: ['diene-hx']
+  diene: ['diene-hx'],
+  // Chapter 7: the halide-from-alcohol card takes alcohol substrates, the others alkyl halides; a reagent that does not apply to a substrate is skipped by the engine's own refusal
+  halide: ['sn2-cn', 'sn2-i', 'sn2-oh', 'sn2-rs', 'sn1-solvolysis', 'e2-zaitsev', 'e1-heat', 'grignard-d2o', 'halide-from-alcohol']
 };
-const NOUN = { alkene: 'alkene', alkyne: 'alkyne', arene: 'arene', diene: 'diene' };
+const NOUN = { alkene: 'alkene', alkyne: 'alkyne', arene: 'arene', diene: 'diene', halide: 'alkyl halide' };
 
 // ---------------------------------------------------------------- what a reagent does, in words (short, concrete; used in the feedback lines)
 const halogenOf = (v) => (/Br/.test(v.id) ? 'Br' : /Cl/.test(v.id) ? 'Cl' : /I/.test(v.id) ? 'I' : 'X');
@@ -135,7 +137,17 @@ const PHRASE = {
   'side-chain-kmno4': () => 'the benzylic carbon turned into CO₂H (the rest of the chain cut off)',
   'nitro-reduction': () => 'NO₂ turned into NH₂',
   'side-chain-h2pd': () => 'H₂ added to the C=C or C≡C outside the ring (the ring is left alone)',
-  clemmensen: () => 'the C=O next to the ring reduced all the way to CH₂'
+  clemmensen: () => 'the C=O next to the ring reduced all the way to CH₂',
+  'sn2-cn': () => 'a C≡N group in place of the halogen (SN2, inversion)',
+  'sn2-i': () => 'an I in place of the Br or Cl (SN2, inversion)',
+  'sn2-oh': () => 'an OH in place of the halogen (SN2, inversion)',
+  'sn2-rs': () => 'an SCH₃ group in place of the halogen (SN2, inversion)',
+  'sn1-solvolysis': () => 'OH or OR from the solvent in place of the halogen (SN1, either face)',
+  'e2-zaitsev': () => 'HX lost: the more substituted alkene (E2, Zaitsev)',
+  'e2-chair': () => 'HBr lost from the H trans to the halogen (E2 on a ring)',
+  'e1-heat': () => 'HX lost through a carbocation: the more substituted alkene (E1)',
+  'grignard-d2o': () => 'D in place of the halogen (Grignard, then D₂O)',
+  'halide-from-alcohol': (v) => `a halogen in place of the OH (${v.id === 'PBr3' || v.id === 'SOCl2' ? 'SN2, inversion' : 'SN1 on a 3° alcohol'})`
 };
 /** What this reagent (a drill variant) does to this substrate, as a short phrase. */
 function phrase(cardId, v, substrate) {
@@ -242,7 +254,7 @@ export function buildGuessReagent(combo, rng) {
     return standard(o, i, { ref: { card: o.cardId, reagent: o.v.id, halide: o.v.halide || null }, lead, more, why: `${lead} ${more}`, fact: 'reagent' });
   });
   const answerOpt = opts.find((o) => o.correct);
-  const noun = NOUN[group];
+  const noun = group === 'halide' && analyze(combo.sub).atoms.some((a) => a.sym === 'O') ? 'alcohol' : NOUN[group];
   return {
     kind: 'choice', skill: 'guess-reagent', mode: 'guess-reagent', smiles: null,
     equation: { reactants: [combo.sub], products: right.products, cond: '?' },

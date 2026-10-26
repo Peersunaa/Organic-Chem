@@ -44,7 +44,16 @@ const EXPECT = {
   'benzylic-bromination': { unassigned: 1 },
   'oxidation-pcc': { subUnassigned: 1 },   // the 1° and 2° alcohol substrate is a racemate drawn flat; the product has no stereocentre
   'oxidation-cr': { subUnassigned: 1 },   // 1-phenylethanol is a racemate drawn flat; its ketone has none
-  'diels-alder': { unassigned: 2, flat: true }   // two stereocentres drawn flat on purpose (the card says syn, but only in words)
+  'diels-alder': { unassigned: 2, flat: true },   // two stereocentres drawn flat on purpose (the card says syn, but only in words)
+  // Chapter 7 alkyl-halide cards. subCentres / subLetters: the written stereocentres of the SUBSTRATE and their CIP letters; letters: the letters of the product's centres
+  'sn2-oh': { subCentres: 1, subLetters: ['R'], centres: 1, letters: ['S'] },                     // (R)-2-bromobutane -> (S)-butan-2-ol: inversion
+  'e2-chair': { subCentres: 2, subCistrans: 'trans', centres: 1, letters: ['S'] },                // trans-1-bromo-2-methylcyclohexane -> (3S)-3-methylcyclohexene: only the CH(CH3) carbon survives, with its configuration
+  'halide-from-alcohol': { subCentres: 1, subLetters: ['S'], centres: 1, letters: ['R'] }          // (S)-pentan-2-ol + PBr3 -> (R)-2-bromopentane
+};
+// second examples that show stereochemistry on purpose (every other second example has none): written centres of the substrate and of each product component
+const EXPECT2 = {
+  'sn1-solvolysis': { subCentres: 1, subLetters: ['R'], products: [['R'], ['S']] },               // (R)-3-bromo-3-methylhexane -> both enantiomers of the alcohol (racemic)
+  'e2-chair': { subCentres: 2, subCistrans: 'cis', products: [[]] }                               // cis isomer -> 1-methylcyclohexene (no stereocentre left)
 };
 
 // The ten cards with no engine model. formula = the example product (Hill formula, D counted as H by the formula code); formula2 = the second example.
@@ -63,7 +72,8 @@ const HAND = {
   // hot KMnO₄ on a C≡C (scene 21): no engine model; the two acids together keep all six carbons of hex-3-yne
   'alkyne-kmno4-hot': { formula: ['C3H6O2', 'C3H6O2'] }
 };
-const NO_LESSON_IDS = ['diels-alder', 'clemmensen', 'birch', 'alkyne-hydroboration', 'alkene-hydroboration', 'oxidation-pcc', 'oxidation-cr', 'alkyne-kmno4-hot'];
+const HALIDE_IDS = ['sn2-cn', 'sn2-i', 'sn2-oh', 'sn2-rs', 'sn1-solvolysis', 'e2-zaitsev', 'e2-chair', 'e1-heat', 'grignard-d2o', 'halide-from-alcohol'];
+const NO_LESSON_IDS = ['diels-alder', 'clemmensen', 'birch', 'alkyne-hydroboration', 'alkene-hydroboration', 'oxidation-pcc', 'oxidation-cr', 'alkyne-kmno4-hot', ...HALIDE_IDS];   // the alkyl-halide cards wait for Lesson 18 (piece 2)
 const SUBGROUP = 'Side chains and alcohols (not in the book)';
 
 // The engine's answer for the card's example (products as canonical isomeric SMILES), and, where the engine knows it, how the new groups add.
@@ -96,7 +106,18 @@ const ENGINE = {
   'alkyne-lindlar': (c) => alk(c, 'H2_Lindlar', 'syn'),
   'alkyne-h2-pd': (c) => alk(c, 'H2_Pd'),
   'alkyne-acetylide': (c) => { const r = R.runSequence(c.example.substrate, ['NaNH2', 'EtBr']); return { products: r.ok ? [r.final.smiles] : [] }; },
-  'diene-hx': (c) => ({ products: R.predictDiene(c.example.substrate, 'HBr').products })
+  'diene-hx': (c) => ({ products: R.predictDiene(c.example.substrate, 'HBr').products }),
+  // Chapter 7: alkyl halides (engine/reactions-halides.js)
+  'sn2-cn': (c) => ({ products: R.predictSN2(c.example.substrate, 'CN').products }),
+  'sn2-i': (c) => ({ products: R.predictSN2(c.example.substrate, 'I').products }),
+  'sn2-oh': (c) => ({ products: R.predictSN2(c.example.substrate, 'HO').products }),
+  'sn2-rs': (c) => ({ products: R.predictSN2(c.example.substrate, 'MeS').products }),
+  'sn1-solvolysis': (c) => ({ products: R.predictSN1(c.example.substrate, 'H2O').products }),
+  'e2-zaitsev': (c) => ({ products: R.predictE2(c.example.substrate, 'KOH').major }),
+  'e2-chair': (c) => ({ products: R.predictE2(c.example.substrate, 'KOH').major }),
+  'e1-heat': (c) => ({ products: R.predictE1(c.example.substrate).major }),
+  'grignard-d2o': (c) => ({ products: [R.grignard(c.example.substrate).protonolysis.D2O] }),
+  'halide-from-alcohol': (c) => ({ products: [R.fromAlcohol(c.example.substrate, 'PBr3').product] })
 };
 function add(c, reagent) { const p = R.predictAdd(c.example.substrate, reagent); return { products: p.products, racemic: p.racemic, rel: p.rel }; }
 function alk(c, key, rel) { const p = R.predictAlkyne(c.example.substrate, key); return { products: p.products, rel: rel ? (p.stereo === 'E' ? 'anti' : p.stereo === 'Z' ? 'syn' : null) : undefined }; }
@@ -123,13 +144,14 @@ export async function hub({ ok, eq }) {
   ok(Array.isArray(HUB_CARDS) && HUB_CARDS.length >= 20, 'hub has at least 20 cards');
   eq(new Set(HUB_CARDS.map((c) => c.id)).size, HUB_CARDS.length, 'hub card ids are unique');
   eq(Object.keys(HUB_BY_ID).length, HUB_CARDS.length, 'HUB_BY_ID covers every card');
-  ok(HUB_GROUPS.length === 4 && HUB_GROUPS.every((g) => nonEmpty(g.id) && nonEmpty(g.label) && nonEmpty(g.sub)), 'four groups, each with id, label and sub');
+  ok(HUB_GROUPS.length === 5 && HUB_GROUPS.every((g) => nonEmpty(g.id) && nonEmpty(g.label) && nonEmpty(g.sub)), 'five groups, each with id, label and sub');
   const spaceIds = HUB_SPACE.map((s) => s.id), addsIds = HUB_ADDS.map((a) => a.id);
-  eq(spaceIds.slice().sort(), ['anti', 'either', 'n.a.', 'syn'], 'space filter ids');
-  eq(addsIds, ['OH', 'X', 'H', 'other', 'O', 'ring'], 'adds filter ids');
-  eq(HUB_GROUPS.map((g) => g.id), ['arene', 'alkene', 'alkyne', 'diene'], 'group order is unchanged');
+  eq(spaceIds.slice().sort(), ['anti', 'either', 'inversion', 'n.a.', 'syn'], 'space filter ids');
+  eq(addsIds, ['OH', 'X', 'H', 'other', 'O', 'ring', 'Nu', 'C=C'], 'adds filter ids');
+  eq(HUB_GROUPS.map((g) => g.id), ['arene', 'alkene', 'alkyne', 'diene', 'halide'], 'group order: the alkyl halides come after the dienes');
+  eq(HUB_CARDS.filter((c) => c.group === 'halide').map((c) => c.id), HALIDE_IDS, 'the ten alkyl-halide cards, in order');
   eq(Object.keys(HAND).sort(), HUB_CARDS.filter((c) => !ENGINE[c.id]).map((c) => c.id).sort(), 'HAND covers exactly the cards with no engine model');
-  eq(HUB_CARDS.filter((c) => c.lesson === null).map((c) => c.id).sort(), NO_LESSON_IDS.slice().sort(), 'the cards with no lesson are the seven the brief names, plus hot KMnO₄ on an alkyne (Lesson 12 has no KMnO₄ step)');
+  eq(HUB_CARDS.filter((c) => c.lesson === null).map((c) => c.id).sort(), NO_LESSON_IDS.slice().sort(), 'the cards with no lesson are the seven the brief names, hot KMnO₄ on an alkyne (Lesson 12 has no KMnO₄ step) and the ten alkyl-halide cards (Lesson 18 is piece 2)');
   eq(HUB_CARDS.filter((c) => c.subgroup).map((c) => c.id), ['oxidation-pcc', 'oxidation-cr'], 'only the two oxidation cards have a sub-header');
   for (const c of HUB_CARDS.filter((x) => x.subgroup)) ok(c.group === 'arene' && c.subgroup === SUBGROUP, `${c.id}: sits in the aromatics group under "${SUBGROUP}"`);
   // the sub-header cards are the last cards of their group, so they stay together under one header
@@ -140,7 +162,7 @@ export async function hub({ ok, eq }) {
   for (const c of HUB_CARDS) {
     const id = c.id;
     ok(nonEmpty(id) && /^[a-z0-9-]+$/.test(id), `${id}: id is a slug`);
-    ok(HUB_GROUPS.some((g) => g.id === c.group), `${id}: group ${c.group} is one of the four`);
+    ok(HUB_GROUPS.some((g) => g.id === c.group), `${id}: group ${c.group} is one of the groups`);
     ok(nonEmpty(c.reagent), `${id}: reagent label`);
     ok(nonEmpty(c.what), `${id}: what`);
     ok(c.what.split(/[.!?](\s|$)/).filter((x) => x && x.trim()).length <= 3, `${id}: what stays short`);
@@ -148,7 +170,7 @@ export async function hub({ ok, eq }) {
     if (c.example.reagent !== undefined) ok(nonEmpty(c.example.reagent), `${id}: example reagent not empty when given`);
     if (c.example.note !== undefined) ok(nonEmpty(c.example.note), `${id}: example note not empty when given`);
     ok(c.facts && nonEmpty(c.facts.adds) && nonEmpty(c.facts.where) && nonEmpty(c.facts.space), `${id}: three facts`);
-    ok(spaceIds.includes(c.facts.space), `${id}: space ${c.facts.space} is syn, anti, either or n.a.`);
+    ok(spaceIds.includes(c.facts.space), `${id}: space ${c.facts.space} is syn, anti, either, inversion or n.a.`);
     ok(Array.isArray(c.facts.addsKey) && c.facts.addsKey.length >= 1 && c.facts.addsKey.every((k) => addsIds.includes(k)), `${id}: addsKey uses the filter ids`);
     if (c.facts.spaceNote !== undefined) ok(nonEmpty(c.facts.spaceNote), `${id}: spaceNote not empty when given`);
     ok(c.apply && nonEmpty(c.apply.pattern) && Array.isArray(c.apply.steps) && c.apply.steps.length >= 3 && c.apply.steps.length <= 6 && c.apply.steps.every(nonEmpty), `${id}: pattern and 3 to 6 steps`);
@@ -215,15 +237,29 @@ export async function hub({ ok, eq }) {
     for (const c of HUB_CARDS.filter((x) => x.example2)) {
       const row = py.find((x) => x.id === c.id + '#2');
       ok(!!row && row.mols.every((m) => m.ok), `${c.id}: second example parses in Python RDKit`);
-      ok(!!row && row.mols.every((m) => m.centres.length === 0 && m.unassigned === 0 && m.ez.length === 0), `${c.id}: second example has no stereochemistry to show`);
+      const e2x = EXPECT2[c.id];
+      if (!e2x) ok(!!row && row.mols.every((m) => m.centres.length === 0 && m.unassigned === 0 && m.ez.length === 0), `${c.id}: second example has no stereochemistry to show`);
+      else if (row) {
+        // a second example that shows stereochemistry on purpose: the substrate's written centres (and ring relationship), the products' letters, nothing left open
+        const [sub2, ...prods2] = row.mols;
+        eq(sub2.centres.length, e2x.subCentres, `${c.id}: second example substrate has ${e2x.subCentres} written stereocentre(s)`);
+        if (e2x.subLetters) eq(sub2.centres, e2x.subLetters, `${c.id}: second example substrate CIP letters`);
+        if (e2x.subCistrans) eq(sub2.cistrans, e2x.subCistrans, `${c.id}: second example substrate is ${e2x.subCistrans} on the ring (3D)`);
+        eq(prods2.map((m) => m.centres.join()).sort(), e2x.products.map((a) => a.join()).sort(), `${c.id}: second example product letters`);
+        ok(sub2.unassigned === 0 && prods2.every((m) => m.unassigned === 0 && m.ez.length === 0 && m.unassignedBonds === 0), `${c.id}: second example leaves nothing unspecified`);
+      }
     }
+    const centres0 = (prods) => prods.flatMap((m) => m.centres);
     for (const c of HUB_CARDS) {
       const row = py.find((x) => x.id === c.id);
       const exp = EXPECT[c.id] || {};
       ok(!!row && row.mols.every((m) => m.ok), `${c.id}: every molecule parses in Python RDKit`);
       if (!row) continue;
       const [sub, ...prods] = row.mols;
-      ok(sub.centres.length === 0 && sub.unassigned === (exp.subUnassigned || 0), `${c.id}: the substrate has no specified stereocentre (${exp.subUnassigned || 0} drawn flat on purpose)`);
+      ok(sub.centres.length === (exp.subCentres || 0) && sub.unassigned === (exp.subUnassigned || 0), `${c.id}: the substrate has ${exp.subCentres || 'no'} specified stereocentre(s) (${exp.subUnassigned || 0} drawn flat on purpose)`);
+      if (exp.subLetters) eq(sub.centres, exp.subLetters, `${c.id}: CIP letters of the substrate`);
+      if (exp.subCistrans) eq(sub.cistrans, exp.subCistrans, `${c.id}: the substrate's two ring groups are ${exp.subCistrans} (3D)`);
+      if (exp.letters) eq(centres0(prods), exp.letters, `${c.id}: CIP letters of the product`);
       const centres = prods.flatMap((m) => m.centres), ez = prods.flatMap((m) => m.ez);
       eq(centres.length, exp.centres || 0, `${c.id}: number of specified stereocentres in the product`);
       eq(prods.reduce((n, m) => n + m.unassigned, 0), exp.unassigned || 0, `${c.id}: stereocentres left unspecified on purpose`);
@@ -239,7 +275,7 @@ export async function hub({ ok, eq }) {
         }
       }
       // a card that says syn or anti must show it: two stereocentres or a C=C with geometry
-      if (c.facts.space === 'syn' || c.facts.space === 'anti') ok((exp.centres || 0) >= 2 || (exp.ez || []).length > 0 || (exp.flat && exp.unassigned >= 2), `${c.id}: syn/anti card shows its stereochemistry in the product (or is drawn flat on purpose with two stereocentres)`);
+      if ((c.facts.space === 'syn' || c.facts.space === 'anti') && c.group !== 'halide') ok((exp.centres || 0) >= 2 || (exp.ez || []).length > 0 || (exp.flat && exp.unassigned >= 2), `${c.id}: syn/anti card shows its stereochemistry in the product (or is drawn flat on purpose with two stereocentres)`);
       if (exp.flat) ok(/racemate/.test(c.example.note || ''), `${c.id}: a flat drawing says so in the note`);
       // hydroboration is syn: H and OH end up on the same face, so OH is TRANS to the CH3 (read back in 3D, not just claimed)
       if (c.id === 'alkene-hydroboration') ok(prods.some((m) => m.cistrans === 'trans'), `${c.id}: the drawn product has the OH trans to the CH3`);
@@ -309,7 +345,7 @@ export async function hub({ ok, eq }) {
   eq(hit('zzzqq'), [], 'a search that matches nothing shows no card');
   eq(fold('Br₂, FeBr₃'), 'br2febr3', 'fold turns "Br₂, FeBr₃" into br2febr3');
   ok(HUB_CARDS.every((c) => hubText(c).length > 20), 'every card has searchable text');
-  ok(/class: 'hub-jump'/.test(view) && /data-jump/.test(view) && HUB_GROUPS.length === 4 && /HUB_GROUPS\.map\(\(g\) => \{\s*const b = h\('button'/.test(view), 'hub view has a jump bar with one chip per group (four groups)');
+  ok(/class: 'hub-jump'/.test(view) && /data-jump/.test(view) && HUB_GROUPS.length === 5 && /HUB_GROUPS\.map\(\(g\) => \{\s*const b = h\('button'/.test(view), 'hub view has a jump bar with one chip per group (five groups)');
   ok(/type: 'search'/.test(view) && /state\.q = search\.value/.test(view) && /matchesQuery\(c, state\.q\)/.test(view), 'hub view has a text search that filters the cards');
   const hubHtml = fs.readFileSync(path.join(HERE, '..', 'index.html'), 'utf8');
   ok(/\.hub-jump \{[^}]*position: sticky/.test(hubHtml), 'the jump bar is sticky');

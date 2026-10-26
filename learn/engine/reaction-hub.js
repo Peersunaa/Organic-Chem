@@ -6,8 +6,9 @@
 //   example   { substrate, product, reagent?, note? }: one worked example, drawn on the card. `product` may hold several molecules joined by '.'
 //             (ortho and para products, cleavage pieces, 1,2 and 1,4 products). A product with stereocentres carries @ / @@ and / \ marks; a
 //             product that forms as a racemate with ONE stereocentre is drawn flat (as the engine does) and `note` says so.
-//   facts     { adds, where, space, addsKey, spaceNote? }: three facts. `space` is exactly 'syn' | 'anti' | 'either' | 'n.a.'.
-//             `addsKey` lists the filter buttons the card belongs to: 'OH' | 'X' (Br or Cl) | 'H' | 'other' | 'O' (oxidation) | 'ring' (a new ring).
+//   facts     { adds, where, space, addsKey, spaceNote? }: three facts. `space` is exactly 'syn' | 'anti' | 'either' | 'inversion' | 'n.a.'
+//             ('inversion' = SN2: the centre flips; on the alkyl-halide cards 'anti' means the anti-periplanar H and X of E2, not a product stereo).
+//             `addsKey` lists the filter buttons the card belongs to: 'OH' | 'X' (Br or Cl) | 'H' | 'other' | 'O' (oxidation) | 'ring' (a new ring) | 'Nu' (a nucleophile replaces X) | 'C=C' (loses HX: a new C=C).
 //   apply     { pattern, steps[] }: the question as an exam would phrase it, then numbered steps to answer it.
 //   caveman   { what, facts: { adds, where, space }, steps[], note? }: the same card text in terse "caveman" voice (Piece 3). Same step count as apply.steps;
 //             `note` rewrites example.note and is present exactly when example.note is. facts.space is kept as is (an enum, not prose).
@@ -22,19 +23,23 @@
 // Birch, alkyne and alkene hydroboration, benzylic bromination, PCC and Cr(VI) oxidation, amines in acid, desulfonation. They have no engine model:
 // the drill uses them as fixed-answer questions built from their examples (generators-predict.js, `fixed: true`).
 // alkyne-kmno4-hot (hot KMnO₄ cuts a C≡C to acids, scene 21) has no engine model either and no lesson (Lesson 12 has no KMnO₄ step): an eleventh fixed-answer card.
+// The ten alkyl-halide cards (group `halide`, Chapter 7: sn2-cn, sn2-i, sn2-oh, sn2-rs, sn1-solvolysis, e2-zaitsev, e2-chair, e1-heat, grignard-d2o, halide-from-alcohol) are modelled by engine/reactions-halides.js
+// (tests/hub.mjs checks every example product against it). They have `lesson: null` until Lesson 18 (piece 2) exists.
 
 export const HUB_GROUPS = [
   { id: 'arene', label: 'Aromatics', sub: 'Benzene rings: substitution, not addition (Lessons 13 and 14)' },
   { id: 'alkene', label: 'Alkenes', sub: 'Additions across a C=C (Lessons 9 and 10)' },
   { id: 'alkyne', label: 'Alkynes', sub: 'Additions across a C≡C, and acetylides (Lesson 12)' },
-  { id: 'diene', label: 'Dienes', sub: 'Conjugated dienes (Lesson 11)' }
+  { id: 'diene', label: 'Dienes', sub: 'Conjugated dienes (Lesson 11)' },
+  { id: 'halide', label: 'Alkyl halides', sub: 'Substitution and elimination at a C–X bond (Lesson 18)' }
 ];
 
 /** Filter buttons: by group, by how the groups add in space, by what adds. */
 export const HUB_SPACE = [
   { id: 'syn', label: 'Syn', text: 'Both new groups on the same face' },
   { id: 'anti', label: 'Anti', text: 'New groups on opposite faces' },
-  { id: 'either', label: 'Either face', text: 'Flat cation: either face' },
+  { id: 'either', label: 'Either face', text: 'Flat cation: either face, racemic' },
+  { id: 'inversion', label: 'Inversion', text: 'Inversion: the nucleophile comes in from the back, the centre flips' },
   { id: 'n.a.', label: 'No stereo', text: 'No stereochemistry to show' }
 ];
 export const HUB_ADDS = [
@@ -43,7 +48,9 @@ export const HUB_ADDS = [
   { id: 'H', label: 'H' },
   { id: 'other', label: 'Other' },
   { id: 'O', label: 'Oxidation (loses H)' },
-  { id: 'ring', label: 'New ring' }
+  { id: 'ring', label: 'New ring' },
+  { id: 'Nu', label: 'Nu replaces X' },
+  { id: 'C=C', label: 'Loses HX: new C=C' }
 ];
 
 export const HUB_CARDS = [
@@ -1122,10 +1129,295 @@ export const HUB_CARDS = [
       note: '2-methylcyclohex-3-ene-1-carbaldehyde. Flat: two stereocentres, racemates.'
     },
     lesson: null
+  }  ,
+  // ------------------------------------------------------------------ alkyl halides (Chapter 7; Lesson 18 is piece 2, so lesson is null for now)
+  {
+    id: 'sn2-cn', group: 'halide', reagent: 'NaCN (cyanide as the nucleophile)',
+    what: 'A cyanide ion replaces the halogen of a methyl, 1° or 2° alkyl halide in one step (SN2). The chain gains one carbon and a nitrile, R–C≡N, forms.',
+    example: { substrate: 'CCCCBr', product: 'CCCCC#N', reagent: 'NaCN' },
+    facts: { adds: 'CN (it replaces the halogen)', where: 'On the carbon that held the halogen: a methyl, 1° or 2° carbon, never a 3° one', space: 'inversion', spaceNote: 'A stereocentre at that carbon inverts. This 1° example has none to show.', addsKey: ['Nu'] },
+    apply: {
+      pattern: '1-Bromobutane is treated with NaCN. Draw the major organic product.',
+      steps: [
+        'A good nucleophile that is a weak base (CN⁻, I⁻, HS⁻, N₃⁻, CH₃S⁻) plus a methyl, 1° or 2° halide means SN2.',
+        'Find the carbon bonded to the halogen. The nucleophile ends up on that carbon and the halogen leaves as a halide ion.',
+        'Cyanide attacks through its carbon, so the new bond is C–C≡N. The product has one more carbon than the halide.',
+        'If that carbon is a stereocentre, draw the product with the opposite configuration (back-side attack).',
+        'A 3° halide does not do SN2 at all: the back side of the carbon is blocked.'
+      ]
+    },
+    caveman: {
+      what: 'Cyanide swap for halogen. One step, SN2. Chain +1 carbon. Nitrile R–C≡N.',
+      facts: { adds: 'CN for the halogen', where: 'Carbon with halogen: methyl, 1°, 2°. Never 3°.', space: 'inversion' },
+      steps: [
+        'Good Nu, weak base (CN⁻, I⁻, HS⁻, N₃⁻, CH₃S⁻) + 1°/2°: SN2.',
+        'Find carbon with halogen. Nu go there. Halogen leave.',
+        'Cyanide hit with carbon: C–C≡N. One more carbon.',
+        'Stereocentre: flip it. Back-side attack.',
+        '3° halide: no SN2. Back side blocked.'
+      ]
+    },
+    lesson: null
+  },
+  {
+    id: 'sn2-i', group: 'halide', reagent: 'NaI, acetone',
+    what: 'Iodide replaces the Cl or Br of a methyl, 1° or 2° halide in one step (SN2). Iodide is a good nucleophile and a good leaving group, so the exchange goes easily.',
+    example: { substrate: 'CCCCBr', product: 'CCCCI', reagent: 'NaI, acetone' },
+    facts: { adds: 'I (it replaces Br or Cl)', where: 'On the carbon that held the halogen: a methyl, 1° or 2° carbon', space: 'inversion', spaceNote: 'A stereocentre at that carbon inverts. This 1° example has none to show.', addsKey: ['Nu', 'X'] },
+    apply: {
+      pattern: '1-Bromobutane is stirred with NaI in acetone. Draw the product.',
+      steps: [
+        'Iodide is a strong nucleophile and a very weak base, and acetone is polar but not protic: SN2 on a methyl, 1° or 2° halide.',
+        'Swap the Br (or Cl) for I on the same carbon. Nothing else in the molecule changes.',
+        'Iodide is a better leaving group than Br⁻ or Cl⁻, but an excess of I⁻ still drives the exchange.',
+        'On a stereocentre the new I comes in from the back, so the configuration inverts.'
+      ]
+    },
+    caveman: {
+      what: 'I swap for Cl or Br. One step, SN2. I good Nu, good leaving group.',
+      facts: { adds: 'I for Br or Cl', where: 'Carbon with halogen: methyl, 1°, 2°', space: 'inversion' },
+      steps: [
+        'I strong Nu, weak base. Acetone polar, not protic: SN2.',
+        'Br (or Cl) out, I in. Same carbon.',
+        'I leave better than Br⁻ or Cl⁻. Extra I⁻ push exchange.',
+        'Stereocentre: I from back. Flip.'
+      ]
+    },
+    lesson: null
+  },
+  {
+    id: 'sn2-oh', group: 'halide', reagent: 'NaOH (hydroxide as the nucleophile)',
+    what: 'Hydroxide replaces the halogen of a methyl, 1° or 2° halide by SN2 and makes an alcohol. It attacks from the back, so a stereocentre inverts.',
+    example: { substrate: 'CC[C@@H](C)Br', product: 'CC[C@H](C)O', reagent: 'NaOH', note: 'The (R) bromide gives the (S) alcohol: HO⁻ comes in from the back. A 2° halide with a strong base also gives some alkene (E2).' },
+    facts: { adds: 'OH (it replaces the halogen): an alcohol', where: 'On the carbon that held the halogen', space: 'inversion', spaceNote: 'Back-side attack: the stereocentre flips. Here (R) becomes (S), because Br and OH both outrank the other groups.', addsKey: ['OH', 'Nu'] },
+    apply: {
+      pattern: '(R)-2-Bromobutane is treated with NaOH. Draw the SN2 product with its stereochemistry.',
+      steps: [
+        'An alkyl halide plus HO⁻, a good nucleophile, gives SN2 on a methyl or 1° halide (on a 2° halide the strong base also does E2).',
+        'Replace the Br by OH on the same carbon.',
+        'The attack comes from the back, so redraw the stereocentre with the OH on the side opposite to where the Br was.',
+        'Check the letter: Br and OH both outrank the other three groups, so the order is unchanged and (R) becomes (S).',
+        'If the new group ranks differently (for example C≡N below another group), work the letter out again from the priorities.'
+      ]
+    },
+    caveman: {
+      what: 'HO⁻ swap for halogen. SN2. Alcohol. Attack from back: centre flip.',
+      facts: { adds: 'OH for halogen: alcohol', where: 'Carbon that held halogen', space: 'inversion' },
+      steps: [
+        'Halide + HO⁻ good Nu: SN2 on methyl, 1°. 2° also E2.',
+        'Br out, OH in.',
+        'Attack from back. Draw OH on opposite side.',
+        'Br and OH both top priority: order same. (R) to (S).',
+        'New group ranks different: redo letter.'
+      ],
+      note: '(R) to (S). HO⁻ from back. 2° also some E2 alkene.'
+    },
+    lesson: null
+  },
+  {
+    id: 'sn2-rs', group: 'halide', reagent: 'NaSCH₃ (a thiolate)',
+    what: 'A thiolate such as CH₃S⁻ is an excellent nucleophile and a weak base. It replaces the halogen of a methyl, 1° or 2° halide by SN2 and makes a sulfide (R–S–R).',
+    example: { substrate: 'CCCBr', product: 'CCCSC', reagent: 'NaSCH₃' },
+    facts: { adds: 'SCH₃ (it replaces the halogen): a sulfide', where: 'On the carbon that held the halogen: a methyl, 1° or 2° carbon', space: 'inversion', spaceNote: 'A stereocentre at that carbon inverts. This 1° example has none to show.', addsKey: ['Nu'] },
+    apply: {
+      pattern: '1-Bromopropane is treated with NaSCH₃. Draw the product.',
+      steps: [
+        'Sulfur nucleophiles (CH₃S⁻, HS⁻) are strong and only weakly basic, so they substitute instead of eliminating: SN2.',
+        'The S atom attacks the carbon that holds the halogen and the halogen leaves as a halide ion.',
+        'Write the product as the old carbon chain bonded to S, which carries a CH₃: a sulfide.',
+        'A stereocentre at that carbon would invert.'
+      ]
+    },
+    caveman: {
+      what: 'CH₃S⁻ great Nu, weak base. Swap for halogen. SN2. Sulfide R–S–R.',
+      facts: { adds: 'SCH₃ for halogen', where: 'Carbon with halogen: methyl, 1°, 2°', space: 'inversion' },
+      steps: [
+        'CH₃S⁻, HS⁻ strong, weak base. Substitute, no eliminate: SN2.',
+        'S hit carbon with halogen. Halogen out.',
+        'Chain on S, S has CH₃: sulfide.',
+        'Stereocentre: flip.'
+      ]
+    },
+    lesson: null
+  },
+  {
+    id: 'sn1-solvolysis', group: 'halide', reagent: 'H₂O, heat (solvolysis of a 3° halide)',
+    what: 'A 3° halide in water or an alcohol loses its halide first and leaves a flat carbocation, and the solvent then bonds to it (SN1). The product is an alcohol, or an ether when the solvent is an alcohol.',
+    example: { substrate: 'CC(C)(C)Br', product: 'CC(C)(C)O', reagent: 'H₂O, heat', note: 'Water bonds to the carbocation and a second water takes H⁺. The alkene (E1) forms beside it; this card gives the substitution product.' },
+    example2: { substrate: 'CCC[C@](C)(Br)CC', product: 'CCC[C@@](C)(O)CC.CCC[C@](C)(O)CC', reagent: 'H₂O, heat', note: '(R)-3-Bromo-3-methylhexane gives a racemic alcohol: both enantiomers are drawn, because the flat carbocation is attacked from either face.' },
+    facts: { adds: 'OH from water (OR from an alcohol): the solvent bonds to the carbon', where: 'On the carbon that held the halogen: 3° (2° is slow); allylic and benzylic work too', space: 'either', spaceNote: 'The carbocation is flat, so the solvent arrives on either face: a new stereocentre comes out as a racemate.', addsKey: ['OH', 'Nu'] },
+    apply: {
+      pattern: '2-Bromo-2-methylpropane is heated in water. Give the product and the mechanism.',
+      steps: [
+        'A 3° halide, a weak nucleophile (H₂O, ROH) and a protic solvent point to SN1, with some E1 beside it.',
+        'Step 1, slow: the C–Br bond breaks and leaves a flat carbocation. The rate depends on the halide only: rate = k[RX].',
+        'Step 2, fast: water bonds to the carbocation, and a second water takes H⁺. Net result: OH on the same carbon.',
+        'If that carbon is a stereocentre, draw BOTH enantiomers: a racemic mixture.',
+        'A methyl or 1° halide cannot do SN1 (its cation is too unstable), and a 2° halide does it slowly.'
+      ]
+    },
+    caveman: {
+      what: '3° halide in water or alcohol: halide leave first, flat cation, solvent bond. SN1. Alcohol or ether.',
+      facts: { adds: 'OH from water (OR from alcohol)', where: 'Halogen carbon: 3°, 2° slow, allylic, benzylic', space: 'either' },
+      steps: [
+        '3° halide, weak Nu (H₂O, ROH), protic: SN1. Some E1.',
+        'Step 1 slow: C–Br break, flat cation. rate = k[RX].',
+        'Step 2 fast: water bond, second water take H⁺. OH on same carbon.',
+        'Stereocentre: draw BOTH enantiomers. Racemic.',
+        'Methyl, 1°: no SN1. 2°: slow.'
+      ],
+      note: 'Water bond cation, second water take H⁺. Alkene (E1) beside it.'
+    },
+    lesson: null
+  },
+  {
+    id: 'e2-zaitsev', group: 'halide', reagent: 'KOH, ethanol, heat (or NaOCH₂CH₃, NaOCH₃)',
+    what: 'A strong base takes a β H while the halide leaves, all in one step (E2), and a C=C forms. When there is a choice, the alkene with more carbon groups on the C=C (the more substituted one) is the major product (Zaitsev).',
+    example: { substrate: 'CCC(C)(C)Br', product: 'CC=C(C)C', reagent: 'KOH, ethanol, heat', note: '2-Methylbut-2-ene (three carbon groups on the C=C) is major; 2-methylbut-1-ene (two) is minor. E/Z is ignored, as the book problems say.' },
+    facts: { adds: 'Nothing adds: HX is lost and a C=C forms', where: 'The H comes from a β carbon; the more substituted alkene is major (Zaitsev)', space: 'anti', spaceNote: 'Anti-periplanar: the H and the halogen sit on opposite sides, and on a chair the halogen must be axial.', addsKey: ['C=C'] },
+    apply: {
+      pattern: '2-Bromo-2-methylbutane is heated with KOH in ethanol. Draw the major product.',
+      steps: [
+        'A strong base (HO⁻, RO⁻) with a 2° or 3° halide means E2. Rate = k[RX][base].',
+        'Mark the carbon with the halogen. Every neighbouring carbon that has an H gives a candidate alkene.',
+        'Count the carbon groups on each candidate C=C. The most substituted alkene is the major product (Zaitsev); the others are minor.',
+        'Draw it: the halogen and one β H are gone, and a C=C joins the two carbons.',
+        'No E/Z label is needed when the problem says to ignore double-bond stereochemistry.'
+      ]
+    },
+    caveman: {
+      what: 'Strong base grab β H, halide leave, one step: E2. C=C forms. More substituted alkene major (Zaitsev).',
+      facts: { adds: 'HX lost, C=C forms', where: 'β-H. More substituted alkene: Zaitsev.', space: 'anti' },
+      steps: [
+        'HO⁻, RO⁻ + 2°/3° halide: E2. k[RX][base].',
+        'Halogen carbon. Each neighbour with H: one alkene.',
+        'Count carbon groups on each C=C. Most = major (Zaitsev).',
+        'Halogen, β H gone. C=C between.',
+        'Problem says ignore E/Z: no label.'
+      ],
+      note: '2-Methylbut-2-ene major (three groups); 2-methylbut-1-ene minor. Ignore E/Z.'
+    },
+    lesson: null
+  },
+  {
+    id: 'e2-chair', group: 'halide', reagent: 'KOH, ethanol, heat, on a cyclohexyl halide',
+    what: 'On a cyclohexane ring E2 needs the β H on the opposite face from the halogen (trans-diaxial in the chair). A β carbon can only give up an H that is trans to X, so the ring decides which alkene can form, even against Zaitsev.',
+    example: { substrate: 'C[C@H]1CCCC[C@@H]1Br', product: 'C[C@@H]1C=CCCC1', reagent: 'KOH, ethanol, heat', note: 'Only 3-methylcyclohexene forms: the H on the CH₃ carbon is cis to Br, so it cannot be anti to it. The CH₃ carbon keeps its configuration.' },
+    example2: { substrate: 'C[C@H]1CCCC[C@H]1Br', product: 'CC1=CCCCC1', reagent: 'KOH, ethanol, heat', note: 'The cis isomer has the H on the CH₃ carbon trans to Br, so the Zaitsev alkene, 1-methylcyclohexene, is major (3-methylcyclohexene is minor).' },
+    facts: { adds: 'Nothing adds: HBr is lost and a C=C forms', where: 'Only a β carbon with an H trans to the halogen can lose it: a β CH₂ always can, a β CH(R) only when R is cis to the halogen', space: 'anti', spaceNote: 'Trans-diaxial: the halogen is axial on the chair and the β H is axial on the opposite face.', addsKey: ['C=C'] },
+    apply: {
+      pattern: 'trans-1-Bromo-2-methylcyclohexane is heated with KOH in ethanol. Which alkene forms?',
+      steps: [
+        'A ring halide and a strong base mean E2, and on a six-membered ring E2 needs a β H trans to the halogen.',
+        'Look at each β carbon. A CH₂ always has one H trans to the halogen, so it can give an alkene.',
+        'A β carbon with one H and a group R (here CH₃) has its H trans to the halogen only when R is cis to the halogen.',
+        'Trans isomer: the CH₃ is trans to the Br, so the H on that carbon is cis to Br and cannot leave. Only the CH₂ side reacts: 3-methylcyclohexene, although it is the less substituted alkene.',
+        'Cis isomer: the H on the CH₃ carbon is trans to the Br, so both alkenes are possible and the more substituted one, 1-methylcyclohexene, is major.'
+      ]
+    },
+    caveman: {
+      what: 'On ring, E2 need β H trans to halogen (trans-diaxial). Ring pick alkene, even against Zaitsev.',
+      facts: { adds: 'HBr lost, C=C forms', where: 'β CH₂ always ok. β CH(R) ok only if R cis to halogen.', space: 'anti' },
+      steps: [
+        'Ring halide + strong base: E2. Need β H trans to halogen.',
+        'Each β carbon: CH₂ always has one trans H. Ok.',
+        'β carbon, one H, R (CH₃): H trans to halogen only if R cis.',
+        'Trans isomer: CH₃ trans to Br, H cis. Only CH₂ side: 3-methylcyclohexene. Less substituted.',
+        'Cis: H on CH₃ carbon trans to Br. Both alkenes. 1-methylcyclohexene major.'
+      ],
+      note: 'Only 3-methylcyclohexene: H on CH₃ carbon cis to Br, not anti.'
+    },
+    lesson: null
+  },
+  {
+    id: 'e1-heat', group: 'halide', reagent: 'CH₃CH₂OH, heat (no added base)',
+    what: 'A 3° halide in a hot protic solvent ionises to a carbocation (the slow step), and the solvent then removes a β H to make the alkene (E1). The same carbocation also gives the SN1 product, so E1 and SN1 travel together.',
+    example: { substrate: 'CC(C)(C)Br', product: 'C=C(C)C', reagent: 'CH₃CH₂OH, heat', note: 'The ether 2-ethoxy-2-methylpropane forms beside it (SN1) from the same carbocation. Heat makes the alkene share bigger.' },
+    facts: { adds: 'Nothing adds: HX is lost and a C=C forms (no new group on the carbon)', where: 'The solvent removes a β H from the carbocation; the more substituted alkene is major (Zaitsev)', space: 'n.a.', addsKey: ['C=C'] },
+    apply: {
+      pattern: '2-Bromo-2-methylpropane is heated in ethanol with no added base. Which alkene forms, and what forms with it?',
+      steps: [
+        'A 3° halide, a weak base and a hot protic solvent: E1 and SN1 together, from one carbocation.',
+        'Step 1, slow: the halide leaves and the carbocation forms. rate = k[RX].',
+        'Step 2: the solvent takes a β H from a carbon next to the carbocation and the C=C forms. Choose the β H that gives the most substituted alkene.',
+        'The solvent can instead bond to the carbocation: that is the SN1 ether, the larger share in the cold. Heat favours the alkene.',
+        'There is no anti-periplanar rule: the carbocation is flat, so any β H can go.'
+      ]
+    },
+    caveman: {
+      what: '3° halide in hot protic solvent: cation forms (slow). Solvent take β H: E1. Same cation gives SN1 too.',
+      facts: { adds: 'HX lost, C=C forms. No new group.', where: 'Solvent take β H. Zaitsev alkene major.', space: 'n.a.' },
+      steps: [
+        '3° halide, weak base, hot protic: E1 + SN1. One cation.',
+        'Slow: halide out, cation. rate = k[RX].',
+        'Step 2: solvent take β H. C=C forms. Pick β H for most substituted alkene.',
+        'Solvent bond cation instead: SN1 ether. Cold: bigger. Heat: more alkene.',
+        'No anti rule. Cation flat. Any β H.'
+      ],
+      note: 'Ether 2-ethoxy-2-methylpropane forms too (SN1). Heat: more alkene.'
+    },
+    lesson: null
+  },
+  {
+    id: 'grignard-d2o', group: 'halide', reagent: 'Mg in ether, then D₂O',
+    what: 'Magnesium inserts into the C–X bond of an alkyl, vinylic or aryl halide and makes a Grignard reagent, R–Mg–X. Its carbon is a strong base, so water (or D₂O) gives it an H (or D) and the alkane forms.',
+    example: { substrate: 'BrC1CCCCC1', product: '[2H]C1CCCCC1', reagent: 'Mg, ether; then D₂O', note: 'The D takes the place of the Br on the same carbon: deuteriocyclohexane.' },
+    facts: { adds: 'D (or H) takes the place of the halogen: R–Br becomes R–D', where: 'On the carbon that held the halogen; the halide must have no O–H, N–H or CO₂H', space: 'n.a.', addsKey: ['other'] },
+    apply: {
+      pattern: 'Bromocyclohexane is treated with Mg in dry ether, and then with D₂O. Draw the product.',
+      steps: [
+        'Mg in ether inserts into the C–Br bond: the carbon is now bonded to Mg (cyclohexyl–MgBr).',
+        'The C–Mg carbon is a very strong base. D₂O is a deuteron donor, so that carbon takes a D.',
+        'Draw the alkane with D where the Br was. With H₂O you would get an H there.',
+        'If the halide also carries an acidic H (O–H, N–H, S–H, CO₂H), the reagent destroys itself as it forms: the reaction fails.'
+      ]
+    },
+    caveman: {
+      what: 'Mg go into C–X bond: Grignard R–Mg–X. Carbon strong base. Water (D₂O) give H (D). Alkane.',
+      facts: { adds: 'D (or H) for halogen: R–Br to R–D', where: 'Halogen carbon. No O–H, N–H, CO₂H.', space: 'n.a.' },
+      steps: [
+        'Mg in ether go into C–Br: cyclohexyl–MgBr.',
+        'C–Mg carbon strong base. D₂O give D.',
+        'Alkane with D where Br was. H₂O: H.',
+        'Acidic H (O–H, N–H, S–H, CO₂H) in halide: reagent die. No reaction.'
+      ],
+      note: 'D replace Br: deuteriocyclohexane.'
+    },
+    lesson: null
+  },
+  {
+    id: 'halide-from-alcohol', group: 'halide', reagent: 'PBr₃ or SOCl₂ (1° and 2° alcohols); HBr or HCl (3° alcohols)',
+    what: 'PBr₃ and SOCl₂ turn a 1° or 2° alcohol into the alkyl bromide or chloride by SN2, so a stereocentre inverts. HX does the job on a 3° alcohol, by SN1.',
+    example: { substrate: 'CCC[C@H](C)O', product: 'CCC[C@@H](C)Br', reagent: 'PBr₃', note: 'The (S) alcohol gives the (R) bromide. OH and Br both outrank the other groups, so the letter flips with the inversion.' },
+    example2: { substrate: 'CC(C)(C)O', product: 'CC(C)(C)Br', reagent: 'HBr', note: '2-Methylpropan-2-ol is 3°: HBr protonates the OH, water leaves and Br⁻ bonds to the carbocation (SN1).' },
+    facts: { adds: 'Br or Cl takes the place of OH: an alkyl halide', where: 'On the carbon that held the OH', space: 'inversion', spaceNote: 'PBr₃ and SOCl₂ invert a stereocentre (SN2); HX on a 3° alcohol makes a racemate (SN1).', addsKey: ['X'] },
+    apply: {
+      pattern: '(S)-Pentan-2-ol is treated with PBr₃. Draw the product with its configuration.',
+      steps: [
+        'PBr₃ or SOCl₂ on a 1° or 2° alcohol: the OH becomes a good leaving group and the halide attacks from the back (SN2).',
+        'Replace the OH by Br on the same carbon, with the opposite configuration.',
+        'Check the letter: Br and OH both outrank the other groups, so the order is unchanged and (S) becomes (R).',
+        'HX (HBr, HCl) is for 3° alcohols: SN1, so a new stereocentre would be racemic.',
+        'Do not use PBr₃ or SOCl₂ on a 3° alcohol: it is too crowded for the back-side attack.'
+      ]
+    },
+    caveman: {
+      what: 'PBr₃, SOCl₂: 1° or 2° alcohol to halide, SN2, flip. HX: 3° alcohol, SN1.',
+      facts: { adds: 'Br or Cl for OH', where: 'Carbon that held OH', space: 'inversion' },
+      steps: [
+        'PBr₃, SOCl₂ on 1°/2° alcohol: OH leaves, halide from back. SN2.',
+        'OH out, Br in. Opposite configuration.',
+        'Br and OH both top priority: order same. (S) to (R).',
+        'HX (HBr, HCl) for 3° alcohol: SN1. Racemic.',
+        'No PBr₃, SOCl₂ on 3° alcohol. Too crowded.'
+      ],
+      note: '(S) alcohol to (R) bromide. OH and Br both top: letter flips.'
+    },
+    lesson: null
   }
 ];
 
 /** The words for `facts.space` (an enum on the card). Shared by the hub view and the player's what-if panel. */
-export const SPACE_TEXT = { syn: 'Syn: both groups on the same face', anti: 'Anti: groups on opposite faces', either: 'Either face', 'n.a.': 'Nothing to show here' };
+export const SPACE_TEXT = { syn: 'Syn: both groups on the same face', anti: 'Anti: groups on opposite faces', either: 'Either face', inversion: 'Inversion: the nucleophile comes in from the back, the centre flips', 'n.a.': 'Nothing to show here' };
 
 export const HUB_BY_ID = Object.fromEntries(HUB_CARDS.map((c) => [c.id, c]));

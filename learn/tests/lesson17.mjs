@@ -291,8 +291,9 @@ export async function lesson17({ ok, eq }) {
   // the Diels-Alder parent step (no engine card) links its card in the reveal
   const da = L.steps.find((s) => s.chk && s.chk.engine === 'diels-alder-parent');
   ok(da && /href="#reactions\/diels-alder"/.test(da.reveal) && /Q1/.test(da.reveal) && /Q3/.test(da.reveal), 'the parent Diels-Alder step links its card and names the questions');
-  const ids38 = HUB_CARDS.map((c) => c.id);
-  eq(ids38.length, 39, 'the hub has 39 cards (38, plus hot KMnO₄ on an alkyne)');
+  // Lesson 17 is the Chapters 1-6 predict lesson: the ten alkyl-halide cards (group `halide`, Chapter 7) wait for Lesson 18 and are not in it
+  const ids38 = HUB_CARDS.filter((c) => c.group !== 'halide').map((c) => c.id);
+  eq(ids38.length, 39, 'the hub has 39 cards outside the alkyl-halide group (38, plus hot KMnO₄ on an alkyne)');
   const missing = ids38.filter((id) => !p2cards.has(id));
   eq(missing, [], 'Part 2 reaches all 39 hub cards (missing: ' + missing.join(', ') + ')');
   const p2steps = L.steps.filter((s) => s.part === 2 && s.type === 'predict');

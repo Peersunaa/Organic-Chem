@@ -1,4 +1,4 @@
-// Reaction tables screen (#table): three tabs (alkenes, alkynes, rings); rows = every builder tile of the class (drawn, named, sticky first column), columns = reagents
+// Reaction tables screen (#table): four tabs (alkenes, alkynes, rings, alkyl halides); rows = every builder tile of the class (drawn, named, sticky first column), columns = reagents
 // (sticky header). A cell = the major product(s) drawn small + a one-word pattern tag; no-reaction cells are muted with the reason, not-modelled cells blank grey.
 // Tap a cell: the builder's result panel (slide-over on phones, side panel on desktop). Pattern colours (hue + glyph), quiz mode (cells hidden, four drawn options,
 // "k of n filled", misses to the weak-spot log), caveman notes under each cell, a column picker. All data from engine/tables.js (which reads engine/builder.js).

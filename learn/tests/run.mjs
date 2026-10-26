@@ -40,6 +40,7 @@ import { lesson14 } from './lesson14.mjs';
 import { lesson15 } from './lesson15.mjs';
 import { lesson16 } from './lesson16.mjs';
 import { lesson17 } from './lesson17.mjs';
+import { halides } from './halides.mjs';
 import { hub } from './hub.mjs';
 import { predict } from './predict.mjs';
 import { reactionModes } from './reaction-modes.mjs';
@@ -61,7 +62,7 @@ import { tables } from './tables.mjs';
 import { morph } from './morph.mjs';
 import { POOL_BY_ID as FISCHER_BY_ID } from '../engine/fischer.js';
 
-const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'skeletal-convert', 'resonance-rank', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product', 'stereo-projections', 'naming-levels', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work', 'aromaticity']);
+const TAXONOMY = new Set(['valence-electrons', 'bond-count', 'lone-pairs', 'octet', 'multiple-bonds', 'formal-charge', 'electron-count-total', 'hybridization', 'sigma-pi', 'polarity', 'conjugate-pairs', 'lewis-acid-base', 'pka-direction', 'curved-arrows', 'skeletal', 'skeletal-convert', 'resonance-rank', 'functional-groups', 'naming', 'conformations', 'chairs', 'ez', 'mechanism', 'markovnikov', 'stereo-addition', 'resonance', 'eas', 'directors', 'synthesis', 'chirality', 'rs', 'stereo-relationships', 'reaction-types', 'nuc-elec', 'energy-diagram', 'carbocations', 'alkene-oxidation', 'polymers', 'dienes', 'alkynes', 'acetylides', 'aromatic-naming', 'side-chains', 'aromatic-synthesis', 'meso', 'racemates', 'fischer', 'predict-product', 'stereo-projections', 'naming-levels', 'guess-reagent', 'guess-reactant', 'stereo-outcome', 'two-step', 'wont-work', 'aromaticity', 'sn2', 'sn1', 'e2', 'e1', 'sub-vs-elim', 'grignard', 'halide-naming']);
 /** Largest distance of any atom from the best-fit plane (smallest-variance direction) of a molblock. */
 function planarity(mb) {
   const lines = mb.split('\n'); const n = parseInt(lines[3].slice(0, 3), 10);
@@ -1189,6 +1190,9 @@ await lesson15({ ok, eq });
 // ---- Lesson 16: diastereomers, meso compounds and racemates (relationship()/isMeso() and the counts of stereoisomers vs Python RDKit EnumerateStereoisomers with inverted centres, cis/trans in 3D, planes of symmetry and Kabsch on solid meso models, resolution logic, hand-checked fixture given by name with OPSIN), stereo-grid, symmetry-plane, relationship-drill, resolution-flow, isomer-tree, `stereo-relationships` generator, lesson steps (tests/lesson16.mjs)
 await lesson16({ ok, eq });
 await lesson17({ ok, eq });
+
+// ---- Chapter 7: alkyl halides engine (engine/reactions-halides.js), independent Python recompute (tools/check_halides.py), hand-checked fixture with OPSIN names (tests/halides.mjs)
+await halides({ ok, eq });
 
 // ---- Reaction hub: every card has all its fields, every lesson/mechanism link resolves to a real step, every drawn molecule parses in RDKit (JS and Python), stereo read back in Python (stereocentres, meso/racemic, cis/trans on rings in 3D, E/Z), the card's product equals the engine's wherever an engine models the reagent, router and home-screen promises (tests/hub.mjs)
 await hub({ ok, eq });

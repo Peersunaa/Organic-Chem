@@ -1,5 +1,5 @@
 // Reaction tables (#table): every builder tile of a class (rows) against a fixed set of the builder's reagents (columns). Pure logic, no DOM; RDKit must be ready.
-//   TABLES                 the three tables: alkenes (12 x 11), alkynes (7 x 11), rings (the 25 one-group-and-exam ring tiles x 6, the exam set)
+//   TABLES                 the four tables: alkenes (12 x 11), alkynes (7 x 11), rings (the 25 one-group-and-exam ring tiles x 6, the exam set), alkyl halides (the 17 halide tiles x 9, Chapter 7)
 //   tableData(id)          rows with one cell per column: {status 'ok'|'none'|'na', tag, family, draw:[<= 2 main products], more, minor, reason, cave, card, skill, note}
 //   tagOf(table, res, sub) the one-word pattern tag, read from the builder's own result (rule, reagent card, ring directors, product count): see TAG_RULES below
 //   cellQuiz(sub, rid)     the builder's four drawn options (generators-predict.js drill options when they match, else the products of other reagents on the same substrate)
@@ -14,7 +14,8 @@ const C = (id, head, note = '') => ({ id, head, note });
 export const TABLES = [
   { id: 'alkenes', label: 'Alkenes', group: 'alkene', cols: [C('HBr', 'HBr'), C('HCl', 'HCl'), C('H2O-H', 'H₂O, H⁺'), C('Br2', 'Br₂'), C('Cl2', 'Cl₂'), C('H2-Pd', 'H₂, Pd'), C('KMnO4-cold', 'cold KMnO₄'), C('KMnO4-hot', 'hot KMnO₄'), C('RCO3H', 'RCO₃H'), C('RCO3H-H3O', 'RCO₃H, then H₃O⁺'), C('BH3', 'BH₃, then H₂O₂/NaOH')] },
   { id: 'alkynes', label: 'Alkynes', group: 'alkyne', cols: [C('HBr-1', 'HX (1 eq)', 'X = Br'), C('HBr-2', 'HX (2 eq)', 'X = Br'), C('Br2-1', 'X₂ (1 eq)', 'X = Br'), C('Br2-2', 'X₂ (2 eq)', 'X = Br'), C('H2O-Hg', 'H₂O, Hg²⁺'), C('Lindlar', 'H₂, Lindlar'), C('Na-NH3', 'Na, NH₃'), C('H2-Pd-2', 'H₂, Pd'), C('NaNH2-EtBr', 'NaNH₂, then RBr', 'R = CH₃CH₂'), C('BH3-alkyne', 'BH₃, then H₂O₂'), C('KMnO4-hot-alkyne', 'hot KMnO₄')] },
-  { id: 'rings', label: 'Rings', group: 'ring', cols: [C('Br2-FeBr3', 'Br₂, FeBr₃'), C('Cl2-AlCl3', 'Cl₂, AlCl₃'), C('HNO3', 'HNO₃, H₂SO₄'), C('SO3', 'SO₃, H₂SO₄'), C('AcCl', 'RCOCl, AlCl₃', 'R = CH₃'), C('EtCl', 'RCl, AlCl₃', 'R = CH₃CH₂')] }
+  { id: 'rings', label: 'Rings', group: 'ring', cols: [C('Br2-FeBr3', 'Br₂, FeBr₃'), C('Cl2-AlCl3', 'Cl₂, AlCl₃'), C('HNO3', 'HNO₃, H₂SO₄'), C('SO3', 'SO₃, H₂SO₄'), C('AcCl', 'RCOCl, AlCl₃', 'R = CH₃'), C('EtCl', 'RCl, AlCl₃', 'R = CH₃CH₂')] },
+  { id: 'halides', label: 'Alkyl halides', group: 'halide', cols: [C('h-CN', 'NaCN'), C('h-I', 'NaI, acetone'), C('h-HO', 'NaOH'), C('h-NaOMe', 'NaOCH₃'), C('h-MeS', 'NaSCH₃'), C('h-KOH', 'KOH, EtOH, heat'), C('h-H2O', 'H₂O, heat'), C('h-MeOH', 'CH₃OH, heat'), C('h-Mg-D2O', 'Mg, then D₂O')] }
 ];
 export const TABLE_BY_ID = Object.fromEntries(TABLES.map((t) => [t.id, t]));
 TABLES.forEach((t) => t.cols.forEach((c) => { c.label = B.REAGENT_BY_ID[c.id].label; c.card = B.REAGENT_BY_ID[c.id].card; }));
@@ -23,16 +24,19 @@ TABLES.forEach((t) => t.cols.forEach((c) => { c.label = B.REAGENT_BY_ID[c.id].la
 export const TAGS = {
   alkenes: ['Markovnikov', 'anti-Markov.', 'anti', 'syn', 'cleave', 'epoxide', 'no rxn'],
   alkynes: ['Markov.', '2×', 'gem', 'cis', 'trans', 'alkane', 'ketone', 'aldehyde', 'C–C', 'cleave', 'no rxn'],
-  rings: ['o/p', 'meta', 'no rxn', 'one isomer']
+  rings: ['o/p', 'meta', 'no rxn', 'one isomer'],
+  halides: ['SN2', 'SN1', 'E2', 'E1', 'SN1+E1', 'E2+SN2', 'SN2+E2', 'Grignard', 'no rxn']
 };
 /** Pattern families for the highlight toggle: hue AND a glyph (readable without colour). Pairs: Markovnikov vs anti-Markovnikov, syn vs anti, o/p vs meta. */
 export const FAMILIES = [
   { id: 'mk', label: 'Markovnikov', glyph: '▲', pair: 'regio' }, { id: 'amk', label: 'anti-Markovnikov', glyph: '▼', pair: 'regio' },
   { id: 'syn', label: 'syn: same face', glyph: '●', pair: 'space' }, { id: 'anti', label: 'anti: opposite faces', glyph: '◆', pair: 'space' },
-  { id: 'op', label: 'ortho/para', glyph: '✚', pair: 'ring' }, { id: 'meta', label: 'meta', glyph: '■', pair: 'ring' }
+  { id: 'op', label: 'ortho/para', glyph: '✚', pair: 'ring' }, { id: 'meta', label: 'meta', glyph: '■', pair: 'ring' },
+  { id: 'sub', label: 'substitution', glyph: '◆', pair: 'path' }, { id: 'elim', label: 'elimination', glyph: '▲', pair: 'path' }
 ];
 export const FAMILY_BY_ID = Object.fromEntries(FAMILIES.map((f) => [f.id, f]));
-const FAMILY_OF_TAG = { Markovnikov: 'mk', 'anti-Markov.': 'amk', anti: 'anti', syn: 'syn', epoxide: 'syn', 'Markov.': 'mk', gem: 'mk', aldehyde: 'amk', cis: 'syn', trans: 'anti', 'o/p': 'op', meta: 'meta' };
+const FAMILY_OF_TAG = { Markovnikov: 'mk', 'anti-Markov.': 'amk', anti: 'anti', syn: 'syn', epoxide: 'syn', 'Markov.': 'mk', gem: 'mk', aldehyde: 'amk', cis: 'syn', trans: 'anti', 'o/p': 'op', meta: 'meta',
+  SN2: 'sub', SN1: 'sub', 'SN1+E1': 'sub', E2: 'elim', E1: 'elim', 'E2+SN2': 'elim', 'SN2+E2': 'sub' };   // a mixed cell takes the family of its major mechanism (SN1 before E1; E2 before SN2)
 /** The family of a tag in a cell (the alkyne ketone is Markovnikov only when it comes from Hg²⁺ hydration, not from hydroboration of an internal alkyne). */
 export function familyOf(tag, rule) {
   if (tag === 'ketone') return rule === 'markovnikov' ? 'mk' : null;
@@ -44,6 +48,7 @@ export function familyOf(tag, rule) {
  *   alkynes: rule + reagent card: markovnikov on alkyne-hx-1 -> Markov., on alkyne-hx-2 -> gem, on alkyne-hydration -> ketone; anti-addition on x2-1 -> trans,
  *            on x2-2 -> 2×; syn-addition -> cis; anti-reduction -> trans; full-reduction -> alkane; acetylide -> C–C; anti-markovnikov -> aldehyde; hydroboration -> ketone;
  *            cleavage (hot KMnO₄) -> cleave
+ *   halides: res.rule (the mechanism ids from decide()) -> SN2, SN1, E2, E1, SN1+E1, E2+SN2, SN2+E2, Grignard
  *   rings:   no directing group -> one isomer; every leading group a meta director -> meta; two or more groups and one product -> one isomer; else o/p
  *   any:     status 'none' -> no rxn; status 'na' -> no tag */
 export function tagOf(tableId, res, sub) {
@@ -59,6 +64,7 @@ export function tagOf(tableId, res, sub) {
     if (res.rule === 'anti-addition') return card === 'alkyne-x2-2' ? '2×' : 'trans';
     return { 'syn-addition': 'cis', 'anti-reduction': 'trans', 'full-reduction': 'alkane', acetylide: 'C–C', 'anti-markovnikov': 'aldehyde', hydroboration: 'ketone', cleavage: 'cleave' }[res.rule] || null;
   }
+  if (tableId === 'halides') return { sn2: 'SN2', sn1: 'SN1', e2: 'E2', e1: 'E1', 'sn1+e1': 'SN1+E1', 'e2+sn2': 'E2+SN2', 'sn2+e2': 'SN2+E2', grignard: 'Grignard' }[res.rule] || null;
   const scan = ER.ringScan(sub);
   const L = res.leaders || [];
   if (!scan.groups.length || !L.length) return 'one isomer';
@@ -73,7 +79,10 @@ const CARD_SKILL = {
   'alkene-epoxide': 'stereo-addition', 'alkene-epoxide-diol': 'stereo-addition', 'alkene-kmno4-base': 'alkene-oxidation', 'alkene-kmno4-acid': 'alkene-oxidation',
   'alkyne-acetylide': 'acetylides'
 };
+/** The Chapter 7 skill of a halide cell, by its tag: SN2, SN1, E2, E1, Grignard; a mixed or empty cell is the decision itself (substitution or elimination?). */
+const HALIDE_SKILL = { SN2: 'sn2', SN1: 'sn1', E2: 'e2', E1: 'e1', Grignard: 'grignard', 'SN1+E1': 'sub-vs-elim', 'E2+SN2': 'sub-vs-elim', 'SN2+E2': 'sub-vs-elim', 'no rxn': 'sub-vs-elim' };
 export function skillOf(card, tableId, tag) {
+  if (tableId === 'halides') return HALIDE_SKILL[tag] || 'sub-vs-elim';
   if (CARD_SKILL[card]) return CARD_SKILL[card];
   if (tableId === 'alkynes') return 'alkynes';
   return tag === 'o/p' || tag === 'meta' ? 'directors' : 'eas';

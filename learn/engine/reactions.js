@@ -317,3 +317,5 @@ export * from './reactions-alkynes.js';
 export * from './synthesis.js';
 // Lesson 13: benzene and electrophilic aromatic substitution (Br2/FeBr3, Cl2/FeCl3, I2, HNO3/H2SO4, SO3, Friedel-Crafts alkylation and acylation, nitro -> amine). Extends this module additively.
 export * from './reactions-aromatic.js';
+// Chapter 7: alkyl halides (SN2, SN1, E2, E1, the choice between them, Grignard reagents, halides from alcohols, monohalogenation). Extends this module additively.
+export * from './reactions-halides.js';

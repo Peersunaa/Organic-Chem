@@ -43,7 +43,7 @@ function countsOf(s) {
 export async function builder({ ok, eq }) {
   await ready();
   // ---- (1) tiles
-  const KIND = { alkene: 'alkene', alkyne: 'alkyne', ring: 'arene', ring2: 'arene' };
+  const KIND = { alkene: 'alkene', alkyne: 'alkyne', ring: 'arene', ring2: 'arene', halide: 'halide' };
   for (const s of B.SUBSTRATES) {
     ok(canon(s.smiles) !== null, `builder tile ${s.id}: SMILES parses`);
     eq(B.classifySubstrate(s.smiles).kind, KIND[s.group], `builder tile ${s.id}: classified as ${KIND[s.group]}`);
@@ -184,7 +184,9 @@ export async function builder({ ok, eq }) {
     quizzes++; if (q.source === 'drill') fromDrill++;
     eq(q.options.filter((o) => o.correct).length, 1, `quiz ${p.substrate} + ${p.reagent}: exactly one right option`);
     ok(q.options.length >= 3 && q.options.length <= 4, `quiz ${p.substrate} + ${p.reagent}: 3 or 4 options`);
-    eq(new Set(q.options.map((o) => keys(o.smiles).join('|'))).size, q.options.length, `quiz ${p.substrate} + ${p.reagent}: options differ`);
+    // (an alkyl-halide quiz may offer the retention enantiomer beside the inversion product, so its options are compared exactly)
+    const qk = p.reagent.startsWith('h-') ? (o) => o.smiles.map((x) => canon(x)).sort().join('|') : (o) => keys(o.smiles).join('|');
+    eq(new Set(q.options.map(qk)).size, q.options.length, `quiz ${p.substrate} + ${p.reagent}: options differ`);
     ok(q.options.every((o) => o.why && o.smiles.every((s) => canon(s) !== null)), `quiz ${p.substrate} + ${p.reagent}: every option parses and has a why`);
   }
   console.log(`  builder: ${quizzes} quizzes checked (${fromDrill} from the drill's own options)`);
